@@ -35,7 +35,6 @@
 #include "yield/thread/mutex.hpp"
 #include "yield/thread/semaphore.hpp"
 #else
-#include "yield/config.hpp"
 
 #include <pthread.h>
 #endif

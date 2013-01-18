@@ -30,8 +30,6 @@
 #ifndef _YIELD_SOCKETS_WIN32_WINSOCK_HPP_
 #define _YIELD_SOCKETS_WIN32_WINSOCK_HPP_
 
-#include "yield/config.hpp"
-
 #ifndef FD_SETSIZE
 #define FD_SETSIZE 1024
 #endif

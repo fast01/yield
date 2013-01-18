@@ -30,8 +30,6 @@
 #ifndef _YIELD_THREAD_SEMAPHORE_HPP_
 #define _YIELD_THREAD_SEMAPHORE_HPP_
 
-#include "yield/config.hpp"
-
 #if defined(__MACH__)
 #include <mach/semaphore.h>
 #elif !defined(_WIN32)

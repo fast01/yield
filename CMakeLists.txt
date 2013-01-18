@@ -8,10 +8,16 @@ if (MSVC)
 	if (CMAKE_GENERATOR MATCHES "Visual Studio 11") # VS2012 doesn't support correctly the tuples yet
 		add_definitions(/D _VARIADIC_MAX=10)
 	endif()
-	add_definitions(-DSTRICT=1 -DWIN32_LEAN_AND_MEAN) # windows.h options
-	add_definitions(-D_WIN32_WINNT=0x0600) # Require Windows Vista
-elseif (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	add_definitions(-D_DEBUG)
+	add_definitions(-D_CRT_DISABLE_PERFCRIT_LOCKS=1) # CRT options
+	add_definitions(-DSTRICT=1 -DUNICODE=1 -D_WIN32_WINNT=0x0600 -DWIN32_LEAN_AND_MEAN) # windows.h options
+else()
+	if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+		add_definitions(-D_DEBUG)
+	endif()
+	add_definitions(-D_FILE_OFFSET_BITS=64)
+	if (CMAKE_SYSTEM_NAME MATCHES "SunOS")
+		add_definitions(-D_REENTRANT -Dupgrade_the_compiler_to_use_STL=1)
+	endif()
 endif()
 
 # CXX_FLAGS

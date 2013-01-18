@@ -30,8 +30,6 @@
 #ifndef _YIELD_DEBUG_HPP_
 #define _YIELD_DEBUG_HPP_
 
-#include "yield/config.hpp"
-
 #include <cstdio> // for snprintf
 #include <exception> // for std::exception
 

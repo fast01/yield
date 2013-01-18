@@ -30,7 +30,6 @@
 #ifndef _YIELD_THREAD_MUTEX_HPP_
 #define _YIELD_THREAD_MUTEX_HPP_
 
-#include "yield/config.hpp"
 #ifndef _WIN32
 #include <pthread.h>
 #endif

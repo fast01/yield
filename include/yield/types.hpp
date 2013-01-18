@@ -30,9 +30,6 @@
 #ifndef _YIELD_TYPES_HPP_
 #define _YIELD_TYPES_HPP_
 
-#include "yield/config.hpp"
-
-#define __STDC_LIMIT_MACROS 1
 #include <stdint.h>
 
 #ifdef _WIN32
