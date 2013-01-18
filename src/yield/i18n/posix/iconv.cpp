@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/config.hpp"
+#include "yield/i18n/iconv.hpp"
 
 #include <iconv.h>
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__sun)
@@ -44,7 +44,6 @@
 
 #include "yield/debug.hpp"
 #include "yield/exception.hpp"
-#include "yield/i18n/iconv.hpp"
 
 #include <errno.h>
 

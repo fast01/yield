@@ -34,6 +34,7 @@
 #else
 #include <ostream>
 #include <stdlib.h>
+#include <unistd.h>
 #endif
 
 namespace yield {

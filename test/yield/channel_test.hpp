@@ -153,14 +153,14 @@ TYPED_TEST_P(ChannelTest, read) {
 TYPED_TEST_P(ChannelTest, read_Buffer) {
   this->write();
   auto_Object<Buffer> test_buffer = new Buffer(this->get_test_string().size());
-  check_read(*test_buffer, this->get_read_channel().read(*test_buffer));
+  this->check_read(*test_buffer, this->get_read_channel().read(*test_buffer));
 }
 
 TYPED_TEST_P(ChannelTest, read_Buffers) {
   this->write();
   auto_Object<Buffer> test_buffer = new Buffer(this->get_test_string().size());
   test_buffer->set_next_buffer(new Buffer(this->get_test_string().size()));
-  check_read(*test_buffer, this->get_read_channel().read(*test_buffer));
+  this->check_read(*test_buffer, this->get_read_channel().read(*test_buffer));
 }
 
 TYPED_TEST_P(ChannelTest, readv_one) {
@@ -172,7 +172,7 @@ TYPED_TEST_P(ChannelTest, readv_one) {
   iov.iov_base = const_cast<char*>(test_string.data());
   iov.iov_len = test_string.size();
 
-  check_read(
+  this->check_read(
     test_string.data(),
     this->get_read_channel().readv(&iov, 1)
   );
@@ -189,7 +189,7 @@ TYPED_TEST_P(ChannelTest, readv_two) {
   iov[1].iov_base = const_cast<char*>(test_string.data()) + 4;
   iov[1].iov_len = 7;
 
-  check_read(
+  this->check_read(
     test_string.data(),
     this->get_read_channel().readv(iov, 2)
   );
@@ -202,7 +202,7 @@ TYPED_TEST_P(ChannelTest, write) {
 
 TYPED_TEST_P(ChannelTest, write_Buffer) {
   auto_Object<Buffer> test_buffer = Buffer::copy(this->get_test_string());
-  check_write(this->get_write_channel().write(*test_buffer));
+  this->check_write(this->get_write_channel().write(*test_buffer));
 
   this->read();
 }
@@ -210,7 +210,7 @@ TYPED_TEST_P(ChannelTest, write_Buffer) {
 TYPED_TEST_P(ChannelTest, write_Buffers) {
   auto_Object<Buffer> test_buffer = Buffer::copy(this->get_test_string());
   test_buffer->set_next_buffer(new Buffer(1));
-  check_write(this->get_write_channel().write(*test_buffer));
+  this->check_write(this->get_write_channel().write(*test_buffer));
 
   this->read();
 }
@@ -219,7 +219,7 @@ TYPED_TEST_P(ChannelTest, writev_one) {
   iovec iov;
   iov.iov_base = const_cast<char*>(this->get_test_string().data());
   iov.iov_len = this->get_test_string().size();
-  check_write(this->get_write_channel().writev(&iov, 1));
+  this->check_write(this->get_write_channel().writev(&iov, 1));
 
   this->read();
 }
@@ -230,7 +230,7 @@ TYPED_TEST_P(ChannelTest, writev_two) {
   iov[0].iov_len = 4;
   iov[1].iov_base = const_cast<char*>(this->get_test_string().data()) + 4;
   iov[1].iov_len = this->get_test_string().size() - 4;
-  check_write(this->get_write_channel().writev(iov, 2));
+  this->check_write(this->get_write_channel().writev(iov, 2));
 
   this->read();
 }

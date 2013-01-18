@@ -15,9 +15,12 @@ else()
 		add_definitions(-D_DEBUG)
 	endif()
 	add_definitions(-D_FILE_OFFSET_BITS=64)
-	if (CMAKE_SYSTEM_NAME MATCHES "SunOS")
+	if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+		add_definitions(-Ulinux)
+	elseif (CMAKE_SYSTEM_NAME MATCHES "SunOS")
 		add_definitions(-D_REENTRANT -Dupgrade_the_compiler_to_use_STL=1)
 	endif()
+	add_definitions(-Uunix)
 endif()
 
 # CXX_FLAGS

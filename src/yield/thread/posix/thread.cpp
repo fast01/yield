@@ -35,6 +35,7 @@
 #ifdef __linux__
 #include <sys/syscall.h>
 #endif
+#include <unistd.h>
 
 namespace yield {
 namespace thread {

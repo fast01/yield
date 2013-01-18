@@ -41,6 +41,7 @@
 #include <stdlib.h> // for realpath
 #include <sys/statvfs.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 namespace yield {
 namespace fs {

@@ -38,6 +38,7 @@
 #include <sys/epoll.h>
 #include <sys/eventfd.h>
 #include <sys/inotify.h>
+#include <unistd.h>
 
 namespace yield {
 namespace fs {
