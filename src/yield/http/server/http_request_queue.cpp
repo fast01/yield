@@ -1,6 +1,6 @@
 // yield/http/server/http_request_queue.cpp
 
-// Copyright (c) 2012 Minor Gordon
+// Copyright (c) 2013 Minor Gordon
 // All rights reserved
 
 // This source file is part of the Yield project.
