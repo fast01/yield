@@ -2,19 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 project(yield CXX)
 
-# Variables
-if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	set(YIELD_PLATFORM_NAME "darwin" CACHE INTERNAL "YIELD_PLATFORM_NAME")
-elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
-	set(YIELD_PLATFORM_NAME "linux" CACHE INTERNAL "YIELD_PLATFORM_NAME")
-elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 11 Win64")
-	set(YIELD_PLATFORM_NAME "win64" CACHE INTERNAL "YIELD_PLATFORM_NAME")
-elseif (WIN32)
-	set(YIELD_PLATFORM_NAME "win32" CACHE INTERNAL "YIELD_PLATFORM_NAME")
-else()
-	message("unknown platform")
-endif()
-
 # Definitions
 add_definitions(-D__STDC_LIMIT_MACROS=1)
 if (MSVC)
