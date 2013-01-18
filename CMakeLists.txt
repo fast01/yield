@@ -22,7 +22,7 @@ if (MSVC)
 		add_definitions(/D _VARIADIC_MAX=10)
 	endif()
 	add_definitions(-DSTRICT=1 -DWIN32_LEAN_AND_MEAN) # windows.h options
-	add_definitions(-D_WIN32_WINNT=0x0501) # Require Windows XP
+	add_definitions(-D_WIN32_WINNT=0x0600) # Require Windows Vista
 elseif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(-D_DEBUG)
 endif()
@@ -114,9 +114,13 @@ endif()
 
 enable_testing()
 
-include_directories(include)
+include_directories(
+	include
+	share/gtest-1.6.0/fused-src
+)
 
 set(CMAKE_USE_RELATIVE_PATHS TRUE FORCE)
 
+add_subdirectory(share)
 add_subdirectory(src)
 add_subdirectory(test)
