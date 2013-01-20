@@ -1,4 +1,5 @@
-file(GLOB CPP *.cpp *.hpp)
-add_executable(yield.http.server.ygi_test ${CPP})
+file(GLOB SRC *.cpp *.hpp)
+source_group("Source Files" FILES ${SRC})
+add_executable(yield.http.server.ygi_test ${SRC})
 add_test(yield.http.server.ygi_test yield.http.server.ygi_test --gtest_output=xml:${CMAKE_BINARY_DIR}/gtest_output/yield.http.server.ygi_test.xml)
 target_link_libraries(yield.http.server.ygi_test yield.http.server.ygi gtest)

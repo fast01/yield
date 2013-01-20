@@ -1,5 +1,6 @@
-file(GLOB CPP *.cpp *.hpp)
-add_executable(yield_test ${CPP})
+file(GLOB SRC *.cpp *.hpp)
+source_group("Source Files" FILES ${SRC})
+add_executable(yield_test ${SRC})
 add_test(yield_test yield_test --gtest_output=xml:${CMAKE_BINARY_DIR}/gtest_output/yield_test.xml)
 target_link_libraries(yield_test yield gtest)
 

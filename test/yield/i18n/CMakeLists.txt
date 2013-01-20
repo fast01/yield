@@ -1,4 +1,5 @@
-file(GLOB CPP *.cpp *.hpp)
-add_executable(yield.i18n_test ${CPP})
+file(GLOB SRC *.cpp *.hpp)
+source_group("Source Files" FILES ${SRC})
+add_executable(yield.i18n_test ${SRC})
 add_test(yield.i18n_test yield.i18n_test --gtest_output=xml:${CMAKE_BINARY_DIR}/gtest_output/yield.i18n_test.xml)
 target_link_libraries(yield.i18n_test yield.i18n gtest)

@@ -1,5 +1,6 @@
-file(GLOB CPP *.cpp *.hpp)
-add_executable(yield.queue_test ${CPP})
+file(GLOB SRC *.cpp *.hpp)
+source_group("Source Files" FILES ${SRC})
+add_executable(yield.queue_test ${SRC})
 add_dependencies(yield.queue_test yield.queue)
 add_test(yield.queue_test yield.queue_test --gtest_output=xml:${CMAKE_BINARY_DIR}/gtest_output/yield.queue_test.xml)
 target_link_libraries(yield.queue_test yield.thread gtest)

@@ -1,4 +1,5 @@
-file(GLOB CPP *.cpp *.hpp)
-add_executable(yield.poll_test ${CPP})
+file(GLOB SRC *.cpp *.hpp)
+source_group("Source Files" FILES ${SRC})
+add_executable(yield.poll_test ${SRC})
 add_test(yield.poll_test yield.poll_test --gtest_output=xml:${CMAKE_BINARY_DIR}/gtest_output/yield.poll_test.xml)
 target_link_libraries(yield.poll_test yield yield.poll yield.sockets gtest)
