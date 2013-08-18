@@ -30,8 +30,6 @@
 #ifndef _YIELD_SOCKETS_SSL_SSL_VERSION_HPP_
 #define _YIELD_SOCKETS_SSL_SSL_VERSION_HPP_
 
-#include "yield/config.hpp"
-
 namespace yield {
 namespace sockets {
 #ifdef YIELD_HAVE_OPENSSL
