@@ -1,0 +1,182 @@
+file(GLOB INCLUDE_YIELD "include/yield/*.hpp" "include/yield/*.cpp")
+file(GLOB INCLUDE_YIELD_FS "include/yield/fs/*.hpp" "include/yield/fs/*.cpp")
+file(GLOB INCLUDE_YIELD_FS_POLL "include/yield/fs/poll/*.hpp" "include/yield/fs/poll/*.cpp")
+file(GLOB INCLUDE_YIELD_HTTP "include/yield/http/*.hpp" "include/yield/http/*.cpp")
+file(GLOB INCLUDE_YIELD_HTTP_SERVER "include/yield/http/server/*.hpp" "include/yield/http/server/*.cpp")
+file(GLOB INCLUDE_YIELD_HTTP_SERVER_FILE "include/yield/http/server/file/*.hpp" "include/yield/http/server/file/*.cpp")
+file(GLOB INCLUDE_YIELD_HTTP_SERVER_YGI "include/yield/http/server/ygi/*.hpp" "include/yield/http/server/ygi/*.cpp")
+file(GLOB INCLUDE_YIELD_I18N "include/yield/i18n/*.hpp" "include/yield/i18n/*.cpp")
+file(GLOB INCLUDE_YIELD_POLL "include/yield/poll/*.hpp" "include/yield/poll/*.cpp")
+file(GLOB INCLUDE_YIELD_QUEUE "include/yield/queue/*.hpp" "include/yield/queue/*.cpp")
+file(GLOB INCLUDE_YIELD_SOCKETS "include/yield/sockets/*.hpp" "include/yield/sockets/*.cpp")
+file(GLOB INCLUDE_YIELD_SOCKETS_AIO "include/yield/sockets/aio/*.hpp" "include/yield/sockets/aio/*.cpp")
+file(GLOB INCLUDE_YIELD_SOCKETS_SSL "include/yield/sockets/ssl/*.hpp" "include/yield/sockets/ssl/*.cpp")
+file(GLOB INCLUDE_YIELD_STAGE "include/yield/stage/*.hpp" "include/yield/stage/*.cpp")
+file(GLOB INCLUDE_YIELD_THREAD "include/yield/thread/*.hpp" "include/yield/thread/*.cpp")
+file(GLOB INCLUDE_YIELD_URI "include/yield/uri/*.hpp" "include/yield/uri/*.cpp")
+file(GLOB SRC_YIELD "src/yield/*.hpp" "src/yield/*.cpp")
+file(GLOB SRC_YIELD_FS "src/yield/fs/*.hpp" "src/yield/fs/*.cpp")
+file(GLOB SRC_YIELD_FS_POLL "src/yield/fs/poll/*.hpp" "src/yield/fs/poll/*.cpp")
+file(GLOB SRC_YIELD_FS_POLL_BSD "src/yield/fs/poll/bsd/*.hpp" "src/yield/fs/poll/bsd/*.cpp")
+file(GLOB SRC_YIELD_FS_POLL_LINUX "src/yield/fs/poll/linux/*.hpp" "src/yield/fs/poll/linux/*.cpp")
+file(GLOB SRC_YIELD_FS_POLL_WIN32 "src/yield/fs/poll/win32/*.hpp" "src/yield/fs/poll/win32/*.cpp")
+file(GLOB SRC_YIELD_FS_POSIX "src/yield/fs/posix/*.hpp" "src/yield/fs/posix/*.cpp")
+file(GLOB SRC_YIELD_FS_WIN32 "src/yield/fs/win32/*.hpp" "src/yield/fs/win32/*.cpp")
+file(GLOB SRC_YIELD_HTTP "src/yield/http/*.hpp" "src/yield/http/*.cpp")
+file(GLOB SRC_YIELD_HTTP_SERVER "src/yield/http/server/*.hpp" "src/yield/http/server/*.cpp")
+file(GLOB SRC_YIELD_HTTP_SERVER_FILE "src/yield/http/server/file/*.hpp" "src/yield/http/server/file/*.cpp")
+file(GLOB SRC_YIELD_HTTP_SERVER_YGI "src/yield/http/server/ygi/*.hpp" "src/yield/http/server/ygi/*.cpp")
+file(GLOB SRC_YIELD_I18N "src/yield/i18n/*.hpp" "src/yield/i18n/*.cpp")
+file(GLOB SRC_YIELD_I18N_POSIX "src/yield/i18n/posix/*.hpp" "src/yield/i18n/posix/*.cpp")
+file(GLOB SRC_YIELD_I18N_WIN32 "src/yield/i18n/win32/*.hpp" "src/yield/i18n/win32/*.cpp")
+file(GLOB SRC_YIELD_POLL "src/yield/poll/*.hpp" "src/yield/poll/*.cpp")
+file(GLOB SRC_YIELD_POLL_BSD "src/yield/poll/bsd/*.hpp" "src/yield/poll/bsd/*.cpp")
+file(GLOB SRC_YIELD_POLL_LINUX "src/yield/poll/linux/*.hpp" "src/yield/poll/linux/*.cpp")
+file(GLOB SRC_YIELD_POLL_POSIX "src/yield/poll/posix/*.hpp" "src/yield/poll/posix/*.cpp")
+file(GLOB SRC_YIELD_POLL_SUNOS "src/yield/poll/sunos/*.hpp" "src/yield/poll/sunos/*.cpp")
+file(GLOB SRC_YIELD_POLL_WIN32 "src/yield/poll/win32/*.hpp" "src/yield/poll/win32/*.cpp")
+file(GLOB SRC_YIELD_QUEUE "src/yield/queue/*.hpp" "src/yield/queue/*.cpp")
+file(GLOB SRC_YIELD_SOCKETS "src/yield/sockets/*.hpp" "src/yield/sockets/*.cpp")
+file(GLOB SRC_YIELD_SOCKETS_AIO "src/yield/sockets/aio/*.hpp" "src/yield/sockets/aio/*.cpp")
+file(GLOB SRC_YIELD_SOCKETS_AIO_WIN32 "src/yield/sockets/aio/win32/*.hpp" "src/yield/sockets/aio/win32/*.cpp")
+file(GLOB SRC_YIELD_SOCKETS_POSIX "src/yield/sockets/posix/*.hpp" "src/yield/sockets/posix/*.cpp")
+file(GLOB SRC_YIELD_SOCKETS_SSL "src/yield/sockets/ssl/*.hpp" "src/yield/sockets/ssl/*.cpp")
+file(GLOB SRC_YIELD_SOCKETS_WIN32 "src/yield/sockets/win32/*.hpp" "src/yield/sockets/win32/*.cpp")
+file(GLOB SRC_YIELD_STAGE "src/yield/stage/*.hpp" "src/yield/stage/*.cpp")
+file(GLOB SRC_YIELD_THREAD "src/yield/thread/*.hpp" "src/yield/thread/*.cpp")
+file(GLOB SRC_YIELD_THREAD_DARWIN "src/yield/thread/darwin/*.hpp" "src/yield/thread/darwin/*.cpp")
+file(GLOB SRC_YIELD_THREAD_LINUX "src/yield/thread/linux/*.hpp" "src/yield/thread/linux/*.cpp")
+file(GLOB SRC_YIELD_THREAD_POSIX "src/yield/thread/posix/*.hpp" "src/yield/thread/posix/*.cpp")
+file(GLOB SRC_YIELD_THREAD_SUNOS "src/yield/thread/sunos/*.hpp" "src/yield/thread/sunos/*.cpp")
+file(GLOB SRC_YIELD_THREAD_WIN32 "src/yield/thread/win32/*.hpp" "src/yield/thread/win32/*.cpp")
+file(GLOB SRC_YIELD_URI "src/yield/uri/*.hpp" "src/yield/uri/*.cpp")
+	if (WIN32)
+	set_source_files_properties(${SRC_YIELD_FS_POLL_BSD} PROPERTIES HEADER_FILE_ONLY true)
+	set_source_files_properties(${SRC_YIELD_FS_POLL_LINUX} PROPERTIES HEADER_FILE_ONLY true)
+	set_source_files_properties(${SRC_YIELD_FS_POSIX} PROPERTIES HEADER_FILE_ONLY true)
+	set_source_files_properties(${SRC_YIELD_I18N_POSIX} PROPERTIES HEADER_FILE_ONLY true)
+	set_source_files_properties(${SRC_YIELD_POLL_BSD} PROPERTIES HEADER_FILE_ONLY true)
+	set_source_files_properties(${SRC_YIELD_POLL_LINUX} PROPERTIES HEADER_FILE_ONLY true)
+	set_source_files_properties(${SRC_YIELD_POLL_POSIX} PROPERTIES HEADER_FILE_ONLY true)
+	set_source_files_properties(${SRC_YIELD_POLL_SUNOS} PROPERTIES HEADER_FILE_ONLY true)
+	set_source_files_properties(${SRC_YIELD_SOCKETS_POSIX} PROPERTIES HEADER_FILE_ONLY true)
+	set_source_files_properties(${SRC_YIELD_THREAD_DARWIN} PROPERTIES HEADER_FILE_ONLY true)
+	set_source_files_properties(${SRC_YIELD_THREAD_LINUX} PROPERTIES HEADER_FILE_ONLY true)
+	set_source_files_properties(${SRC_YIELD_THREAD_POSIX} PROPERTIES HEADER_FILE_ONLY true)
+	set_source_files_properties(${SRC_YIELD_THREAD_SUNOS} PROPERTIES HEADER_FILE_ONLY true)
+	source_group("Header Files\\yield" FILES ${INCLUDE_YIELD})
+	source_group("Header Files\\yield\\fs" FILES ${INCLUDE_YIELD_FS})
+	source_group("Header Files\\yield\\fs\\poll" FILES ${INCLUDE_YIELD_FS_POLL})
+	source_group("Header Files\\yield\\http" FILES ${INCLUDE_YIELD_HTTP})
+	source_group("Header Files\\yield\\http\\server" FILES ${INCLUDE_YIELD_HTTP_SERVER})
+	source_group("Header Files\\yield\\http\\server\\file" FILES ${INCLUDE_YIELD_HTTP_SERVER_FILE})
+	source_group("Header Files\\yield\\http\\server\\ygi" FILES ${INCLUDE_YIELD_HTTP_SERVER_YGI})
+	source_group("Header Files\\yield\\i18n" FILES ${INCLUDE_YIELD_I18N})
+	source_group("Header Files\\yield\\poll" FILES ${INCLUDE_YIELD_POLL})
+	source_group("Header Files\\yield\\queue" FILES ${INCLUDE_YIELD_QUEUE})
+	source_group("Header Files\\yield\\sockets" FILES ${INCLUDE_YIELD_SOCKETS})
+	source_group("Header Files\\yield\\sockets\\aio" FILES ${INCLUDE_YIELD_SOCKETS_AIO})
+	source_group("Header Files\\yield\\sockets\\ssl" FILES ${INCLUDE_YIELD_SOCKETS_SSL})
+	source_group("Header Files\\yield\\stage" FILES ${INCLUDE_YIELD_STAGE})
+	source_group("Header Files\\yield\\thread" FILES ${INCLUDE_YIELD_THREAD})
+	source_group("Header Files\\yield\\uri" FILES ${INCLUDE_YIELD_URI})
+	source_group("Source Files\\yield" FILES ${SRC_YIELD})
+	source_group("Source Files\\yield\\fs" FILES ${SRC_YIELD_FS})
+	source_group("Source Files\\yield\\fs\\poll" FILES ${SRC_YIELD_FS_POLL})
+	source_group("Source Files\\yield\\fs\\poll\\bsd" FILES ${SRC_YIELD_FS_POLL_BSD})
+	source_group("Source Files\\yield\\fs\\poll\\linux" FILES ${SRC_YIELD_FS_POLL_LINUX})
+	source_group("Source Files\\yield\\fs\\poll\\win32" FILES ${SRC_YIELD_FS_POLL_WIN32})
+	source_group("Source Files\\yield\\fs\\posix" FILES ${SRC_YIELD_FS_POSIX})
+	source_group("Source Files\\yield\\fs\\win32" FILES ${SRC_YIELD_FS_WIN32})
+	source_group("Source Files\\yield\\http" FILES ${SRC_YIELD_HTTP})
+	source_group("Source Files\\yield\\http\\server" FILES ${SRC_YIELD_HTTP_SERVER})
+	source_group("Source Files\\yield\\http\\server\\file" FILES ${SRC_YIELD_HTTP_SERVER_FILE})
+	source_group("Source Files\\yield\\http\\server\\ygi" FILES ${SRC_YIELD_HTTP_SERVER_YGI})
+	source_group("Source Files\\yield\\i18n" FILES ${SRC_YIELD_I18N})
+	source_group("Source Files\\yield\\i18n\\posix" FILES ${SRC_YIELD_I18N_POSIX})
+	source_group("Source Files\\yield\\i18n\\win32" FILES ${SRC_YIELD_I18N_WIN32})
+	source_group("Source Files\\yield\\poll" FILES ${SRC_YIELD_POLL})
+	source_group("Source Files\\yield\\poll\\bsd" FILES ${SRC_YIELD_POLL_BSD})
+	source_group("Source Files\\yield\\poll\\linux" FILES ${SRC_YIELD_POLL_LINUX})
+	source_group("Source Files\\yield\\poll\\posix" FILES ${SRC_YIELD_POLL_POSIX})
+	source_group("Source Files\\yield\\poll\\sunos" FILES ${SRC_YIELD_POLL_SUNOS})
+	source_group("Source Files\\yield\\poll\\win32" FILES ${SRC_YIELD_POLL_WIN32})
+	source_group("Source Files\\yield\\queue" FILES ${SRC_YIELD_QUEUE})
+	source_group("Source Files\\yield\\sockets" FILES ${SRC_YIELD_SOCKETS})
+	source_group("Source Files\\yield\\sockets\\aio" FILES ${SRC_YIELD_SOCKETS_AIO})
+	source_group("Source Files\\yield\\sockets\\aio\\win32" FILES ${SRC_YIELD_SOCKETS_AIO_WIN32})
+	source_group("Source Files\\yield\\sockets\\posix" FILES ${SRC_YIELD_SOCKETS_POSIX})
+	source_group("Source Files\\yield\\sockets\\ssl" FILES ${SRC_YIELD_SOCKETS_SSL})
+	source_group("Source Files\\yield\\sockets\\win32" FILES ${SRC_YIELD_SOCKETS_WIN32})
+	source_group("Source Files\\yield\\stage" FILES ${SRC_YIELD_STAGE})
+	source_group("Source Files\\yield\\thread" FILES ${SRC_YIELD_THREAD})
+	source_group("Source Files\\yield\\thread\\darwin" FILES ${SRC_YIELD_THREAD_DARWIN})
+	source_group("Source Files\\yield\\thread\\linux" FILES ${SRC_YIELD_THREAD_LINUX})
+	source_group("Source Files\\yield\\thread\\posix" FILES ${SRC_YIELD_THREAD_POSIX})
+	source_group("Source Files\\yield\\thread\\sunos" FILES ${SRC_YIELD_THREAD_SUNOS})
+	source_group("Source Files\\yield\\thread\\win32" FILES ${SRC_YIELD_THREAD_WIN32})
+	source_group("Source Files\\yield\\uri" FILES ${SRC_YIELD_URI})
+	endif()
+	add_library(
+		yield STATIC
+	${INCLUDE_YIELD}
+	${INCLUDE_YIELD_FS}
+	${INCLUDE_YIELD_FS_POLL}
+	${INCLUDE_YIELD_HTTP}
+	${INCLUDE_YIELD_HTTP_SERVER}
+	${INCLUDE_YIELD_HTTP_SERVER_FILE}
+	${INCLUDE_YIELD_HTTP_SERVER_YGI}
+	${INCLUDE_YIELD_I18N}
+	${INCLUDE_YIELD_POLL}
+	${INCLUDE_YIELD_QUEUE}
+	${INCLUDE_YIELD_SOCKETS}
+	${INCLUDE_YIELD_SOCKETS_AIO}
+	${INCLUDE_YIELD_SOCKETS_SSL}
+	${INCLUDE_YIELD_STAGE}
+	${INCLUDE_YIELD_THREAD}
+	${INCLUDE_YIELD_URI}
+	${SRC_YIELD}
+	${SRC_YIELD_FS}
+	${SRC_YIELD_FS_POLL}
+	${SRC_YIELD_FS_POLL_BSD}
+	${SRC_YIELD_FS_POLL_LINUX}
+	${SRC_YIELD_FS_POLL_WIN32}
+	${SRC_YIELD_FS_POSIX}
+	${SRC_YIELD_FS_WIN32}
+	${SRC_YIELD_HTTP}
+	${SRC_YIELD_HTTP_SERVER}
+	${SRC_YIELD_HTTP_SERVER_FILE}
+	${SRC_YIELD_HTTP_SERVER_YGI}
+	${SRC_YIELD_I18N}
+	${SRC_YIELD_I18N_POSIX}
+	${SRC_YIELD_I18N_WIN32}
+	${SRC_YIELD_POLL}
+	${SRC_YIELD_POLL_BSD}
+	${SRC_YIELD_POLL_LINUX}
+	${SRC_YIELD_POLL_POSIX}
+	${SRC_YIELD_POLL_SUNOS}
+	${SRC_YIELD_POLL_WIN32}
+	${SRC_YIELD_QUEUE}
+	${SRC_YIELD_SOCKETS}
+	${SRC_YIELD_SOCKETS_AIO}
+	${SRC_YIELD_SOCKETS_AIO_WIN32}
+	${SRC_YIELD_SOCKETS_POSIX}
+	${SRC_YIELD_SOCKETS_SSL}
+	${SRC_YIELD_SOCKETS_WIN32}
+	${SRC_YIELD_STAGE}
+	${SRC_YIELD_THREAD}
+	${SRC_YIELD_THREAD_DARWIN}
+	${SRC_YIELD_THREAD_LINUX}
+	${SRC_YIELD_THREAD_POSIX}
+	${SRC_YIELD_THREAD_SUNOS}
+	${SRC_YIELD_THREAD_WIN32}
+	${SRC_YIELD_URI}
+	)
+set_target_properties(yield PROPERTIES LINKER_LANGUAGE CXX)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	target_link_libraries(yield pthread)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+	target_link_libraries(yield pthread)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
+	target_link_libraries(yield kstat)
+endif()

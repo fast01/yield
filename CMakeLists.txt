@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 2.8)
 
 project(yield CXX)
 
+# Configuration
+if (NOT YIELD_FUSED)
+	enable_testing()
+endif()
+set(CMAKE_USE_RELATIVE_PATHS TRUE FORCE)
+
 # Definitions
 add_definitions(-D__STDC_LIMIT_MACROS=1)
 if (MSVC)
@@ -108,15 +114,15 @@ elseif (YIELD_PLATFORM_NAME STREQUAL "darwin")
 	set(CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS "${CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS} -undefined dynamic_lookup")
 endif()
 
-enable_testing()
-
 include_directories(
 	include
 	share/gtest-1.6.0/fused-src
 )
 
-set(CMAKE_USE_RELATIVE_PATHS TRUE FORCE)
-
 add_subdirectory(share)
-add_subdirectory(src)
-add_subdirectory(test)
+if (YIELD_FUSED)
+	include(CMakeLists_fused.txt)
+else()
+	add_subdirectory(src)
+	add_subdirectory(test)
+endif()
