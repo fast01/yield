@@ -40,14 +40,14 @@ namespace poll {
   Event subclass describing file system change events (directory or file
     add/modify/remove/rename).
 */
-class FSEvent  : public Event {
+class FsEvent  : public Event {
 public:
   const static uint32_t TYPE_ID = 1640119324;
 
 public:
   /**
     Type enum. An integer instead of a proper enum to allow
-      FSEventQueue::associate to take a bitmask of desired types.
+      FsEventQueue::associate to take a bitmask of desired types.
   */
   typedef uint8_t Type;
 
@@ -99,20 +99,20 @@ public:
 
 public:
   /**
-    Construct an FSEvent with a single path.
+    Construct an FsEvent with a single path.
     @param path path to the added/modified/removed directory or file
     @param type TYPE_DIRECTORY_ADD, TYPE_DIRECTORY_MODIFY,
       TYPE_DIRECTORY_REMOVE, TYPE_FILE_ADD, TYPE_FILE_MODIFY, TYPE_FILE_REMOVE
   */
-  FSEvent(const Path& path, Type type);
+  FsEvent(const Path& path, Type type);
 
   /**
-    Construct an FSEvent with two paths i.e., a rename.
+    Construct an FsEvent with two paths i.e., a rename.
     @param old_path path to the directory or file before the rename
     @param new_path path to the directory or file after the rename
     @param type TYPE_DIRECTORY_RENAME or TYPE_FILE_RENAME
   */
-  FSEvent(const Path& old_path, const Path& new_path, Type type);
+  FsEvent(const Path& old_path, const Path& new_path, Type type);
 
 public:
   /**
@@ -157,7 +157,7 @@ public:
   }
 
   const char* get_type_name() const {
-    return "yield::fs::poll::FSEvent";
+    return "yield::fs::poll::FsEvent";
   }
 
 private:
@@ -165,7 +165,7 @@ private:
   Type type;
 };
 
-std::ostream& operator<<(std::ostream&, const FSEvent&);
+std::ostream& operator<<(std::ostream&, const FsEvent&);
 }
 }
 }

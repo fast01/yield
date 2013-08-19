@@ -72,7 +72,7 @@
 namespace yield {
 namespace uri {
 bool
-URIParser::parse(
+UriParser::parse(
   iovec& fragment,
   iovec& host,
   iovec& path,

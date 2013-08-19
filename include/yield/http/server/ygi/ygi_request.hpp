@@ -38,9 +38,9 @@ namespace yield {
 namespace http {
 namespace server {
 namespace ygi {
-class YGIRequest : public ygi_request_t {
+class YgiRequest : public ygi_request_t {
 public:
-  YGIRequest(HTTPRequest& http_request);
+  YgiRequest(HttpRequest& http_request);
 
 public:
   size_t CONTENT_LENGTH();
@@ -63,59 +63,59 @@ public:
 
 private:
   static size_t __CONTENT_LENGTH(ygi_request_t* this_) {
-    return reinterpret_cast<YGIRequest*>(this_)->CONTENT_LENGTH();
+    return reinterpret_cast<YgiRequest*>(this_)->CONTENT_LENGTH();
   }
 
   static iovec __DOCUMENT_ROOT(ygi_request_t* this_) {
-    return reinterpret_cast<YGIRequest*>(this_)->DOCUMENT_ROOT();
+    return reinterpret_cast<YgiRequest*>(this_)->DOCUMENT_ROOT();
   }
 
   static iovec __HTTP_(ygi_request_t* this_, const char* field_name) {
-    return reinterpret_cast<YGIRequest*>(this_)->HTTP_(field_name);
+    return reinterpret_cast<YgiRequest*>(this_)->HTTP_(field_name);
   }
 
   static iovec __HTTP_REFERER(ygi_request_t* this_) {
-    return reinterpret_cast<YGIRequest*>(this_)->HTTP_REFERER();
+    return reinterpret_cast<YgiRequest*>(this_)->HTTP_REFERER();
   }
 
   static iovec __HTTP_USER_AGENT(ygi_request_t* this_) {
-    return reinterpret_cast<YGIRequest*>(this_)->HTTP_USER_AGENT();
+    return reinterpret_cast<YgiRequest*>(this_)->HTTP_USER_AGENT();
   }
 
   static iovec __PATH_INFO(ygi_request_t* this_) {
-    return reinterpret_cast<YGIRequest*>(this_)->PATH_INFO();
+    return reinterpret_cast<YgiRequest*>(this_)->PATH_INFO();
   }
 
   static iovec __PATH_TRANSLATED(ygi_request_t* this_) {
-    return reinterpret_cast<YGIRequest*>(this_)->PATH_TRANSLATED();
+    return reinterpret_cast<YgiRequest*>(this_)->PATH_TRANSLATED();
   }
 
   static iovec __QUERY_STRING(ygi_request_t* this_) {
-    return reinterpret_cast<YGIRequest*>(this_)->QUERY_STRING();
+    return reinterpret_cast<YgiRequest*>(this_)->QUERY_STRING();
   }
 
   static iovec __REMOTE_ADDR(ygi_request_t* this_) {
-    return reinterpret_cast<YGIRequest*>(this_)->REMOTE_ADDR();
+    return reinterpret_cast<YgiRequest*>(this_)->REMOTE_ADDR();
   }
 
   static iovec __REMOTE_HOST(ygi_request_t* this_) {
-    return reinterpret_cast<YGIRequest*>(this_)->REMOTE_HOST();
+    return reinterpret_cast<YgiRequest*>(this_)->REMOTE_HOST();
   }
 
   static iovec __REQUEST_METHOD(ygi_request_t* this_) {
-    return reinterpret_cast<YGIRequest*>(this_)->REQUEST_METHOD();
+    return reinterpret_cast<YgiRequest*>(this_)->REQUEST_METHOD();
   }
 
   static iovec __SCRIPT_NAME(ygi_request_t* this_) {
-    return reinterpret_cast<YGIRequest*>(this_)->SCRIPT_NAME();
+    return reinterpret_cast<YgiRequest*>(this_)->SCRIPT_NAME();
   }
 
   static iovec __SERVER_NAME(ygi_request_t* this_) {
-    return reinterpret_cast<YGIRequest*>(this_)->SERVER_NAME();
+    return reinterpret_cast<YgiRequest*>(this_)->SERVER_NAME();
   }
 
   static uint16_t __SERVER_PORT(ygi_request_t* this_) {
-    return reinterpret_cast<YGIRequest*>(this_)->SERVER_PORT();
+    return reinterpret_cast<YgiRequest*>(this_)->SERVER_PORT();
   }
 
   static ygi_response_t*
@@ -123,13 +123,13 @@ private:
     ygi_request_t* this_,
     uint16_t status_code
   ) {
-    return reinterpret_cast<YGIRequest*>(this_)->respond(status_code);
+    return reinterpret_cast<YgiRequest*>(this_)->respond(status_code);
   }
 
   ygi_response_t* __respond(uint16_t status_code);
 
 private:
-  HTTPRequest& http_request;
+  HttpRequest& http_request;
 };
 }
 }

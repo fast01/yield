@@ -61,37 +61,37 @@ class Watch;
 template <class> class Watches;
 
 /**
-  EventQueue for file system change events (<code>FSEvent</code>s).
+  EventQueue for file system change events (<code>FsEvent</code>s).
 */
-class FSEventQueue : public EventQueue {
+class FsEventQueue : public EventQueue {
 public:
   /**
-    Construct an FSEventQueue, allocating any system resources as necessary.
+    Construct an FsEventQueue, allocating any system resources as necessary.
     @param log optional debug and error log
   */
-  FSEventQueue(YO_NEW_REF Log* log = NULL);
+  FsEventQueue(YO_NEW_REF Log* log = NULL);
 
   /**
-    Destroy an FDEventQueue, deallocating any associated system resources.
+    Destroy an FdEventQueue, deallocating any associated system resources.
   */
-  ~FSEventQueue();
+  ~FsEventQueue();
 
 public:
   /**
-    Associate a file system path with this FSEventQueue,
-      watching for the specified FSEvent types (directory or file
+    Associate a file system path with this FsEventQueue,
+      watching for the specified FsEvent types (directory or file
       add/modify/remove/rename).
     @param path the path to associate
-    @param fs_event_types FSEvent types to monitor
+    @param fs_event_types FsEvent types to monitor
     @return true on success, false+errno on failure
   */
   bool associate(
     const Path& path,
-    FSEvent::Type fs_event_types = FSEvent::TYPE_ALL
+    FsEvent::Type fs_event_types = FsEvent::TYPE_ALL
   );
 
   /**
-    Dissociate a file system path from this FSEventQueue.
+    Dissociate a file system path from this FsEventQueue.
     @param path the path to dissociate
     @return true on success, false+errno on failure
   */
@@ -118,7 +118,7 @@ private:
 #endif
 };
 #else
-typedef ScanningFSEventQueue FSEventQueue;
+typedef ScanningFsEventQueue FsEventQueue;
 #endif
 }
 }

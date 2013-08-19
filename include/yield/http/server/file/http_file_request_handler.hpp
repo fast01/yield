@@ -38,11 +38,11 @@ namespace yield {
 namespace http {
 namespace server {
 namespace file {
-class HTTPFileRequestHandler : public EventHandler {
+class HttpFileRequestHandler : public EventHandler {
 public:
-  HTTPFileRequestHandler(
+  HttpFileRequestHandler(
     const yield::fs::Path& root_directory_path,
-    const yield::uri::URI& root_uri
+    const yield::uri::Uri& root_uri
   );
 
 public:
@@ -51,7 +51,7 @@ public:
 
 private:
   yield::fs::Path root_directory_path;
-  yield::uri::URI root_uri;
+  yield::uri::Uri root_uri;
   iovec root_uri_path;
 };
 }

@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_SOCKETS_AIO_SEND_AIOCB_HPP_
-#define _YIELD_SOCKETS_AIO_SEND_AIOCB_HPP_
+#ifndef _YIELD_SOCKETS_AIO_SEND_Aiocb_HPP_
+#define _YIELD_SOCKETS_AIO_SEND_Aiocb_HPP_
 
 #include "yield/sockets/aio/aiocb.hpp"
 #include "yield/sockets/socket.hpp"
@@ -39,29 +39,29 @@ namespace aio {
 /**
   AIO control block for send operations on sockets.
 */
-class sendAIOCB : public AIOCB {
+class SendAiocb : public Aiocb {
 public:
   const static uint32_t TYPE_ID = 2368940288UL;
 
 public:
   /**
-    Construct a sendAIOCB, passing the same parameters as to send.
+    Construct a SendAiocb, passing the same parameters as to send.
     @param socket_ socket to send data on
     @param buffer buffer to send data from
     @param flags flags to pass to the send method
     @param context optional context object
   */
-  sendAIOCB(
+  SendAiocb(
     Socket& socket_,
     YO_NEW_REF Buffer& buffer,
     const Socket::MessageFlags& flags,
     Object* context = NULL
-  ) : AIOCB(socket_, context),
+  ) : Aiocb(socket_, context),
     buffer(buffer),
     flags(flags) {
   }
 
-  ~sendAIOCB();
+  ~SendAiocb();
 
 public:
   /**
@@ -87,7 +87,7 @@ public:
   }
 
   const char* get_type_name() const {
-    return "yield::sockets::aio::sendAIOCB";
+    return "yield::sockets::aio::SendAiocb";
   }
 
 private:
@@ -97,12 +97,12 @@ private:
 };
 
 /**
-  Print a string representation of a sendAIOCB to a std::ostream.
+  Print a string representation of a SendAiocb to a std::ostream.
   @param os std::ostream to print to
-  @param send_aiocb sendAIOCB to print
+  @param send_aiocb SendAiocb to print
   @return os
 */
-std::ostream& operator<<(std::ostream& os, sendAIOCB& send_aiocb);
+std::ostream& operator<<(std::ostream& os, SendAiocb& send_aiocb);
 }
 }
 }

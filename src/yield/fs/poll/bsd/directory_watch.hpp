@@ -43,7 +43,7 @@ class DirectoryWatch
 public:
   DirectoryWatch(
     int fd,
-    FSEvent::Type fs_event_types,
+    FsEvent::Type fs_event_types,
     const Path& path,
     Log* log = NULL
   );

@@ -73,7 +73,7 @@
 
 namespace yield {
 namespace http {
-Object& HTTPResponseParser::parse() {
+Object& HttpResponseParser::parse() {
   if (p < eof) {
     ps = p;
 
@@ -122,7 +122,7 @@ Object& HTTPResponseParser::parse() {
       p = ps;
       return next_buffer;
     } else { // Error parsing
-      HTTPResponse& http_response
+      HttpResponse& http_response
       = create_http_response(400, NULL, http_version);
       http_response.set_field("Content-Length", 14, "0", 1);
       return http_response;
@@ -133,7 +133,7 @@ Object& HTTPResponseParser::parse() {
 }
 
 bool
-HTTPResponseParser::parse_status_line(
+HttpResponseParser::parse_status_line(
   uint8_t& http_version,
   uint16_t& status_code
 ) {

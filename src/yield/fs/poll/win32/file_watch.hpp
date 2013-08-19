@@ -42,7 +42,7 @@ public:
     YO_NEW_REF Directory& directory,
     const Path& directory_path,
     const Path& file_path,
-    FSEvent::Type fs_event_types,
+    FsEvent::Type fs_event_types,
     Log* log = NULL
   ) : Watch(directory, fs_event_types, log, file_path),
     directory_path(directory_path) {
@@ -50,7 +50,7 @@ public:
 
 public:
   // yield::fs::poll::win32::Watch
-  YO_NEW_REF FSEvent* parse(const FILE_NOTIFY_INFORMATION&);
+  YO_NEW_REF FsEvent* parse(const FILE_NOTIFY_INFORMATION&);
 
 private:
   Path directory_path;

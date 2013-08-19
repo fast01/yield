@@ -41,7 +41,7 @@ namespace linux {
 using std::map;
 
 Watch::Watch(
-  FSEvent::Type fs_event_types,
+  FsEvent::Type fs_event_types,
   int inotify_fd,
   const Path& path,
   int wd,
@@ -55,7 +55,7 @@ Watch::~Watch() {
   inotify_rm_watch(inotify_fd, wd);
 }
 
-YO_NEW_REF FSEvent* Watch::parse(const inotify_event& inotify_event_) {
+YO_NEW_REF FsEvent* Watch::parse(const inotify_event& inotify_event_) {
   uint32_t mask = inotify_event_.mask;
 
   bool isdir;
@@ -91,32 +91,32 @@ YO_NEW_REF FSEvent* Watch::parse(const inotify_event& inotify_event_) {
         ")";
   }
 
-  FSEvent::Type fs_event_type;
+  FsEvent::Type fs_event_type;
 
   if ((mask & IN_ATTRIB) == IN_ATTRIB) {
     mask ^= IN_ATTRIB;
     fs_event_type =
-      isdir ? FSEvent::TYPE_DIRECTORY_MODIFY : FSEvent::TYPE_FILE_MODIFY;
+      isdir ? FsEvent::TYPE_DIRECTORY_MODIFY : FsEvent::TYPE_FILE_MODIFY;
   } else if ((mask & IN_CREATE) == IN_CREATE) {
     mask ^= IN_CREATE;
     fs_event_type =
-      isdir ? FSEvent::TYPE_DIRECTORY_ADD : FSEvent::TYPE_FILE_ADD;
+      isdir ? FsEvent::TYPE_DIRECTORY_ADD : FsEvent::TYPE_FILE_ADD;
   } else if ((mask & IN_DELETE) == IN_DELETE) {
     mask ^= IN_DELETE;
     fs_event_type =
-      isdir ? FSEvent::TYPE_DIRECTORY_REMOVE : FSEvent::TYPE_FILE_REMOVE;
+      isdir ? FsEvent::TYPE_DIRECTORY_REMOVE : FsEvent::TYPE_FILE_REMOVE;
   } else if ((mask & IN_DELETE_SELF) == IN_DELETE_SELF) {
     mask ^= IN_DELETE_SELF;
     fs_event_type =
-      isdir ? FSEvent::TYPE_DIRECTORY_REMOVE : FSEvent::TYPE_FILE_REMOVE;
+      isdir ? FsEvent::TYPE_DIRECTORY_REMOVE : FsEvent::TYPE_FILE_REMOVE;
   } else if ((mask & IN_IGNORED) == IN_IGNORED) {
     mask ^= IN_IGNORED;
     debug_assert_false(isdir);
-    fs_event_type = FSEvent::TYPE_FILE_REMOVE;
+    fs_event_type = FsEvent::TYPE_FILE_REMOVE;
   } else if ((mask & IN_MODIFY) == IN_MODIFY) {
     mask ^= IN_MODIFY;
     fs_event_type =
-      isdir ? FSEvent::TYPE_DIRECTORY_MODIFY : FSEvent::TYPE_FILE_MODIFY;
+      isdir ? FsEvent::TYPE_DIRECTORY_MODIFY : FsEvent::TYPE_FILE_MODIFY;
   } else if ((mask & IN_MOVED_FROM) == IN_MOVED_FROM) {
     mask ^= IN_MOVED_FROM;
     debug_assert_false(name.empty());
@@ -127,15 +127,15 @@ YO_NEW_REF FSEvent* Watch::parse(const inotify_event& inotify_event_) {
     debug_assert_eq(mask, 0);
 
     fs_event_type =
-      isdir ? FSEvent::TYPE_DIRECTORY_RENAME : FSEvent::TYPE_FILE_RENAME;
+      isdir ? FsEvent::TYPE_DIRECTORY_RENAME : FsEvent::TYPE_FILE_RENAME;
 
     map<uint32_t, Path>::iterator old_name_i
     = old_names.find(inotify_event_.cookie);
     debug_assert_ne(old_name_i, old_names.end());
 
     if (want_fs_event_type(fs_event_type)) {
-      FSEvent* fs_event
-      = new FSEvent(
+      FsEvent* fs_event
+      = new FsEvent(
         this->get_path() / old_name_i->second,
         path,
         fs_event_type
@@ -152,7 +152,7 @@ YO_NEW_REF FSEvent* Watch::parse(const inotify_event& inotify_event_) {
   debug_assert_eq(mask, 0);
 
   if (want_fs_event_type(fs_event_type)) {
-    FSEvent* fs_event = new FSEvent(path, fs_event_type);
+    FsEvent* fs_event = new FsEvent(path, fs_event_type);
     log_fs_event(*fs_event);
     return fs_event;
   } else {

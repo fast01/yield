@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_SOCKETS_AIO_ACCEPT_AIOCB_HPP_
-#define _YIELD_SOCKETS_AIO_ACCEPT_AIOCB_HPP_
+#ifndef _YIELD_SOCKETS_AIO_ACCEPT_Aiocb_HPP_
+#define _YIELD_SOCKETS_AIO_ACCEPT_Aiocb_HPP_
 
 #include "yield/sockets/aio/aiocb.hpp"
 
@@ -44,26 +44,26 @@ namespace aio {
 /**
   AIO control block for accept operations on sockets.
 */
-class acceptAIOCB : public AIOCB {
+class AcceptAiocb : public Aiocb {
 public:
   const static uint32_t TYPE_ID = 3895043741UL;
 
 public:
   /**
-    Construct an acceptAIOCB with an optional buffer for receiving data
+    Construct an AcceptAiocb with an optional buffer for receiving data
       after a new connection is accepted.
     @param socket_ listen socket to accept on
     @param context optional context object
     @param recv_buffer optional buffer for receiving data after a new
       connection is accepted
   */
-  acceptAIOCB(
+  AcceptAiocb(
     StreamSocket& socket_,
     Object* context = NULL,
     YO_NEW_REF Buffer* recv_buffer = NULL
   );
 
-  ~acceptAIOCB();
+  ~AcceptAiocb();
 
 public:
   /**
@@ -105,14 +105,14 @@ public:
   }
 
   const char* get_type_name() const {
-    return "yield::sockets::aio::acceptAIOCB";
+    return "yield::sockets::aio::AcceptAiocb";
   }
 
 protected:
 #ifdef _WIN32
-  friend class AIOQueue;
+  friend class AioQueue;
 #endif
-  friend class NBIOQueue;
+  friend class NbioQueue;
 
   void set_accepted_socket(YO_NEW_REF StreamSocket& accepted_socket);
   void set_peername(YO_NEW_REF SocketAddress* peername);
@@ -125,12 +125,12 @@ private:
 };
 
 /**
-  Print a string representation of an acceptAIOCB to a std::ostream.
+  Print a string representation of an AcceptAiocb to a std::ostream.
   @param os std::ostream to print to
-  @param accept_aiocb acceptAIOCB to print
+  @param accept_aiocb AcceptAiocb to print
   @return os
 */
-std::ostream& operator<<(std::ostream& os, acceptAIOCB& accept_aiocb);
+std::ostream& operator<<(std::ostream& os, AcceptAiocb& accept_aiocb);
 }
 }
 }

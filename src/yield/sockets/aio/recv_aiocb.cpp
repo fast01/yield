@@ -34,11 +34,11 @@
 namespace yield {
 namespace sockets {
 namespace aio {
-recvAIOCB::~recvAIOCB() {
+RecvAiocb::~RecvAiocb() {
   Buffer::dec_ref(buffer);
 }
 
-std::ostream& operator<<(std::ostream& os, recvAIOCB& recv_aiocb) {
+std::ostream& operator<<(std::ostream& os, RecvAiocb& recv_aiocb) {
   os <<
      recv_aiocb.get_type_name() <<
      "(" <<

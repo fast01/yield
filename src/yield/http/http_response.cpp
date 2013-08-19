@@ -35,14 +35,14 @@
 
 namespace yield {
 namespace http {
-HTTPResponse::HTTPResponse(
+HttpResponse::HttpResponse(
   YO_NEW_REF Object* body,
   uint16_t fields_offset,
   Buffer& header,
   uint8_t http_version,
   uint16_t status_code
 )
-  : HTTPMessage<HTTPResponse>(
+  : HttpMessage<HttpResponse>(
     body,
     fields_offset,
     header,
@@ -51,12 +51,12 @@ HTTPResponse::HTTPResponse(
   status_code(status_code)
 { }
 
-HTTPResponse::HTTPResponse(
+HttpResponse::HttpResponse(
   uint16_t status_code,
   YO_NEW_REF Object* body,
   uint8_t http_version
 )
-  : HTTPMessage<HTTPResponse>(body, http_version),
+  : HttpMessage<HttpResponse>(body, http_version),
     status_code(status_code) {
   const char* status_line;
   size_t status_line_len;
@@ -179,7 +179,7 @@ HTTPResponse::HTTPResponse(
     status_line_len = 39;
     break;
   case 414:
-    status_line = "HTTP/1.1 414 Request-URI Too Long\r\n";
+    status_line = "HTTP/1.1 414 Request-Uri Too Long\r\n";
     status_line_len = 35;
     break;
   case 415:
@@ -247,7 +247,7 @@ HTTPResponse::HTTPResponse(
   set_field("Date", DateTime::now());
 }
 
-std::ostream& operator<<(std::ostream& os, const HTTPResponse& http_response) {
+std::ostream& operator<<(std::ostream& os, const HttpResponse& http_response) {
   std::ostringstream body;
   if (http_response.get_body() != NULL) {
     if (http_response.get_body()->get_type_id() == Buffer::TYPE_ID) {

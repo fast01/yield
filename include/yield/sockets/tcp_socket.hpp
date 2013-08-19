@@ -37,7 +37,7 @@ namespace sockets {
 /**
   A TCP/IP socket.
 */
-class TCPSocket : public StreamSocket {
+class TcpSocket : public StreamSocket {
 public:
   /**
     The default domain of the socket in the (domain, type, protocol) tuple.
@@ -66,25 +66,25 @@ public:
 
 public:
   /**
-    Construct a TCPSocket with the given domain.
+    Construct a TcpSocket with the given domain.
     @param domain the domain of the new socket
   */
-  TCPSocket(int domain = DOMAIN_DEFAULT)
+  TcpSocket(int domain = DOMAIN_DEFAULT)
     : StreamSocket(domain, PROTOCOL)
   { }
 
   /**
     Empty virtual destructor.
   */
-  virtual ~TCPSocket() { }
+  virtual ~TcpSocket() { }
 
 public:
   // yield::Object
   const char* get_type_name() const {
-    return "yield::sockets::TCPSocket";
+    return "yield::sockets::TcpSocket";
   }
 
-  TCPSocket& inc_ref() {
+  TcpSocket& inc_ref() {
     return Object::inc_ref(*this);
   }
 
@@ -94,32 +94,32 @@ public:
 
 public:
   // yield::sockets::StreamSocket
-  virtual YO_NEW_REF TCPSocket* accept() {
-    return static_cast<TCPSocket*>(StreamSocket::accept());
+  virtual YO_NEW_REF TcpSocket* accept() {
+    return static_cast<TcpSocket*>(StreamSocket::accept());
   }
 
-  virtual YO_NEW_REF TCPSocket* accept(SocketAddress& peername) {
-    return static_cast<TCPSocket*>(StreamSocket::accept(peername));
+  virtual YO_NEW_REF TcpSocket* accept(SocketAddress& peername) {
+    return static_cast<TcpSocket*>(StreamSocket::accept(peername));
   }
 
-  virtual YO_NEW_REF TCPSocket* dup() {
+  virtual YO_NEW_REF TcpSocket* dup() {
     socket_t socket_ = Socket::create(get_domain(), TYPE, PROTOCOL);
     if (socket_ != static_cast<socket_t>(-1)) {
-      return new TCPSocket(get_domain(), socket_);
+      return new TcpSocket(get_domain(), socket_);
     } else {
       return NULL;
     }
   }
 
 protected:
-  TCPSocket(int domain, socket_t socket_)
+  TcpSocket(int domain, socket_t socket_)
     : StreamSocket(domain, PROTOCOL, socket_)
   { }
 
 protected:
   // yield::sockets::StreamSocket
-  virtual TCPSocket* dup2(socket_t socket_) {
-    return new TCPSocket(get_domain(), socket_);
+  virtual TcpSocket* dup2(socket_t socket_) {
+    return new TcpSocket(get_domain(), socket_);
   }
 };
 }

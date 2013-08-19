@@ -76,12 +76,12 @@ public:
   operator ::OVERLAPPED* ();
 
 public:
-  virtual YO_NEW_REF FSEvent* parse(const FILE_NOTIFY_INFORMATION&) = 0;
+  virtual YO_NEW_REF FsEvent* parse(const FILE_NOTIFY_INFORMATION&) = 0;
 
 protected:
   Watch(
     YO_NEW_REF Directory& directory,
-    FSEvent::Type fs_event_types,
+    FsEvent::Type fs_event_types,
     Log* log,
     const Path& path
   );

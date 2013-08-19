@@ -35,12 +35,12 @@
 
 namespace yield {
 namespace poll {
-class FDEventQueue::Impl : public EventQueue {
+class FdEventQueue::Impl : public EventQueue {
 public:
   virtual ~Impl() {
   }
 
-  virtual bool associate(fd_t fd, FDEvent::Type fd_event_types) = 0;
+  virtual bool associate(fd_t fd, FdEvent::Type fd_event_types) = 0;
   virtual bool dissociate(fd_t fd) = 0;
 
 protected:
@@ -48,12 +48,12 @@ protected:
 };
 
 
-class FDEventQueue::FDImpl : public Impl {
+class FdEventQueue::FDImpl : public Impl {
 public:
   FDImpl() {
     HANDLE hWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
     if (hWakeEvent != NULL) {
-      fd_event_types.push_back(FDEvent::TYPE_READ_READY);
+      fd_event_types.push_back(FdEvent::TYPE_READ_READY);
       handles.push_back(hWakeEvent);
     } else {
       throw Exception();
@@ -88,7 +88,7 @@ public:
     if (dwRet == WAIT_OBJECT_0) {
       return event_queue.trydequeue();
     } else if (dwRet > WAIT_OBJECT_0 && dwRet < WAIT_OBJECT_0 + handles.size()) {
-      return new FDEvent(
+      return new FdEvent(
                handles[dwRet - WAIT_OBJECT_0],
                fd_event_types[dwRet - WAIT_OBJECT_0]
              );
@@ -98,14 +98,14 @@ public:
   }
 
 public:
-  // yield::poll::FDEventQueue::Impl
-  bool associate(fd_t fd, FDEvent::Type fd_event_types) {
+  // yield::poll::FdEventQueue::Impl
+  bool associate(fd_t fd, FdEvent::Type fd_event_types) {
     if (fd_event_types != 0) {
       if (handles.size() < MAXIMUM_WAIT_OBJECTS) {
         if (
-          fd_event_types == FDEvent::TYPE_READ_READY
+          fd_event_types == FdEvent::TYPE_READ_READY
           ||
-          fd_event_types == FDEvent::TYPE_WRITE_READY
+          fd_event_types == FdEvent::TYPE_WRITE_READY
         ) {
           for (size_t fd_i = 1; fd_i < handles.size(); ++fd_i) {
             if (handles[fd_i] == fd) {
@@ -146,13 +146,13 @@ public:
   }
 
 private:
-  vector<FDEvent::Type> fd_event_types;
+  vector<FdEvent::Type> fd_event_types;
   vector<HANDLE> handles;
 };
 
-class FDEventQueue::SocketImpl : public Impl {
+class FdEventQueue::SocketImpl : public Impl {
 public:
-  virtual bool associate(socket_t socket_, FDEvent::Type fd_event_types) = 0;
+  virtual bool associate(socket_t socket_, FdEvent::Type fd_event_types) = 0;
   virtual bool dissociate(socket_t socket_) = 0;
 
 public:
@@ -167,8 +167,8 @@ public:
   }
 
 public:
-  // yield::poll::FDEventQueue::Impl
-  bool associate(fd_t fd, FDEvent::Type fd_event_types) {
+  // yield::poll::FdEventQueue::Impl
+  bool associate(fd_t fd, FdEvent::Type fd_event_types) {
     return associate(reinterpret_cast<socket_t>(fd), fd_event_types);
   }
 
@@ -269,10 +269,10 @@ protected:
 };
 
 #if _WIN32_WINNT >= 0x0600
-class FDEventQueue::SocketPoller : public SocketImpl {
+class FdEventQueue::SocketPoller : public SocketImpl {
 public:
   SocketPoller() {
-    if (!associate(wake_socket_pair[0], FDEvent::TYPE_READ_READY)) {
+    if (!associate(wake_socket_pair[0], FdEvent::TYPE_READ_READY)) {
       throw Exception();
     }
   }
@@ -304,7 +304,7 @@ public:
               revents = pollfd_.revents;
             }
             pollfd_.revents = 0;
-            return new FDEvent(fd, revents);
+            return new FdEvent(fd, revents);
           }
         }
       } while (++pollfd_i < pollfds.end());
@@ -365,7 +365,7 @@ private:
 };
 #endif
 
-class FDEventQueue::SocketSelector : public SocketImpl {
+class FdEventQueue::SocketSelector : public SocketImpl {
 public:
   SocketSelector() {
     FD_ZERO(&except_fd_set);
@@ -454,7 +454,7 @@ public:
             recv(wake_socket_pair[0], &m, 1, 0);
             return event_queue.trydequeue();
           } else {
-            return new FDEvent(
+            return new FdEvent(
                      reinterpret_cast<fd_t>(socket_),
                      fd_event_types
                    );
@@ -469,12 +469,12 @@ public:
   }
 
 public:
-  // yield::poll::FDEventQueue::SocketImpl
+  // yield::poll::FdEventQueue::SocketImpl
   bool associate(socket_t socket_, uint16_t fd_event_types) {
     if (fd_event_types != 0) {
       bool added_socket_to_except_fd_set = false;
 
-      if (fd_event_types & FDEvent::TYPE_READ_READY) {
+      if (fd_event_types & FdEvent::TYPE_READ_READY) {
         FD_SET(socket_, &read_fd_set);
         FD_SET(socket_, &except_fd_set);
         added_socket_to_except_fd_set = true;
@@ -482,7 +482,7 @@ public:
         FD_CLR(socket_, &read_fd_set);
       }
 
-      if (fd_event_types & FDEvent::TYPE_WRITE_READY) {
+      if (fd_event_types & FdEvent::TYPE_WRITE_READY) {
         FD_SET(socket_, &write_fd_set);
         if (!added_socket_to_except_fd_set) {
           FD_SET(socket_, &except_fd_set);
@@ -536,7 +536,7 @@ private:
 };
 
 
-FDEventQueue::FDEventQueue(bool for_sockets_only) throw(Exception) {
+FdEventQueue::FdEventQueue(bool for_sockets_only) throw(Exception) {
   if (for_sockets_only) {
 #if _WIN32_WINNT >= 0x0600
     pimpl = new SocketPoller;
@@ -548,23 +548,23 @@ FDEventQueue::FDEventQueue(bool for_sockets_only) throw(Exception) {
   }
 }
 
-FDEventQueue::~FDEventQueue() {
+FdEventQueue::~FdEventQueue() {
   delete pimpl;
 }
 
-bool FDEventQueue::associate(fd_t fd, FDEvent::Type fd_event_types) {
+bool FdEventQueue::associate(fd_t fd, FdEvent::Type fd_event_types) {
   return pimpl->associate(fd, fd_event_types);
 }
 
-bool FDEventQueue::dissociate(fd_t fd) {
+bool FdEventQueue::dissociate(fd_t fd) {
   return pimpl->dissociate(fd);
 }
 
-bool FDEventQueue::enqueue(Event& event) {
+bool FdEventQueue::enqueue(Event& event) {
   return pimpl->enqueue(event);
 }
 
-YO_NEW_REF Event* FDEventQueue::timeddequeue(const Time& timeout) {
+YO_NEW_REF Event* FdEventQueue::timeddequeue(const Time& timeout) {
   return pimpl->timeddequeue(timeout);
 }
 }

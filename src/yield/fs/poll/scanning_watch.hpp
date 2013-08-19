@@ -44,7 +44,7 @@ public:
   virtual void scan(EventHandler& fs_event_handler) = 0;
 
 protected:
-  ScanningWatch(FSEvent::Type fs_event_types, Log* log, const Path& path)
+  ScanningWatch(FsEvent::Type fs_event_types, Log* log, const Path& path)
     : Watch(fs_event_types, log, path) {
   }
 

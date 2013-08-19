@@ -42,8 +42,8 @@
 namespace yield {
 namespace sockets {
 namespace aio {
-sendfileAIOCB::sendfileAIOCB(StreamSocket& socket_, fd_t fd, Object* context)
-  : AIOCB(socket_, context) {
+SendfileAiocb::SendfileAiocb(StreamSocket& socket_, fd_t fd, Object* context)
+  : Aiocb(socket_, context) {
   init(fd);
 
 #ifdef _WIN32
@@ -81,18 +81,18 @@ sendfileAIOCB::sendfileAIOCB(StreamSocket& socket_, fd_t fd, Object* context)
 #endif
 }
 
-sendfileAIOCB::sendfileAIOCB(
+SendfileAiocb::SendfileAiocb(
   StreamSocket& socket_,
   fd_t fd,
   off_t offset,
   size_t nbytes,
   Object* context
-) : AIOCB(socket_, offset, context),
+) : Aiocb(socket_, offset, context),
   nbytes(nbytes) {
   init(fd);
 }
 
-sendfileAIOCB::~sendfileAIOCB() {
+SendfileAiocb::~SendfileAiocb() {
 #ifdef _WIN32
   CloseHandle(fd);
 #else
@@ -100,11 +100,11 @@ sendfileAIOCB::~sendfileAIOCB() {
 #endif
 }
 
-StreamSocket& sendfileAIOCB::get_socket() {
-  return static_cast<StreamSocket&>(AIOCB::get_socket());
+StreamSocket& SendfileAiocb::get_socket() {
+  return static_cast<StreamSocket&>(Aiocb::get_socket());
 }
 
-void sendfileAIOCB::init(fd_t fd) {
+void SendfileAiocb::init(fd_t fd) {
 #ifdef _WIN32
   if (
     !DuplicateHandle(
@@ -127,7 +127,7 @@ void sendfileAIOCB::init(fd_t fd) {
 #endif
 }
 
-std::ostream& operator<<(std::ostream& os, sendfileAIOCB& sendfile_aiocb) {
+std::ostream& operator<<(std::ostream& os, SendfileAiocb& sendfile_aiocb) {
   os <<
      sendfile_aiocb.get_type_name() <<
      "(" <<

@@ -38,25 +38,25 @@ namespace http {
 /**
   An RFC 2616 HTTP message body chunk.
   Used for sending streams of chunked bodies (incoming as well as outgoing)
-    as separate Events from the HTTPRequest or HTTPResponse header.
+    as separate Events from the HttpRequest or HttpResponse header.
 */
-class HTTPMessageBodyChunk : public Event {
+class HttpMessageBodyChunk : public Event {
 public:
   const static uint32_t TYPE_ID = 3435197009UL;
 
 public:
   /**
-    Construct an HTTPMessageBodyChunk with the given data.
+    Construct an HttpMessageBodyChunk with the given data.
     Steals the reference to data.
   */
-  HTTPMessageBodyChunk(YO_NEW_REF Buffer* data)
+  HttpMessageBodyChunk(YO_NEW_REF Buffer* data)
     : data_(data)
   { }
 
   /**
-    Destruct an HTTPMessageBodyChunk, releasing its underlying buffer.
+    Destruct an HttpMessageBodyChunk, releasing its underlying buffer.
   */
-  virtual ~HTTPMessageBodyChunk() {
+  virtual ~HttpMessageBodyChunk() {
     Buffer::dec_ref(data_);
   }
 
@@ -92,10 +92,10 @@ public:
   }
 
   virtual const char* get_type_name() const {
-    return "yield::http::HTTPMessageBodyChunk";
+    return "yield::http::HttpMessageBodyChunk";
   }
 
-  HTTPMessageBodyChunk& inc_ref() {
+  HttpMessageBodyChunk& inc_ref() {
     return Object::inc_ref(*this);
   }
 

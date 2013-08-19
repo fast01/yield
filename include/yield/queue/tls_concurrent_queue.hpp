@@ -60,7 +60,7 @@ using yield::thread::Thread;
       USENIX Association, Berkeley, CA, USA, 103-114.
 */
 template <class ElementType>
-class TLSConcurrentQueue : private BlockingConcurrentQueue<ElementType> {
+class TlsConcurrentQueue : private BlockingConcurrentQueue<ElementType> {
 private:
   class Stack : private std::stack<ElementType*> {
   public:
@@ -81,14 +81,14 @@ private:
   };
 
 public:
-  TLSConcurrentQueue() {
+  TlsConcurrentQueue() {
     tls_key = Thread::self()->key_create();
     if (tls_key == static_cast<uintptr_t>(-1)) {
       throw Exception();
     }
   }
 
-  ~TLSConcurrentQueue() {
+  ~TlsConcurrentQueue() {
     Thread::self()->key_delete(tls_key);
 
     for (

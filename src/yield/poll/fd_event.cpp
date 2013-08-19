@@ -37,19 +37,19 @@
 namespace yield {
 namespace poll {
 #ifdef _WIN32
-const FDEvent::Type FDEvent::TYPE_ERROR = 0x0001;
-const FDEvent::Type FDEvent::TYPE_HUP = 0x0002;
-const FDEvent::Type FDEvent::TYPE_READ_READY = 0x0100;
-const FDEvent::Type FDEvent::TYPE_WRITE_READY = 0x0010;
+const FdEvent::Type FdEvent::TYPE_ERROR = 0x0001;
+const FdEvent::Type FdEvent::TYPE_HUP = 0x0002;
+const FdEvent::Type FdEvent::TYPE_READ_READY = 0x0100;
+const FdEvent::Type FdEvent::TYPE_WRITE_READY = 0x0010;
 #else
-const FDEvent::Type FDEvent::TYPE_ERROR = POLLERR;
-const FDEvent::Type FDEvent::TYPE_HUP = POLLHUP;
-const uint32_t FDEvent::TYPE_ID;
-const FDEvent::Type FDEvent::TYPE_READ_READY = POLLIN;
-const FDEvent::Type FDEvent::TYPE_WRITE_READY = POLLOUT;
+const FdEvent::Type FdEvent::TYPE_ERROR = POLLERR;
+const FdEvent::Type FdEvent::TYPE_HUP = POLLHUP;
+const uint32_t FdEvent::TYPE_ID;
+const FdEvent::Type FdEvent::TYPE_READ_READY = POLLIN;
+const FdEvent::Type FdEvent::TYPE_WRITE_READY = POLLOUT;
 #endif
 
-FDEvent::FDEvent(fd_t fd, Type type) : fd(fd), type(type) {
+FdEvent::FdEvent(fd_t fd, Type type) : fd(fd), type(type) {
   debug_assert(
     type == TYPE_ERROR
     ||

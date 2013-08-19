@@ -38,16 +38,16 @@ namespace http {
 namespace server {
 /**
   An HTTP server stage.
-  HTTPServer is an "active" counterpart to HTTPRequestQueue: rather than relying
+  HttpServer is an "active" counterpart to HttpRequestQueue: rather than relying
     on a caller to drive it continuously, it continously polls an underlying
-    HTTPRequestQueue and dispatches HTTPRequests and associated Events to
+    HttpRequestQueue and dispatches HTTPRequests and associated Events to
     an EventHandler.
 */
-template <class AIOQueueType = yield::sockets::aio::AIOQueue>
-class HTTPServer : public yield::stage::Stage {
+template <class AioQueueType = yield::sockets::aio::AioQueue>
+class HttpServer : public yield::stage::Stage {
 public:
   /**
-    Construct an HTTPServer that will listen to the given socket address and
+    Construct an HttpServer that will listen to the given socket address and
       dispatch HTTPRequests and related Events originating from the server
       to the given handler.
     @param http_request_handler handler for HTTPRequests and related Events
@@ -55,14 +55,14 @@ public:
     @param sockname address to listen to
     @param log optional debug and error log
   */
-  HTTPServer(
+  HttpServer(
     YO_NEW_REF EventHandler& http_request_handler,
     const yield::sockets::SocketAddress& sockname,
     YO_NEW_REF Log* log = NULL
   )
     : yield::stage::Stage(
       http_request_handler,
-      *new HTTPRequestQueue<AIOQueueType>(sockname, log)
+      *new HttpRequestQueue<AioQueueType>(sockname, log)
     ) {
   }
 };

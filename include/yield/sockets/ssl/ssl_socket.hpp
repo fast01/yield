@@ -44,11 +44,11 @@ namespace yield {
 namespace sockets {
 #ifdef YIELD_HAVE_OPENSSL
 namespace ssl {
-class SSLSocket : public TCPSocket {
+class SslSocket : public TcpSocket {
 public:
-  SSLSocket(int domain = DOMAIN_DEFAULT);
-  SSLSocket(SSLContext& ssl_context, int domain = DOMAIN_DEFAULT);
-  ~SSLSocket();
+  SslSocket(int domain = DOMAIN_DEFAULT);
+  SslSocket(SslContext& ssl_context, int domain = DOMAIN_DEFAULT);
+  ~SslSocket();
 
 public:
   bool do_handshake();
@@ -72,25 +72,25 @@ public:
 
 public:
   // yield::sockets::StreamSocket
-  YO_NEW_REF SSLSocket* accept();
-  YO_NEW_REF SSLSocket* accept(SocketAddress& peername);
-  YO_NEW_REF SSLSocket* dup();
+  YO_NEW_REF SslSocket* accept();
+  YO_NEW_REF SslSocket* accept(SocketAddress& peername);
+  YO_NEW_REF SslSocket* dup();
   bool listen();
 
 private:
-  SSLSocket(int domain, socket_t socket_, SSL* ssl, SSLContext& ssl_context);
+  SslSocket(int domain, socket_t socket_, SSL* ssl, SslContext& ssl_context);
 
 private:
-  void init(SSLContext& ssl_context);
+  void init(SslContext& ssl_context);
   void init(SSL* ssl);
 
 private:
   // yield::sockets::StreamSocket
-  YO_NEW_REF SSLSocket* dup2(socket_t);
+  YO_NEW_REF SslSocket* dup2(socket_t);
 
 private:
   SSL* ssl;
-  SSLContext& ssl_context;
+  SslContext& ssl_context;
 };
 }
 #endif

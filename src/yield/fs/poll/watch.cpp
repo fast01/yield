@@ -34,7 +34,7 @@
 namespace yield {
 namespace fs {
 namespace poll {
-Watch::Watch(FSEvent::Type fs_event_types, Log* log, const Path& path)
+Watch::Watch(FsEvent::Type fs_event_types, Log* log, const Path& path)
   : fs_event_types(fs_event_types),
     log(Object::inc_ref(log)),
     path(path) {
@@ -48,52 +48,52 @@ Watch::~Watch() {
   Log::dec_ref(log);
 }
 
-void Watch::log_fs_event(const FSEvent& fs_event) const {
+void Watch::log_fs_event(const FsEvent& fs_event) const {
   if (log != NULL) {
-    FSEvent::Type fs_event_types = get_fs_event_types();
+    FsEvent::Type fs_event_types = get_fs_event_types();
     std::string fs_event_types_str;
-    if (fs_event_types == FSEvent::TYPE_ALL) {
+    if (fs_event_types == FsEvent::TYPE_ALL) {
       fs_event_types_str = "TYPE_ALL";
     } else {
       std::ostringstream fs_event_types_oss;
-      if (fs_event_types & FSEvent::TYPE_DIRECTORY_ADD) {
+      if (fs_event_types & FsEvent::TYPE_DIRECTORY_ADD) {
         fs_event_types_oss << "TYPE_DIRECTORY_ADD|";
-        fs_event_types ^= FSEvent::TYPE_DIRECTORY_ADD;
+        fs_event_types ^= FsEvent::TYPE_DIRECTORY_ADD;
       }
 
-      if (fs_event_types & FSEvent::TYPE_DIRECTORY_MODIFY) {
+      if (fs_event_types & FsEvent::TYPE_DIRECTORY_MODIFY) {
         fs_event_types_oss << "TYPE_DIRECTORY_MODIFY|";
-        fs_event_types ^= FSEvent::TYPE_DIRECTORY_MODIFY;
+        fs_event_types ^= FsEvent::TYPE_DIRECTORY_MODIFY;
       }
 
-      if (fs_event_types & FSEvent::TYPE_DIRECTORY_REMOVE) {
+      if (fs_event_types & FsEvent::TYPE_DIRECTORY_REMOVE) {
         fs_event_types_oss << "TYPE_DIRECTORY_REMOVE|";
-        fs_event_types ^= FSEvent::TYPE_DIRECTORY_REMOVE;
+        fs_event_types ^= FsEvent::TYPE_DIRECTORY_REMOVE;
       }
 
-      if (fs_event_types & FSEvent::TYPE_DIRECTORY_RENAME) {
+      if (fs_event_types & FsEvent::TYPE_DIRECTORY_RENAME) {
         fs_event_types_oss << "TYPE_DIRECTORY_RENAME|";
-        fs_event_types ^= FSEvent::TYPE_DIRECTORY_RENAME;
+        fs_event_types ^= FsEvent::TYPE_DIRECTORY_RENAME;
       }
 
-      if (fs_event_types & FSEvent::TYPE_FILE_ADD) {
+      if (fs_event_types & FsEvent::TYPE_FILE_ADD) {
         fs_event_types_oss << "TYPE_FILE_ADD|";
-        fs_event_types ^= FSEvent::TYPE_FILE_ADD;
+        fs_event_types ^= FsEvent::TYPE_FILE_ADD;
       }
 
-      if (fs_event_types & FSEvent::TYPE_FILE_MODIFY) {
+      if (fs_event_types & FsEvent::TYPE_FILE_MODIFY) {
         fs_event_types_oss << "TYPE_FILE_MODIFY|";
-        fs_event_types ^= FSEvent::TYPE_FILE_MODIFY;
+        fs_event_types ^= FsEvent::TYPE_FILE_MODIFY;
       }
 
-      if (fs_event_types & FSEvent::TYPE_FILE_REMOVE) {
+      if (fs_event_types & FsEvent::TYPE_FILE_REMOVE) {
         fs_event_types_oss << "TYPE_FILE_REMOVE|";
-        fs_event_types ^= FSEvent::TYPE_FILE_REMOVE;
+        fs_event_types ^= FsEvent::TYPE_FILE_REMOVE;
       }
 
-      if (fs_event_types & FSEvent::TYPE_FILE_RENAME) {
+      if (fs_event_types & FsEvent::TYPE_FILE_RENAME) {
         fs_event_types_oss << "TYPE_FILE_RENAME|";
-        fs_event_types ^= FSEvent::TYPE_FILE_RENAME;
+        fs_event_types ^= FsEvent::TYPE_FILE_RENAME;
       }
 
       debug_assert_eq(fs_event_types, 0);

@@ -40,7 +40,7 @@ namespace queue {
 /**
   An EventQueue implementation that wraps a std::queue.
 */
-class STLEventQueue : public EventQueue, private std::queue<Event*> {
+class StlEventQueue : public EventQueue, private std::queue<Event*> {
 public:
   // yield::EventQueue
   YO_NEW_REF Event& dequeue() {

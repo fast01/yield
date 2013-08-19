@@ -41,37 +41,37 @@ class Log;
 
 namespace sockets {
 namespace aio {
-class acceptAIOCB;
-class connectAIOCB;
-class recvAIOCB;
-class sendAIOCB;
-class sendfileAIOCB;
+class AcceptAiocb;
+class ConnectAiocb;
+class RecvAiocb;
+class SendAiocb;
+class SendfileAiocb;
 
 /**
   Queue for asynchronous input/output (AIO) operations on sockets,
     implemented in terms of non-blocking I/O.
-  The NBIOQueue presents the same interface and emulates the semantics of
-    AIOQueue for platforms that do not natively support socket AIO (e.g., all
-    platforms besides Win32). Even on Win32 the NBIOQueue is needed for socket
+  The NbioQueue presents the same interface and emulates the semantics of
+    AioQueue for platforms that do not natively support socket AIO (e.g., all
+    platforms besides Win32). Even on Win32 the NbioQueue is needed for socket
     types that only support blocking or non-blocking I/O, like SSL sockets.
-  @see AIOQueue
+  @see AioQueue
 */
 
-class NBIOQueue : public EventQueue {
+class NbioQueue : public EventQueue {
 public:
   /**
-    Construct an NBIOQueue with an optional error and tracing log.
+    Construct an NbioQueue with an optional error and tracing log.
     @param log optional error and tracing log
   */
-  NBIOQueue(YO_NEW_REF Log* log = NULL);
+  NbioQueue(YO_NEW_REF Log* log = NULL);
 
-  ~NBIOQueue();
+  ~NbioQueue();
 
 public:
   /**
-    Associate a socket with this AIOQueue.
-    This is a no-op in the NBIOQueue, intended only to conform to the interface
-      of the AIOQueue on Win32.
+    Associate a socket with this AioQueue.
+    This is a no-op in the NbioQueue, intended only to conform to the interface
+      of the AioQueue on Win32.
   */
   bool associate(socket_t) {
     return true;
@@ -80,10 +80,10 @@ public:
 public:
   // yield::Object
   const char* get_type_name() const {
-    return "yield::sockets::aio::NBIOQueue";
+    return "yield::sockets::aio::NbioQueue";
   }
 
-  NBIOQueue& inc_ref() {
+  NbioQueue& inc_ref() {
     return Object::inc_ref(*this);
   }
 
@@ -93,7 +93,7 @@ public:
   YO_NEW_REF Event* timeddequeue(const Time& timeout);
 
 private:
-  class AIOCBState;
+  class AiocbState;
 
   enum RetryStatus {
     RETRY_STATUS_COMPLETE,
@@ -105,30 +105,30 @@ private:
   class SocketState;
 
 private:
-  void associate(AIOCB& aiocb, RetryStatus retry_status);
+  void associate(Aiocb& aiocb, RetryStatus retry_status);
 
 private:
-  template <class AIOCBType> void log_completion(AIOCBType&);
-  template <class AIOCBType> void log_error(AIOCBType&);
-  template <class AIOCBType> void log_retry(AIOCBType&);
-  template <class AIOCBType> void log_partial_send(AIOCBType&, size_t);
-  template <class AIOCBType> void log_wouldblock(AIOCBType&, RetryStatus);
+  template <class AiocbType> void log_completion(AiocbType&);
+  template <class AiocbType> void log_error(AiocbType&);
+  template <class AiocbType> void log_retry(AiocbType&);
+  template <class AiocbType> void log_partial_send(AiocbType&, size_t);
+  template <class AiocbType> void log_wouldblock(AiocbType&, RetryStatus);
 
 private:
-  static uint8_t get_aiocb_priority(const AIOCB& aiocb);
+  static uint8_t get_aiocb_priority(const Aiocb& aiocb);
 
 private:
-  RetryStatus retry(AIOCB&, size_t& partial_send_len);
-  RetryStatus retry_accept(acceptAIOCB&);
-  RetryStatus retry_connect(connectAIOCB&, size_t& partial_send_len);
-  RetryStatus retry_recv(recvAIOCB&);
-  RetryStatus retry_send(sendAIOCB&, size_t& partial_send_len);
-  template <class AIOCBType>
-  RetryStatus retry_send(AIOCBType&, const Buffer&, size_t& partial_send_len);
-  RetryStatus retry_sendfile(sendfileAIOCB&, size_t& partial_send_len);
+  RetryStatus retry(Aiocb&, size_t& partial_send_len);
+  RetryStatus retry_accept(AcceptAiocb&);
+  RetryStatus retry_connect(ConnectAiocb&, size_t& partial_send_len);
+  RetryStatus retry_recv(RecvAiocb&);
+  RetryStatus retry_send(SendAiocb&, size_t& partial_send_len);
+  template <class AiocbType>
+  RetryStatus retry_send(AiocbType&, const Buffer&, size_t& partial_send_len);
+  RetryStatus retry_sendfile(SendfileAiocb&, size_t& partial_send_len);
 
 private:
-  yield::poll::FDEventQueue fd_event_queue;
+  yield::poll::FdEventQueue fd_event_queue;
   Log* log;
   std::map<fd_t, SocketState*> socket_state;
 };

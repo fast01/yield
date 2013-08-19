@@ -40,7 +40,7 @@ namespace poll {
 class ScanningDirectoryWatch : public ScanningWatch {
 public:
   ScanningDirectoryWatch(
-    FSEvent::Type fs_event_types,
+    FsEvent::Type fs_event_types,
     const Path& path,
     Log* log = NULL
   );
@@ -54,7 +54,7 @@ public:
   }
 
 protected:
-  void scan(EventHandler& fs_event_handler, FSEvent::Type fs_event_types);
+  void scan(EventHandler& fs_event_handler, FsEvent::Type fs_event_types);
 
 private:
   YO_NEW_REF Stat* stat(Directory::Entry&);

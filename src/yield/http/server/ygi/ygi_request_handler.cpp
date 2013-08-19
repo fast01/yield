@@ -36,15 +36,15 @@ namespace yield {
 namespace http {
 namespace server {
 namespace ygi {
-YGIRequestHandler::YGIRequestHandler(ygi_request_handler_t ygi_request_handler)
+YgiRequestHandler::YgiRequestHandler(ygi_request_handler_t ygi_request_handler)
   : ygi_request_handler(ygi_request_handler) {
 }
 
-void YGIRequestHandler::handle(YO_NEW_REF Event& event) {
-  debug_assert_eq(event.get_type_id(), HTTPRequest::TYPE_ID);
-  HTTPRequest& http_request = static_cast<HTTPRequest&>(event);
+void YgiRequestHandler::handle(YO_NEW_REF Event& event) {
+  debug_assert_eq(event.get_type_id(), HttpRequest::TYPE_ID);
+  HttpRequest& http_request = static_cast<HttpRequest&>(event);
 
-  YGIRequest ygi_request(http_request);
+  YgiRequest ygi_request(http_request);
   ygi_request_handler(&ygi_request);
 }
 }

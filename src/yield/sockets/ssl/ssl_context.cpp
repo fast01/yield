@@ -51,26 +51,26 @@ namespace yield {
 namespace sockets {
 #ifdef YIELD_HAVE_OPENSSL
 namespace ssl {
-SSLContext::SSLContext(SSLVersion ssl_version) throw(Exception) {
+SslContext::SslContext(SslVersion ssl_version) throw(Exception) {
   init(ssl_version);
 }
 
-SSLContext::SSLContext(
+SslContext::SslContext(
   const string& pem_certificate,
   const string& pem_private_key,
   const string& pem_private_key_passphrase,
-  SSLVersion ssl_version
+  SslVersion ssl_version
 ) throw(Exception) {
   init(ssl_version);
   use_pem_certificate(pem_certificate);
   use_pem_private_key(pem_private_key, pem_private_key_passphrase);
 }
 
-SSLContext::~SSLContext() {
+SslContext::~SslContext() {
   SSL_CTX_free(ctx);
 }
 
-void SSLContext::init(SSLVersion ssl_version) {
+void SslContext::init(SslVersion ssl_version) {
   SSL_load_error_strings();
   SSL_library_init();
 
@@ -115,7 +115,7 @@ void SSLContext::init(SSLVersion ssl_version) {
   }
 }
 
-int SSLContext::pem_password_callback(char* buf, int size, int, void* userdata) {
+int SslContext::pem_password_callback(char* buf, int size, int, void* userdata) {
   const string* pem_password
   = static_cast<const string*>(userdata);
   if (size > static_cast<int>(pem_password->size())) {
@@ -126,7 +126,7 @@ int SSLContext::pem_password_callback(char* buf, int size, int, void* userdata) 
 }
 
 void
-SSLContext::use_pem_certificate(
+SslContext::use_pem_certificate(
   const string& pem_certificate
 ) throw(Exception) {
   try {
@@ -167,7 +167,7 @@ SSLContext::use_pem_certificate(
 }
 
 void
-SSLContext::use_pem_certificate_file(
+SslContext::use_pem_certificate_file(
   const string& pem_certificate_file_path
 ) throw(Exception) {
   if (
@@ -182,7 +182,7 @@ SSLContext::use_pem_certificate_file(
 }
 
 void
-SSLContext::use_pem_private_key(
+SslContext::use_pem_private_key(
   const string& pem_private_key,
   const string& pem_private_key_passphrase
 ) throw(Exception) {
@@ -225,7 +225,7 @@ SSLContext::use_pem_private_key(
 }
 
 void
-SSLContext::use_pem_private_key_file(
+SslContext::use_pem_private_key_file(
   const string& pem_private_key_file_path,
   const string& pem_private_key_passphrase
 ) throw(Exception) {
@@ -250,7 +250,7 @@ SSLContext::use_pem_private_key_file(
 }
 
 //void
-//SSLContext::use_pkcs12(
+//SslContext::use_pkcs12(
 //  const Path& pkcs12_file_path,
 //  const string& passphrase
 //) {

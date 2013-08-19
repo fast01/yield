@@ -34,7 +34,7 @@ namespace yield {
 namespace http {
 namespace server {
 namespace ygi {
-YGIRequest::YGIRequest(HTTPRequest& http_request)
+YgiRequest::YgiRequest(HttpRequest& http_request)
   : http_request(http_request) {
   ygi_request_t::CONTENT_LENGTH = __CONTENT_LENGTH;
   ygi_request_t::DOCUMENT_ROOT = __DOCUMENT_ROOT;
@@ -53,55 +53,55 @@ YGIRequest::YGIRequest(HTTPRequest& http_request)
   ygi_request_t::respond = __respond;
 }
 
-size_t YGIRequest::CONTENT_LENGTH() {
+size_t YgiRequest::CONTENT_LENGTH() {
   return http_request.get_content_length();
 }
 
-iovec YGIRequest::DOCUMENT_ROOT() {
+iovec YgiRequest::DOCUMENT_ROOT() {
   return iovec();
 }
 
-iovec YGIRequest::HTTP_(const char* field_name) {
+iovec YgiRequest::HTTP_(const char* field_name) {
   iovec field_value = { 0, 0 };
   http_request.get_field(field_name, field_value);
   return field_value;
 }
 
-iovec YGIRequest::HTTP_REFERER() {
+iovec YgiRequest::HTTP_REFERER() {
   iovec field_value = { 0, 0 };
   http_request.get_field("Referer", field_value);
   return field_value;
 }
 
-iovec YGIRequest::HTTP_USER_AGENT() {
+iovec YgiRequest::HTTP_USER_AGENT() {
   iovec field_value = { 0, 0 };
   http_request.get_field("User-Agent", field_value);
   return field_value;
 }
 
-iovec YGIRequest::PATH_INFO() {
+iovec YgiRequest::PATH_INFO() {
   return iovec();
 }
 
-iovec YGIRequest::PATH_TRANSLATED() {
+iovec YgiRequest::PATH_TRANSLATED() {
   return iovec();
 }
 
-iovec YGIRequest::QUERY_STRING() {
+iovec YgiRequest::QUERY_STRING() {
   iovec query_string;
   http_request.get_uri().get_query(query_string);
   return query_string;
 }
 
-iovec YGIRequest::REMOTE_ADDR() {
+iovec YgiRequest::REMOTE_ADDR() {
   return iovec();
 }
 
-iovec YGIRequest::REMOTE_HOST() {
+iovec YgiRequest::REMOTE_HOST() {
   return iovec();
 }
 
-iovec YGIRequest::REQUEST_METHOD() {
+iovec YgiRequest::REQUEST_METHOD() {
   iovec request_method;
   request_method.iov_base
   = const_cast<char*>(http_request.get_method().get_name());
@@ -109,20 +109,20 @@ iovec YGIRequest::REQUEST_METHOD() {
   return request_method;
 }
 
-ygi_response_t* YGIRequest::respond(uint16_t status_code) {
+ygi_response_t* YgiRequest::respond(uint16_t status_code) {
   http_request.respond(status_code);
   return NULL;
 }
 
-iovec YGIRequest::SCRIPT_NAME() {
+iovec YgiRequest::SCRIPT_NAME() {
   return iovec();
 }
 
-iovec YGIRequest::SERVER_NAME() {
+iovec YgiRequest::SERVER_NAME() {
   return iovec();
 }
 
-uint16_t YGIRequest::SERVER_PORT() {
+uint16_t YgiRequest::SERVER_PORT() {
   return 0;
 }
 }

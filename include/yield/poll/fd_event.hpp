@@ -38,7 +38,7 @@ namespace poll {
   Event subclass describing file descriptor events
     (read and write readiness, errors).
 */
-class FDEvent : public Event {
+class FdEvent : public Event {
 public:
   const static uint32_t TYPE_ID = 117149474;
 
@@ -51,22 +51,22 @@ public:
 
 public:
   /**
-    Construct an FDEvent from a file descriptor and a Type.
+    Construct an FdEvent from a file descriptor and a Type.
   */
-  FDEvent(fd_t fd, Type type);
+  FdEvent(fd_t fd, Type type);
 
 public:
   /**
-    Get the file descriptor associated with this FDEvent.
-    @return the file descriptor associated with this FDEvent
+    Get the file descriptor associated with this FdEvent.
+    @return the file descriptor associated with this FdEvent
   */
   fd_t get_fd() const {
     return fd;
   }
 
   /**
-    Get the Type of this FDEvent.
-    @return the Type of this FDEvent
+    Get the Type of this FdEvent.
+    @return the Type of this FdEvent
   */
   Type get_type() const {
     return type;
@@ -79,7 +79,7 @@ public:
   }
 
   virtual const char* get_type_name() const {
-    return "yield::poll::FDEvent";
+    return "yield::poll::FdEvent";
   }
 
 private:

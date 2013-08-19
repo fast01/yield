@@ -45,7 +45,7 @@ namespace fs {
 namespace poll {
 using linux::Watches;
 
-FSEventQueue::FSEventQueue(YO_NEW_REF Log* log) : log(log) {
+FsEventQueue::FsEventQueue(YO_NEW_REF Log* log) : log(log) {
   epoll_fd = epoll_create(32768);
   if (epoll_fd != -1) {
     try {
@@ -103,16 +103,16 @@ FSEventQueue::FSEventQueue(YO_NEW_REF Log* log) : log(log) {
   }
 }
 
-FSEventQueue::~FSEventQueue() {
+FsEventQueue::~FsEventQueue() {
   close(inotify_fd);
   Log::dec_ref(log);
   delete watches;
 }
 
 bool
-FSEventQueue::associate(
+FsEventQueue::associate(
   const Path& path,
-  FSEvent::Type fs_event_types
+  FsEvent::Type fs_event_types
 ) {
   linux::Watch* watch = watches->find(path);
   if (watch != NULL) {
@@ -126,28 +126,28 @@ FSEventQueue::associate(
   }
 
   uint32_t mask = 0;
-  if (fs_event_types & FSEvent::TYPE_DIRECTORY_ADD) {
+  if (fs_event_types & FsEvent::TYPE_DIRECTORY_ADD) {
     mask |= IN_CREATE;
   }
-  if (fs_event_types & FSEvent::TYPE_DIRECTORY_MODIFY) {
+  if (fs_event_types & FsEvent::TYPE_DIRECTORY_MODIFY) {
     mask |= IN_ATTRIB | IN_MODIFY;
   }
-  if (fs_event_types & FSEvent::TYPE_DIRECTORY_REMOVE) {
+  if (fs_event_types & FsEvent::TYPE_DIRECTORY_REMOVE) {
     mask |= IN_DELETE | IN_DELETE_SELF;
   }
-  if (fs_event_types & FSEvent::TYPE_DIRECTORY_RENAME) {
+  if (fs_event_types & FsEvent::TYPE_DIRECTORY_RENAME) {
     mask |= IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
   }
-  if (fs_event_types & FSEvent::TYPE_FILE_ADD) {
+  if (fs_event_types & FsEvent::TYPE_FILE_ADD) {
     mask |= IN_CREATE;
   }
-  if (fs_event_types & FSEvent::TYPE_FILE_MODIFY) {
+  if (fs_event_types & FsEvent::TYPE_FILE_MODIFY) {
     mask |= IN_ATTRIB | IN_MODIFY;
   }
-  if (fs_event_types & FSEvent::TYPE_FILE_REMOVE) {
+  if (fs_event_types & FsEvent::TYPE_FILE_REMOVE) {
     mask |= IN_DELETE | IN_DELETE_SELF;
   }
-  if (fs_event_types & FSEvent::TYPE_FILE_RENAME) {
+  if (fs_event_types & FsEvent::TYPE_FILE_RENAME) {
     mask |= IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
   }
 
@@ -161,7 +161,7 @@ FSEventQueue::associate(
   }
 }
 
-bool FSEventQueue::dissociate(const Path& path) {
+bool FsEventQueue::dissociate(const Path& path) {
   linux::Watch* watch = watches->erase(path);
   if (watch != NULL) {
     delete watch;
@@ -171,7 +171,7 @@ bool FSEventQueue::dissociate(const Path& path) {
   }
 }
 
-bool FSEventQueue::enqueue(YO_NEW_REF Event& event) {
+bool FsEventQueue::enqueue(YO_NEW_REF Event& event) {
   if (event_queue.enqueue(event)) {
     uint64_t data = 1;
     ssize_t write_ret = write(event_fd, &data, sizeof(data));
@@ -182,7 +182,7 @@ bool FSEventQueue::enqueue(YO_NEW_REF Event& event) {
   }
 }
 
-YO_NEW_REF Event* FSEventQueue::timeddequeue(const Time& timeout) {
+YO_NEW_REF Event* FsEventQueue::timeddequeue(const Time& timeout) {
   Event* event = event_queue.trydequeue();
   if (event != NULL) {
     return event;
@@ -217,7 +217,7 @@ YO_NEW_REF Event* FSEventQueue::timeddequeue(const Time& timeout) {
 
           linux::Watch* watch = watches->find(inotify_event_->wd);
           if (watch != NULL) {
-            FSEvent* fs_event = watch->parse(*inotify_event_);
+            FsEvent* fs_event = watch->parse(*inotify_event_);
             if (fs_event != NULL) {
               event_queue.enqueue(*fs_event);
             }

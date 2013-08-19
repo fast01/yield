@@ -35,15 +35,15 @@
 
 namespace yield {
 namespace stage {
-class SEDAStageScheduler : public StageScheduler {
+class SedaStageScheduler : public StageScheduler {
 public:
-  ~SEDAStageScheduler();
+  ~SedaStageScheduler();
 
   // StageScheduler
   void schedule(Stage&, ConcurrencyLevel);
 
 private:
-  class SEDAStage;
+  class SedaStage;
 
 private:
   vector< ::yield::thread::Thread*> threads;

@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_SOCKETS_AIO_CONNECT_AIOCB_HPP_
-#define _YIELD_SOCKETS_AIO_CONNECT_AIOCB_HPP_
+#ifndef _YIELD_SOCKETS_AIO_CONNECT_Aiocb_HPP_
+#define _YIELD_SOCKETS_AIO_CONNECT_Aiocb_HPP_
 
 #include "yield/sockets/aio/aiocb.hpp"
 
@@ -42,13 +42,13 @@ namespace aio {
 /**
   AIO control block for connect operations on sockets.
 */
-class connectAIOCB : public AIOCB {
+class ConnectAiocb : public Aiocb {
 public:
   const static uint32_t TYPE_ID = 2458109810UL;
 
 public:
   /**
-    Construct a connectAIOCB with an optional buffer for sending data
+    Construct a ConnectAiocb with an optional buffer for sending data
       after a connection is established.
     @param socket_ socket to connect
     @param peername address of the peer to connect to
@@ -56,14 +56,14 @@ public:
     @param send_buffer optional buffer of data to send after the connection is
       established
   */
-  connectAIOCB(
+  ConnectAiocb(
     StreamSocket& socket_,
     SocketAddress& peername,
     Object* context = NULL,
     YO_NEW_REF Buffer* send_buffer = NULL
   );
 
-  ~connectAIOCB();
+  ~ConnectAiocb();
 
 public:
   /**
@@ -95,7 +95,7 @@ public:
   }
 
   const char* get_type_name() const {
-    return "yield::sockets::aio::connectAIOCB";
+    return "yield::sockets::aio::ConnectAiocb";
   }
 
 private:
@@ -104,12 +104,12 @@ private:
 };
 
 /**
-  Print a string representation of a connectAIOCB to a std::ostream.
+  Print a string representation of a ConnectAiocb to a std::ostream.
   @param os std::ostream to print to
-  @param connect_aiocb connectAIOCB to print
+  @param connect_aiocb ConnectAiocb to print
   @return os
 */
-std::ostream& operator<<(std::ostream& os, connectAIOCB& connect_aiocb);
+std::ostream& operator<<(std::ostream& os, ConnectAiocb& connect_aiocb);
 }
 }
 }

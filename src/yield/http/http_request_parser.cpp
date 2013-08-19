@@ -74,14 +74,14 @@
 
 namespace yield {
 namespace http {
-using yield::uri::URI;
+using yield::uri::Uri;
 
-Object& HTTPRequestParser::parse() {
+Object& HttpRequestParser::parse() {
   if (p < eof) {
     ps = p;
 
     uint8_t http_version;
-    HTTPRequest::Method method;
+    HttpRequest::Method method;
     iovec uri_fragment = {0, 0};
     iovec uri_host = {0, 0};
     iovec uri_path = {0, 0};
@@ -102,7 +102,7 @@ Object& HTTPRequestParser::parse() {
         uri_userinfo
       )
     ) {
-      URI uri(
+      Uri uri(
         buffer,
         uri_fragment,
         uri_host,
@@ -156,7 +156,7 @@ Object& HTTPRequestParser::parse() {
       p = ps;
       return next_buffer;
     } else { // Error parsing
-      HTTPResponse& http_response
+      HttpResponse& http_response
       = create_http_response(400, NULL, http_version);
       http_response.set_field("Content-Length", 14, "0", 1);
       return http_response;
@@ -166,9 +166,9 @@ Object& HTTPRequestParser::parse() {
   }
 }
 
-bool HTTPRequestParser::parse_request_line(
+bool HttpRequestParser::parse_request_line(
   uint8_t& http_version,
-  HTTPRequest::Method& method,
+  HttpRequest::Method& method,
   iovec& host,
   iovec& path,
   uint16_t& port,
@@ -3341,97 +3341,97 @@ _match:
       case 13:
         /* #line 158 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::CONNECT;
+        method = HttpRequest::Method::CONNECT;
       }
       break;
       case 14:
         /* #line 159 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::COPY;
+        method = HttpRequest::Method::COPY;
       }
       break;
       case 15:
         /* #line 160 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::DELETE;
+        method = HttpRequest::Method::DELETE;
       }
       break;
       case 16:
         /* #line 161 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::GET;
+        method = HttpRequest::Method::GET;
       }
       break;
       case 17:
         /* #line 162 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::HEAD;
+        method = HttpRequest::Method::HEAD;
       }
       break;
       case 18:
         /* #line 163 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::LOCK;
+        method = HttpRequest::Method::LOCK;
       }
       break;
       case 19:
         /* #line 164 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::MKCOL;
+        method = HttpRequest::Method::MKCOL;
       }
       break;
       case 20:
         /* #line 165 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::MOVE;
+        method = HttpRequest::Method::MOVE;
       }
       break;
       case 21:
         /* #line 166 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::OPTIONS;
+        method = HttpRequest::Method::OPTIONS;
       }
       break;
       case 22:
         /* #line 167 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::PATCH;
+        method = HttpRequest::Method::PATCH;
       }
       break;
       case 23:
         /* #line 168 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::POST;
+        method = HttpRequest::Method::POST;
       }
       break;
       case 24:
         /* #line 169 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::PROPFIND;
+        method = HttpRequest::Method::PROPFIND;
       }
       break;
       case 25:
         /* #line 170 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::PROPPATCH;
+        method = HttpRequest::Method::PROPPATCH;
       }
       break;
       case 26:
         /* #line 171 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::PUT;
+        method = HttpRequest::Method::PUT;
       }
       break;
       case 27:
         /* #line 172 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::TRACE;
+        method = HttpRequest::Method::TRACE;
       }
       break;
       case 28:
         /* #line 173 "c:\\Users\\minorg\\projects\\yield\\src\\yield\\http\\http_request_parser.rl" */
       {
-        method = HTTPRequest::Method::UNLOCK;
+        method = HttpRequest::Method::UNLOCK;
       }
       break;
       case 29:

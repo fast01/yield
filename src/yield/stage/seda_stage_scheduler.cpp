@@ -38,9 +38,9 @@ namespace yield {
 namespace stage {
 using yield::thread::Thread;
 
-class SEDAStageScheduler::SEDAStage : public ::yield::thread::Runnable {
+class SedaStageScheduler::SedaStage : public ::yield::thread::Runnable {
 public:
-  SEDAStage(Stage& stage)
+  SedaStage(Stage& stage)
     : stage(stage.inc_ref()) {
     should_run = true;
   }
@@ -63,24 +63,24 @@ private:
 };
 
 
-SEDAStageScheduler::~SEDAStageScheduler() {
+SedaStageScheduler::~SedaStageScheduler() {
   for (
     vector<Thread*>::iterator thread_i = threads.begin();
     thread_i != threads.end();
     ++thread_i
   ) {
-    static_cast<SEDAStage*>((*thread_i)->get_runnable())->stop();
+    static_cast<SedaStage*>((*thread_i)->get_runnable())->stop();
     (*thread_i)->join();
     Thread::dec_ref(**thread_i);
   }
 }
 
 void
-SEDAStageScheduler::schedule(
+SedaStageScheduler::schedule(
   Stage& stage,
   ConcurrencyLevel concurrency_level
 ) {
-  auto_Object<SEDAStage> seda_stage = new SEDAStage(stage);
+  auto_Object<SedaStage> seda_stage = new SedaStage(stage);
   for (int16_t thread_i = 0; thread_i < concurrency_level; thread_i++) {
     threads.push_back(new Thread(seda_stage->inc_ref()));
   }

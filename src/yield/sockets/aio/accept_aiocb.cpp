@@ -35,12 +35,12 @@
 namespace yield {
 namespace sockets {
 namespace aio {
-acceptAIOCB::acceptAIOCB(
+AcceptAiocb::AcceptAiocb(
   StreamSocket& socket_,
   Object* context,
   YO_NEW_REF Buffer* recv_buffer
 )
-  : AIOCB(socket_, context),
+  : Aiocb(socket_, context),
     recv_buffer(recv_buffer) {
   accepted_socket = NULL;
   peername = NULL;
@@ -49,35 +49,35 @@ acceptAIOCB::acceptAIOCB(
   }
 }
 
-acceptAIOCB::~acceptAIOCB() {
+AcceptAiocb::~AcceptAiocb() {
   StreamSocket::dec_ref(accepted_socket);
   SocketAddress::dec_ref(peername);
   Buffer::dec_ref(recv_buffer);
 }
 
-StreamSocket& acceptAIOCB::get_socket() {
-  return static_cast<StreamSocket&>(AIOCB::get_socket());
+StreamSocket& AcceptAiocb::get_socket() {
+  return static_cast<StreamSocket&>(Aiocb::get_socket());
 }
 
 void
-acceptAIOCB::set_accepted_socket(
+AcceptAiocb::set_accepted_socket(
   YO_NEW_REF StreamSocket& accepted_socket
 ) {
   StreamSocket::dec_ref(this->accepted_socket);
   this->accepted_socket = &accepted_socket;
 }
 
-void acceptAIOCB::set_peername(YO_NEW_REF SocketAddress* peername) {
+void AcceptAiocb::set_peername(YO_NEW_REF SocketAddress* peername) {
   SocketAddress::dec_ref(this->peername);
   this->peername = peername;
 }
 
-void acceptAIOCB::set_recv_buffer(YO_NEW_REF Buffer* recv_buffer) {
+void AcceptAiocb::set_recv_buffer(YO_NEW_REF Buffer* recv_buffer) {
   Buffer::dec_ref(this->recv_buffer);
   this->recv_buffer = recv_buffer;
 }
 
-std::ostream& operator<<(std::ostream& os, acceptAIOCB& accept_aiocb) {
+std::ostream& operator<<(std::ostream& os, AcceptAiocb& accept_aiocb) {
   os <<
      accept_aiocb.get_type_name() <<
      "(" <<

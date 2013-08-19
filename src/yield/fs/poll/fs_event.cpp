@@ -33,20 +33,20 @@
 namespace yield {
 namespace fs {
 namespace poll {
-const FSEvent::Type FSEvent::TYPE_ALL = static_cast<Type>(~0);
-const FSEvent::Type FSEvent::TYPE_DIRECTORY_ADD = 1;
-const FSEvent::Type FSEvent::TYPE_DIRECTORY_MODIFY = 2;
-const FSEvent::Type FSEvent::TYPE_DIRECTORY_REMOVE = 4;
-const FSEvent::Type FSEvent::TYPE_DIRECTORY_RENAME = 8;
-const FSEvent::Type FSEvent::TYPE_FILE_ADD = 16;
-const FSEvent::Type FSEvent::TYPE_FILE_MODIFY = 32;
-const FSEvent::Type FSEvent::TYPE_FILE_REMOVE = 64;
-const FSEvent::Type FSEvent::TYPE_FILE_RENAME = 128;
+const FsEvent::Type FsEvent::TYPE_ALL = static_cast<Type>(~0);
+const FsEvent::Type FsEvent::TYPE_DIRECTORY_ADD = 1;
+const FsEvent::Type FsEvent::TYPE_DIRECTORY_MODIFY = 2;
+const FsEvent::Type FsEvent::TYPE_DIRECTORY_REMOVE = 4;
+const FsEvent::Type FsEvent::TYPE_DIRECTORY_RENAME = 8;
+const FsEvent::Type FsEvent::TYPE_FILE_ADD = 16;
+const FsEvent::Type FsEvent::TYPE_FILE_MODIFY = 32;
+const FsEvent::Type FsEvent::TYPE_FILE_REMOVE = 64;
+const FsEvent::Type FsEvent::TYPE_FILE_RENAME = 128;
 #ifndef _WIN32
-const uint32_t FSEvent::TYPE_ID;
+const uint32_t FsEvent::TYPE_ID;
 #endif
 
-FSEvent::FSEvent(const Path& path, Type type)
+FsEvent::FsEvent(const Path& path, Type type)
   : old_path(path), type(type) {
   debug_assert_false(path.empty());
   debug_assert(
@@ -64,38 +64,38 @@ FSEvent::FSEvent(const Path& path, Type type)
   );
 }
 
-FSEvent::FSEvent(const Path& old_path, const Path& new_path, Type type)
+FsEvent::FsEvent(const Path& old_path, const Path& new_path, Type type)
   : new_path(new_path), old_path(old_path), type(type) {
   debug_assert_false(new_path.empty());
   debug_assert_false(old_path.empty());
   debug_assert(type == TYPE_DIRECTORY_RENAME || type == TYPE_FILE_RENAME);
 }
 
-std::ostream& operator<<(std::ostream& os, const FSEvent& fs_event) {
+std::ostream& operator<<(std::ostream& os, const FsEvent& fs_event) {
   std::string type;
   switch (fs_event.get_type()) {
-  case FSEvent::TYPE_DIRECTORY_ADD:
+  case FsEvent::TYPE_DIRECTORY_ADD:
     type = "DIRECTORY_ADD";
     break;
-  case FSEvent::TYPE_DIRECTORY_MODIFY:
+  case FsEvent::TYPE_DIRECTORY_MODIFY:
     type = "DIRECTORY_MODIFY";
     break;
-  case FSEvent::TYPE_DIRECTORY_REMOVE:
+  case FsEvent::TYPE_DIRECTORY_REMOVE:
     type = "DIRECTORY_REMOVE";
     break;
-  case FSEvent::TYPE_DIRECTORY_RENAME:
+  case FsEvent::TYPE_DIRECTORY_RENAME:
     type = "DIRECTORY_RENAME";
     break;
-  case FSEvent::TYPE_FILE_ADD:
+  case FsEvent::TYPE_FILE_ADD:
     type = "FILE_ADD";
     break;
-  case FSEvent::TYPE_FILE_MODIFY:
+  case FsEvent::TYPE_FILE_MODIFY:
     type = "FILE_MODIFY";
     break;
-  case FSEvent::TYPE_FILE_REMOVE:
+  case FsEvent::TYPE_FILE_REMOVE:
     type = "FILE_REMOVE";
     break;
-  case FSEvent::TYPE_FILE_RENAME:
+  case FsEvent::TYPE_FILE_RENAME:
     type = "FILE_RENAME";
     break;
   default:
@@ -104,8 +104,8 @@ std::ostream& operator<<(std::ostream& os, const FSEvent& fs_event) {
   }
 
   switch (fs_event.get_type()) {
-  case FSEvent::TYPE_DIRECTORY_RENAME:
-  case FSEvent::TYPE_FILE_RENAME: {
+  case FsEvent::TYPE_DIRECTORY_RENAME:
+  case FsEvent::TYPE_FILE_RENAME: {
     os <<
        fs_event.get_type_name() <<
        "("

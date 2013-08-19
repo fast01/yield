@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_SOCKETS_AIO_AIOCB_HPP_
-#define _YIELD_SOCKETS_AIO_AIOCB_HPP_
+#ifndef _YIELD_SOCKETS_AIO_Aiocb_HPP_
+#define _YIELD_SOCKETS_AIO_Aiocb_HPP_
 
 #include "yield/event.hpp"
 
@@ -43,27 +43,27 @@ class Socket;
 
 namespace aio {
 #ifdef _WIN32
-class AIOQueue;
+class AioQueue;
 #endif
-class NBIOQueue;
+class NbioQueue;
 
 /**
-  Asynchronous Input/Output Control Block (AIOCB) for sockets.
+  Asynchronous Input/Output Control Block (Aiocb) for sockets.
 */
-class AIOCB : public Event {
+class Aiocb : public Event {
 public:
-  virtual ~AIOCB();
+  virtual ~Aiocb();
 
 public:
 #ifdef _WIN32
   /**
     Win32 only: cast an LPOVERLAPPED returned by
-      <code>GetQueuedCompletionStatus[Ex]</code> to an AIOCB.
+      <code>GetQueuedCompletionStatus[Ex]</code> to an Aiocb.
     @param lpOverlapped the LPOVERLAPPED returned by
       <code>GetQueuedCompletionStatus[Ex]</code>
-    @return the AIOCB that wraps lpOverlapped
+    @return the Aiocb that wraps lpOverlapped
   */
-  static AIOCB& cast(::OVERLAPPED& lpOverlapped);
+  static Aiocb& cast(::OVERLAPPED& lpOverlapped);
 #endif
 
 public:
@@ -119,19 +119,19 @@ public:
   virtual uint32_t get_type_id() const = 0;
   virtual const char* get_type_name() const = 0;
 
-  AIOCB& inc_ref() {
+  Aiocb& inc_ref() {
     return Object::inc_ref(*this);
   }
 
 protected:
-  AIOCB(Socket& socket_, Object* context = NULL);
-  AIOCB(Socket& socket_, off_t offset, Object* context = NULL);
+  Aiocb(Socket& socket_, Object* context = NULL);
+  Aiocb(Socket& socket_, off_t offset, Object* context = NULL);
 
 protected:
 #ifdef _WIN32
-  friend class AIOQueue;
+  friend class AioQueue;
 #endif
-  friend class NBIOQueue;
+  friend class NbioQueue;
 
   void set_error(uint32_t error) {
     this->error = error;
@@ -158,7 +158,7 @@ private:
 #pragma warning(pop)
     void* hEvent;
   } overlapped;
-  AIOCB* this_;
+  Aiocb* this_;
 #endif
 
   Object* context;

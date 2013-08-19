@@ -45,7 +45,7 @@ namespace linux {
 class Watch : public ::yield::fs::poll::Watch {
 public:
   Watch(
-    FSEvent::Type fs_event_types,
+    FsEvent::Type fs_event_types,
     int inotify_fd,
     const Path& path,
     int wd,
@@ -60,7 +60,7 @@ public:
   }
 
 public:
-  YO_NEW_REF FSEvent* parse(const inotify_event&);
+  YO_NEW_REF FsEvent* parse(const inotify_event&);
 
 public:
   // yield::Object

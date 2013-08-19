@@ -37,7 +37,7 @@ namespace sockets {
 /**
   A UDP/IP socket.
 */
-class UDPSocket : public DatagramSocket {
+class UdpSocket : public DatagramSocket {
 public:
   /**
     The default domain of the socket in the (domain, type, protocol) tuple.
@@ -53,21 +53,21 @@ public:
 
 public:
   /**
-    Construct a UDPSocket with the given domain.
+    Construct a UdpSocket with the given domain.
     @param domain the domain of the new socket
   */
-  UDPSocket(int domain = DOMAIN_DEFAULT)
+  UdpSocket(int domain = DOMAIN_DEFAULT)
     : DatagramSocket(domain)
   { }
 
   /**
     Empty virtual destructor.
   */
-  virtual ~UDPSocket() { }
+  virtual ~UdpSocket() { }
 
 public:
   // yield::Object
-  UDPSocket& inc_ref() {
+  UdpSocket& inc_ref() {
     return Object::inc_ref(*this);
   }
 };

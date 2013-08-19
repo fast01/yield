@@ -39,7 +39,7 @@ namespace poll {
 namespace bsd {
 FileWatch::FileWatch(
   int fd,
-  FSEvent::Type fs_event_types,
+  FsEvent::Type fs_event_types,
   const Path& path,
   Log* log
 ) :
@@ -54,34 +54,34 @@ FileWatch::read(
 ) {
   uint32_t fflags = kevent_.fflags;
   while (fflags != 0) {
-    FSEvent::Type fs_event_type;
+    FsEvent::Type fs_event_type;
     if ((fflags & NOTE_ATTRIB) == NOTE_ATTRIB) {
       fflags ^= NOTE_ATTRIB;
-      fs_event_type = FSEvent::TYPE_FILE_MODIFY;
+      fs_event_type = FsEvent::TYPE_FILE_MODIFY;
     } else if ((fflags & NOTE_DELETE) == NOTE_DELETE) {
       fflags ^= NOTE_DELETE;
-      fs_event_type = FSEvent::TYPE_FILE_REMOVE;
+      fs_event_type = FsEvent::TYPE_FILE_REMOVE;
     } else if ((fflags & NOTE_EXTEND) == NOTE_EXTEND) {
       fflags ^= NOTE_EXTEND;
-      fs_event_type = FSEvent::TYPE_FILE_MODIFY;
+      fs_event_type = FsEvent::TYPE_FILE_MODIFY;
     } else if ((fflags & NOTE_LINK) == NOTE_LINK) {
       fflags ^= NOTE_LINK;
-      fs_event_type = FSEvent::TYPE_FILE_MODIFY;
+      fs_event_type = FsEvent::TYPE_FILE_MODIFY;
     } else if ((fflags & NOTE_RENAME) == NOTE_RENAME) {
       fflags ^= NOTE_RENAME;
-      fs_event_type = FSEvent::TYPE_FILE_RENAME;
+      fs_event_type = FsEvent::TYPE_FILE_RENAME;
     } else if ((fflags & NOTE_REVOKE) == NOTE_REVOKE) {
       fflags ^= NOTE_REVOKE;
-      fs_event_type = FSEvent::TYPE_FILE_REMOVE;
+      fs_event_type = FsEvent::TYPE_FILE_REMOVE;
     } else if ((fflags & NOTE_WRITE) == NOTE_WRITE) {
       fflags ^= NOTE_WRITE;
-      fs_event_type = FSEvent::TYPE_FILE_MODIFY;
+      fs_event_type = FsEvent::TYPE_FILE_MODIFY;
     } else {
       debug_break();
       return;
     }
 
-    FSEvent* fs_event = new FSEvent(get_path(), fs_event_type);
+    FsEvent* fs_event = new FsEvent(get_path(), fs_event_type);
     log_fs_event(*fs_event);
     fs_event_handler.handle(*fs_event);
   }

@@ -47,18 +47,18 @@ static LPFN_CONNECTEX lpfnConnectEx = NULL;
 static LPFN_GETACCEPTEXSOCKADDRS lpfnGetAcceptExSockaddrs = NULL;
 static LPFN_TRANSMITFILE lpfnTransmitFile = NULL;
 
-AIOQueue::AIOQueue(YO_NEW_REF Log* log) : log(log) {
+AioQueue::AioQueue(YO_NEW_REF Log* log) : log(log) {
   hIoCompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
   if (hIoCompletionPort == INVALID_HANDLE_VALUE) {
     throw Exception();
   }
 }
 
-AIOQueue::~AIOQueue() {
+AioQueue::~AioQueue() {
   Log::dec_ref(log);
 }
 
-bool AIOQueue::associate(socket_t socket_) {
+bool AioQueue::associate(socket_t socket_) {
   return CreateIoCompletionPort(
            reinterpret_cast<fd_t>(socket_),
            hIoCompletionPort,
@@ -67,10 +67,10 @@ bool AIOQueue::associate(socket_t socket_) {
          ) != INVALID_HANDLE_VALUE;
 }
 
-bool AIOQueue::enqueue(YO_NEW_REF Event& event) {
+bool AioQueue::enqueue(YO_NEW_REF Event& event) {
   switch (event.get_type_id()) {
-  case acceptAIOCB::TYPE_ID: {
-    acceptAIOCB& accept_aiocb = static_cast<acceptAIOCB&>(event);
+  case AcceptAiocb::TYPE_ID: {
+    AcceptAiocb& accept_aiocb = static_cast<AcceptAiocb&>(event);
 
     log_enqueue(accept_aiocb);
 
@@ -177,8 +177,8 @@ bool AIOQueue::enqueue(YO_NEW_REF Event& event) {
   }
   break;
 
-  case connectAIOCB::TYPE_ID: {
-    connectAIOCB& connect_aiocb = static_cast<connectAIOCB&>(event);
+  case ConnectAiocb::TYPE_ID: {
+    ConnectAiocb& connect_aiocb = static_cast<ConnectAiocb&>(event);
 
     log_enqueue(connect_aiocb);
 
@@ -246,8 +246,8 @@ bool AIOQueue::enqueue(YO_NEW_REF Event& event) {
   }
   break;
 
-  case recvAIOCB::TYPE_ID: {
-    recvAIOCB& recv_aiocb = static_cast<recvAIOCB&>(event);
+  case RecvAiocb::TYPE_ID: {
+    RecvAiocb& recv_aiocb = static_cast<RecvAiocb&>(event);
 
     log_enqueue(recv_aiocb);
 
@@ -299,8 +299,8 @@ bool AIOQueue::enqueue(YO_NEW_REF Event& event) {
   }
   break;
 
-  case sendAIOCB::TYPE_ID: {
-    sendAIOCB& send_aiocb = static_cast<sendAIOCB&>(event);
+  case SendAiocb::TYPE_ID: {
+    SendAiocb& send_aiocb = static_cast<SendAiocb&>(event);
 
     log_enqueue(send_aiocb);
 
@@ -350,8 +350,8 @@ bool AIOQueue::enqueue(YO_NEW_REF Event& event) {
   }
   break;
 
-  case sendfileAIOCB::TYPE_ID: {
-    sendfileAIOCB& sendfile_aiocb = static_cast<sendfileAIOCB&>(event);
+  case SendfileAiocb::TYPE_ID: {
+    SendfileAiocb& sendfile_aiocb = static_cast<SendfileAiocb&>(event);
 
     if (lpfnTransmitFile == NULL) {
       GUID GuidTransmitFile = WSAID_TRANSMITFILE;
@@ -411,7 +411,7 @@ bool AIOQueue::enqueue(YO_NEW_REF Event& event) {
   }
 }
 
-template <class AIOCBType> void AIOQueue::log_completion(AIOCBType& aiocb) {
+template <class AiocbType> void AioQueue::log_completion(AiocbType& aiocb) {
   if (aiocb.get_return() >= 0) {
     if (log != NULL)
       log->get_stream(Log::Level::DEBUG) <<
@@ -421,21 +421,21 @@ template <class AIOCBType> void AIOQueue::log_completion(AIOCBType& aiocb) {
   }
 }
 
-template <class AIOCBType> void AIOQueue::log_enqueue(AIOCBType& aiocb) {
+template <class AiocbType> void AioQueue::log_enqueue(AiocbType& aiocb) {
   if (log != NULL) {
     log->get_stream(Log::Level::DEBUG) <<
                                        get_type_name() << ": enqueuing " << aiocb;
   }
 }
 
-template <class AIOCBType> void AIOQueue::log_error(AIOCBType& aiocb) {
+template <class AiocbType> void AioQueue::log_error(AiocbType& aiocb) {
   if (log != NULL) {
     log->get_stream(Log::Level::ERR) <<
                                      get_type_name() << ": error on " << aiocb;
   }
 }
 
-YO_NEW_REF Event* AIOQueue::timeddequeue(const Time& timeout) {
+YO_NEW_REF Event* AioQueue::timeddequeue(const Time& timeout) {
   DWORD dwBytesTransferred = 0;
   ULONG_PTR ulCompletionKey = 0;
   LPOVERLAPPED lpOverlapped = NULL;
@@ -450,7 +450,7 @@ YO_NEW_REF Event* AIOQueue::timeddequeue(const Time& timeout) {
     );
 
   if (lpOverlapped != NULL) {
-    AIOCB& aiocb = AIOCB::cast(*lpOverlapped);
+    Aiocb& aiocb = Aiocb::cast(*lpOverlapped);
 
     if (bRet) {
       aiocb.set_return(dwBytesTransferred);
@@ -459,8 +459,8 @@ YO_NEW_REF Event* AIOQueue::timeddequeue(const Time& timeout) {
     }
 
     switch (aiocb.get_type_id()) {
-    case acceptAIOCB::TYPE_ID: {
-      acceptAIOCB& accept_aiocb = static_cast<acceptAIOCB&>(aiocb);
+    case AcceptAiocb::TYPE_ID: {
+      AcceptAiocb& accept_aiocb = static_cast<AcceptAiocb&>(aiocb);
 
       if (accept_aiocb.get_error() == 0) {
         // accept_aiocb.return does NOT include the size of the
@@ -518,13 +518,13 @@ YO_NEW_REF Event* AIOQueue::timeddequeue(const Time& timeout) {
     }
     break;
 
-    case connectAIOCB::TYPE_ID: {
-      log_completion(static_cast<connectAIOCB&>(aiocb));
+    case ConnectAiocb::TYPE_ID: {
+      log_completion(static_cast<ConnectAiocb&>(aiocb));
     }
     break;
 
-    case recvAIOCB::TYPE_ID: {
-      recvAIOCB& recv_aiocb = static_cast<recvAIOCB&>(aiocb);
+    case RecvAiocb::TYPE_ID: {
+      RecvAiocb& recv_aiocb = static_cast<RecvAiocb&>(aiocb);
 
       if (recv_aiocb.get_return() > 0) {
         Buffers::put(
@@ -538,8 +538,8 @@ YO_NEW_REF Event* AIOQueue::timeddequeue(const Time& timeout) {
     }
     break;
 
-    case sendAIOCB::TYPE_ID: {
-      log_completion(static_cast<sendAIOCB&>(aiocb));
+    case SendAiocb::TYPE_ID: {
+      log_completion(static_cast<SendAiocb&>(aiocb));
     }
     break;
     }

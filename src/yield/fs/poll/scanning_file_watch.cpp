@@ -37,7 +37,7 @@ namespace yield {
 namespace fs {
 namespace poll {
 ScanningFileWatch::ScanningFileWatch(
-  FSEvent::Type fs_event_types,
+  FsEvent::Type fs_event_types,
   const Path& path,
   Log* log
 ) : ScanningWatch(fs_event_types, log, path) {
@@ -57,7 +57,7 @@ void ScanningFileWatch::scan(EventHandler& fs_event_handler) {
   debug_assert_ne(old_stbuf, NULL);
   stbuf = NULL;
 
-  FSEvent::Type fs_event_type;
+  FsEvent::Type fs_event_type;
   if (new_stbuf != NULL) { // File exists
     if (type(*new_stbuf) == type(*old_stbuf)) { // File has not changed type
       if (equals(*new_stbuf, *old_stbuf)) {
@@ -65,17 +65,17 @@ void ScanningFileWatch::scan(EventHandler& fs_event_handler) {
         stbuf = new_stbuf;
         return;
       } else {
-        fs_event_type = FSEvent::TYPE_FILE_MODIFY;
+        fs_event_type = FsEvent::TYPE_FILE_MODIFY;
       }
     } else { // File has changed type
-      fs_event_type = FSEvent::TYPE_FILE_REMOVE;
+      fs_event_type = FsEvent::TYPE_FILE_REMOVE;
     }
   } else { // File does not exist any longer
-    fs_event_type = FSEvent::TYPE_FILE_REMOVE;
+    fs_event_type = FsEvent::TYPE_FILE_REMOVE;
   }
 
   if (want_fs_event_type(fs_event_type)) {
-    FSEvent* fs_event = new FSEvent(get_path(), fs_event_type);
+    FsEvent* fs_event = new FsEvent(get_path(), fs_event_type);
     log_fs_event(*fs_event);
     fs_event_handler.handle(*fs_event);
   }

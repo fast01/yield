@@ -35,7 +35,7 @@
 namespace yield {
 namespace http {
 namespace server {
-typedef ::yield::http::HTTPResponse HTTPResponse;
+typedef ::yield::http::HttpResponse HttpResponse;
 }
 }
 }

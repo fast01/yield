@@ -39,53 +39,53 @@ class Log;
 
 namespace sockets {
 namespace aio {
-class acceptAIOCB;
+class AcceptAiocb;
 }
 class SocketAddress;
-class TCPSocket;
+class TcpSocket;
 }
 
 namespace http {
 namespace server {
-class HTTPConnection;
+class HttpConnection;
 
 /**
   An EventQueue that acts as an HTTP server: listening to an (interface, port),
     accepting connections, reading request data from connections, parsing HTTP
     requests, serializing HTTP responses, writing response data to connections.
 
-  HTTPRequestQueue is "passive" in that it relies on the caller to drive it.
-  HTTPRequestQueue::dequeue or its variants must be called repeatedly and frequently
+  HttpRequestQueue is "passive" in that it relies on the caller to drive it.
+  HttpRequestQueue::dequeue or its variants must be called repeatedly and frequently
     in order for the server to make progress.
 */
-template <class AIOQueueType = yield::sockets::aio::AIOQueue>
-class HTTPRequestQueue : public EventQueue {
+template <class AioQueueType = yield::sockets::aio::AioQueue>
+class HttpRequestQueue : public EventQueue {
 public:
   /**
-    Construct an HTTPRequestQueue that listens for connections on the given
+    Construct an HttpRequestQueue that listens for connections on the given
       socket address.
     @param sockname address to listen to
     @param log optional debug and error log
   */
-  HTTPRequestQueue(
+  HttpRequestQueue(
     const yield::sockets::SocketAddress& sockname,
     YO_NEW_REF Log* log = NULL
   ) throw(Exception);
 
   /**
-    Construct an HTTPRequestQueue around an extant TCP socket, which will
+    Construct an HttpRequestQueue around an extant TCP socket, which will
       then be bound and listen to the given socket address.
     @param socket_ server socket to use
     @param sockname address to bind and listen to
     @param log optional debug and error log
   */
-  HTTPRequestQueue(
-    YO_NEW_REF yield::sockets::TCPSocket& socket_,
+  HttpRequestQueue(
+    YO_NEW_REF yield::sockets::TcpSocket& socket_,
     const yield::sockets::SocketAddress& sockname,
     YO_NEW_REF Log* log = NULL
   ) throw(Exception);
 
-  ~HTTPRequestQueue();
+  ~HttpRequestQueue();
 
 public:
   // yield::EventQueue
@@ -97,15 +97,15 @@ public:
   YO_NEW_REF Event* timeddequeue(const Time& timeout);
 
 private:
-  void handle(YO_NEW_REF yield::sockets::aio::acceptAIOCB& accept_aiocb);
-  template <class AIOCBType> void handle(YO_NEW_REF AIOCBType& aiocb);
+  void handle(YO_NEW_REF yield::sockets::aio::AcceptAiocb& accept_aiocb);
+  template <class AiocbType> void handle(YO_NEW_REF AiocbType& aiocb);
   void init(const yield::sockets::SocketAddress& sockname) throw(Exception);
 
 private:
-  AIOQueueType& aio_queue;
-  vector<HTTPConnection*> connections;
+  AioQueueType& aio_queue;
+  vector<HttpConnection*> connections;
   Log* log;
-  yield::sockets::TCPSocket& socket_;
+  yield::sockets::TcpSocket& socket_;
 };
 }
 }

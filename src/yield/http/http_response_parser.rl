@@ -43,7 +43,7 @@
 
 namespace yield {
 namespace http {
-Object& HTTPResponseParser::parse() {
+Object& HttpResponseParser::parse() {
   if (p < eof) {
     ps = p;
 
@@ -101,7 +101,7 @@ Object& HTTPResponseParser::parse() {
 }
 
 bool
-HTTPResponseParser::parse_status_line(
+HttpResponseParser::parse_status_line(
   uint8_t& http_version,
   uint16_t& status_code
 ) {

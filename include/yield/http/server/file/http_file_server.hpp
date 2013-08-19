@@ -37,17 +37,17 @@ namespace yield {
 namespace http {
 namespace server {
 namespace file {
-template <class AIOQueueType = yield::sockets::aio::AIOQueue>
-class HTTPFileServer : public HTTPServer<AIOQueueType> {
+template <class AioQueueType = yield::sockets::aio::AioQueue>
+class HttpFileServer : public HttpServer<AioQueueType> {
 public:
-  HTTPFileServer(
+  HttpFileServer(
     const yield::fs::Path& root_directory_path,
-    const yield::uri::URI& root_uri,
+    const yield::uri::Uri& root_uri,
     const yield::sockets::SocketAddress& sockname,
     YO_NEW_REF Log* log = NULL
   )
-    : HTTPServer<AIOQueueType>(
-      *new HTTPFileRequestHandler(root_directory_path, root_uri),
+    : HttpServer<AioQueueType>(
+      *new HttpFileRequestHandler(root_directory_path, root_uri),
       sockname,
       log
     ) {

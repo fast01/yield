@@ -38,25 +38,25 @@ namespace http {
 /**
   An RFC 2616-conformant HTTP response parser.
 */
-class HTTPResponseParser : public HTTPMessageParser {
+class HttpResponseParser : public HttpMessageParser {
 public:
   /**
-    Construct an HTTPResponseParser on the underlying buffer.
-    References to buffer may be created for any objects (such as HTTPResponse)
+    Construct an HttpResponseParser on the underlying buffer.
+    References to buffer may be created for any objects (such as HttpResponse)
       produced by the parser.
     @param buffer buffer to parse
   */
-  HTTPResponseParser(Buffer& buffer)
-    : HTTPMessageParser(buffer)
+  HttpResponseParser(Buffer& buffer)
+    : HttpMessageParser(buffer)
   { }
 
   /**
-    Construct an HTTPResponseParser on the string buffer.
+    Construct an HttpResponseParser on the string buffer.
     Only used for testing.
     @param buffer buffer to parse.
   */
-  HTTPResponseParser(const string& buffer)
-    : HTTPMessageParser(buffer)
+  HttpResponseParser(const string& buffer)
+    : HttpMessageParser(buffer)
   { }
 
 public:
@@ -65,9 +65,9 @@ public:
     The caller is responsible for checking the Object's get_type_id
       and downcasting to the appropriate type.
     Object may be of the following types, in order of probability:
-    - yield::http::HTTPResponse or subclasses: an HTTP response, including its
+    - yield::http::HttpResponse or subclasses: an HTTP response, including its
         body for responses with fixed Content-Length's.
-    - yield::http::HTTPMessageBodyChunk: a chunk of body data, for responses
+    - yield::http::HttpMessageBodyChunk: a chunk of body data, for responses
         with chunked Transfer-Encoding.
     - yield::Buffer: the next Buffer to read; may include the remainder of
       the previous Buffer that was passed to the constructor
@@ -76,16 +76,16 @@ public:
   YO_NEW_REF Object& parse();
 
 protected:
-  virtual HTTPResponse&
+  virtual HttpResponse&
   create_http_response(
     uint16_t status_code,
     YO_NEW_REF Object* body = NULL,
-    uint8_t http_version = HTTPResponse::HTTP_VERSION_DEFAULT
+    uint8_t http_version = HttpResponse::HTTP_VERSION_DEFAULT
   ) {
-    return *new HTTPResponse(status_code, body, http_version);
+    return *new HttpResponse(status_code, body, http_version);
   }
 
-  virtual HTTPResponse&
+  virtual HttpResponse&
   create_http_response(
     YO_NEW_REF Object* body,
     uint16_t fields_offset,
@@ -93,7 +93,7 @@ protected:
     uint8_t http_version,
     uint16_t status_code
   ) {
-    return *new HTTPResponse(
+    return *new HttpResponse(
              body,
              fields_offset,
              header,

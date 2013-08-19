@@ -34,56 +34,56 @@
 
 namespace yield {
 namespace http {
-class HTTPMessageBodyChunk;
-class HTTPResponse;
+class HttpMessageBodyChunk;
+class HttpResponse;
 
 namespace server {
-class HTTPConnection;
-class HTTPRequestParser;
+class HttpConnection;
+class HttpRequestParser;
 
 /**
-  A <code>yield::http::HTTPRequest</code> that's bound to a server
-    <code>HTTPConnection</code>.
-  These <code>HTTPRequest</code>s are usually created by
-    <code>HTTPRequestQueue</code>.
+  A <code>yield::http::HttpRequest</code> that's bound to a server
+    <code>HttpConnection</code>.
+  These <code>HttpRequest</code>s are usually created by
+    <code>HttpRequestQueue</code>.
 */
-class HTTPRequest : public ::yield::http::HTTPRequest {
+class HttpRequest : public ::yield::http::HttpRequest {
 public:
   const static uint32_t TYPE_ID = 2792000307UL;
 
 public:
   /**
-    Construct an HTTPRequest that originates from the given server connection.
+    Construct an HttpRequest that originates from the given server connection.
     @param connection the server connection
-    @param method the HTTP request method e.g., HTTPRequest::Method::GET
-    @param uri the HTTP request URI e.g., /
+    @param method the HTTP request method e.g., HttpRequest::Method::GET
+    @param uri the HTTP request Uri e.g., /
     @param body an optional body, usually a Buffer
     @param http_version the HTTP version as a single byte (0 or 1 for HTTP/1.0
       and HTTP/1.1, respectively)
   */
-  HTTPRequest(
-    HTTPConnection& connection,
+  HttpRequest(
+    HttpConnection& connection,
     Method method,
-    const yield::uri::URI& uri,
+    const yield::uri::Uri& uri,
     YO_NEW_REF Object* body = NULL,
     uint8_t http_version = HTTP_VERSION_DEFAULT
   );
 
-  virtual ~HTTPRequest();
+  virtual ~HttpRequest();
 
 public:
   /**
     Get the server connection from which this HTTP request originated.
     @return the server connection from which this HTTP request originated
   */
-  const HTTPConnection& get_connection() const {
+  const HttpConnection& get_connection() const {
     return connection;
   }
 
   /**
-    Get the date-time this HTTPRequest was constructed.
+    Get the date-time this HttpRequest was constructed.
     Used in logging.
-    @return the date-time this HTTPRequest was constructed
+    @return the date-time this HttpRequest was constructed
   */
   const DateTime& get_creation_date_time() const {
     return creation_date_time;
@@ -92,10 +92,17 @@ public:
 public:
   /**
     Respond to the HTTP request with a chunked body.
-    respond(HTTPResponse&) or respond(status_code) must be called first.
+    respond(HttpResponse&) or respond(status_code) must be called first.
     @param chunk response body chunk
   */
-  void respond(YO_NEW_REF ::yield::http::HTTPMessageBodyChunk& chunk);
+  void respond(YO_NEW_REF ::yield::http::HttpResponse& response);
+
+  /**
+    Respond to the HTTP request with a chunked body.
+    respond(HttpResponse&) or respond(status_code) must be called first.
+    @param chunk response body chunk
+  */
+  void respond(YO_NEW_REF ::yield::http::HttpMessageBodyChunk& chunk);
 
   /**
     Respond to the HTTP request.
@@ -103,7 +110,7 @@ public:
       after this method is called.
     @param http_response HTTP response
   */
-  void respond(YO_NEW_REF ::yield::http::HTTPResponse& http_response);
+  void respond(YO_NEW_REF ::yield::http::server::HttpConnection& http_response);
 
   /**
     Respond to the HTTP request.
@@ -166,28 +173,28 @@ public:
   }
 
   const char* get_type_name() const {
-    return "yield::http::server::HTTPRequest";
+    return "yield::http::server::HttpRequest";
   }
 
-  HTTPRequest& inc_ref() {
+  HttpRequest& inc_ref() {
     return Object::inc_ref(*this);
   }
 
 protected:
-  friend class HTTPRequestParser;
+  friend class HttpRequestParser;
 
-  HTTPRequest(
+  HttpRequest(
     YO_NEW_REF Object* body,
-    HTTPConnection& connection,
+    HttpConnection& connection,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version,
     Method method,
-    const yield::uri::URI& uri
+    const yield::uri::Uri& uri
   );
 
 private:
-  HTTPConnection& connection;
+  HttpConnection& connection;
   DateTime creation_date_time;
 };
 }

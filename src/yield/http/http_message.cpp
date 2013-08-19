@@ -46,8 +46,8 @@
 
 namespace yield {
 namespace http {
-template <class HTTPMessageType>
-HTTPMessage<HTTPMessageType>::HTTPMessage(
+template <class HttpMessageType>
+HttpMessage<HttpMessageType>::HttpMessage(
   YO_NEW_REF Object* body,
   uint8_t http_version
 ) : body(body),
@@ -56,9 +56,9 @@ HTTPMessage<HTTPMessageType>::HTTPMessage(
   fields_offset = 0;
 }
 
-template <class HTTPMessageType>
-HTTPMessage<HTTPMessageType>::
-HTTPMessage(
+template <class HttpMessageType>
+HttpMessage<HttpMessageType>::
+HttpMessage(
   YO_NEW_REF Object* body,
   uint16_t fields_offset,
   Buffer& header,
@@ -69,21 +69,21 @@ HTTPMessage(
   http_version(http_version) {
 }
 
-template <class HTTPMessageType>
-HTTPMessage<HTTPMessageType>::~HTTPMessage() {
+template <class HttpMessageType>
+HttpMessage<HttpMessageType>::~HttpMessage() {
   Object::dec_ref(body);
   Buffer::dec_ref(header);
 }
 
-template <class HTTPMessageType>
-void HTTPMessage<HTTPMessageType>::finalize() {
+template <class HttpMessageType>
+void HttpMessage<HttpMessageType>::finalize() {
   header.put("\r\n", 2);
 }
 
-template <class HTTPMessageType>
-size_t HTTPMessage<HTTPMessageType>::get_content_length() const {
+template <class HttpMessageType>
+size_t HttpMessage<HttpMessageType>::get_content_length() const {
   size_t content_length = 0;
-  HTTPMessageParser::parse_content_length_field(
+  HttpMessageParser::parse_content_length_field(
     static_cast<const char*>(header) + fields_offset,
     static_cast<const char*>(header) + header.size(),
     content_length
@@ -91,19 +91,19 @@ size_t HTTPMessage<HTTPMessageType>::get_content_length() const {
   return content_length;
 }
 
-template <class HTTPMessageType>
-DateTime HTTPMessage<HTTPMessageType>::get_date_field(const char* name) const {
+template <class HttpMessageType>
+DateTime HttpMessage<HttpMessageType>::get_date_field(const char* name) const {
   iovec value;
   if (get_field(name, value)) {
-    return HTTPMessageParser::parse_date(value);
+    return HttpMessageParser::parse_date(value);
   } else {
     return DateTime::INVALID_DATE_TIME;
   }
 }
 
-template <class HTTPMessageType>
+template <class HttpMessageType>
 bool
-HTTPMessage<HTTPMessageType>::get_field(
+HttpMessage<HttpMessageType>::get_field(
   const char* name,
   size_t name_len,
   iovec& value
@@ -111,7 +111,7 @@ HTTPMessage<HTTPMessageType>::get_field(
   iovec name_iov;
   name_iov.iov_base = const_cast<char*>(name);
   name_iov.iov_len = name_len;
-  return HTTPMessageParser::parse_field(
+  return HttpMessageParser::parse_field(
            static_cast<const char*>(header) + fields_offset,
            static_cast<const char*>(header) + header.size(),
            name_iov,
@@ -119,27 +119,27 @@ HTTPMessage<HTTPMessageType>::get_field(
          );
 }
 
-template <class HTTPMessageType>
+template <class HttpMessageType>
 void
-HTTPMessage<HTTPMessageType>::get_fields(
+HttpMessage<HttpMessageType>::get_fields(
   vector< std::pair<iovec, iovec> >& fields
 ) const {
-  return HTTPMessageParser::parse_fields(
+  return HttpMessageParser::parse_fields(
            static_cast<const char*>(header) + fields_offset,
            static_cast<const char*>(header) + header.size(),
            fields
          );
 }
 
-template <class HTTPMessageType>
-void HTTPMessage<HTTPMessageType>::set_body(YO_NEW_REF Object* body) {
+template <class HttpMessageType>
+void HttpMessage<HttpMessageType>::set_body(YO_NEW_REF Object* body) {
   Object::dec_ref(this->body);
   this->body = body;
 }
 
-template <class HTTPMessageType>
-HTTPMessageType&
-HTTPMessage<HTTPMessageType>::
+template <class HttpMessageType>
+HttpMessageType&
+HttpMessage<HttpMessageType>::
 set_field(
   const char* name,
   size_t name_len,
@@ -195,9 +195,9 @@ set_field(
   return set_field(name, name_len, date, date_len);
 }
 
-template <class HTTPMessageType>
-HTTPMessageType&
-HTTPMessage<HTTPMessageType>::
+template <class HttpMessageType>
+HttpMessageType&
+HttpMessage<HttpMessageType>::
 set_field(
   const char* name,
   size_t name_len,
@@ -215,9 +215,9 @@ set_field(
   return set_field(name, name_len, value_str, value_str_len);
 }
 
-template <class HTTPMessageType>
-HTTPMessageType&
-HTTPMessage<HTTPMessageType>::
+template <class HttpMessageType>
+HttpMessageType&
+HttpMessage<HttpMessageType>::
 set_field(
   const char* name,
   size_t name_len,
@@ -233,11 +233,11 @@ set_field(
   header.put(value, value_len);
   header.put("\r\n");
 
-  return static_cast<HTTPMessageType&>(*this);
+  return static_cast<HttpMessageType&>(*this);
 }
 
-template class HTTPMessage<HTTPRequest>;
-template class HTTPMessage<HTTPResponse>;
+template class HttpMessage<HttpRequest>;
+template class HttpMessage<HttpResponse>;
 }
 }
 

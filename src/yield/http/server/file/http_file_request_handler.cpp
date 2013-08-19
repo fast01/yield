@@ -39,19 +39,19 @@ namespace file {
 using yield::fs::File;
 using yield::fs::FileSystem;
 using yield::fs::Path;
-using yield::uri::URI;
+using yield::uri::Uri;
 
-HTTPFileRequestHandler::HTTPFileRequestHandler(
+HttpFileRequestHandler::HttpFileRequestHandler(
   const Path& root_directory_path,
-  const URI& root_uri
+  const Uri& root_uri
 ) : root_directory_path(root_directory_path),
   root_uri(root_uri) {
   this->root_uri.get_path(root_uri_path);
 }
 
-void HTTPFileRequestHandler::handle(YO_NEW_REF Event& event) {
-  debug_assert_eq(event.get_type_id(), HTTPRequest::TYPE_ID);
-  HTTPRequest& http_request = static_cast<HTTPRequest&>(event);
+void HttpFileRequestHandler::handle(YO_NEW_REF Event& event) {
+  debug_assert_eq(event.get_type_id(), HttpRequest::TYPE_ID);
+  HttpRequest& http_request = static_cast<HttpRequest&>(event);
 
   iovec http_request_uri_path;
   http_request.get_uri().get_path(http_request_uri_path);
@@ -86,7 +86,7 @@ void HTTPFileRequestHandler::handle(YO_NEW_REF Event& event) {
         http_request.respond(404, Exception());
       }
 
-      HTTPRequest::dec_ref(http_request);
+      HttpRequest::dec_ref(http_request);
     }
   }
 }

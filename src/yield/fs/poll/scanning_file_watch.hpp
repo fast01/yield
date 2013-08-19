@@ -37,7 +37,7 @@ namespace fs {
 namespace poll {
 class ScanningFileWatch : public ScanningWatch {
 public:
-  ScanningFileWatch(FSEvent::Type fs_event_types, const Path& path, Log* log = NULL);
+  ScanningFileWatch(FsEvent::Type fs_event_types, const Path& path, Log* log = NULL);
   virtual ~ScanningFileWatch();
 
 public:

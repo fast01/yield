@@ -39,33 +39,33 @@ class SocketAddress;
 
 namespace http {
 namespace server {
-class HTTPConnection;
+class HttpConnection;
 
-class HTTPRequestParser : public ::yield::http::HTTPRequestParser {
+class HttpRequestParser : public ::yield::http::HttpRequestParser {
 public:
-  HTTPRequestParser(HTTPConnection& connection, Buffer& data);
-  ~HTTPRequestParser();
+  HttpRequestParser(HttpConnection& connection, Buffer& data);
+  ~HttpRequestParser();
 
 protected:
-  // yield::http::HTTPMessageParser
-  virtual YO_NEW_REF yield::http::HTTPMessageBodyChunk&
+  // yield::http::HttpMessageParser
+  virtual YO_NEW_REF yield::http::HttpMessageBodyChunk&
   create_http_message_body_chunk(
     YO_NEW_REF Buffer* data
   );
 
-  // yield::http::HTTPRequestParser
-  virtual YO_NEW_REF yield::http::HTTPRequest&
+  // yield::http::HttpRequestParser
+  virtual YO_NEW_REF yield::http::HttpRequest&
   create_http_request(
     YO_NEW_REF Object* body,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version,
-    HTTPRequest::Method method,
-    const yield::uri::URI& uri
+    HttpRequest::Method method,
+    const yield::uri::Uri& uri
   );
 
 private:
-  HTTPConnection& connection;
+  HttpConnection& connection;
 };
 }
 }

@@ -40,130 +40,130 @@ namespace http {
 namespace server {
 using yield::sockets::Socket;
 using yield::sockets::SocketAddress;
-using yield::sockets::TCPSocket;
-using yield::sockets::aio::acceptAIOCB;
-using yield::sockets::aio::AIOQueue;
-using yield::sockets::aio::recvAIOCB;
-using yield::sockets::aio::sendAIOCB;
-using yield::sockets::aio::sendfileAIOCB;
+using yield::sockets::TcpSocket;
+using yield::sockets::aio::AcceptAiocb;
+using yield::sockets::aio::AioQueue;
+using yield::sockets::aio::RecvAiocb;
+using yield::sockets::aio::SendAiocb;
+using yield::sockets::aio::SendfileAiocb;
 
-template <class AIOQueueType>
-HTTPRequestQueue<AIOQueueType>::HTTPRequestQueue(
+template <class AioQueueType>
+HttpRequestQueue<AioQueueType>::HttpRequestQueue(
   const SocketAddress& sockname,
   YO_NEW_REF Log* log
-) throw(Exception) : aio_queue(*new AIOQueueType(log)),
+) throw(Exception) : aio_queue(*new AioQueueType(log)),
   log(Object::inc_ref(log)),
-  socket_(*new TCPSocket(sockname.get_family())) {
+  socket_(*new TcpSocket(sockname.get_family())) {
   init(sockname);
 }
 
-template <class AIOQueueType>
-HTTPRequestQueue<AIOQueueType>::HTTPRequestQueue(
-  YO_NEW_REF TCPSocket& socket_,
+template <class AioQueueType>
+HttpRequestQueue<AioQueueType>::HttpRequestQueue(
+  YO_NEW_REF TcpSocket& socket_,
   const SocketAddress& sockname,
   YO_NEW_REF Log* log
-) throw(Exception) : aio_queue(*new AIOQueueType(log)),
+) throw(Exception) : aio_queue(*new AioQueueType(log)),
   log(Object::inc_ref(log)),
   socket_(socket_) {
   init(sockname);
 }
 
-template <class AIOQueueType>
-HTTPRequestQueue<AIOQueueType>::~HTTPRequestQueue() {
+template <class AioQueueType>
+HttpRequestQueue<AioQueueType>::~HttpRequestQueue() {
   for (
-    vector<HTTPConnection*>::iterator connection_i = connections.begin();
+    vector<HttpConnection*>::iterator connection_i = connections.begin();
     connection_i != connections.end();
     ++connection_i
   ) {
-    HTTPConnection* connection = *connection_i;
-    TCPSocket& socket_ = connection->get_socket();
+    HttpConnection* connection = *connection_i;
+    TcpSocket& socket_ = connection->get_socket();
     socket_.set_blocking_mode(true);
-    socket_.setsockopt(TCPSocket::Option::LINGER, 30);
+    socket_.setsockopt(TcpSocket::Option::LINGER, 30);
     socket_.shutdown();
     socket_.close();
-    HTTPConnection::dec_ref(*connection);
+    HttpConnection::dec_ref(*connection);
   }
 
   socket_.close();
 
-  AIOQueue::dec_ref(aio_queue);
+  AioQueue::dec_ref(aio_queue);
   Log::dec_ref(log);
-  TCPSocket::dec_ref(socket_);
+  TcpSocket::dec_ref(socket_);
 }
 
-template <class AIOQueueType>
-bool HTTPRequestQueue<AIOQueueType>::enqueue(YO_NEW_REF Event& event) {
+template <class AioQueueType>
+bool HttpRequestQueue<AioQueueType>::enqueue(YO_NEW_REF Event& event) {
   return aio_queue.enqueue(event);
 }
 
-template <class AIOQueueType>
-void HTTPRequestQueue<AIOQueueType>::handle(YO_NEW_REF acceptAIOCB& accept_aiocb) {
+template <class AioQueueType>
+void HttpRequestQueue<AioQueueType>::handle(YO_NEW_REF AcceptAiocb& accept_aiocb) {
   if (accept_aiocb.get_return() >= 0) {
-    TCPSocket& accepted_socket
-    = static_cast<TCPSocket&>(*accept_aiocb.get_accepted_socket());
+    TcpSocket& accepted_socket
+    = static_cast<TcpSocket&>(*accept_aiocb.get_accepted_socket());
 
     if (aio_queue.associate(accepted_socket)) {
-      HTTPConnection* connection
-      = new HTTPConnection(
+      HttpConnection* connection
+      = new HttpConnection(
         aio_queue,
         aio_queue,
         *accept_aiocb.get_peername(),
-        static_cast<TCPSocket&>(accepted_socket),
+        static_cast<TcpSocket&>(accepted_socket),
         log
       );
 
       connection->handle(accept_aiocb);
 
-      if (connection->get_state() == HTTPConnection::STATE_CONNECTED) {
+      if (connection->get_state() == HttpConnection::STATE_CONNECTED) {
         connections.push_back(connection);
       } else {
-        HTTPConnection::dec_ref(*connection);
+        HttpConnection::dec_ref(*connection);
       }
     } else {
       accepted_socket.shutdown();
       accepted_socket.close();
-      TCPSocket::dec_ref(accepted_socket);
+      TcpSocket::dec_ref(accepted_socket);
     }
   } else {
-    acceptAIOCB::dec_ref(accept_aiocb);
+    AcceptAiocb::dec_ref(accept_aiocb);
   }
 
   Buffer* recv_buffer
   = new Buffer(Buffer::getpagesize(), Buffer::getpagesize());
-  acceptAIOCB* next_accept_aiocb = new acceptAIOCB(socket_, recv_buffer);
+  AcceptAiocb* next_accept_aiocb = new AcceptAiocb(socket_, recv_buffer);
   if (!aio_queue.enqueue(*next_accept_aiocb)) {
-    acceptAIOCB::dec_ref(next_accept_aiocb);
+    AcceptAiocb::dec_ref(next_accept_aiocb);
   }
 }
 
-template <class AIOQueueType>
-template <class AIOCBType>
-void HTTPRequestQueue<AIOQueueType>::handle(YO_NEW_REF AIOCBType& aiocb) {
-  HTTPConnection& connection = *static_cast<HTTPConnection*>(aiocb.get_context());
-  if (connection.get_state() == HTTPConnection::STATE_CONNECTED) {
+template <class AioQueueType>
+template <class AiocbType>
+void HttpRequestQueue<AioQueueType>::handle(YO_NEW_REF AiocbType& aiocb) {
+  HttpConnection& connection = *static_cast<HttpConnection*>(aiocb.get_context());
+  if (connection.get_state() == HttpConnection::STATE_CONNECTED) {
     connection.handle(aiocb);
 
-    if (connection.get_state() == HTTPConnection::STATE_ERROR) {
+    if (connection.get_state() == HttpConnection::STATE_ERROR) {
       for (
-        vector<HTTPConnection*>::iterator connection_i = connections.begin();
+        vector<HttpConnection*>::iterator connection_i = connections.begin();
         connection_i != connections.end();
         ++connection_i
       ) {
         if (*connection_i == &connection) {
           connections.erase(connection_i);
           connection.get_socket().close();
-          HTTPConnection::dec_ref(connection);
+          HttpConnection::dec_ref(connection);
         }
       }
     }
   } else {
-    AIOCBType::dec_ref(aiocb);
+    AiocbType::dec_ref(aiocb);
   }
 }
 
-template <class AIOQueueType>
+template <class AioQueueType>
 void
-HTTPRequestQueue<AIOQueueType>::init(
+HttpRequestQueue<AioQueueType>::init(
   const SocketAddress& sockname
 ) throw(Exception) {
   if (aio_queue.associate(socket_)) {
@@ -174,7 +174,7 @@ HTTPRequestQueue<AIOQueueType>::init(
         if (socket_.listen()) {
           Buffer* recv_buffer
           = new Buffer(Buffer::getpagesize(), Buffer::getpagesize());
-          acceptAIOCB* accept_aiocb = new acceptAIOCB(socket_, recv_buffer);
+          AcceptAiocb* accept_aiocb = new AcceptAiocb(socket_, recv_buffer);
           if (aio_queue.enqueue(*accept_aiocb)) {
             return;
           }
@@ -188,8 +188,8 @@ HTTPRequestQueue<AIOQueueType>::init(
   throw Exception();
 }
 
-template <class AIOQueueType>
-YO_NEW_REF Event* HTTPRequestQueue<AIOQueueType>::timeddequeue(const Time& timeout) {
+template <class AioQueueType>
+YO_NEW_REF Event* HttpRequestQueue<AioQueueType>::timeddequeue(const Time& timeout) {
   Time timeout_remaining(timeout);
 
   for (;;) {
@@ -199,23 +199,23 @@ YO_NEW_REF Event* HTTPRequestQueue<AIOQueueType>::timeddequeue(const Time& timeo
 
     if (event != NULL) {
       switch (event->get_type_id()) {
-      case acceptAIOCB::TYPE_ID: {
-        handle(static_cast<acceptAIOCB&>(*event));
+      case AcceptAiocb::TYPE_ID: {
+        handle(static_cast<AcceptAiocb&>(*event));
       }
       break;
 
-      case recvAIOCB::TYPE_ID: {
-        handle<recvAIOCB>(static_cast<recvAIOCB&>(*event));
+      case RecvAiocb::TYPE_ID: {
+        handle<RecvAiocb>(static_cast<RecvAiocb&>(*event));
       }
       break;
 
-      case sendAIOCB::TYPE_ID: {
-        handle<sendAIOCB>(static_cast<sendAIOCB&>(*event));
+      case SendAiocb::TYPE_ID: {
+        handle<SendAiocb>(static_cast<SendAiocb&>(*event));
       }
       break;
 
-      case sendfileAIOCB::TYPE_ID: {
-        handle<sendfileAIOCB>(static_cast<sendfileAIOCB&>(*event));
+      case SendfileAiocb::TYPE_ID: {
+        handle<SendfileAiocb>(static_cast<SendfileAiocb&>(*event));
       }
       break;
 
@@ -236,9 +236,9 @@ YO_NEW_REF Event* HTTPRequestQueue<AIOQueueType>::timeddequeue(const Time& timeo
 }
 
 #ifdef _WIN32
-template class HTTPRequestQueue<yield::sockets::aio::AIOQueue>;
+template class HttpRequestQueue<yield::sockets::aio::AioQueue>;
 #endif
-template class HTTPRequestQueue<yield::sockets::aio::NBIOQueue>;
+template class HttpRequestQueue<yield::sockets::aio::NbioQueue>;
 }
 }
 }

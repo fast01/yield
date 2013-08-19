@@ -33,18 +33,18 @@
 
 namespace yield {
 namespace poll {
-FDEventQueue::FDEventQueue(bool) throw(Exception) {
+FdEventQueue::FdEventQueue(bool) throw(Exception) {
   port = port_create();
   if (port == -1) {
     throw Exception();
   }
 }
 
-FDEventQueue::~FDEventQueue() {
+FdEventQueue::~FdEventQueue() {
   close(port);
 }
 
-bool FDEventQueue::associate(fd_t fd, FDEvent::Type fd_event_types) {
+bool FdEventQueue::associate(fd_t fd, FdEvent::Type fd_event_types) {
   if (fd_event_types > 0) {
     return port_associate(
              port,
@@ -58,13 +58,13 @@ bool FDEventQueue::associate(fd_t fd, FDEvent::Type fd_event_types) {
   }
 }
 
-bool FDEventQueue::dissociate(fd_t fd) {
+bool FdEventQueue::dissociate(fd_t fd) {
   return port_dissociate(port, PORT_SOURCE_FD, fd) != -1;
 }
 
 int16_t
-FDEventQueue::poll(
-  FDEvent* fd_events,
+FdEventQueue::poll(
+  FdEvent* fd_events,
   int16_t fd_events_len,
   const Time& timeout
 ) {
@@ -99,7 +99,7 @@ FDEventQueue::poll(
 }
 }
 
-void FDEventQueue::wake() {
+void FdEventQueue::wake() {
   port_send(port, 0, NULL);
 }
 }

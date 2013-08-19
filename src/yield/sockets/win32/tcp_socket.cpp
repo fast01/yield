@@ -32,12 +32,12 @@
 
 namespace yield {
 namespace sockets {
-const int TCPSocket::DOMAIN_DEFAULT = AF_INET;
-const int TCPSocket::PROTOCOL = IPPROTO_TCP;
+const int TcpSocket::DOMAIN_DEFAULT = AF_INET;
+const int TcpSocket::PROTOCOL = IPPROTO_TCP;
 
-const int TCPSocket::Option::NODELAY = TCP_NODELAY;
+const int TcpSocket::Option::NODELAY = TCP_NODELAY;
 
-bool TCPSocket::setsockopt(int option_name, int option_value) {
+bool TcpSocket::setsockopt(int option_name, int option_value) {
   if (option_name == Option::NODELAY) {
     return ::setsockopt(
              *this,

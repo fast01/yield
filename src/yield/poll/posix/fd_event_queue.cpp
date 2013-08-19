@@ -38,10 +38,10 @@ namespace poll {
     !defined(__MACH__) && \
     !defined(__FreeBSD__) && \
     !defined(__sun)
-FDEventQueue::FDEventQueue(bool) throw(Exception) {
+FdEventQueue::FdEventQueue(bool) throw(Exception) {
   if (pipe(wake_pipe) != -1) {
     try {
-      if (!associate(wake_pipe[0], FDEvent::TYPE_READ_READY)) {
+      if (!associate(wake_pipe[0], FdEvent::TYPE_READ_READY)) {
         throw Exception();
       }
     } catch (Exception&) {
@@ -54,12 +54,12 @@ FDEventQueue::FDEventQueue(bool) throw(Exception) {
   }
 }
 
-FDEventQueue::~FDEventQueue() {
+FdEventQueue::~FdEventQueue() {
   close(wake_pipe[0]);
   close(wake_pipe[1]);
 }
 
-bool FDEventQueue::associate(fd_t fd, FDEvent::Type fd_event_types) {
+bool FdEventQueue::associate(fd_t fd, FdEvent::Type fd_event_types) {
   if (fd_event_types > 0) {
     for (
       vector<pollfd>::iterator pollfd_i = pollfds.begin();
@@ -83,7 +83,7 @@ bool FDEventQueue::associate(fd_t fd, FDEvent::Type fd_event_types) {
   }
 }
 
-bool FDEventQueue::dissociate(fd_t fd) {
+bool FdEventQueue::dissociate(fd_t fd) {
   for (
     vector<pollfd>::iterator pollfd_i = pollfds.begin();
     pollfd_i != pollfds.end();
@@ -99,7 +99,7 @@ bool FDEventQueue::dissociate(fd_t fd) {
   return false;
 }
 
-bool FDEventQueue::enqueue(YO_NEW_REF Event& event) {
+bool FdEventQueue::enqueue(YO_NEW_REF Event& event) {
   if (event_queue.enqueue(event)) {
     ssize_t write_ret = write(wake_pipe[1], "m", 1);
     debug_assert_eq(write_ret, 1);
@@ -109,7 +109,7 @@ bool FDEventQueue::enqueue(YO_NEW_REF Event& event) {
   }
 }
 
-YO_NEW_REF Event* FDEventQueue::timeddequeue(const Time& timeout) {
+YO_NEW_REF Event* FdEventQueue::timeddequeue(const Time& timeout) {
   int timeout_ms
   = (timeout == Time::FOREVER) ? -1 : static_cast<int>(timeout.ms());
   int ret = ::poll(&pollfds[0], pollfds.size(), timeout_ms);
@@ -125,7 +125,7 @@ YO_NEW_REF Event* FDEventQueue::timeddequeue(const Time& timeout) {
           read(wake_pipe[0], &data, sizeof(data));
           return event_queue.trydequeue();
         } else {
-          return new FDEvent(pollfd_.fd, pollfd_.revents);
+          return new FdEvent(pollfd_.fd, pollfd_.revents);
         }
 
         if (--ret == 0) {

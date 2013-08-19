@@ -34,7 +34,7 @@ namespace yield {
 namespace sockets {
 #ifdef YIELD_HAVE_OPENSSL
 namespace ssl {
-enum SSLVersion {
+enum SslVersion {
   SSL_VERSION_2,
   SSL_VERSION_23,
   SSL_VERSION_3,

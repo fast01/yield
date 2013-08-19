@@ -44,18 +44,18 @@ namespace yield {
 namespace sockets {
 #ifdef YIELD_HAVE_OPENSSL
 namespace ssl {
-class SSLContext : public Object {
+class SslContext : public Object {
 public:
-  SSLContext(SSLVersion ssl_version = SSL_VERSION_23) throw(Exception);
+  SslContext(SslVersion ssl_version = SSL_VERSION_23) throw(Exception);
 
-  SSLContext(
+  SslContext(
     const string& pem_certificate,
     const string& pem_private_key,
     const string& pem_private_key_passphrase,
-    SSLVersion ssl_version = SSL_VERSION_23
+    SslVersion ssl_version = SSL_VERSION_23
   ) throw(Exception);
 
-  ~SSLContext();
+  ~SslContext();
 
 public:
   operator SSL_CTX* () const {
@@ -64,12 +64,12 @@ public:
 
 public:
   // yield::Object
-  SSLContext& inc_ref() {
+  SslContext& inc_ref() {
     return Object::inc_ref(*this);
   }
 
 private:
-  void init(SSLVersion ssl_version);
+  void init(SslVersion ssl_version);
 
 public:
   static int pem_password_callback(char*, int, int, void*);

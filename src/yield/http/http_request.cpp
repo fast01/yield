@@ -36,28 +36,28 @@
 
 namespace yield {
 namespace http {
-HTTPRequest::Method HTTPRequest::Method::CONNECT(1, "CONNECT", 7);
-HTTPRequest::Method HTTPRequest::Method::COPY(2, "COPY", 4);
+HttpRequest::Method HttpRequest::Method::CONNECT(1, "CONNECT", 7);
+HttpRequest::Method HttpRequest::Method::COPY(2, "COPY", 4);
 #ifdef DELETE
 #undef DELETE
 #endif
-HTTPRequest::Method HTTPRequest::Method::DELETE(3, "DELETE", 7);
-HTTPRequest::Method HTTPRequest::Method::GET(4, "GET", 3);
-HTTPRequest::Method HTTPRequest::Method::HEAD(5, "HEAD", 4);
-HTTPRequest::Method HTTPRequest::Method::LOCK(6, "LOCK", 4);
-HTTPRequest::Method HTTPRequest::Method::MKCOL(7, "MKCOL", 5);
-HTTPRequest::Method HTTPRequest::Method::MOVE(8, "MOVE", 4);
-HTTPRequest::Method HTTPRequest::Method::OPTIONS(9, "OPTIONS", 7);
-HTTPRequest::Method HTTPRequest::Method::PATCH(10, "PATCH", 5);
-HTTPRequest::Method HTTPRequest::Method::POST(11, "POST", 4);
-HTTPRequest::Method HTTPRequest::Method::PROPFIND(12, "PROPFIND", 8);
-HTTPRequest::Method HTTPRequest::Method::PROPPATCH(13, "PROPPATCH", 9);
-HTTPRequest::Method HTTPRequest::Method::PUT(14, "PUT", 3);
-HTTPRequest::Method HTTPRequest::Method::TRACE(15, "TRACE", 5);
-HTTPRequest::Method HTTPRequest::Method::UNLOCK(16, "UNLOCK", 6);
+HttpRequest::Method HttpRequest::Method::DELETE(3, "DELETE", 7);
+HttpRequest::Method HttpRequest::Method::GET(4, "GET", 3);
+HttpRequest::Method HttpRequest::Method::HEAD(5, "HEAD", 4);
+HttpRequest::Method HttpRequest::Method::LOCK(6, "LOCK", 4);
+HttpRequest::Method HttpRequest::Method::MKCOL(7, "MKCOL", 5);
+HttpRequest::Method HttpRequest::Method::MOVE(8, "MOVE", 4);
+HttpRequest::Method HttpRequest::Method::OPTIONS(9, "OPTIONS", 7);
+HttpRequest::Method HttpRequest::Method::PATCH(10, "PATCH", 5);
+HttpRequest::Method HttpRequest::Method::POST(11, "POST", 4);
+HttpRequest::Method HttpRequest::Method::PROPFIND(12, "PROPFIND", 8);
+HttpRequest::Method HttpRequest::Method::PROPPATCH(13, "PROPPATCH", 9);
+HttpRequest::Method HttpRequest::Method::PUT(14, "PUT", 3);
+HttpRequest::Method HttpRequest::Method::TRACE(15, "TRACE", 5);
+HttpRequest::Method HttpRequest::Method::UNLOCK(16, "UNLOCK", 6);
 
-HTTPRequest::Method
-HTTPRequest::Method::parse(
+HttpRequest::Method
+HttpRequest::Method::parse(
   const char* method
 ) throw(Exception) {
   if (method != NULL) {
@@ -111,15 +111,15 @@ HTTPRequest::Method::parse(
   throw Exception("unknown method");
 }
 
-HTTPRequest::HTTPRequest(
+HttpRequest::HttpRequest(
   YO_NEW_REF Object* body,
   uint16_t fields_offset,
   Buffer& header,
   uint8_t http_version,
   Method method,
-  const yield::uri::URI& uri
+  const yield::uri::Uri& uri
 )
-  : HTTPMessage<HTTPRequest>(
+  : HttpMessage<HttpRequest>(
     body,
     fields_offset,
     header,
@@ -129,13 +129,13 @@ HTTPRequest::HTTPRequest(
   uri(uri)
 { }
 
-HTTPRequest::HTTPRequest(
+HttpRequest::HttpRequest(
   Method method,
-  const yield::uri::URI& uri,
+  const yield::uri::Uri& uri,
   YO_NEW_REF Object* body,
   uint8_t http_version
 )
-  : HTTPMessage<HTTPRequest>(body, http_version),
+  : HttpMessage<HttpRequest>(body, http_version),
     method(method),
     uri(uri) {
   get_header().put(method.get_name(), method.get_name_len());
@@ -192,7 +192,7 @@ HTTPRequest::HTTPRequest(
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const HTTPRequest& http_request) {
+std::ostream& operator<<(std::ostream& os, const HttpRequest& http_request) {
   std::ostringstream body;
   if (http_request.get_body() != NULL) {
     if (http_request.get_body()->get_type_id() == Buffer::TYPE_ID) {
@@ -221,7 +221,7 @@ std::ostream& operator<<(std::ostream& os, const HTTPRequest& http_request) {
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const HTTPRequest::Method& method) {
+std::ostream& operator<<(std::ostream& os, const HttpRequest::Method& method) {
   os << method.get_name();
   return os;
 }

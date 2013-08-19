@@ -34,21 +34,21 @@ namespace yield {
 namespace sockets {
 namespace aio {
 #ifndef _WIN32
-AIOCB::AIOCB(Socket& socket_, Object* context)
+Aiocb::Aiocb(Socket& socket_, Object* context)
   : context(Object::inc_ref(context)),
     socket_(socket_.inc_ref()) {
   error = 0;
   return_ = -1;
 }
 
-AIOCB::AIOCB(Socket& socket_, off_t offset, Object* context)
+Aiocb::Aiocb(Socket& socket_, off_t offset, Object* context)
   : context(Object::inc_ref(context)),
     socket_(socket_.inc_ref()) {
   error = 0;
   return_ = -1;
 }
 
-AIOCB::~AIOCB() {
+Aiocb::~Aiocb() {
   Object::dec_ref(context);
   Socket::dec_ref(socket_);
 }

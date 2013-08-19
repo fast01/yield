@@ -37,21 +37,21 @@ namespace http {
 /**
   An RFC 2616 HTTP response.
   Unlike its counterparts in yield.http.client and yield.http.server, this
-    HTTPResponse is not tied to a particular connection.
+    HttpResponse is not tied to a particular connection.
 */
-class HTTPResponse : public HTTPMessage<HTTPResponse> {
+class HttpResponse : public HttpMessage<HttpResponse> {
 public:
   const static uint32_t TYPE_ID = 654743796;
 
 public:
   /**
-    Construct an HTTPResponse from its constituent parts.
+    Construct an HttpResponse from its constituent parts.
     @param status_code numeric status code e.g., 200
     @param body optional body, usually a Buffer
     @param http_version HTTP version as a single byte (0 or 1 for HTTP/1.0 or
       HTTP/1.1, respectively.)
   */
-  HTTPResponse(
+  HttpResponse(
     uint16_t status_code,
     YO_NEW_REF Object* body = NULL,
     uint8_t http_version = HTTP_VERSION_DEFAULT
@@ -60,7 +60,7 @@ public:
   /**
     Empty virtual destructor.
   */
-  virtual ~HTTPResponse() { }
+  virtual ~HttpResponse() { }
 
 public:
   /**
@@ -73,7 +73,7 @@ public:
 
 public:
   // yield::Object
-  HTTPResponse& inc_ref() {
+  HttpResponse& inc_ref() {
     return Object::inc_ref(*this);
   }
 
@@ -84,13 +84,13 @@ public:
   }
 
   const char* get_type_name() const {
-    return "yield::http::HTTPResponse";
+    return "yield::http::HttpResponse";
   }
 
 protected:
-  friend class HTTPResponseParser;
+  friend class HttpResponseParser;
 
-  HTTPResponse(
+  HttpResponse(
     YO_NEW_REF Object* body,
     uint16_t fields_offset,
     Buffer& header,
@@ -102,7 +102,7 @@ private:
   uint16_t status_code;
 };
 
-std::ostream& operator<<(std::ostream&, const HTTPResponse&);
+std::ostream& operator<<(std::ostream&, const HttpResponse&);
 }
 }
 

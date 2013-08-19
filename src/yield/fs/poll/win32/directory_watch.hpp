@@ -42,14 +42,14 @@ class DirectoryWatch : public Watch {
 public:
   DirectoryWatch(
     YO_NEW_REF Directory& directory,
-    FSEvent::Type fs_event_types,
+    FsEvent::Type fs_event_types,
     const Path& path,
     Log* log = NULL
   );
 
 public:
   // yield::fs::poll::win32::Watch
-  YO_NEW_REF FSEvent* parse(const FILE_NOTIFY_INFORMATION&);
+  YO_NEW_REF FsEvent* parse(const FILE_NOTIFY_INFORMATION&);
 
 private:
   std::stack<Path> old_paths;

@@ -39,36 +39,36 @@ class SocketAddress;
 
 namespace http {
 namespace server {
-class HTTPConnection;
+class HttpConnection;
 
 /**
-  A <code>yield::http::HTTPMessageBodyChunk</code> that's bound to a server
-    <code>HTTPConnection</code>.
-  These <code>HTTPMessageBodyChunk</code>s are usually created by
-    <code>HTTPRequestQueue</code> as part of a request;
+  A <code>yield::http::HttpMessageBodyChunk</code> that's bound to a server
+    <code>HttpConnection</code>.
+  These <code>HttpMessageBodyChunk</code>s are usually created by
+    <code>HttpRequestQueue</code> as part of a request;
     response <code>HTTPMessageBodyChunks</code> can be the normal
-      <code>yield::http::HTTPMessageBodyChunk</code>s.
+      <code>yield::http::HttpMessageBodyChunk</code>s.
 */
-class HTTPMessageBodyChunk : public ::yield::http::HTTPMessageBodyChunk {
+class HttpMessageBodyChunk : public ::yield::http::HttpMessageBodyChunk {
 public:
   const static uint32_t TYPE_ID = 3690639367UL;
 
 public:
   /**
-    Construct an HTTPMessageBodyChunk that originates from the given
+    Construct an HttpMessageBodyChunk that originates from the given
       server connection.
     @param connection the server connection
     @param data the chunk data
   */
-  HTTPMessageBodyChunk(HTTPConnection& connection, YO_NEW_REF Buffer* data);
-  virtual ~HTTPMessageBodyChunk();
+  HttpMessageBodyChunk(HttpConnection& connection, YO_NEW_REF Buffer* data);
+  virtual ~HttpMessageBodyChunk();
 
 public:
   /**
     Get the server connection from which this chunk originated.
     @return the server connection from which this chunk originated
   */
-  const HTTPConnection& get_connection() const {
+  const HttpConnection& get_connection() const {
     return connection;
   }
 
@@ -79,15 +79,15 @@ public:
   }
 
   const char* get_type_name() const {
-    return "yield::http::server::HTTPMessageBodyChunk";
+    return "yield::http::server::HttpMessageBodyChunk";
   }
 
-  HTTPMessageBodyChunk& inc_ref() {
+  HttpMessageBodyChunk& inc_ref() {
     return Object::inc_ref(*this);
   }
 
 private:
-  HTTPConnection& connection;
+  HttpConnection& connection;
 };
 }
 }

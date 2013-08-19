@@ -45,7 +45,7 @@
 
 namespace yield {
 namespace http {
-HTTPMessageParser::HTTPMessageParser(Buffer& buffer)
+HttpMessageParser::HttpMessageParser(Buffer& buffer)
   : buffer(buffer.inc_ref()) {
   debug_assert_false(buffer.empty());
 
@@ -53,7 +53,7 @@ HTTPMessageParser::HTTPMessageParser(Buffer& buffer)
   eof = ps + buffer.size();
 }
 
-HTTPMessageParser::HTTPMessageParser(const string& buffer)
+HttpMessageParser::HttpMessageParser(const string& buffer)
   : buffer(Buffer::copy(buffer)) {
   debug_assert_false(buffer.empty());
 
@@ -61,12 +61,12 @@ HTTPMessageParser::HTTPMessageParser(const string& buffer)
   eof = ps + this->buffer.size();
 }
 
-HTTPMessageParser::~HTTPMessageParser() {
+HttpMessageParser::~HttpMessageParser() {
   Buffer::dec_ref(buffer);
 }
 
 bool
-HTTPMessageParser::parse_body(
+HttpMessageParser::parse_body(
   size_t content_length,
   YO_NEW_REF Object*& body
 ) {
@@ -85,7 +85,7 @@ HTTPMessageParser::parse_body(
     return false;
 }
 
-Object* HTTPMessageParser::parse_body_chunk() {
+Object* HttpMessageParser::parse_body_chunk() {
   const char* chunk_data_p = NULL;
   size_t chunk_size = 0;
   const char* chunk_size_p = NULL;
@@ -126,7 +126,7 @@ Object* HTTPMessageParser::parse_body_chunk() {
 }
 
 bool
-HTTPMessageParser::parse_content_length_field(
+HttpMessageParser::parse_content_length_field(
   const char* ps,
   const char* pe,
   size_t& content_length
@@ -166,7 +166,7 @@ HTTPMessageParser::parse_content_length_field(
 }
 
 bool
-HTTPMessageParser::parse_content_length_field(
+HttpMessageParser::parse_content_length_field(
   const iovec& field_name,
   const iovec& field_value,
   size_t& content_length
@@ -201,14 +201,14 @@ HTTPMessageParser::parse_content_length_field(
     return false;
 }
 
-DateTime HTTPMessageParser::parse_date(const iovec& date) {
+DateTime HttpMessageParser::parse_date(const iovec& date) {
 return parse_date(
           static_cast<const char*>(date.iov_base),
           static_cast<const char*>(date.iov_base) + date.iov_len
         );
 }
 
-DateTime HTTPMessageParser::parse_date(const char* ps, const char* pe) {
+DateTime HttpMessageParser::parse_date(const char* ps, const char* pe) {
   int cs;
   const char* eof = pe;
   char* p = const_cast<char*>(ps);
@@ -239,7 +239,7 @@ DateTime HTTPMessageParser::parse_date(const char* ps, const char* pe) {
 }
 
 bool
-HTTPMessageParser::parse_field(
+HttpMessageParser::parse_field(
   const char* ps,
   const char* pe,
   const iovec& in_field_name,
@@ -284,7 +284,7 @@ HTTPMessageParser::parse_field(
 }
 
 void
-HTTPMessageParser::parse_fields(
+HttpMessageParser::parse_fields(
   const char* ps,
   const char* pe,
   vector< std::pair<iovec, iovec> >& fields
@@ -313,7 +313,7 @@ HTTPMessageParser::parse_fields(
 }
 
 bool
-HTTPMessageParser::parse_fields(
+HttpMessageParser::parse_fields(
   uint16_t& fields_offset,
   size_t& content_length
 ) {

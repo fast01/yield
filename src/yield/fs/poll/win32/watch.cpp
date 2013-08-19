@@ -41,7 +41,7 @@ namespace poll {
 namespace win32 {
 Watch::Watch(
   YO_NEW_REF Directory& directory,
-  FSEvent::Type fs_event_types,
+  FsEvent::Type fs_event_types,
   Log* log,
   const Path& path
 ) : yield::fs::poll::Watch(fs_event_types, log, path),
@@ -53,19 +53,19 @@ Watch::Watch(
   notify_filter = 0;
 
   if (
-    fs_event_types & FSEvent::TYPE_DIRECTORY_ADD
+    fs_event_types & FsEvent::TYPE_DIRECTORY_ADD
     ||
-    fs_event_types & FSEvent::TYPE_DIRECTORY_REMOVE
+    fs_event_types & FsEvent::TYPE_DIRECTORY_REMOVE
     ||
-    fs_event_types & FSEvent::TYPE_DIRECTORY_RENAME
+    fs_event_types & FsEvent::TYPE_DIRECTORY_RENAME
   ) {
     notify_filter |= FILE_NOTIFY_CHANGE_DIR_NAME;
   }
 
   if (
-    fs_event_types & FSEvent::TYPE_DIRECTORY_MODIFY
+    fs_event_types & FsEvent::TYPE_DIRECTORY_MODIFY
     ||
-    fs_event_types & FSEvent::TYPE_FILE_MODIFY
+    fs_event_types & FsEvent::TYPE_FILE_MODIFY
   ) {
     notify_filter |= FILE_NOTIFY_CHANGE_ATTRIBUTES |
                      FILE_NOTIFY_CHANGE_CREATION |
@@ -75,11 +75,11 @@ Watch::Watch(
   }
 
   if (
-    fs_event_types & FSEvent::TYPE_FILE_ADD
+    fs_event_types & FsEvent::TYPE_FILE_ADD
     ||
-    fs_event_types & FSEvent::TYPE_FILE_REMOVE
+    fs_event_types & FsEvent::TYPE_FILE_REMOVE
     ||
-    fs_event_types & FSEvent::TYPE_FILE_RENAME
+    fs_event_types & FsEvent::TYPE_FILE_RENAME
   ) {
     notify_filter |= FILE_NOTIFY_CHANGE_FILE_NAME;
   }

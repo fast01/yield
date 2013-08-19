@@ -42,35 +42,35 @@
 namespace yield {
 namespace poll {
 /**
-  EventQueue for file descriptor events (<code>FDEvent</code>s).
+  EventQueue for file descriptor events (<code>FdEvent</code>s).
   Implemented in terms of efficient poll() variants on different platforms.
 */
-class FDEventQueue : public EventQueue {
+class FdEventQueue : public EventQueue {
 public:
   /**
-    Construct an FDEventQueue, allocating any associated system resources.
-    @param for_sockets_only true if this FDEventQueue is only for sockets
+    Construct an FdEventQueue, allocating any associated system resources.
+    @param for_sockets_only true if this FdEventQueue is only for sockets
   */
-  FDEventQueue(bool for_sockets_only = false) throw(Exception);
+  FdEventQueue(bool for_sockets_only = false) throw(Exception);
 
   /**
-    Destroy an FDEventQueue, deallocating any associated system resources.
+    Destroy an FdEventQueue, deallocating any associated system resources.
   */
-  ~FDEventQueue();
+  ~FdEventQueue();
 
 public:
   /**
-    Associate a file descriptor with this FDEventQueue,
-      watching for the specified FDEvent types (read readiness,
+    Associate a file descriptor with this FdEventQueue,
+      watching for the specified FdEvent types (read readiness,
       write readiness, et al.).
    @param fd the file descriptor to associate
-   @param fd_event_types FDEvent types to monitor
+   @param fd_event_types FdEvent types to monitor
    @return true on success, false+errno on failure
   */
-  bool associate(fd_t fd, FDEvent::Type fd_event_types);
+  bool associate(fd_t fd, FdEvent::Type fd_event_types);
 
   /**
-    Dissociate a file descriptor from this FDEventQueue.
+    Dissociate a file descriptor from this FdEventQueue.
     @param fd the file descriptor to dissociate
     @return true on success, false+errno on failure
   */

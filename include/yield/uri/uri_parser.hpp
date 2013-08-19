@@ -35,39 +35,39 @@
 namespace yield {
 namespace uri {
 /**
-  An RFC 3986-conformant URI parser.
+  An RFC 3986-conformant Uri parser.
 */
-class URIParser {
+class UriParser {
 public:
   /**
-    Construct a URI parser on the specified string.
-    @param ps pointer to the beginning of the URI string
-    @param pe pointer to the end of the URI string
+    Construct a Uri parser on the specified string.
+    @param ps pointer to the beginning of the Uri string
+    @param pe pointer to the end of the Uri string
   */
-  URIParser(const char* ps, const char* pe)
+  UriParser(const char* ps, const char* pe)
     : p(const_cast<char*>(ps)), pe(pe), ps(ps) {
   }
 
   /**
-    Construct a URI parser on the specified buffer.
-    @param buffer buffer with the URI
+    Construct a Uri parser on the specified buffer.
+    @param buffer buffer with the Uri
   */
-  URIParser(Buffer& buffer) {
+  UriParser(Buffer& buffer) {
     p = buffer;
     ps = buffer;
     pe = static_cast<const char*>(buffer) + buffer.size();
   }
 
   /**
-    Parse a URI from the string or buffer specified in the constructor.
-    @param[out] fragment component of the URI
-    @param[out] host component of the URI
-    @param[out] path component of the URI
-    @param[out] port component of the URI
-    @param[out] query component of the URI
-    @param[out] scheme component of the URI
-    @param[out] userinfo component of the URI
-    @return true if a URI was successfully parsed, false on failure
+    Parse a Uri from the string or buffer specified in the constructor.
+    @param[out] fragment component of the Uri
+    @param[out] host component of the Uri
+    @param[out] path component of the Uri
+    @param[out] port component of the Uri
+    @param[out] query component of the Uri
+    @param[out] scheme component of the Uri
+    @param[out] userinfo component of the Uri
+    @return true if a Uri was successfully parsed, false on failure
   */
   bool parse(
     iovec& fragment,

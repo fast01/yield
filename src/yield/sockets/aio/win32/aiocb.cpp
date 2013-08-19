@@ -35,7 +35,7 @@
 namespace yield {
 namespace sockets {
 namespace aio {
-AIOCB::AIOCB(Socket& socket_, Object* context)
+Aiocb::Aiocb(Socket& socket_, Object* context)
   : context(Object::inc_ref(context)),
     socket_(socket_.inc_ref()) {
   static_assert(sizeof(overlapped) == sizeof(::OVERLAPPED), "");
@@ -46,7 +46,7 @@ AIOCB::AIOCB(Socket& socket_, Object* context)
   return_ = -1;
 }
 
-AIOCB::AIOCB(Socket& socket_, off_t offset, Object *context)
+Aiocb::Aiocb(Socket& socket_, off_t offset, Object *context)
   : context(Object::inc_ref(context)),
     socket_(socket_.inc_ref()) {
   memset(&overlapped, 0, sizeof(overlapped));
@@ -58,13 +58,13 @@ AIOCB::AIOCB(Socket& socket_, off_t offset, Object *context)
   return_ = -1;
 }
 
-AIOCB::~AIOCB() {
+Aiocb::~Aiocb() {
   Object::dec_ref(context);
   Socket::dec_ref(socket_);
 }
 
-AIOCB& AIOCB::cast(::OVERLAPPED& lpOverlapped) {
-  AIOCB* aiocb;
+Aiocb& Aiocb::cast(::OVERLAPPED& lpOverlapped) {
+  Aiocb* aiocb;
 
   memcpy_s(
     &aiocb,
@@ -76,7 +76,7 @@ AIOCB& AIOCB::cast(::OVERLAPPED& lpOverlapped) {
   return *aiocb;
 }
 
-AIOCB::operator ::OVERLAPPED* () {
+Aiocb::operator ::OVERLAPPED* () {
   return reinterpret_cast<::OVERLAPPED*>(&overlapped);
 }
 }

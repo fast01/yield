@@ -36,7 +36,7 @@
 
 namespace yield {
 namespace uri {
-URI::URI(
+Uri::Uri(
   Buffer& buffer,
   const iovec& fragment,
   const iovec& host,
@@ -56,22 +56,22 @@ URI::URI(
     userinfo(userinfo) {
 }
 
-URI::URI(const char* uri) throw(Exception)
+Uri::Uri(const char* uri) throw(Exception)
   : buffer(NULL) {
   init(uri, strlen(uri));
 }
 
-URI::URI(const string& uri) throw(Exception)
+Uri::Uri(const string& uri) throw(Exception)
   : buffer(NULL) {
   init(uri.data(), uri.size());
 }
 
-URI::URI(const char* uri, size_t uri_len) throw(Exception)
+Uri::Uri(const char* uri, size_t uri_len) throw(Exception)
   : buffer(NULL) {
   init(uri, uri_len);
 }
 
-URI::URI(URI& other)
+Uri::Uri(Uri& other)
   : buffer(&other.buffer->inc_ref()),
     fragment(other.fragment),
     host(other.host),
@@ -82,7 +82,7 @@ URI::URI(URI& other)
     userinfo(other.userinfo)
 { }
 
-URI::URI(const URI& other)
+Uri::Uri(const Uri& other)
   : buffer(&other.buffer->copy()),
     port(other.port) {
   char* old_base = static_cast<char*>(*other.buffer);
@@ -95,15 +95,15 @@ URI::URI(const URI& other)
   rebase(old_base, other.userinfo, new_base, userinfo);
 }
 
-URI::~URI() {
+Uri::~Uri() {
   Buffer::dec_ref(*buffer);
 }
 
-void URI::init(const char* uri, size_t uri_len) {
+void Uri::init(const char* uri, size_t uri_len) {
   buffer = &Buffer::copy(uri, uri_len);
 
   if (
-    !URIParser(*buffer).parse(
+    !UriParser(*buffer).parse(
       fragment,
       host,
       path,
@@ -113,15 +113,15 @@ void URI::init(const char* uri, size_t uri_len) {
       userinfo
     )
   ) {
-    throw Exception("invalid URI");
+    throw Exception("invalid Uri");
   }
 }
 
-string URI::iovec_to_string(const iovec& iovec_) {
+string Uri::iovec_to_string(const iovec& iovec_) {
   return string(static_cast<char*>(iovec_.iov_base), iovec_.iov_len);
 }
 
-std::ostream& operator<<(std::ostream& os, const URI& uri) {
+std::ostream& operator<<(std::ostream& os, const Uri& uri) {
   if (uri.has_scheme()) {
     os.write(static_cast<char*>(uri.scheme.iov_base), uri.scheme.iov_len);
     os.write("://", 3);
@@ -156,13 +156,13 @@ std::ostream& operator<<(std::ostream& os, const URI& uri) {
   return os;
 }
 
-URI::operator string() const {
+Uri::operator string() const {
   std::ostringstream uri;
   uri << *this;
   return uri.str();
 }
 
-bool URI::operator==(const URI& other) const {
+bool Uri::operator==(const Uri& other) const {
   return
     fragment.iov_len == other.fragment.iov_len
     &&
@@ -191,22 +191,22 @@ bool URI::operator==(const URI& other) const {
     memcmp(userinfo.iov_base, other.userinfo.iov_base, userinfo.iov_len) == 0;
 }
 
-URI URI::operator+(const char* s) const {
+Uri Uri::operator+(const char* s) const {
   std::ostringstream uri;
   uri << *this;
   uri << s;
-  return URI(uri.str());
+  return Uri(uri.str());
 }
 
-URI URI::operator+(const string& s) const {
+Uri Uri::operator+(const string& s) const {
   std::ostringstream uri;
   uri << *this;
   uri << s;
-  return URI(uri.str());
+  return Uri(uri.str());
 }
 
 void
-URI::rebase(
+Uri::rebase(
   char* old_base,
   const iovec& old_iov,
   char* new_base,

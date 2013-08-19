@@ -43,23 +43,23 @@ class Buffer;
 
 namespace uri {
 /**
-  A parsed Uniform Resource Identifier (URI).
+  A parsed Uniform Resource Identifier (Uri).
 */
-class URI : public Object {
+class Uri : public Object {
 public:
   /**
-    Construct a URI from its constituent components:
+    Construct a Uri from its constituent components:
       scheme://userinfo\@host:port/path\#fragment?query
     @param buffer the underlying buffer that the various iovecs point into
-    @param fragment fragment component of the URI
-    @param host host component of the URI
-    @param path path component of the URI
-    @param port port component of the URI
-    @param query query component of the URI
-    @param scheme scheme component of the URI
-    @param userinfo userinfo component of the URI
+    @param fragment fragment component of the Uri
+    @param host host component of the Uri
+    @param path path component of the Uri
+    @param port port component of the Uri
+    @param query query component of the Uri
+    @param scheme scheme component of the Uri
+    @param userinfo userinfo component of the Uri
   */
-  URI(
+  Uri(
     Buffer& buffer,
     const iovec& fragment,
     const iovec& host,
@@ -71,145 +71,145 @@ public:
   );
 
   /**
-    Construct a URI by parsing a string.
-    @param uri the URI string
+    Construct a Uri by parsing a string.
+    @param uri the Uri string
   */
-  URI(const char* uri) throw(Exception);
+  Uri(const char* uri) throw(Exception);
 
   /**
-    Construct a URI by parsing a string.
-    @param uri the URI string
+    Construct a Uri by parsing a string.
+    @param uri the Uri string
   */
-  URI(const string& uri) throw(Exception);
+  Uri(const string& uri) throw(Exception);
 
   /**
-    Construct a URI by parsing a string.
-    @param uri the URI string
+    Construct a Uri by parsing a string.
+    @param uri the Uri string
     @param uri_len length of uri
   */
-  URI(const char* uri, size_t uri_len) throw(Exception);
+  Uri(const char* uri, size_t uri_len) throw(Exception);
 
   /**
     Copy constructor that minimizes allocations by taking a reference
       to other's buffer instead of copying it.
-    @param other URI to copy
+    @param other Uri to copy
   */
-  URI(URI& other);
+  Uri(Uri& other);
 
   /**
     Copy constructor that preserves const-correctness by copying other's
       buffer instead of taking a reference to it.
   */
-  URI(const URI& other);
+  Uri(const Uri& other);
 
-  ~URI();
+  ~Uri();
 
 public:
   /**
-    Get the fragment component of the URI, copying into a temporary string.
-    @return the fragment component of the URI
+    Get the fragment component of the Uri, copying into a temporary string.
+    @return the fragment component of the Uri
   */
   string get_fragment() const {
     return iovec_to_string(fragment);
   }
 
   /**
-    Get the fragment component of the URI, returning a pointer into URI's buffer
+    Get the fragment component of the Uri, returning a pointer into Uri's buffer
       instead of copying.
-    @param[out] fragment fragment component of the URI
+    @param[out] fragment fragment component of the Uri
   */
   void get_fragment(iovec& fragment) const {
     fragment = this->fragment;
   }
 
   /**
-    Get the host component of the URI, copying into a temporary string.
-    @return the host component of the URI
+    Get the host component of the Uri, copying into a temporary string.
+    @return the host component of the Uri
   */
   string get_host() const {
     return iovec_to_string(host);
   }
 
   /**
-    Get the host component of the URI, returning a pointer into URI's buffer
+    Get the host component of the Uri, returning a pointer into Uri's buffer
       instead of copying.
-    @param[out] host host component of the URI
+    @param[out] host host component of the Uri
   */
   void get_host(iovec& host) const {
     host = this->host;
   }
 
   /**
-    Get the path component of the URI, copying into a temporary string.
-    @return the path component of the URI
+    Get the path component of the Uri, copying into a temporary string.
+    @return the path component of the Uri
   */
   string get_path() const {
     return iovec_to_string(path);
   }
 
   /**
-    Get the path component of the URI, returning a pointer into URI's buffer
+    Get the path component of the Uri, returning a pointer into Uri's buffer
       instead of copying.
-    @param[out] path path component of the URI
+    @param[out] path path component of the Uri
   */
   void get_path(iovec& path) const {
     path = this->path;
   }
 
   /**
-    Get the port component of the URI.
-    @return the port component of the URI
+    Get the port component of the Uri.
+    @return the port component of the Uri
   */
   uint16_t get_port() const {
     return port;
   }
 
   /**
-    Get the scheme component of the URI, copying into a temporary string.
-    @return the scheme component of the URI
+    Get the scheme component of the Uri, copying into a temporary string.
+    @return the scheme component of the Uri
   */
   string get_scheme() const {
     return iovec_to_string(scheme);
   }
 
   /**
-    Get the scheme component of the URI, returning a pointer into URI's buffer
+    Get the scheme component of the Uri, returning a pointer into Uri's buffer
       instead of copying.
-    @param[out] scheme scheme component of the URI
+    @param[out] scheme scheme component of the Uri
   */
   void get_scheme(iovec& scheme) const {
     scheme = this->scheme;
   }
 
   /**
-    Get the query component of the URI, copying into a temporary string.
-    @return the query component of the URI
+    Get the query component of the Uri, copying into a temporary string.
+    @return the query component of the Uri
   */
   string get_query() const {
     return iovec_to_string(query);
   }
 
   /**
-    Get the query component of the URI, returning a pointer into URI's buffer
+    Get the query component of the Uri, returning a pointer into Uri's buffer
       instead of copying.
-    @param[out] query query component of the URI
+    @param[out] query query component of the Uri
   */
   void get_query(iovec& query) const {
     query = this->query;
   }
 
   /**
-    Get the userinfo component of the URI, copying into a temporary string.
-    @return the userinfo component of the URI
+    Get the userinfo component of the Uri, copying into a temporary string.
+    @return the userinfo component of the Uri
   */
   string get_userinfo() const {
     return iovec_to_string(userinfo);
   }
 
   /**
-    Get the userinfo component of the URI, returning a pointer into URI's buffer
+    Get the userinfo component of the Uri, returning a pointer into Uri's buffer
       instead of copying.
-    @param[out] userinfo userinfo component of the URI
+    @param[out] userinfo userinfo component of the Uri
   */
   void get_userinfo(iovec& userinfo) const {
     userinfo = this->userinfo;
@@ -217,40 +217,40 @@ public:
 
 public:
   /**
-    Check if the URI has a fragment component.
-    @return true if the URI has a fragment component
+    Check if the Uri has a fragment component.
+    @return true if the Uri has a fragment component
   */
   bool has_fragment() const {
     return fragment.iov_len > 0;
   }
 
   /**
-    Check if the URI has a host component.
-    @return true if the URI has a host component
+    Check if the Uri has a host component.
+    @return true if the Uri has a host component
   */
   bool has_host() const {
     return host.iov_len > 0;
   }
 
   /**
-    Check if the URI has a path component.
-    @return true if the URI has a path component
+    Check if the Uri has a path component.
+    @return true if the Uri has a path component
   */
   bool has_path() const {
     return path.iov_len > 0;
   }
 
   /**
-    Check if the URI has a port component.
-    @return true if the URI has a port component
+    Check if the Uri has a port component.
+    @return true if the Uri has a port component
   */
   bool has_port() const {
     return port != 0;
   }
 
   /**
-    Check if the URI has a query component.
-    @return true if the URI has a query component
+    Check if the Uri has a query component.
+    @return true if the Uri has a query component
   */
   bool has_query() const {
     return query.iov_len > 0;
@@ -258,16 +258,16 @@ public:
 
 
   /**
-    Check if the URI has a scheme component.
-    @return true if the URI has a scheme component
+    Check if the Uri has a scheme component.
+    @return true if the Uri has a scheme component
   */
   bool has_scheme() const {
     return scheme.iov_len > 0;
   }
 
   /**
-    Check if the URI has a userinfo component.
-    @return true if the URI has a userinfo component
+    Check if the Uri has a userinfo component.
+    @return true if the Uri has a userinfo component
   */
   bool has_userinfo() const {
     return userinfo.iov_len > 0;
@@ -275,38 +275,38 @@ public:
 
 public:
   /**
-    Return a string representation of the URI.
-    @return a string representation of the URI
+    Return a string representation of the Uri.
+    @return a string representation of the Uri
   */
   operator string() const;
 
 public:
   /**
     Compare two URIs for equality.
-    @param other URI to compare this one to
+    @param other Uri to compare this one to
     @return true if the two URIs are equal
   */
-  bool operator==(const URI& other) const;
+  bool operator==(const Uri& other) const;
 
 public:
   /**
-    Concatenate a string to the URI.
-    @param s string to concatenate to the URI
-    @return a new URI with the added string
+    Concatenate a string to the Uri.
+    @param s string to concatenate to the Uri
+    @return a new Uri with the added string
   */
-  URI operator+(const char* s) const;
+  Uri operator+(const char* s) const;
 
   /**
-    Concatenate a string to the URI.
-    @param s string to concatenate to the URI
-    @return a new URI with the added string
+    Concatenate a string to the Uri.
+    @param s string to concatenate to the Uri
+    @return a new Uri with the added string
   */
-  URI operator+(const string& s) const;
+  Uri operator+(const string& s) const;
 
 public:
   /**
-    Set the port component of the URI.
-    @param port new port component of the URI
+    Set the port component of the Uri.
+    @param port new port component of the Uri
   */
   void set_port(uint16_t port) {
     this->port = port;
@@ -314,12 +314,12 @@ public:
 
 public:
   // yield::Object
-  URI& inc_ref() {
+  Uri& inc_ref() {
     return Object::inc_ref(*this);
   }
 
 private:
-  friend std::ostream& operator<<(std::ostream&, const URI&);
+  friend std::ostream& operator<<(std::ostream&, const Uri&);
 
 private:
   void init(const char* uri, size_t uri_len);
@@ -344,7 +344,7 @@ private:
   iovec userinfo;
 };
 
-std::ostream& operator<<(std::ostream&, const URI&);
+std::ostream& operator<<(std::ostream&, const Uri&);
 }
 }
 

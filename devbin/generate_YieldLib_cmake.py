@@ -20,7 +20,7 @@ for src_dir_name, source_group_name in (('include', 'Header Files'), ('src', 'So
 		dir_relpath_ = dir_relpath.replace(os.path.sep, '_').upper().rstrip('.')
 		if dir_path == src_dir_path:
 			dir_relpath_ += '_'
-		globs.append("""file(GLOB %(dir_relpath_)s "%(dir_relpath_posix)s/*.h" "%(dir_relpath_posix)s/*.hpp" "%(dir_relpath_posix)s/*.cpp" "%(dir_relpath_posix)s/*.h")""" % locals())
+		globs.append("""file(GLOB %(dir_relpath_)s "%(dir_relpath_posix)s/*.h" "%(dir_relpath_posix)s/*.hpp" "%(dir_relpath_posix)s/*.cpp" "%(dir_relpath_posix)s/*.h" "%(dir_relpath_posix)s/*.rl")""" % locals())
 		add_library_files.append("\t${%(dir_relpath_)s}" % locals())
 		if dir_name in PLATFORM_NAMES and dir_name != 'win32':
 			set_source_file_properties.append("\tset_source_files_properties(${%(dir_relpath_)s} PROPERTIES HEADER_FILE_ONLY true)" % locals())

@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_SOCKETS_AIO_SENDFILE_AIOCB_HPP_
-#define _YIELD_SOCKETS_AIO_SENDFILE_AIOCB_HPP_
+#ifndef _YIELD_SOCKETS_AIO_SENDFILE_Aiocb_HPP_
+#define _YIELD_SOCKETS_AIO_SENDFILE_Aiocb_HPP_
 
 #include "yield/sockets/aio/aiocb.hpp"
 
@@ -42,28 +42,28 @@ namespace aio {
 /**
   AIO control block for sendfile operations on sockets.
 */
-class sendfileAIOCB : public AIOCB {
+class SendfileAiocb : public Aiocb {
 public:
   const static uint32_t TYPE_ID = 2151573397UL;
 
 public:
   /**
-    Construct a sendfileAIOCB, passing the same parameters as to sendfile.
+    Construct a SendfileAiocb, passing the same parameters as to sendfile.
     @param socket_ socket to send data on
     @param fd file descriptor from which to send data
     @param context optional context object
   */
-  sendfileAIOCB(StreamSocket& socket_, fd_t fd, Object* context = NULL);
+  SendfileAiocb(StreamSocket& socket_, fd_t fd, Object* context = NULL);
 
   /**
-    Construct a sendfileAIOCB, passing the same parameters as to sendfile.
+    Construct a SendfileAiocb, passing the same parameters as to sendfile.
     @param socket_ socket to send data on
     @param fd file descriptor from which to send data
     @param offset offset in the file from which to send data
     @param nbytes number of bytes to send
     @param context optional context object
   */
-  sendfileAIOCB(
+  SendfileAiocb(
     StreamSocket& socket_,
     fd_t fd,
     off_t offset,
@@ -71,7 +71,7 @@ public:
     Object* context = NULL
   );
 
-  ~sendfileAIOCB();
+  ~SendfileAiocb();
 
 public:
   /**
@@ -111,7 +111,7 @@ public:
   }
 
   const char* get_type_name() const {
-    return "yield::sockets::aio::sendfileAIOCB";
+    return "yield::sockets::aio::SendfileAiocb";
   }
 
 private:
@@ -124,12 +124,12 @@ private:
 };
 
 /**
-  Print a string representation of a sendfileAIOCB to a std::ostream.
+  Print a string representation of a SendfileAiocb to a std::ostream.
   @param os std::ostream to print to
-  @param sendfile_aiocb sendfileAIOCB to print
+  @param sendfile_aiocb SendfileAiocb to print
   @return os
 */
-std::ostream& operator<<(std::ostream& os, sendfileAIOCB& sendfile_aiocb);
+std::ostream& operator<<(std::ostream& os, SendfileAiocb& sendfile_aiocb);
 }
 }
 }

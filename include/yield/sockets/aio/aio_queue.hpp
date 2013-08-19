@@ -44,25 +44,25 @@ namespace aio {
 /**
   Queue for asynchronous input/output (AIO) operations on sockets.
   The queue is similar to Win32 I/O completion ports or Linux io_submit AIO:
-    AIO operations are described by AIO control blocks (AIOCBs), enqueued
+    AIO operations are described by AIO control blocks (Aiocbs), enqueued
     to the AIO queue, and dequeued on completion.
-  The AIOQueue also serves as a general thread-safe EventQueue, passing non-AIOCB
+  The AioQueue also serves as a general thread-safe EventQueue, passing non-Aiocb
     events through from producer to consumer.
 */
 #ifdef _WIN32
-class AIOQueue : public EventQueue {
+class AioQueue : public EventQueue {
 public:
   /**
-    Construct an AIOQueue with an optional error and tracing log.
+    Construct an AioQueue with an optional error and tracing log.
     @param log optional error and tracing log
   */
-  AIOQueue(YO_NEW_REF Log* log = NULL);
+  AioQueue(YO_NEW_REF Log* log = NULL);
 
-  ~AIOQueue();
+  ~AioQueue();
 
 public:
   /**
-    Associate a socket with this AIOQueue.
+    Associate a socket with this AioQueue.
     On Win32 it is necessary to call this method once per socket before
       enqueueing an AIO operation/AIO operation on the socket.
   */
@@ -71,10 +71,10 @@ public:
 public:
   // yield::Object
   const char* get_type_name() const {
-    return "yield::sockets::aio::AIOQueue";
+    return "yield::sockets::aio::AioQueue";
   }
 
-  AIOQueue& inc_ref() {
+  AioQueue& inc_ref() {
     return Object::inc_ref(*this);
   }
 
@@ -84,16 +84,16 @@ public:
   YO_NEW_REF Event* timeddequeue(const Time& timeout);
 
 private:
-  template <class AIOCBType> void log_completion(AIOCBType& aiocb);
-  template <class AIOCBType> void log_enqueue(AIOCBType& aiocb);
-  template <class AIOCBType> void log_error(AIOCBType& aiocb);
+  template <class AiocbType> void log_completion(AiocbType& aiocb);
+  template <class AiocbType> void log_enqueue(AiocbType& aiocb);
+  template <class AiocbType> void log_error(AiocbType& aiocb);
 
 private:
   fd_t hIoCompletionPort;
   Log* log;
 };
 #else
-typedef NBIOQueue AIOQueue;
+typedef NbioQueue AioQueue;
 #endif
 }
 }

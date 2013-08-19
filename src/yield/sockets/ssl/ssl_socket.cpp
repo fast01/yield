@@ -38,49 +38,49 @@ namespace yield {
 namespace sockets {
 #ifdef YIELD_HAVE_OPENSSL
 namespace ssl {
-SSLSocket::SSLSocket(int domain)
-  : TCPSocket(domain),
-    ssl_context(*new SSLContext()) {
+SslSocket::SslSocket(int domain)
+  : TcpSocket(domain),
+    ssl_context(*new SslContext()) {
   init(ssl_context);
 }
 
-SSLSocket::SSLSocket(SSLContext& ssl_context, int domain)
-  : TCPSocket(domain),
+SslSocket::SslSocket(SslContext& ssl_context, int domain)
+  : TcpSocket(domain),
     ssl_context(ssl_context.inc_ref()) {
   init(ssl_context);
 }
 
-SSLSocket::SSLSocket(
+SslSocket::SslSocket(
   int domain,
   socket_t socket_,
   SSL* ssl,
-  SSLContext& ssl_context
-) : TCPSocket(domain, socket_),
+  SslContext& ssl_context
+) : TcpSocket(domain, socket_),
   ssl(ssl),
   ssl_context(ssl_context.inc_ref()) {
   init(ssl);
 }
 
-SSLSocket::~SSLSocket() {
+SslSocket::~SslSocket() {
   SSL_free(ssl);
-  SSLContext::dec_ref(ssl_context);
+  SslContext::dec_ref(ssl_context);
 }
 
-YO_NEW_REF SSLSocket* SSLSocket::accept() {
+YO_NEW_REF SslSocket* SslSocket::accept() {
   SocketAddress peername;
   return accept(peername);
 }
 
-YO_NEW_REF SSLSocket* SSLSocket::accept(SocketAddress& peername) {
-  SSLSocket* ssl_socket = static_cast<SSLSocket*>(TCPSocket::accept(peername));
+YO_NEW_REF SslSocket* SslSocket::accept(SocketAddress& peername) {
+  SslSocket* ssl_socket = static_cast<SslSocket*>(TcpSocket::accept(peername));
   if (ssl_socket != NULL) {
     SSL_set_accept_state(*ssl_socket);
   }
   return ssl_socket;
 }
 
-bool SSLSocket::connect(const SocketAddress& peername) {
-  if (TCPSocket::connect(peername)) {
+bool SslSocket::connect(const SocketAddress& peername) {
+  if (TcpSocket::connect(peername)) {
     SSL_set_connect_state(ssl);
     return true;
   } else {
@@ -88,16 +88,16 @@ bool SSLSocket::connect(const SocketAddress& peername) {
   }
 }
 
-bool SSLSocket::do_handshake() {
+bool SslSocket::do_handshake() {
   return SSL_do_handshake(ssl) == 1;
 }
 
-YO_NEW_REF SSLSocket* SSLSocket::dup() {
+YO_NEW_REF SslSocket* SslSocket::dup() {
   socket_t socket_ = Socket::create(get_domain(), TYPE, PROTOCOL);
   if (socket_ != -1) {
     SSL* ssl = SSL_new(ssl_context);
     if (ssl != NULL) {
-      return new SSLSocket(get_domain(), socket_, ssl, ssl_context);
+      return new SslSocket(get_domain(), socket_, ssl, ssl_context);
     } else {
       SSL_free(ssl);
       return NULL;
@@ -107,16 +107,16 @@ YO_NEW_REF SSLSocket* SSLSocket::dup() {
   }
 }
 
-YO_NEW_REF SSLSocket* SSLSocket::dup2(socket_t socket_) {
+YO_NEW_REF SslSocket* SslSocket::dup2(socket_t socket_) {
   SSL* ssl = SSL_new(ssl_context);
   if (ssl != NULL) {
-    return new SSLSocket(get_domain(), socket_, ssl, ssl_context);
+    return new SslSocket(get_domain(), socket_, ssl, ssl_context);
   } else {
     return NULL;
   }
 }
 
-void SSLSocket::init(SSLContext& ssl_context) {
+void SslSocket::init(SslContext& ssl_context) {
   ssl = SSL_new(ssl_context);
   if (ssl != NULL) {
     try {
@@ -130,7 +130,7 @@ void SSLSocket::init(SSLContext& ssl_context) {
   }
 }
 
-void SSLSocket::init(SSL* ssl) {
+void SslSocket::init(SSL* ssl) {
   BIO* bio = BIO_new_socket(static_cast<socket_t>(*this), BIO_NOCLOSE);
   if (bio != NULL) {
     SSL_set_bio(ssl, bio, bio);
@@ -142,13 +142,13 @@ void SSLSocket::init(SSL* ssl) {
   //  throw SSLException();
 }
 
-bool SSLSocket::listen() {
+bool SslSocket::listen() {
   SSL_set_accept_state(ssl);
-  return TCPSocket::listen();
+  return TcpSocket::listen();
 }
 
 /*
-void SSLSocket::info_callback( const SSL* ssl, int where, int ret )
+void SslSocket::info_callback( const SSL* ssl, int where, int ret )
 {
   ostringstream info;
 
@@ -178,16 +178,16 @@ void SSLSocket::info_callback( const SSL* ssl, int where, int ret )
   else
     return;
 
-  reinterpret_cast<SSLSocket*>( SSL_get_app_data( const_cast<SSL*>( ssl ) ) )
-    ->log->get_stream( Log::NOTICE ) << "SSLSocket: " << info.str();
+  reinterpret_cast<SslSocket*>( SSL_get_app_data( const_cast<SSL*>( ssl ) ) )
+    ->log->get_stream( Log::NOTICE ) << "SslSocket: " << info.str();
 }
 */
 
-ssize_t SSLSocket::recv(Buffer& buffer, const MessageFlags& flags) {
-  return TCPSocket::recv(buffer, flags);
+ssize_t SslSocket::recv(Buffer& buffer, const MessageFlags& flags) {
+  return TcpSocket::recv(buffer, flags);
 }
 
-ssize_t SSLSocket::recv(void* buf, size_t buflen, const MessageFlags&) {
+ssize_t SslSocket::recv(void* buf, size_t buflen, const MessageFlags&) {
   return SSL_read(ssl, buf, static_cast<int>(buflen));
   //ssize_t read_ret = SSL_read(ssl, buf, static_cast<int>(buflen));
   //if (read_ret >= 0)
@@ -196,7 +196,7 @@ ssize_t SSLSocket::recv(void* buf, size_t buflen, const MessageFlags&) {
   //  throw SSLException();
 }
 
-ssize_t SSLSocket::recvmsg(const iovec* iov, int iovlen, const MessageFlags& flags) {
+ssize_t SslSocket::recvmsg(const iovec* iov, int iovlen, const MessageFlags& flags) {
   if (iovlen == 1) {
     return recv(iov[0].iov_base, iov[0].iov_len, flags);
   } else {
@@ -204,7 +204,7 @@ ssize_t SSLSocket::recvmsg(const iovec* iov, int iovlen, const MessageFlags& fla
   }
 }
 
-ssize_t SSLSocket::send(const void* buf, size_t buflen, const MessageFlags&) {
+ssize_t SslSocket::send(const void* buf, size_t buflen, const MessageFlags&) {
   return SSL_write(ssl, buf, static_cast<int>(buflen));
   //ssize_t write_ret = SSL_write(ssl, buf, static_cast<int>(buflen));
   //if (write_ret >= 0)
@@ -213,23 +213,23 @@ ssize_t SSLSocket::send(const void* buf, size_t buflen, const MessageFlags&) {
   //  throw SSLException();
 }
 
-ssize_t SSLSocket::sendmsg(const iovec* iov, int iovlen, const MessageFlags&) {
+ssize_t SslSocket::sendmsg(const iovec* iov, int iovlen, const MessageFlags&) {
   return Channel::writev(iov, iovlen);
 }
 
-bool SSLSocket::shutdown(bool shut_rd, bool shut_wr) {
+bool SslSocket::shutdown(bool shut_rd, bool shut_wr) {
   if (SSL_shutdown(ssl) != -1) {
-    return TCPSocket::shutdown(shut_rd, shut_wr);
+    return TcpSocket::shutdown(shut_rd, shut_wr);
   } else {
     return false;
   }
 }
 
-bool SSLSocket::want_recv() const {
+bool SslSocket::want_recv() const {
   return SSL_want_read(ssl) == 1;
 }
 
-bool SSLSocket::want_send() const {
+bool SslSocket::want_send() const {
   return SSL_want_write(ssl) == 1;
 }
 }

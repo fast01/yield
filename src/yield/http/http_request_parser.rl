@@ -46,7 +46,7 @@ namespace yield {
 namespace http {
 using yield::uri::URI;
 
-Object& HTTPRequestParser::parse() {
+Object& HttpRequestParser::parse() {
   if (p < eof) {
     ps = p;
 
@@ -134,7 +134,7 @@ Object& HTTPRequestParser::parse() {
     return *new Buffer(Buffer::getpagesize(), Buffer::getpagesize());
 }
 
-bool HTTPRequestParser::parse_request_line(
+bool HttpRequestParser::parse_request_line(
   uint8_t& http_version,
   HTTPRequest::Method& method,
   iovec& host,

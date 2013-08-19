@@ -40,7 +40,7 @@ namespace poll {
 namespace win32 {
 DirectoryWatch::DirectoryWatch(
   YO_NEW_REF Directory& directory,
-  FSEvent::Type fs_event_types,
+  FsEvent::Type fs_event_types,
   const Path& path,
   Log* log
 ) : Watch(directory, fs_event_types, log, path) {
@@ -57,13 +57,13 @@ DirectoryWatch::DirectoryWatch(
   }
 }
 
-YO_NEW_REF FSEvent*
+YO_NEW_REF FsEvent*
 DirectoryWatch::parse(
   const FILE_NOTIFY_INFORMATION& file_notify_info
 ) {
   log_read(file_notify_info);
 
-  FSEvent::Type fs_event_type;
+  FsEvent::Type fs_event_type;
   Path name(
     file_notify_info.FileName,
     file_notify_info.FileNameLength / sizeof(wchar_t)
@@ -74,24 +74,24 @@ DirectoryWatch::parse(
   case FILE_ACTION_ADDED: {
     if (FileSystem().isdir(path)) {
       subdirectory_names.push_back(name);
-      fs_event_type = FSEvent::TYPE_DIRECTORY_ADD;
+      fs_event_type = FsEvent::TYPE_DIRECTORY_ADD;
     } else {
-      fs_event_type = FSEvent::TYPE_FILE_ADD;
+      fs_event_type = FsEvent::TYPE_FILE_ADD;
     }
   }
   break;
 
   case FILE_ACTION_MODIFIED: {
     if (FileSystem().isdir(path)) {
-      fs_event_type = FSEvent::TYPE_DIRECTORY_MODIFY;
+      fs_event_type = FsEvent::TYPE_DIRECTORY_MODIFY;
     } else {
-      fs_event_type = FSEvent::TYPE_FILE_MODIFY;
+      fs_event_type = FsEvent::TYPE_FILE_MODIFY;
     }
   }
   break;
 
   case FILE_ACTION_REMOVED: {
-    fs_event_type = FSEvent::TYPE_FILE_REMOVE;
+    fs_event_type = FsEvent::TYPE_FILE_REMOVE;
 
     for (
       vector<Path>::iterator subdirectory_name_i
@@ -101,7 +101,7 @@ DirectoryWatch::parse(
     ) {
       if (*subdirectory_name_i == name) {
         subdirectory_names.erase(subdirectory_name_i);
-        fs_event_type = FSEvent::TYPE_DIRECTORY_REMOVE;
+        fs_event_type = FsEvent::TYPE_DIRECTORY_REMOVE;
         break;
       }
     }
@@ -112,14 +112,14 @@ DirectoryWatch::parse(
     debug_assert_false(old_paths.empty());
 
     if (FileSystem().isdir(path)) {
-      fs_event_type = FSEvent::TYPE_DIRECTORY_RENAME;
+      fs_event_type = FsEvent::TYPE_DIRECTORY_RENAME;
       subdirectory_names.push_back(path);
     } else {
-      fs_event_type = FSEvent::TYPE_FILE_RENAME;
+      fs_event_type = FsEvent::TYPE_FILE_RENAME;
     }
 
     if (want_fs_event_type(fs_event_type)) {
-      FSEvent* fs_event = new FSEvent(old_paths.top(), path, fs_event_type);
+      FsEvent* fs_event = new FsEvent(old_paths.top(), path, fs_event_type);
       log_fs_event(*fs_event);
       old_paths.pop();
       return fs_event;
@@ -155,7 +155,7 @@ DirectoryWatch::parse(
   }
 
   if (want_fs_event_type(fs_event_type)) {
-    FSEvent* fs_event = new FSEvent(path, fs_event_type);
+    FsEvent* fs_event = new FsEvent(path, fs_event_type);
     log_fs_event(*fs_event);
     return fs_event;
   } else {

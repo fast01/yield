@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_SOCKETS_AIO_RECV_AIOCB_HPP_
-#define _YIELD_SOCKETS_AIO_RECV_AIOCB_HPP_
+#ifndef _YIELD_SOCKETS_AIO_RECV_Aiocb_HPP_
+#define _YIELD_SOCKETS_AIO_RECV_Aiocb_HPP_
 
 #include "yield/sockets/socket.hpp"
 #include "yield/sockets/aio/aiocb.hpp"
@@ -39,29 +39,29 @@ namespace aio {
 /**
   AIO control block for receive operations on sockets.
 */
-class recvAIOCB : public AIOCB {
+class RecvAiocb : public Aiocb {
 public:
   const static uint32_t TYPE_ID = 3045195539UL;
 
 public:
   /**
-    Construct a recvAIOCB, passing the same parameters as to recv.
+    Construct a RecvAiocb, passing the same parameters as to recv.
     @param socket_ socket to receive data on
     @param buffer buffer to receive data into
     @param flags flags to pass to the recv method
     @param context optional context object
   */
-  recvAIOCB(
+  RecvAiocb(
     Socket& socket_,
     YO_NEW_REF Buffer& buffer,
     const Socket::MessageFlags& flags,
     Object* context = NULL
-  ) : AIOCB(socket_, context),
+  ) : Aiocb(socket_, context),
     buffer(buffer),
     flags(flags)
   { }
 
-  ~recvAIOCB();
+  ~RecvAiocb();
 
 public:
   /**
@@ -87,7 +87,7 @@ public:
   }
 
   const char* get_type_name() const {
-    return "yield::sockets::aio::recvAIOCB";
+    return "yield::sockets::aio::RecvAiocb";
   }
 
 private:
@@ -96,12 +96,12 @@ private:
 };
 
 /**
-  Print a string representation of a recvAIOCB to a std::ostream.
+  Print a string representation of a RecvAiocb to a std::ostream.
   @param os std::ostream to print to
-  @param recv_aiocb recvAIOCB to print
+  @param recv_aiocb RecvAiocb to print
   @return os
 */
-std::ostream& operator<<(std::ostream& os, recvAIOCB& recv_aiocb);
+std::ostream& operator<<(std::ostream& os, RecvAiocb& recv_aiocb);
 }
 }
 }

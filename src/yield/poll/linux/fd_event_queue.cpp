@@ -39,7 +39,7 @@
 
 namespace yield {
 namespace poll {
-FDEventQueue::FDEventQueue(bool) throw(Exception) {
+FdEventQueue::FdEventQueue(bool) throw(Exception) {
   epfd = epoll_create(32768);
   if (epfd != -1) {
     try {
@@ -65,12 +65,12 @@ FDEventQueue::FDEventQueue(bool) throw(Exception) {
   }
 }
 
-FDEventQueue::~FDEventQueue() {
+FdEventQueue::~FdEventQueue() {
   close(epfd);
   close(wake_fd);
 }
 
-bool FDEventQueue::associate(fd_t fd, FDEvent::Type fd_event_types) {
+bool FdEventQueue::associate(fd_t fd, FdEvent::Type fd_event_types) {
   if (fd_event_types > 0) {
     epoll_event epoll_event_;
     memset(&epoll_event_, 0, sizeof(epoll_event_));
@@ -89,7 +89,7 @@ bool FDEventQueue::associate(fd_t fd, FDEvent::Type fd_event_types) {
   }
 }
 
-bool FDEventQueue::dissociate(fd_t fd) {
+bool FdEventQueue::dissociate(fd_t fd) {
   // From the man page: In kernel versions before 2.6.9,
   // the EPOLL_CTL_DEL operation required a non-NULL pointer in event,
   // even though this argument is ignored. Since kernel 2.6.9,
@@ -99,7 +99,7 @@ bool FDEventQueue::dissociate(fd_t fd) {
   return epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &epoll_event_) == 0;
 }
 
-bool FDEventQueue::enqueue(Event& event) {
+bool FdEventQueue::enqueue(Event& event) {
   if (event_queue.enqueue(event)) {
     uint64_t data = 1;
 #ifdef _DEBUG
@@ -113,7 +113,7 @@ bool FDEventQueue::enqueue(Event& event) {
   }
 }
 
-YO_NEW_REF Event* FDEventQueue::timeddequeue(const Time& timeout) {
+YO_NEW_REF Event* FdEventQueue::timeddequeue(const Time& timeout) {
   Event* event = event_queue.trydequeue();
   if (event != NULL) {
     return event;
@@ -134,7 +134,7 @@ YO_NEW_REF Event* FDEventQueue::timeddequeue(const Time& timeout) {
         debug_assert_eq(read_ret, static_cast<ssize_t>(sizeof(data)));
         return event_queue.trydequeue();
       } else {
-        return new FDEvent(epoll_event_.data.fd, epoll_event_.events);
+        return new FdEvent(epoll_event_.data.fd, epoll_event_.events);
       }
     } else {
       debug_assert_true(ret == 0 || errno == EINTR);

@@ -44,7 +44,7 @@ namespace poll {
 using win32::DirectoryWatch;
 using win32::FileWatch;
 
-FSEventQueue::FSEventQueue(YO_NEW_REF Log* log) : log(log) {
+FsEventQueue::FsEventQueue(YO_NEW_REF Log* log) : log(log) {
   hIoCompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
   if (hIoCompletionPort != INVALID_HANDLE_VALUE) {
     watches = new Watches<win32::Watch>;
@@ -54,12 +54,12 @@ FSEventQueue::FSEventQueue(YO_NEW_REF Log* log) : log(log) {
   }
 }
 
-FSEventQueue::~FSEventQueue() {
+FsEventQueue::~FsEventQueue() {
   Log::dec_ref(log);
   delete watches;
 }
 
-bool FSEventQueue::associate(const Path& path, FSEvent::Type fs_event_types) {
+bool FsEventQueue::associate(const Path& path, FsEvent::Type fs_event_types) {
   Watch* watch = watches->find(path);
   if (watch != NULL) {
     if (watch->get_fs_event_types() == fs_event_types) {
@@ -128,7 +128,7 @@ bool FSEventQueue::associate(const Path& path, FSEvent::Type fs_event_types) {
   }
 }
 
-bool FSEventQueue::dissociate(const Path& path) {
+bool FsEventQueue::dissociate(const Path& path) {
   win32::Watch* watch = watches->erase(path);
   if (watch != NULL) {
     watch->close();
@@ -138,7 +138,7 @@ bool FSEventQueue::dissociate(const Path& path) {
   }
 }
 
-bool FSEventQueue::enqueue(YO_NEW_REF Event& event) {
+bool FsEventQueue::enqueue(YO_NEW_REF Event& event) {
   return PostQueuedCompletionStatus(
            hIoCompletionPort,
            0,
@@ -148,7 +148,7 @@ bool FSEventQueue::enqueue(YO_NEW_REF Event& event) {
          == TRUE;
 }
 
-YO_NEW_REF Event* FSEventQueue::timeddequeue(const Time& timeout) {
+YO_NEW_REF Event* FsEventQueue::timeddequeue(const Time& timeout) {
   DWORD dwBytesTransferred = 0;
   ULONG_PTR ulCompletionKey = 0;
   LPOVERLAPPED lpOverlapped = NULL;
@@ -175,7 +175,7 @@ YO_NEW_REF Event* FSEventQueue::timeddequeue(const Time& timeout) {
             &watch.get_buffer()[dwReadUntilBufferOffset]
           );
 
-        FSEvent* fs_event = watch.parse(*file_notify_info);
+        FsEvent* fs_event = watch.parse(*file_notify_info);
         if (fs_event != NULL) {
           enqueue(*fs_event);
         }

@@ -41,20 +41,20 @@ class HTTPBodyChunk;
 
 /**
   An RFC 2616-compliant HTTP message parser, the parent class of
-    HTTPRequestParser and HTTPResponseParser.
+    HttpRequestParser and HttpResponseParser.
 */
-class HTTPMessageParser {
+class HttpMessageParser {
 protected:
-  HTTPMessageParser(Buffer& buffer);
-  HTTPMessageParser(const string& buffer); // For testing
-  ~HTTPMessageParser();
+  HttpMessageParser(Buffer& buffer);
+  HttpMessageParser(const string& buffer); // For testing
+  ~HttpMessageParser();
 
 protected:
-  virtual YO_NEW_REF HTTPMessageBodyChunk&
+  virtual YO_NEW_REF HttpMessageBodyChunk&
   create_http_message_body_chunk(
     YO_NEW_REF Buffer* data
   ) {
-    return *new HTTPMessageBodyChunk(data);
+    return *new HttpMessageBodyChunk(data);
   }
 
 protected:
@@ -70,9 +70,9 @@ protected:
   char* p, *ps;
 
 private:
-  template <class> friend class HTTPMessage;
+  template <class> friend class HttpMessage;
 
-  // Helper methods for HTTPMessage
+  // Helper methods for HttpMessage
   static bool
   parse_content_length_field(
     const char* ps,

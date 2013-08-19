@@ -33,15 +33,15 @@
 namespace yield {
 namespace http {
 namespace server {
-HTTPMessageBodyChunk::HTTPMessageBodyChunk(
-  HTTPConnection& connection,
+HttpMessageBodyChunk::HttpMessageBodyChunk(
+  HttpConnection& connection,
   YO_NEW_REF Buffer* data
-) : yield::http::HTTPMessageBodyChunk(data),
+) : yield::http::HttpMessageBodyChunk(data),
   connection(connection.inc_ref()) {
 }
 
-HTTPMessageBodyChunk::~HTTPMessageBodyChunk() {
-  HTTPConnection::dec_ref(connection);
+HttpMessageBodyChunk::~HttpMessageBodyChunk() {
+  HttpConnection::dec_ref(connection);
 }
 }
 }

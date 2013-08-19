@@ -40,9 +40,9 @@ namespace http {
 /**
   An RFC 2616 HTTP request.
   Unlike its counterparts in yield.http.client and yield.http.server, this
-    HTTPRequest is not tied to a particular connection.
+    HttpRequest is not tied to a particular connection.
 */
-class HTTPRequest : public HTTPMessage<HTTPRequest> {
+class HttpRequest : public HttpMessage<HttpRequest> {
 public:
   const static uint32_t TYPE_ID = 707981577;
 
@@ -186,16 +186,16 @@ public:
 
 public:
   /**
-    Construct an HTTPRequest from its constituent parts.
-    @param method the HTTP request method e.g., HTTPRequest::Method::GET
-    @param uri the HTTP request URI e.g., /
+    Construct an HttpRequest from its constituent parts.
+    @param method the HTTP request method e.g., HttpRequest::Method::GET
+    @param uri the HTTP request Uri e.g., /
     @param body an optional body, usually a Buffer
     @param http_version the HTTP version as a single byte (0 or 1 for HTTP/1.0
       and HTTP/1.1, respectively)
   */
-  HTTPRequest(
+  HttpRequest(
     Method method,
-    const yield::uri::URI& uri,
+    const yield::uri::Uri& uri,
     YO_NEW_REF Object* body = NULL,
     uint8_t http_version = HTTP_VERSION_DEFAULT
   );
@@ -203,11 +203,11 @@ public:
   /**
     Empty virtual destructor.
   */
-  virtual ~HTTPRequest() { }
+  virtual ~HttpRequest() { }
 
 public:
   /**
-    Get the HTTP request method e.g., HTTPRequest::Method::GET
+    Get the HTTP request method e.g., HttpRequest::Method::GET
     @return the request method
   */
   Method get_method() const {
@@ -215,16 +215,16 @@ public:
   }
 
   /**
-    Get the HTTP request URI e.g., /
-    @return the request URI
+    Get the HTTP request Uri e.g., /
+    @return the request Uri
   */
-  const yield::uri::URI& get_uri() const {
+  const yield::uri::Uri& get_uri() const {
     return uri;
   }
 
 public:
   // yield::Object
-  HTTPRequest& inc_ref() {
+  HttpRequest& inc_ref() {
     return Object::inc_ref(*this);
   }
 
@@ -235,28 +235,28 @@ public:
   }
 
   const char* get_type_name() const {
-    return "yield::http::HTTPRequest";
+    return "yield::http::HttpRequest";
   }
 
 protected:
-  friend class HTTPRequestParser;
+  friend class HttpRequestParser;
 
-  HTTPRequest(
+  HttpRequest(
     YO_NEW_REF Object* body,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version,
     Method method,
-    const yield::uri::URI& uri
+    const yield::uri::Uri& uri
   );
 
 private:
   Method method;
-  yield::uri::URI uri;
+  yield::uri::Uri uri;
 };
 
-std::ostream& operator<<(std::ostream&, const HTTPRequest&);
-std::ostream& operator<<(std::ostream&, const HTTPRequest::Method&);
+std::ostream& operator<<(std::ostream&, const HttpRequest&);
+std::ostream& operator<<(std::ostream&, const HttpRequest::Method&);
 }
 }
 

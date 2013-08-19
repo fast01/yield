@@ -43,7 +43,7 @@ public:
   virtual ~Watch();
 
 public:
-  FSEvent::Type get_fs_event_types() const {
+  FsEvent::Type get_fs_event_types() const {
     return fs_event_types;
   }
 
@@ -52,7 +52,7 @@ public:
   }
 
 protected:
-  Watch(FSEvent::Type fs_event_types, Log* log, const Path& path);
+  Watch(FsEvent::Type fs_event_types, Log* log, const Path& path);
   Watch(const Watch&);
 
 protected:
@@ -61,14 +61,14 @@ protected:
   }
 
 protected:
-  bool want_fs_event_type(FSEvent::Type fs_event_type) {
+  bool want_fs_event_type(FsEvent::Type fs_event_type) {
     return (fs_event_types & fs_event_type) == fs_event_type;
   }
 
-  void log_fs_event(const FSEvent& fs_event) const;
+  void log_fs_event(const FsEvent& fs_event) const;
 
 private:
-  FSEvent::Type fs_event_types;
+  FsEvent::Type fs_event_types;
   Log* log;
   Path path;
 };

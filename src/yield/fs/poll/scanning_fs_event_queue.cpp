@@ -37,20 +37,20 @@
 namespace yield {
 namespace fs {
 namespace poll {
-ScanningFSEventQueue::ScanningFSEventQueue(YO_NEW_REF Log* log)
+ScanningFsEventQueue::ScanningFsEventQueue(YO_NEW_REF Log* log)
   : log(Object::inc_ref(log)) {
   watches = new Watches<ScanningWatch>;
 }
 
-ScanningFSEventQueue::~ScanningFSEventQueue() {
+ScanningFsEventQueue::~ScanningFsEventQueue() {
   Log::dec_ref(log);
   delete watches;
 }
 
 bool
-ScanningFSEventQueue::associate(
+ScanningFsEventQueue::associate(
   const Path& path,
-  FSEvent::Type fs_event_types
+  FsEvent::Type fs_event_types
 ) {
   dissociate(path);
 
@@ -69,7 +69,7 @@ ScanningFSEventQueue::associate(
   }
 }
 
-bool ScanningFSEventQueue::dissociate(const Path& path) {
+bool ScanningFsEventQueue::dissociate(const Path& path) {
   ScanningWatch* watch = watches->erase(path);
   if (watch != NULL) {
     delete watch;
@@ -79,11 +79,11 @@ bool ScanningFSEventQueue::dissociate(const Path& path) {
   }
 }
 
-bool ScanningFSEventQueue::enqueue(YO_NEW_REF Event& event) {
+bool ScanningFsEventQueue::enqueue(YO_NEW_REF Event& event) {
   return event_queue.enqueue(event);
 }
 
-YO_NEW_REF Event* ScanningFSEventQueue::timeddequeue(const Time& timeout) {
+YO_NEW_REF Event* ScanningFsEventQueue::timeddequeue(const Time& timeout) {
   Event* event = event_queue.trydequeue();
   if (event != NULL) {
     return event;

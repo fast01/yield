@@ -47,7 +47,7 @@
 namespace yield {
 namespace fs {
 namespace poll {
-FSEventQueue::FSEventQueue(YO_NEW_REF Log* log) : log(log) {
+FsEventQueue::FsEventQueue(YO_NEW_REF Log* log) : log(log) {
   watches = NULL;
   kq = kqueue();
   if (kq != -1) {
@@ -78,7 +78,7 @@ FSEventQueue::FSEventQueue(YO_NEW_REF Log* log) : log(log) {
   }
 }
 
-FSEventQueue::~FSEventQueue() {
+FsEventQueue::~FsEventQueue() {
   close(kq);
   Log::dec_ref(log);
   close(wake_pipe[0]);
@@ -87,9 +87,9 @@ FSEventQueue::~FSEventQueue() {
 }
 
 bool
-FSEventQueue::associate(
+FsEventQueue::associate(
   const Path& path,
-  FSEvent::Type fs_event_types
+  FsEvent::Type fs_event_types
 ) {
   delete watches->erase(path);
 
@@ -130,7 +130,7 @@ FSEventQueue::associate(
   return false;
 }
 
-bool FSEventQueue::dissociate(const Path& path) {
+bool FsEventQueue::dissociate(const Path& path) {
   bsd::Watch* watch = watches->erase(path);
   if (watch != NULL) {
     delete watch;
@@ -140,7 +140,7 @@ bool FSEventQueue::dissociate(const Path& path) {
   }
 }
 
-bool FSEventQueue::enqueue(YO_NEW_REF Event& event) {
+bool FsEventQueue::enqueue(YO_NEW_REF Event& event) {
   if (event_queue.enqueue(event)) {
     ssize_t write_ret = write(wake_pipe[1], "m", 1);
     debug_assert_eq(write_ret, 1);
@@ -150,7 +150,7 @@ bool FSEventQueue::enqueue(YO_NEW_REF Event& event) {
   }
 }
 
-YO_NEW_REF Event* FSEventQueue::timeddequeue(const Time& timeout) {
+YO_NEW_REF Event* FsEventQueue::timeddequeue(const Time& timeout) {
   Event* event = event_queue.trydequeue();
   if (event != NULL) {
     return event;

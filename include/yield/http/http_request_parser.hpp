@@ -39,25 +39,25 @@ namespace http {
 /**
   An RFC 2616-conformant HTTP request parser.
 */
-class HTTPRequestParser : public HTTPMessageParser {
+class HttpRequestParser : public HttpMessageParser {
 public:
   /**
-    Construct an HTTPRequestParser on the underlying buffer.
-    References to buffer may be created for any objects (such as HTTPRequest)
+    Construct an HttpRequestParser on the underlying buffer.
+    References to buffer may be created for any objects (such as HttpRequest)
       produced by the parser.
     @param buffer buffer to parse
   */
-  HTTPRequestParser(Buffer& buffer)
-    : HTTPMessageParser(buffer)
+  HttpRequestParser(Buffer& buffer)
+    : HttpMessageParser(buffer)
   { }
 
   /**
-    Construct an HTTPRequestParser on the string buffer.
+    Construct an HttpRequestParser on the string buffer.
     Only used for testing.
     @param buffer buffer to parse.
   */
-  HTTPRequestParser(const string& buffer)
-    : HTTPMessageParser(buffer)
+  HttpRequestParser(const string& buffer)
+    : HttpMessageParser(buffer)
   { }
 
 public:
@@ -66,27 +66,27 @@ public:
     The caller is responsible for checking the Object's get_type_id
       and downcasting to the appropriate type.
     Object may be of the following types:
-    - yield::http::HTTPRequest or subclasses: an HTTP request, including its
+    - yield::http::HttpRequest or subclasses: an HTTP request, including its
         body for requests with fixed Content-Length's.
     - yield::Buffer: the next Buffer to read; may include the remainder of
       the previous Buffer that was passed to the constructor
-    - yield::http::HTTPMessageBodyChunk: a chunk of body data, for requests
+    - yield::http::HttpMessageBodyChunk: a chunk of body data, for requests
         with chunked Transfer-Encoding.
-    - yield::http::HTTPResponse: an error HTTP response, usually a 400
+    - yield::http::HttpResponse: an error HTTP response, usually a 400
   */
   YO_NEW_REF Object& parse();
 
 protected:
-  virtual YO_NEW_REF HTTPRequest&
+  virtual YO_NEW_REF HttpRequest&
   create_http_request(
     YO_NEW_REF Object* body,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version,
-    HTTPRequest::Method method,
-    const yield::uri::URI& uri
+    HttpRequest::Method method,
+    const yield::uri::Uri& uri
   ) {
-    return *new HTTPRequest(
+    return *new HttpRequest(
              body,
              fields_offset,
              header,
@@ -96,19 +96,19 @@ protected:
            );
   }
 
-  virtual HTTPResponse&
+  virtual HttpResponse&
   create_http_response(
     uint16_t status_code,
     YO_NEW_REF Object* body = NULL,
-    uint8_t http_version = HTTPResponse::HTTP_VERSION_DEFAULT
+    uint8_t http_version = HttpResponse::HTTP_VERSION_DEFAULT
   ) {
-    return *new HTTPResponse(status_code, body, http_version);
+    return *new HttpResponse(status_code, body, http_version);
   }
 
 protected:
   bool parse_request_line(
     uint8_t& http_version,
-    HTTPRequest::Method& method,
+    HttpRequest::Method& method,
     iovec& uri_host,
     iovec& uri_path,
     uint16_t& uri_port,

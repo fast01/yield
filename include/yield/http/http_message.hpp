@@ -40,10 +40,10 @@ class DateTime;
 
 namespace http {
 /**
-  An RFC 2616 HTTP message, the parent class of HTTPRequest and HTTPResponse.
+  An RFC 2616 HTTP message, the parent class of HttpRequest and HttpResponse.
 */
-template <class HTTPMessageType>
-class HTTPMessage : public Event {
+template <class HttpMessageType>
+class HttpMessage : public Event {
 public:
   /**
     The default HTTP version to use for outgoing HTTP messages, as a single
@@ -52,7 +52,7 @@ public:
   const static uint8_t HTTP_VERSION_DEFAULT = 1;
 
   /**
-    A constant returned by HTTPMessage::get_content_length that indicates
+    A constant returned by HttpMessage::get_content_length that indicates
       that the HTTP message does not contain a Content-Length header,
       but has an unbounded Transfer-Encoding: chunked body.
   */
@@ -123,7 +123,7 @@ public:
     Get a field value.
     @param name the field name
     @param[out] value a pointer and length to the field value in the
-      HTTPMessage's underlying buffer
+      HttpMessage's underlying buffer
     @return true if the field is present, false if not
   */
   bool get_field(const char* name, iovec& value) const {
@@ -135,7 +135,7 @@ public:
     @param name the field name
     @param name_len length in bytes of name
     @param[out] value a pointer and length to the field value in the
-      HTTPMessage's underlying buffer
+      HttpMessage's underlying buffer
     @return true if the field is present, false if not
   */
   bool get_field(const char* name, size_t name_len, iovec& value) const;
@@ -143,7 +143,7 @@ public:
   /**
     Get all field name-value pairs.
     @param[out] fields growable vector of name-value pairs as pointers
-      into the HTTPMessage's underlying buffer
+      into the HttpMessage's underlying buffer
   */
   void get_fields(vector<std::pair<iovec, iovec> >& fields) const;
 
@@ -211,7 +211,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType& set_field(const char* name, const char* value) {
+  HttpMessageType& set_field(const char* name, const char* value) {
     return set_field(name, strlen(name), value);
   }
 
@@ -221,7 +221,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType& set_field(const string& name, const char* value) {
+  HttpMessageType& set_field(const string& name, const char* value) {
     return set_field(name.data(), name.size(), value);
   }
 
@@ -232,7 +232,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType&
+  HttpMessageType&
   set_field(
     const char* name,
     size_t name_len,
@@ -247,7 +247,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType& set_field(const char* name, const iovec& value) {
+  HttpMessageType& set_field(const char* name, const iovec& value) {
     return set_field(name, strlen(name), value);
   }
 
@@ -257,7 +257,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType& set_field(const string& name, const iovec& value) {
+  HttpMessageType& set_field(const string& name, const iovec& value) {
     return set_field(name.data(), name.size(), value);
   }
 
@@ -268,7 +268,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType&
+  HttpMessageType&
   set_field(
     const char* name,
     size_t name_len,
@@ -288,7 +288,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType&
+  HttpMessageType&
   set_field(
     const char* name,
     const string& value
@@ -302,7 +302,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType& set_field(const string& name, const string& value) {
+  HttpMessageType& set_field(const string& name, const string& value) {
     return set_field(name.data(), name.size(), value);
   }
 
@@ -313,7 +313,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType&
+  HttpMessageType&
   set_field(
     const char* name,
     size_t name_len,
@@ -328,7 +328,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType& set_field(const char* name, size_t value) {
+  HttpMessageType& set_field(const char* name, size_t value) {
     return set_field(name, strlen(name), value);
   }
 
@@ -338,7 +338,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType& set_field(const string& name, size_t value) {
+  HttpMessageType& set_field(const string& name, size_t value) {
     return set_field(name.data(), name.size(), value);
   }
 
@@ -349,7 +349,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType& set_field(const char* name, size_t name_len, size_t value);
+  HttpMessageType& set_field(const char* name, size_t name_len, size_t value);
 
   /**
     Set a date-time field.
@@ -357,7 +357,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType& set_field(const char* name, const DateTime& value) {
+  HttpMessageType& set_field(const char* name, const DateTime& value) {
     return set_field(name, strlen(name), value);
   }
 
@@ -367,7 +367,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType& set_field(const string& name, const DateTime& value) {
+  HttpMessageType& set_field(const string& name, const DateTime& value) {
     return set_field(name.data(), name.size(), value);
   }
 
@@ -378,7 +378,7 @@ public:
     @param value the field value
     @return *this
   */
-  HTTPMessageType&
+  HttpMessageType&
   set_field(
     const char* name,
     size_t name_len,
@@ -394,7 +394,7 @@ public:
     @param value_len the length of value in bytes
     @return *this
   */
-  HTTPMessageType&
+  HttpMessageType&
   set_field(
     const char* name,
     const void* value,
@@ -411,7 +411,7 @@ public:
     @param value_len the length of value in bytes
     @return *this
   */
-  HTTPMessageType& set_field(
+  HttpMessageType& set_field(
     const string& name,
     const void* value,
     size_t value_len
@@ -428,7 +428,7 @@ public:
     @param value_len the length of value in bytes
     @return *this
   */
-  HTTPMessageType&
+  HttpMessageType&
   set_field(
     const char* name,
     size_t name_len,
@@ -437,16 +437,16 @@ public:
   );
 
 protected:
-  HTTPMessage(YO_NEW_REF Object* body, uint8_t http_version);
+  HttpMessage(YO_NEW_REF Object* body, uint8_t http_version);
 
-  HTTPMessage(
+  HttpMessage(
     YO_NEW_REF Object* body,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version
   );
 
-  virtual ~HTTPMessage();
+  virtual ~HttpMessage();
 
 protected:
   void set_fields_offset(uint16_t fields_offset) {

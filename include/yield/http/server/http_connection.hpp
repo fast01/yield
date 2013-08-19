@@ -48,20 +48,20 @@ namespace server {
 /**
   A server-side HTTP connection.
 */
-class HTTPConnection : public Object {
+class HttpConnection : public Object {
 public:
   enum State { STATE_CONNECTED, STATE_ERROR };
 
 public:
-  HTTPConnection(
+  HttpConnection(
     EventQueue& aio_queue,
     EventHandler& http_request_handler,
     yield::sockets::SocketAddress& peername,
-    yield::sockets::TCPSocket& socket_,
+    yield::sockets::TcpSocket& socket_,
     Log* log = NULL
   );
 
-  ~HTTPConnection();
+  ~HttpConnection();
 
 public:
   EventHandler& get_http_request_handler() {
@@ -72,7 +72,7 @@ public:
     return peername;
   }
 
-  yield::sockets::TCPSocket& get_socket() const {
+  yield::sockets::TcpSocket& get_socket() const {
     return socket_;
   }
 
@@ -81,20 +81,20 @@ public:
   }
 
 public:
-  void handle(YO_NEW_REF ::yield::sockets::aio::acceptAIOCB& accept_aiocb);
-  void handle(YO_NEW_REF ::yield::http::HTTPMessageBodyChunk& http_message_body_chunk);
-  void handle(YO_NEW_REF ::yield::http::HTTPResponse& http_response);
-  void handle(YO_NEW_REF ::yield::sockets::aio::recvAIOCB& recv_aiocb);
-  void handle(YO_NEW_REF ::yield::sockets::aio::sendAIOCB& send_aiocb);
-  void handle(YO_NEW_REF ::yield::sockets::aio::sendfileAIOCB& sendfile_aiocb);
+  void handle(YO_NEW_REF ::yield::sockets::aio::AcceptAiocb& accept_aiocb);
+  void handle(YO_NEW_REF ::yield::http::HttpMessageBodyChunk& http_message_body_chunk);
+  void handle(YO_NEW_REF ::yield::http::HttpResponse& http_response);
+  void handle(YO_NEW_REF ::yield::sockets::aio::RecvAiocb& recv_aiocb);
+  void handle(YO_NEW_REF ::yield::sockets::aio::SendAiocb& send_aiocb);
+  void handle(YO_NEW_REF ::yield::sockets::aio::SendfileAiocb& sendfile_aiocb);
 
 public:
   // yield::Object
   const char* get_type_name() const {
-    return "yield::http::server::HTTPConnection";
+    return "yield::http::server::HttpConnection";
   }
 
-  HTTPConnection& inc_ref() {
+  HttpConnection& inc_ref() {
     return Object::inc_ref(*this);
   }
 
@@ -106,7 +106,7 @@ private:
   EventHandler& http_request_handler;
   Log* log;
   yield::sockets::SocketAddress& peername;
-  yield::sockets::TCPSocket& socket_;
+  yield::sockets::TcpSocket& socket_;
   State state;
 };
 }

@@ -38,34 +38,34 @@ namespace http {
 namespace server {
 using yield::fs::File;
 using yield::sockets::SocketAddress;
-using yield::sockets::TCPSocket;
-using yield::sockets::aio::acceptAIOCB;
-using yield::sockets::aio::recvAIOCB;
-using yield::sockets::aio::sendAIOCB;
-using yield::sockets::aio::sendfileAIOCB;
+using yield::sockets::TcpSocket;
+using yield::sockets::aio::AcceptAiocb;
+using yield::sockets::aio::RecvAiocb;
+using yield::sockets::aio::SendAiocb;
+using yield::sockets::aio::SendfileAiocb;
 
-HTTPConnection::HTTPConnection(
+HttpConnection::HttpConnection(
   EventQueue& aio_queue,
   EventHandler& http_request_handler,
   SocketAddress& peername,
-  TCPSocket& socket_,
+  TcpSocket& socket_,
   Log* log
 ) : aio_queue(aio_queue.inc_ref()),
   http_request_handler(http_request_handler.inc_ref()),
   log(Object::inc_ref(log)),
   peername(peername.inc_ref()),
-  socket_(static_cast<TCPSocket&>(socket_.inc_ref())) {
+  socket_(static_cast<TcpSocket&>(socket_.inc_ref())) {
   state = STATE_CONNECTED;
 }
 
-HTTPConnection::~HTTPConnection() {
+HttpConnection::~HttpConnection() {
   EventQueue::dec_ref(aio_queue);
   EventHandler::dec_ref(http_request_handler);
   Log::dec_ref(log);
-  TCPSocket::dec_ref(socket_);
+  TcpSocket::dec_ref(socket_);
 }
 
-void HTTPConnection::handle(YO_NEW_REF acceptAIOCB& accept_aiocb) {
+void HttpConnection::handle(YO_NEW_REF AcceptAiocb& accept_aiocb) {
   if (
     accept_aiocb.get_recv_buffer() != NULL
     &&
@@ -75,19 +75,19 @@ void HTTPConnection::handle(YO_NEW_REF acceptAIOCB& accept_aiocb) {
   } else {
     Buffer* recv_buffer
     = new Buffer(Buffer::getpagesize(), Buffer::getpagesize());
-    recvAIOCB* recv_aiocb = new recvAIOCB(socket_, *recv_buffer, 0, this);
+    RecvAiocb* recv_aiocb = new RecvAiocb(socket_, *recv_buffer, 0, this);
     if (!aio_queue.enqueue(*recv_aiocb)) {
-      recvAIOCB::dec_ref(*recv_aiocb);
+      RecvAiocb::dec_ref(*recv_aiocb);
       state = STATE_ERROR;
     }
   }
 
-  acceptAIOCB::dec_ref(accept_aiocb);
+  AcceptAiocb::dec_ref(accept_aiocb);
 }
 
 void
-HTTPConnection::handle(
-  YO_NEW_REF ::yield::http::HTTPMessageBodyChunk& http_message_body_chunk
+HttpConnection::handle(
+  YO_NEW_REF ::yield::http::HttpMessageBodyChunk& http_message_body_chunk
 ) {
   Buffer* send_buffer;
   if (http_message_body_chunk.data() != NULL) {
@@ -95,18 +95,18 @@ HTTPConnection::handle(
   } else {
     send_buffer = &Buffer::copy("0\r\n\r\n", 5);
   }
-  HTTPMessageBodyChunk::dec_ref(http_message_body_chunk);
+  HttpMessageBodyChunk::dec_ref(http_message_body_chunk);
 
-  sendAIOCB* send_aiocb = new sendAIOCB(socket_, *send_buffer, 0, this);
+  SendAiocb* send_aiocb = new SendAiocb(socket_, *send_buffer, 0, this);
   if (!aio_queue.enqueue(*send_aiocb)) {
-    sendAIOCB::dec_ref(*send_aiocb);
+    SendAiocb::dec_ref(*send_aiocb);
     state = STATE_ERROR;
   }
 }
 
 void
-HTTPConnection::handle(
-  YO_NEW_REF ::yield::http::HTTPResponse& http_response
+HttpConnection::handle(
+  YO_NEW_REF ::yield::http::HttpResponse& http_response
 ) {
   if (log != NULL) {
     log->get_stream(Log::Level::DEBUG) << get_type_name()
@@ -116,7 +116,7 @@ HTTPConnection::handle(
   http_response.finalize();
   Buffer& http_response_header = http_response.get_header().inc_ref();
   Object* http_response_body = Object::inc_ref(http_response.get_body());
-  HTTPResponse::dec_ref(http_response);
+  HttpResponse::dec_ref(http_response);
 
   if (http_response_body != NULL) {
     switch (http_response_body->get_type_id()) {
@@ -128,19 +128,19 @@ HTTPConnection::handle(
     break;
 
     case File::TYPE_ID: {
-      sendAIOCB* send_aiocb
-        = new sendAIOCB(socket_, http_response_header, 0, this);
+      SendAiocb* send_aiocb
+        = new SendAiocb(socket_, http_response_header, 0, this);
       if (aio_queue.enqueue(*send_aiocb)) {
-        sendfileAIOCB* sendfile_aiocb
-        = new sendfileAIOCB(socket_, *static_cast<File*>(http_response_body), this);
+        SendfileAiocb* sendfile_aiocb
+        = new SendfileAiocb(socket_, *static_cast<File*>(http_response_body), this);
         if (aio_queue.enqueue(*sendfile_aiocb)) {
           return;
         } else {
-          sendfileAIOCB::dec_ref(*sendfile_aiocb);
+          SendfileAiocb::dec_ref(*sendfile_aiocb);
           state = STATE_ERROR;
         }
       } else {
-        sendAIOCB::dec_ref(*send_aiocb);
+        SendAiocb::dec_ref(*send_aiocb);
         state = STATE_ERROR;
       }
     }
@@ -151,42 +151,42 @@ HTTPConnection::handle(
     }
   }
 
-  sendAIOCB* send_aiocb = new sendAIOCB(socket_, http_response_header, 0, this);
+  SendAiocb* send_aiocb = new SendAiocb(socket_, http_response_header, 0, this);
   if (!aio_queue.enqueue(*send_aiocb)) {
-    sendAIOCB::dec_ref(*send_aiocb);
+    SendAiocb::dec_ref(*send_aiocb);
     state = STATE_ERROR;
   }
 }
 
 void
-HTTPConnection::handle(
-  YO_NEW_REF ::yield::sockets::aio::recvAIOCB& recv_aiocb
+HttpConnection::handle(
+  YO_NEW_REF ::yield::sockets::aio::RecvAiocb& recv_aiocb
 ) {
   if (recv_aiocb.get_return() > 0) {
     parse(recv_aiocb.get_buffer());
   }
 
-  ::yield::sockets::aio::recvAIOCB::dec_ref(recv_aiocb);
+  ::yield::sockets::aio::RecvAiocb::dec_ref(recv_aiocb);
 }
 
 void
-HTTPConnection::handle(
-  YO_NEW_REF ::yield::sockets::aio::sendAIOCB& send_aiocb
+HttpConnection::handle(
+  YO_NEW_REF ::yield::sockets::aio::SendAiocb& send_aiocb
 ) {
-  sendAIOCB::dec_ref(send_aiocb);
+  SendAiocb::dec_ref(send_aiocb);
 }
 
 void
-HTTPConnection::handle(
-  YO_NEW_REF ::yield::sockets::aio::sendfileAIOCB& sendfile_aiocb
+HttpConnection::handle(
+  YO_NEW_REF ::yield::sockets::aio::SendfileAiocb& sendfile_aiocb
 ) {
-  ::yield::sockets::aio::sendfileAIOCB::dec_ref(sendfile_aiocb);
+  ::yield::sockets::aio::SendfileAiocb::dec_ref(sendfile_aiocb);
 }
 
-void HTTPConnection::parse(Buffer& recv_buffer) {
+void HttpConnection::parse(Buffer& recv_buffer) {
   debug_assert_false(recv_buffer.empty());
 
-  HTTPRequestParser http_request_parser(*this, recv_buffer);
+  HttpRequestParser http_request_parser(*this, recv_buffer);
 
   for (;;) {
     Object& object = http_request_parser.parse();
@@ -194,16 +194,16 @@ void HTTPConnection::parse(Buffer& recv_buffer) {
     switch (object.get_type_id()) {
     case Buffer::TYPE_ID: {
       Buffer& next_recv_buffer = static_cast<Buffer&>(object);
-      recvAIOCB* recv_aiocb = new recvAIOCB(socket_, next_recv_buffer, 0, this);
+      RecvAiocb* recv_aiocb = new RecvAiocb(socket_, next_recv_buffer, 0, this);
       if (!aio_queue.enqueue(*recv_aiocb)) {
-        recvAIOCB::dec_ref(*recv_aiocb);
+        RecvAiocb::dec_ref(*recv_aiocb);
         state = STATE_ERROR;
       }
     }
     return;
 
-    case HTTPRequest::TYPE_ID: {
-      HTTPRequest& http_request = static_cast<HTTPRequest&>(object);
+    case HttpRequest::TYPE_ID: {
+      HttpRequest& http_request = static_cast<HttpRequest&>(object);
 
       if (log != NULL) {
         log->get_stream(Log::Level::DEBUG) << get_type_name()
@@ -214,8 +214,8 @@ void HTTPConnection::parse(Buffer& recv_buffer) {
     }
     break;
 
-    case HTTPResponse::TYPE_ID: {
-      HTTPResponse& http_response = static_cast<HTTPResponse&>(object);
+    case HttpResponse::TYPE_ID: {
+      HttpResponse& http_response = static_cast<HttpResponse&>(object);
       debug_assert_eq(http_response.get_status_code(), 400);
 
       if (log != NULL) {

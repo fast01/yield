@@ -38,7 +38,7 @@ namespace poll {
 namespace bsd {
 DirectoryWatch::DirectoryWatch(
   int fd,
-  FSEvent::Type fs_event_types,
+  FsEvent::Type fs_event_types,
   const Path& path,
   Log* log
 ) :
@@ -51,28 +51,28 @@ DirectoryWatch::read(
   const struct kevent& kevent_,
   EventHandler& fs_event_handler
 ) {
-  FSEvent::Type fs_event_types = 0;
+  FsEvent::Type fs_event_types = 0;
   if ((kevent_.fflags & NOTE_ATTRIB) == NOTE_ATTRIB) {
-    fs_event_types |= FSEvent::TYPE_DIRECTORY_MODIFY;
-    fs_event_types |= FSEvent::TYPE_FILE_MODIFY;
+    fs_event_types |= FsEvent::TYPE_DIRECTORY_MODIFY;
+    fs_event_types |= FsEvent::TYPE_FILE_MODIFY;
   } else if ((kevent_.fflags & NOTE_DELETE) == NOTE_DELETE) {
-    fs_event_types |= FSEvent::TYPE_DIRECTORY_REMOVE;
-    fs_event_types |= FSEvent::TYPE_FILE_REMOVE;
+    fs_event_types |= FsEvent::TYPE_DIRECTORY_REMOVE;
+    fs_event_types |= FsEvent::TYPE_FILE_REMOVE;
   } else if ((kevent_.fflags & NOTE_EXTEND) == NOTE_EXTEND) {
-    fs_event_types |= FSEvent::TYPE_DIRECTORY_MODIFY;
-    fs_event_types |= FSEvent::TYPE_FILE_MODIFY;
+    fs_event_types |= FsEvent::TYPE_DIRECTORY_MODIFY;
+    fs_event_types |= FsEvent::TYPE_FILE_MODIFY;
   } else if ((kevent_.fflags & NOTE_LINK) == NOTE_LINK) {
-    fs_event_types |= FSEvent::TYPE_DIRECTORY_MODIFY;
-    fs_event_types |= FSEvent::TYPE_FILE_MODIFY;
+    fs_event_types |= FsEvent::TYPE_DIRECTORY_MODIFY;
+    fs_event_types |= FsEvent::TYPE_FILE_MODIFY;
   } else if ((kevent_.fflags & NOTE_RENAME) == NOTE_RENAME) {
-    fs_event_types |= FSEvent::TYPE_DIRECTORY_RENAME;
-    fs_event_types |= FSEvent::TYPE_FILE_RENAME;
+    fs_event_types |= FsEvent::TYPE_DIRECTORY_RENAME;
+    fs_event_types |= FsEvent::TYPE_FILE_RENAME;
   } else if ((kevent_.fflags & NOTE_REVOKE) == NOTE_REVOKE) {
-    fs_event_types |= FSEvent::TYPE_DIRECTORY_REMOVE;
-    fs_event_types |= FSEvent::TYPE_FILE_REMOVE;
+    fs_event_types |= FsEvent::TYPE_DIRECTORY_REMOVE;
+    fs_event_types |= FsEvent::TYPE_FILE_REMOVE;
   } else if ((kevent_.fflags & NOTE_WRITE) == NOTE_WRITE) {
-    fs_event_types |= FSEvent::TYPE_DIRECTORY_MODIFY;
-    fs_event_types |= FSEvent::TYPE_FILE_MODIFY;
+    fs_event_types |= FsEvent::TYPE_DIRECTORY_MODIFY;
+    fs_event_types |= FsEvent::TYPE_FILE_MODIFY;
   }
 
   fs_event_types ^= this->get_fs_event_types();
