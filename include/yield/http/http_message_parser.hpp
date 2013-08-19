@@ -47,7 +47,7 @@ class HttpMessageParser {
 protected:
   HttpMessageParser(Buffer& buffer);
   HttpMessageParser(const string& buffer); // For testing
-  ~HttpMessageParser();
+  virtual ~HttpMessageParser();
 
 protected:
   virtual YO_NEW_REF HttpMessageBodyChunk&
