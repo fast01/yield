@@ -32,6 +32,6 @@
 
 namespace yield {
 namespace queue {
-INSTANTIATE_TYPED_TEST_CASE_P(STLEventQueue, EventQueueTest, STLEventQueue);
+INSTANTIATE_TYPED_TEST_CASE_P(StlEventQueue, EventQueueTest, StlEventQueue);
 }
 }

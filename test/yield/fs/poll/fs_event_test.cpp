@@ -35,59 +35,59 @@
 namespace yield {
 namespace fs {
 namespace poll {
-TEST(FSEvent, constructors) {
-  FSEvent("path", FSEvent::TYPE_DIRECTORY_ADD);
-  FSEvent("old_path", "new_path", FSEvent::TYPE_DIRECTORY_RENAME);
+TEST(FsEvent, constructors) {
+  FsEvent("path", FsEvent::TYPE_DIRECTORY_ADD);
+  FsEvent("old_path", "new_path", FsEvent::TYPE_DIRECTORY_RENAME);
 }
 
-TEST(FSEvent, get_new_path) {
+TEST(FsEvent, get_new_path) {
   ASSERT_EQ(
-    FSEvent("old_path", "new_path", FSEvent::TYPE_FILE_RENAME).get_new_path(),
+    FsEvent("old_path", "new_path", FsEvent::TYPE_FILE_RENAME).get_new_path(),
     Path("new_path")
   );
 }
 
-TEST(FSEvent, get_old_path) {
+TEST(FsEvent, get_old_path) {
   ASSERT_EQ(
-    FSEvent("old_path", "new_path", FSEvent::TYPE_FILE_RENAME).get_old_path(),
+    FsEvent("old_path", "new_path", FsEvent::TYPE_FILE_RENAME).get_old_path(),
     Path("old_path")
   );
 }
 
-TEST(FSEvent, get_path) {
+TEST(FsEvent, get_path) {
   ASSERT_EQ(
-    FSEvent("path", FSEvent::TYPE_FILE_ADD).get_path(),
+    FsEvent("path", FsEvent::TYPE_FILE_ADD).get_path(),
     Path("path")
   );
 }
 
-TEST(FSEvent, get_type) {
+TEST(FsEvent, get_type) {
   ASSERT_EQ(
-    FSEvent("path", FSEvent::TYPE_FILE_ADD).get_type(),
-    FSEvent::TYPE_FILE_ADD
+    FsEvent("path", FsEvent::TYPE_FILE_ADD).get_type(),
+    FsEvent::TYPE_FILE_ADD
   );
 }
 
-TEST(FSEvent, get_type_id) {
+TEST(FsEvent, get_type_id) {
   ASSERT_EQ(
-    FSEvent("path", FSEvent::TYPE_FILE_ADD).get_type_id(),
-    FSEvent::TYPE_ID
+    FsEvent("path", FsEvent::TYPE_FILE_ADD).get_type_id(),
+    FsEvent::TYPE_ID
   );
 }
 
-TEST(FSEvent, get_type_name) {
+TEST(FsEvent, get_type_name) {
   ASSERT_EQ(
     strcmp(
-      FSEvent("path", FSEvent::TYPE_FILE_ADD).get_type_name(),
-      "yield::fs::poll::FSEvent"
+      FsEvent("path", FsEvent::TYPE_FILE_ADD).get_type_name(),
+      "yield::fs::poll::FsEvent"
     ),
     0
   );
 }
 
-TEST(FSEvent, print) {
+TEST(FsEvent, print) {
   std::ostringstream oss;
-  oss << FSEvent("path", FSEvent::TYPE_FILE_ADD);
+  oss << FsEvent("path", FsEvent::TYPE_FILE_ADD);
   ASSERT_NE(oss.str().size(), 0u);
 }
 }

@@ -33,7 +33,7 @@
 namespace yield {
 namespace fs {
 namespace poll {
-INSTANTIATE_TYPED_TEST_CASE_P(ScanningFSEventQueue, FSEventQueueTest, ScanningFSEventQueue);
+INSTANTIATE_TYPED_TEST_CASE_P(ScanningFsEventQueue, FsEventQueueTest, ScanningFsEventQueue);
 }
 }
 }

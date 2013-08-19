@@ -32,45 +32,45 @@
 
 namespace yield {
 namespace uri {
-TEST(URIParser, path1) {
-  URI uri("/mydir/");
+TEST(UriParser, path1) {
+  Uri uri("/mydir/");
   ASSERT_EQ(uri.get_path(), "/mydir/");
 }
 
-TEST(URIParser, path2) {
-  URI uri("/mypath");
+TEST(UriParser, path2) {
+  Uri uri("/mypath");
   ASSERT_EQ(uri.get_path(), "/mypath");
 }
 
-TEST(URIParser, path3) {
-  URI uri("/mydir/mypath");
+TEST(UriParser, path3) {
+  Uri uri("/mydir/mypath");
   ASSERT_EQ(uri.get_path(), "/mydir/mypath");
 }
 
-TEST(URIParser, path_query1) {
-  URI uri("/mypath?key=value");
+TEST(UriParser, path_query1) {
+  Uri uri("/mypath?key=value");
   ASSERT_EQ(uri.get_path(), "/mypath");
   //ASSERT_EQ(uri.get_query_value("key" ), "value");
   //ASSERT_EQ(uri.get_query_value("otherkey" ), "");
   //ASSERT_TRUE_ne(uri.get_query_values("key" ), uri.get_query().end());
 }
 
-TEST(URIParser, path_query2) {
-  URI uri("/mypath?key1=value1&key2=value2");
+TEST(UriParser, path_query2) {
+  Uri uri("/mypath?key1=value1&key2=value2");
   ASSERT_EQ(uri.get_path(), "/mypath");
   //ASSERT_EQ(uri.get_query_value("key1" ), "value1");
   //ASSERT_EQ(uri.get_query_value("key2" ), "value2");
   //ASSERT_EQ(uri.get_query_value("otherkey" ), "");
 }
 
-TEST(URIParser, path_query3) { // A Django URI 20110427
-  URI uri("/accounts/login/?next=/");
+TEST(UriParser, path_query3) { // A Django Uri 20110427
+  Uri uri("/accounts/login/?next=/");
   ASSERT_EQ(uri.get_path(), "/accounts/login/");
   ASSERT_EQ(uri.get_query(), "next=/");
 }
 
-TEST(URIParser, scheme_host1) {
-  URI uri("http://localhost");
+TEST(UriParser, scheme_host1) {
+  Uri uri("http://localhost");
   ASSERT_EQ(uri.get_scheme(), "http");
   ASSERT_EQ(uri.get_host(), "localhost");
   //ASSERT_TRUE(uri.get_user().empty());
@@ -79,46 +79,46 @@ TEST(URIParser, scheme_host1) {
   ASSERT_TRUE(uri.get_path().empty());
 }
 
-TEST(URIParser, scheme_host2) {
-  URI uri("http://localhost/");
+TEST(UriParser, scheme_host2) {
+  Uri uri("http://localhost/");
   ASSERT_EQ(uri.get_scheme(), "http");
   ASSERT_EQ(uri.get_host(), "localhost");
   ASSERT_EQ(uri.get_path(), "/");
 }
 
-TEST(URIParser, scheme_host_port1) {
-  URI uri("http://*:80/");
+TEST(UriParser, scheme_host_port1) {
+  Uri uri("http://*:80/");
   ASSERT_EQ(uri.get_scheme(), "http");
   ASSERT_EQ(uri.get_host(), "*");
   ASSERT_EQ(uri.get_path(), "/");
 }
 
-TEST(URIParser, scheme_host_port2) {
-  URI uri("http://localhost:1");
+TEST(UriParser, scheme_host_port2) {
+  Uri uri("http://localhost:1");
   ASSERT_EQ(uri.get_scheme(), "http");
   ASSERT_EQ(uri.get_host(), "localhost");
   ASSERT_EQ(uri.get_port(), 1);
   ASSERT_TRUE(uri.get_path().empty());
 }
 
-TEST(URIParser, scheme_host_port3) {
-  URI uri("http://localhost:1/");
+TEST(UriParser, scheme_host_port3) {
+  Uri uri("http://localhost:1/");
   ASSERT_EQ(uri.get_scheme(), "http");
   ASSERT_EQ(uri.get_host(), "localhost");
   ASSERT_EQ(uri.get_port(), 1);
   ASSERT_EQ(uri.get_path(), "/");
 }
 
-TEST(URIParser, scheme_user_host) {
-  URI uri("http://minorg@localhost");
+TEST(UriParser, scheme_user_host) {
+  Uri uri("http://minorg@localhost");
   ASSERT_EQ(uri.get_scheme(), "http");
   ASSERT_EQ(uri.get_host(), "localhost");
   //ASSERT_EQ(uri.get_user(), "minorg");
   //ASSERT_TRUE(uri.get_password().empty());
 }
 
-TEST(URIParser, scheme_user_password_host) {
-  URI uri("http://minorg:minorg@localhost");
+TEST(UriParser, scheme_user_password_host) {
+  Uri uri("http://minorg:minorg@localhost");
   ASSERT_EQ(uri.get_scheme(), "http");
   ASSERT_EQ(uri.get_host(), "localhost");
   //ASSERT_EQ(uri.get_user(), "minorg");

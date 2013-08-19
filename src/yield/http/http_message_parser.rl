@@ -73,7 +73,7 @@ HttpMessageParser::parse_body(
   if (
     content_length == 0
     ||
-    content_length == HTTPRequest::CONTENT_LENGTH_CHUNKED
+    content_length == HttpRequest::CONTENT_LENGTH_CHUNKED
  ) {
     body = NULL;
     return true;
@@ -195,7 +195,7 @@ HttpMessageParser::parse_content_length_field(
     &&
     memcmp(field_value.iov_base, "chunked", 7) == 0
   ) {
-    content_length = HTTPRequest::CONTENT_LENGTH_CHUNKED;
+    content_length = HttpRequest::CONTENT_LENGTH_CHUNKED;
     return true;
   } else
     return false;

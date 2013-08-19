@@ -36,45 +36,45 @@
 
 namespace yield {
 namespace http {
-TEST(HTTPResponseParser, MalformedReasonPhraseMissing) {
-  HTTPResponseParser http_response_parser("HTTP/1.1 200\r\n\r\n");
-  HTTPResponse* http_response = Object::cast<HTTPResponse>(http_response_parser.parse());
+TEST(HttpResponseParser, MalformedReasonPhraseMissing) {
+  HttpResponseParser http_response_parser("HTTP/1.1 200\r\n\r\n");
+  HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
   ASSERT_NE(http_response, static_cast<Object*>(NULL));
   ASSERT_EQ(http_response->get_status_code(), 400);
-  HTTPResponse::dec_ref(http_response);
+  HttpResponse::dec_ref(http_response);
 }
 
-TEST(HTTPResponseParser, MalformedStatusCodeAlpha) {
-  HTTPResponseParser http_response_parser("HTTP/1.1 XX OK\r\n\r\n");
-  HTTPResponse* http_response = Object::cast<HTTPResponse>(http_response_parser.parse());
+TEST(HttpResponseParser, MalformedStatusCodeAlpha) {
+  HttpResponseParser http_response_parser("HTTP/1.1 XX OK\r\n\r\n");
+  HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
   ASSERT_NE(http_response, static_cast<Object*>(NULL));
   ASSERT_EQ(http_response->get_status_code(), 400);
-  HTTPResponse::dec_ref(http_response);
+  HttpResponse::dec_ref(http_response);
 }
 
-TEST(HTTPResponseParser, MalformedStatusCodeMissing) {
-  HTTPResponseParser http_response_parser("HTTP/1.1 OK\r\n\r\n");
-  HTTPResponse* http_response = Object::cast<HTTPResponse>(http_response_parser.parse());
+TEST(HttpResponseParser, MalformedStatusCodeMissing) {
+  HttpResponseParser http_response_parser("HTTP/1.1 OK\r\n\r\n");
+  HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
   ASSERT_NE(http_response, static_cast<Object*>(NULL));
   ASSERT_EQ(http_response->get_status_code(), 400);
-  HTTPResponse::dec_ref(http_response);
+  HttpResponse::dec_ref(http_response);
 }
 
-TEST(HTTPResponseParser, MalformedStatusLineMissing) {
-  HTTPResponseParser http_response_parser("Host: localhost\r\n\r\n");
-  HTTPResponse* http_response = Object::cast<HTTPResponse>(http_response_parser.parse());
+TEST(HttpResponseParser, MalformedStatusLineMissing) {
+  HttpResponseParser http_response_parser("Host: localhost\r\n\r\n");
+  HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
   ASSERT_NE(http_response, static_cast<Object*>(NULL));
   ASSERT_EQ(http_response->get_status_code(), 400);
-  HTTPResponse::dec_ref(http_response);
+  HttpResponse::dec_ref(http_response);
 }
 
-TEST(HTTPResponseParser, WellFormedStatusLineOnly) {
-  HTTPResponseParser http_response_parser("HTTP/1.1 200 OK\r\n\r\n");
-  HTTPResponse* http_response = Object::cast<HTTPResponse>(http_response_parser.parse());
+TEST(HttpResponseParser, WellFormedStatusLineOnly) {
+  HttpResponseParser http_response_parser("HTTP/1.1 200 OK\r\n\r\n");
+  HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
   ASSERT_NE(http_response, static_cast<Object*>(NULL));
   ASSERT_EQ(http_response->get_status_code(), 200);
   ASSERT_EQ(http_response->get_body(), static_cast<Object*>(NULL));
-  HTTPResponse::dec_ref(http_response);
+  HttpResponse::dec_ref(http_response);
 }
 }
 }

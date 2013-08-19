@@ -34,11 +34,11 @@
 namespace yield {
 namespace sockets {
 namespace aio {
-INSTANTIATE_TYPED_TEST_CASE_P(NBIOQueue, AIOQueueTest, NBIOQueue);
-INSTANTIATE_TYPED_TEST_CASE_P(NBIOQueue, EventQueueTest, NBIOQueue);
+INSTANTIATE_TYPED_TEST_CASE_P(NbioQueue, AioQueueTest, NbioQueue);
+INSTANTIATE_TYPED_TEST_CASE_P(NbioQueue, EventQueueTest, NbioQueue);
 
-TEST(NBIOQueue, partial_send) {
-  NBIOQueue aio_queue;
+TEST(NbioQueue, partial_send) {
+  NbioQueue aio_queue;
 
   StreamSocketPair sockets;
   auto_Object<PartialSendStreamSocket>
@@ -47,15 +47,15 @@ TEST(NBIOQueue, partial_send) {
     throw Exception();
   }
 
-  auto_Object<sendAIOCB> aiocb
-  = new sendAIOCB(*partial_send_stream_socket, Buffer::copy("test"), 0);
+  auto_Object<SendAiocb> aiocb
+  = new SendAiocb(*partial_send_stream_socket, Buffer::copy("test"), 0);
 
   if (!aio_queue.enqueue(aiocb->inc_ref())) {
     throw Exception();
   }
 
-  auto_Object<sendAIOCB> out_aiocb
-  = Object::cast<sendAIOCB>(aio_queue.dequeue());
+  auto_Object<SendAiocb> out_aiocb
+  = Object::cast<SendAiocb>(aio_queue.dequeue());
   ASSERT_EQ(&out_aiocb.get(), &aiocb.get());
   ASSERT_EQ(out_aiocb->get_error(), 0);
   ASSERT_EQ(out_aiocb->get_return(), 4);
@@ -82,7 +82,7 @@ public:
 };
 
 TEST_F(NBIOQueuePartialSendFileTest, partial_sendfile) {
-  NBIOQueue aio_queue;
+  NbioQueue aio_queue;
 
   StreamSocketPair sockets;
   auto_Object<PartialSendStreamSocket>
@@ -95,8 +95,8 @@ TEST_F(NBIOQueuePartialSendFileTest, partial_sendfile) {
   = yield::fs::FileSystem().open("NBIOQueuePartialSendFileTest.txt");
   auto_Object<yield::fs::Stat> stbuf = file->stat();
 
-  auto_Object<sendfileAIOCB> aiocb
-  = new sendfileAIOCB(*partial_send_stream_socket, *file);
+  auto_Object<SendfileAiocb> aiocb
+  = new SendfileAiocb(*partial_send_stream_socket, *file);
   ASSERT_EQ(aiocb->get_nbytes(), stbuf->get_size());
   ASSERT_EQ(aiocb->get_offset(), 0);
 
@@ -104,8 +104,8 @@ TEST_F(NBIOQueuePartialSendFileTest, partial_sendfile) {
     throw Exception();
   }
 
-  auto_Object<sendfileAIOCB> out_aiocb
-  = Object::cast<sendfileAIOCB>(aio_queue.dequeue());
+  auto_Object<SendfileAiocb> out_aiocb
+  = Object::cast<SendfileAiocb>(aio_queue.dequeue());
   ASSERT_EQ(&out_aiocb.get(), &aiocb.get());
   ASSERT_EQ(out_aiocb->get_error(), 0);
   ASSERT_EQ(
@@ -119,8 +119,8 @@ TEST_F(NBIOQueuePartialSendFileTest, partial_sendfile) {
   ASSERT_EQ(memcmp(test, "test", 4), 0);
 }
 
-TEST(NBIOQueue, partial_sendmsg) {
-  NBIOQueue aio_queue;
+TEST(NbioQueue, partial_sendmsg) {
+  NbioQueue aio_queue;
 
   StreamSocketPair sockets;
   auto_Object<PartialSendStreamSocket>
@@ -131,14 +131,14 @@ TEST(NBIOQueue, partial_sendmsg) {
 
   auto_Object<Buffer> buffer = Buffer::copy("test");
   buffer->set_next_buffer(Buffer::copy(" string"));
-  auto_Object<sendAIOCB> aiocb
-  = new sendAIOCB(*partial_send_stream_socket, buffer->inc_ref(), 0);
+  auto_Object<SendAiocb> aiocb
+  = new SendAiocb(*partial_send_stream_socket, buffer->inc_ref(), 0);
   if (!aio_queue.enqueue(aiocb->inc_ref())) {
     throw Exception();
   }
 
-  auto_Object<sendAIOCB> out_aiocb
-  = Object::cast<sendAIOCB>(aio_queue.dequeue());
+  auto_Object<SendAiocb> out_aiocb
+  = Object::cast<SendAiocb>(aio_queue.dequeue());
   ASSERT_EQ(&out_aiocb.get(), &aiocb.get());
   ASSERT_EQ(out_aiocb->get_error(), 0);
   ASSERT_EQ(out_aiocb->get_return(), 11);

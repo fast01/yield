@@ -32,39 +32,39 @@
 
 namespace yield {
 namespace poll {
-TEST(FDEvent, constructors) {
-  FDEvent(static_cast<fd_t>(0), FDEvent::TYPE_READ_READY);
+TEST(FdEvent, constructors) {
+  FdEvent(static_cast<fd_t>(0), FdEvent::TYPE_READ_READY);
 #ifdef _WIN32
-  FDEvent(static_cast<socket_t>(0), FDEvent::TYPE_READ_READY);
+  FdEvent(static_cast<socket_t>(0), FdEvent::TYPE_READ_READY);
 #endif
 }
 
-TEST(FDEvent, get_fd) {
+TEST(FdEvent, get_fd) {
   ASSERT_EQ(
-    FDEvent(static_cast<fd_t>(0), FDEvent::TYPE_READ_READY).get_fd(),
+    FdEvent(static_cast<fd_t>(0), FdEvent::TYPE_READ_READY).get_fd(),
     static_cast<fd_t>(0)
   );
 }
 
-TEST(FDEvent, get_type) {
+TEST(FdEvent, get_type) {
   ASSERT_EQ(
-    FDEvent(static_cast<fd_t>(0), FDEvent::TYPE_READ_READY).get_type(),
-    FDEvent::TYPE_READ_READY
+    FdEvent(static_cast<fd_t>(0), FdEvent::TYPE_READ_READY).get_type(),
+    FdEvent::TYPE_READ_READY
   );
 }
 
-TEST(FDEvent, get_type_id) {
+TEST(FdEvent, get_type_id) {
   ASSERT_EQ(
-    FDEvent(static_cast<fd_t>(0), FDEvent::TYPE_READ_READY).get_type_id(),
-    FDEvent::TYPE_ID
+    FdEvent(static_cast<fd_t>(0), FdEvent::TYPE_READ_READY).get_type_id(),
+    FdEvent::TYPE_ID
   );
 }
 
-TEST(FDEvent, get_type_name) {
+TEST(FdEvent, get_type_name) {
   ASSERT_EQ(
     strcmp(
-      FDEvent(static_cast<fd_t>(0), FDEvent::TYPE_READ_READY).get_type_name(),
-      "yield::poll::FDEvent"
+      FdEvent(static_cast<fd_t>(0), FdEvent::TYPE_READ_READY).get_type_name(),
+      "yield::poll::FdEvent"
     ),
     0
   );

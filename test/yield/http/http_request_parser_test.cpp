@@ -36,56 +36,56 @@
 
 namespace yield {
 namespace http {
-TEST(HTTPRequestParser, MalformedHTTPVersionMissing) {
-  HTTPRequestParser http_request_parser("GET /\r\nHost: localhost\r\n\r\n");
-  HTTPRequest* http_request = Object::cast<HTTPRequest>(http_request_parser.parse());
+TEST(HttpRequestParser, MalformedHTTPVersionMissing) {
+  HttpRequestParser http_request_parser("GET /\r\nHost: localhost\r\n\r\n");
+  HttpRequest* http_request = Object::cast<HttpRequest>(http_request_parser.parse());
   ASSERT_EQ(http_request, static_cast<Object*>(NULL));
 }
 
-TEST(HTTPRequestParser, MalformedHTTPVersionMissingHTTP) {
-  HTTPRequestParser http_request_parser("GET / /1.0\r\nHost: localhost\r\n\r\n");
-  HTTPRequest* http_request = Object::cast<HTTPRequest>(http_request_parser.parse());
+TEST(HttpRequestParser, MalformedHTTPVersionMissingHTTP) {
+  HttpRequestParser http_request_parser("GET / /1.0\r\nHost: localhost\r\n\r\n");
+  HttpRequest* http_request = Object::cast<HttpRequest>(http_request_parser.parse());
   ASSERT_EQ(http_request, static_cast<Object*>(NULL));
 }
 
-TEST(HTTPRequestParser, MalformedHTTPVersionMissingMinorVersion) {
-  HTTPRequestParser http_request_parser("GET / HTTP/1.\r\nHost: localhost\r\n\r\n");
-  HTTPRequest* http_request = Object::cast<HTTPRequest>(http_request_parser.parse());
+TEST(HttpRequestParser, MalformedHTTPVersionMissingMinorVersion) {
+  HttpRequestParser http_request_parser("GET / HTTP/1.\r\nHost: localhost\r\n\r\n");
+  HttpRequest* http_request = Object::cast<HttpRequest>(http_request_parser.parse());
   ASSERT_EQ(http_request, static_cast<Object*>(NULL));
 }
 
-TEST(HTTPRequestParser, MalformedHTTPVersionMissingTrailingCRLF) {
-  HTTPRequestParser http_request_parser("GET / HTTP/1.1Host: localhost\r\n\r\n");
-  HTTPRequest* http_request = Object::cast<HTTPRequest>(http_request_parser.parse());
+TEST(HttpRequestParser, MalformedHTTPVersionMissingTrailingCRLF) {
+  HttpRequestParser http_request_parser("GET / HTTP/1.1Host: localhost\r\n\r\n");
+  HttpRequest* http_request = Object::cast<HttpRequest>(http_request_parser.parse());
   ASSERT_EQ(http_request, static_cast<Object*>(NULL));
 }
 
-TEST(HTTPRequestParser, MalformedMethodMissing) {
-  HTTPRequestParser http_request_parser("/ HTTP/1.0\r\nHost: localhost\r\n\r\n");
-  HTTPRequest* http_request = Object::cast<HTTPRequest>(http_request_parser.parse());
+TEST(HttpRequestParser, MalformedMethodMissing) {
+  HttpRequestParser http_request_parser("/ HTTP/1.0\r\nHost: localhost\r\n\r\n");
+  HttpRequest* http_request = Object::cast<HttpRequest>(http_request_parser.parse());
   ASSERT_EQ(http_request, static_cast<Object*>(NULL));
 }
 
-TEST(HTTPRequestParser, MalformedURIEmbeddedLF) {
-  HTTPRequestParser http_request_parser("GET /\r HTTP/1.1\r\nHost: localhost\r\n\r\n");
-  HTTPRequest* http_request = Object::cast<HTTPRequest>(http_request_parser.parse());
+TEST(HttpRequestParser, MalformedURIEmbeddedLF) {
+  HttpRequestParser http_request_parser("GET /\r HTTP/1.1\r\nHost: localhost\r\n\r\n");
+  HttpRequest* http_request = Object::cast<HttpRequest>(http_request_parser.parse());
   ASSERT_EQ(http_request, static_cast<Object*>(NULL));
 }
 
-TEST(HTTPRequestParser, MalformedURIMissing) {
-  HTTPRequestParser http_request_parser("GET HTTP/1.1\r\nHost: localhost\r\n\r\n");
-  HTTPRequest* http_request = Object::cast<HTTPRequest>(http_request_parser.parse());
+TEST(HttpRequestParser, MalformedURIMissing) {
+  HttpRequestParser http_request_parser("GET HTTP/1.1\r\nHost: localhost\r\n\r\n");
+  HttpRequest* http_request = Object::cast<HttpRequest>(http_request_parser.parse());
   ASSERT_EQ(http_request, static_cast<Object*>(NULL));
 }
 
-TEST(HTTPRequestParser, WellFormedRequestLineOnly) {
-  HTTPRequestParser http_request_parser("GET / HTTP/1.1\r\n\r\n");
-  HTTPRequest* http_request = Object::cast<HTTPRequest>(http_request_parser.parse());
+TEST(HttpRequestParser, WellFormedRequestLineOnly) {
+  HttpRequestParser http_request_parser("GET / HTTP/1.1\r\n\r\n");
+  HttpRequest* http_request = Object::cast<HttpRequest>(http_request_parser.parse());
   ASSERT_NE(http_request, static_cast<Object*>(NULL));
-  ASSERT_EQ(http_request->get_method(), HTTPRequest::Method::GET);
+  ASSERT_EQ(http_request->get_method(), HttpRequest::Method::GET);
   ASSERT_EQ(http_request->get_http_version(), 1);
   ASSERT_EQ(http_request->get_body(), static_cast<Object*>(NULL));
-  HTTPRequest::dec_ref(http_request);
+  HttpRequest::dec_ref(http_request);
 }
 }
 }

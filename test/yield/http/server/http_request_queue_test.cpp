@@ -41,18 +41,18 @@
 namespace yield {
 namespace http {
 namespace server {
-class TestHTTPRequestQueue : public HTTPRequestQueue<> {
+class TestHttpRequestQueue : public HttpRequestQueue<> {
 public:
-  TestHTTPRequestQueue(YO_NEW_REF Log* log = NULL)
-    : HTTPRequestQueue<>(8000, log) {
+  TestHttpRequestQueue(YO_NEW_REF Log* log = NULL)
+    : HttpRequestQueue<>(8000, log) {
   }
 };
 
-INSTANTIATE_TYPED_TEST_CASE_P(HTTPRequestQueue, EventQueueTest, TestHTTPRequestQueue);
+INSTANTIATE_TYPED_TEST_CASE_P(HttpRequestQueue, EventQueueTest, TestHttpRequestQueue);
 
-class HTTPRequestQueueTest : public ::testing::Test {
+class HttpRequestQueueTest : public ::testing::Test {
 protected:
-  void handle(HTTPRequest& http_request) {
+  void handle(HttpRequest& http_request) {
     if (http_request.get_uri().get_path() == "/") {
       http_request.respond(200, "Hello world");
     } else if (http_request.get_uri().get_path() == "/drop") {
@@ -67,7 +67,7 @@ protected:
       if (file != NULL) {
         yield::fs::Stat* stbuf = file->stat();
         if (stbuf != NULL) {
-          HTTPResponse* http_response = new HTTPResponse(200, file);
+          HttpResponse* http_response = new HttpResponse(200, file);
           http_response->set_field(
             "Content-Length",
             static_cast<size_t>(stbuf->get_size())
@@ -85,15 +85,15 @@ protected:
       http_request.respond(404);
     }
 
-    HTTPRequest::dec_ref(http_request);
+    HttpRequest::dec_ref(http_request);
   }
 };
 
-TEST_F(HTTPRequestQueueTest, dequeue) {
-  TestHTTPRequestQueue http_request_queue(&Log::open(std::cout));
+TEST_F(HttpRequestQueueTest, dequeue) {
+  TestHttpRequestQueue http_request_queue(&Log::open(std::cout));
   for (;;) {
-    HTTPRequest* http_request
-    = Object::cast<HTTPRequest>(http_request_queue.timeddequeue(30.0));
+    HttpRequest* http_request
+    = Object::cast<HttpRequest>(http_request_queue.timeddequeue(30.0));
     if (http_request != NULL) {
       handle(*http_request);
     } else {

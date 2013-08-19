@@ -40,8 +40,8 @@ INSTANTIATE_TYPED_TEST_CASE_P(StreamSocket, ChannelTest, StreamSocketPair);
 INSTANTIATE_TYPED_TEST_CASE_P(StreamSocket, SocketTest, StreamSocketPair);
 
 TEST(StreamSocket, accept) {
-  StreamSocket client_stream_socket(TCPSocket::DOMAIN_DEFAULT),
-               listen_stream_socket(TCPSocket::DOMAIN_DEFAULT);
+  StreamSocket client_stream_socket(TcpSocket::DOMAIN_DEFAULT),
+               listen_stream_socket(TcpSocket::DOMAIN_DEFAULT);
   if (listen_stream_socket.bind(SocketAddress::IN_LOOPBACK)) {
     if (listen_stream_socket.listen()) {
       if (client_stream_socket.connect(*listen_stream_socket.getsockname())) {
@@ -61,7 +61,7 @@ TEST(StreamSocket, dup) {
 
 TEST(StreamSocket, getsockname_exception) {
   try {
-    StreamSocket(TCPSocket::DOMAIN_DEFAULT).getsockname();
+    StreamSocket(TcpSocket::DOMAIN_DEFAULT).getsockname();
   } catch (Exception&) {
     return;
   }
@@ -70,7 +70,7 @@ TEST(StreamSocket, getsockname_exception) {
 
 TEST(StreamSocket, getpeername_exception) {
   try {
-    StreamSocket(TCPSocket::DOMAIN_DEFAULT).getpeername();
+    StreamSocket(TcpSocket::DOMAIN_DEFAULT).getpeername();
   } catch (Exception&) {
     return;
   }
@@ -82,7 +82,7 @@ TEST(StreamSocket, inc_ref) {
 }
 
 TEST(StreamSocket, listen) {
-  StreamSocket stream_socket(TCPSocket::DOMAIN_DEFAULT);
+  StreamSocket stream_socket(TcpSocket::DOMAIN_DEFAULT);
 
   if (!stream_socket.bind(SocketAddress::IN_LOOPBACK)) {
     throw Exception();
@@ -171,7 +171,7 @@ TEST(StreamSocket, shutdown) {
 }
 
 TEST(StreamSocket, want_accept) {
-  StreamSocket listen_stream_socket(TCPSocket::DOMAIN_DEFAULT);
+  StreamSocket listen_stream_socket(TcpSocket::DOMAIN_DEFAULT);
   if (listen_stream_socket.bind(SocketAddress::IN_LOOPBACK)) {
     if (listen_stream_socket.listen()) {
       if (listen_stream_socket.set_blocking_mode(false)) {

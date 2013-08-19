@@ -33,15 +33,15 @@
 
 namespace yield {
 namespace http {
-TEST(HTTPResponse, constructor) {
-  HTTPResponse(404);
-  HTTPResponse(404, &Buffer::copy("test"));
-  HTTPResponse(404, &Buffer::copy("test"), 1);
+TEST(HttpResponse, constructor) {
+  HttpResponse(404);
+  HttpResponse(404, &Buffer::copy("test"));
+  HttpResponse(404, &Buffer::copy("test"), 1);
 }
 
-TEST(HTTPResponse, get_status_code) {
-  ASSERT_EQ(HTTPResponse(200).get_status_code(), 200);
-  ASSERT_EQ(HTTPResponse(404).get_status_code(), 404);
+TEST(HttpResponse, get_status_code) {
+  ASSERT_EQ(HttpResponse(200).get_status_code(), 200);
+  ASSERT_EQ(HttpResponse(404).get_status_code(), 404);
 }
 }
 }

@@ -44,14 +44,14 @@
 
 namespace yield {
 namespace http {
-using yield::uri::URI;
+using yield::uri::Uri;
 
 Object& HttpRequestParser::parse() {
   if (p < eof) {
     ps = p;
 
     uint8_t http_version;
-    HTTPRequest::Method method;
+    HttpRequest::Method method;
     iovec uri_fragment = {0, 0};
     iovec uri_host = {0, 0};
     iovec uri_path = {0, 0};
@@ -72,7 +72,7 @@ Object& HttpRequestParser::parse() {
         uri_userinfo
       )
     ) {
-      URI uri(
+      Uri uri(
         buffer,
         uri_fragment,
         uri_host,
@@ -125,7 +125,7 @@ Object& HttpRequestParser::parse() {
       p = ps;
       return next_buffer;
     } else { // Error parsing
-      HTTPResponse& http_response
+      HttpResponse& http_response
         = create_http_response(400, NULL, http_version);
       http_response.set_field("Content-Length", 14, "0", 1);
       return http_response;
@@ -136,7 +136,7 @@ Object& HttpRequestParser::parse() {
 
 bool HttpRequestParser::parse_request_line(
   uint8_t& http_version,
-  HTTPRequest::Method& method,
+  HttpRequest::Method& method,
   iovec& host,
   iovec& path,
   uint16_t& port,
@@ -155,25 +155,25 @@ bool HttpRequestParser::parse_request_line(
 
     # RFC 2616 5.1.1
     method
-      = ("CONNECT" % { method = HTTPRequest::Method::CONNECT; }) |
-        ("COPY" % { method = HTTPRequest::Method::COPY; }) |
-        ("DELETE" % { method = HTTPRequest::Method::DELETE; }) |
-        ("GET" % { method = HTTPRequest::Method::GET; }) |
-        ("HEAD" % { method = HTTPRequest::Method::HEAD; }) |
-        ("LOCK" % { method = HTTPRequest::Method::LOCK; }) |
-        ("MKCOL" % { method = HTTPRequest::Method::MKCOL; }) |
-        ("MOVE" % { method = HTTPRequest::Method::MOVE; }) |
-        ("OPTIONS" % { method = HTTPRequest::Method::OPTIONS; }) |
-        ("PATCH" % { method = HTTPRequest::Method::PATCH; }) |
-        ("POST" % { method = HTTPRequest::Method::POST; }) |
-        ("PROPFIND" % { method = HTTPRequest::Method::PROPFIND; }) |
-        ("PROPPATCH" % { method = HTTPRequest::Method::PROPPATCH; }) |
-        ("PUT" % { method = HTTPRequest::Method::PUT; }) |
-        ("TRACE" % { method = HTTPRequest::Method::TRACE; }) |
-        ("UNLOCK" % { method = HTTPRequest::Method::UNLOCK; });
+      = ("CONNECT" % { method = HttpRequest::Method::CONNECT; }) |
+        ("COPY" % { method = HttpRequest::Method::COPY; }) |
+        ("DELETE" % { method = HttpRequest::Method::DELETE; }) |
+        ("GET" % { method = HttpRequest::Method::GET; }) |
+        ("HEAD" % { method = HttpRequest::Method::HEAD; }) |
+        ("LOCK" % { method = HttpRequest::Method::LOCK; }) |
+        ("MKCOL" % { method = HttpRequest::Method::MKCOL; }) |
+        ("MOVE" % { method = HttpRequest::Method::MOVE; }) |
+        ("OPTIONS" % { method = HttpRequest::Method::OPTIONS; }) |
+        ("PATCH" % { method = HttpRequest::Method::PATCH; }) |
+        ("POST" % { method = HttpRequest::Method::POST; }) |
+        ("PROPFIND" % { method = HttpRequest::Method::PROPFIND; }) |
+        ("PROPPATCH" % { method = HttpRequest::Method::PROPPATCH; }) |
+        ("PUT" % { method = HttpRequest::Method::PUT; }) |
+        ("TRACE" % { method = HttpRequest::Method::TRACE; }) |
+        ("UNLOCK" % { method = HttpRequest::Method::UNLOCK; });
 
     # RFC 2616 5.1.2
-    # Per the spec, Request-URI = "*" | absoluteURI | abs_path | authority
+    # Per the spec, Request-Uri = "*" | absoluteURI | abs_path | authority
     # absoluteURI is fully-qualified (http://host...), for use with proxies.
     # authority is (userinfo "@")? host (":" port)?, used with CONNECT.
     # abs_path is the common form, but it does NOT include a ["?" query],

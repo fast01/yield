@@ -34,12 +34,12 @@ namespace yield {
 namespace http {
 namespace server {
 namespace file {
-TEST(HTTPFileServer, constructor) {
-  HTTPFileServer<>(".", "/", 8080);
+TEST(HttpFileServer, constructor) {
+  HttpFileServer<>(".", "/", 8080);
 }
 
-//TEST(HTTPFileServer, visit) {
-//  HTTPFileServer<> http_file_server(".", "/", 8080);
+//TEST(HttpFileServer, visit) {
+//  HttpFileServer<> http_file_server(".", "/", 8080);
 //  for (;;)
 //    http_file_server.visit();
 //}

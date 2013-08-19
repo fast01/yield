@@ -35,12 +35,12 @@ namespace yield {
 namespace http {
 namespace server {
 namespace ygi {
-TEST(YGIServer, constructor) {
-  YGIServer<>(8080, test_ygi_request_handler);
+TEST(YgiServer, constructor) {
+  YgiServer<>(8080, test_ygi_request_handler);
 }
 
-//TEST(YGIServer, visit) {
-//  YGIServer<> ygi_server(8080, test_ygi_request_handler);
+//TEST(YgiServer, visit) {
+//  YgiServer<> ygi_server(8080, test_ygi_request_handler);
 //  for (;;)
 //    ygi_server.visit();
 //}

@@ -32,8 +32,8 @@
 
 namespace yield {
 namespace stage {
-typedef StageSchedulerScheduleTest<SEDAStageScheduler> SEDAStageSchedulerScheduleTest;
-TEST_F(SEDAStageSchedulerScheduleTest, schedule) {
+typedef StageSchedulerScheduleTest<SedaStageScheduler> SedaStageSchedulerScheduleTest;
+TEST_F(SedaStageSchedulerScheduleTest, schedule) {
 }
 }
 }

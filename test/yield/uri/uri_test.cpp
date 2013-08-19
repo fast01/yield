@@ -33,9 +33,9 @@
 
 namespace yield {
 namespace uri {
-TEST(URI, copy_constructor) {
-  URI uri("http://minorg:minorg@localhost:80/myfile");
-  URI uri_copy(uri);
+TEST(Uri, copy_constructor) {
+  Uri uri("http://minorg:minorg@localhost:80/myfile");
+  Uri uri_copy(uri);
   ASSERT_EQ(uri_copy.get_scheme(), "http");
   //ASSERT_EQ(uri_copy.get_user(), "minorg");
   //ASSERT_EQ(uri_copy.get_password(), "minorg");
@@ -44,8 +44,8 @@ TEST(URI, copy_constructor) {
   ASSERT_EQ(uri_copy.get_path(), "/myfile");
 }
 
-TEST(URI, set_port) {
-  URI uri("http://localhost/");
+TEST(Uri, set_port) {
+  Uri uri("http://localhost/");
   ASSERT_EQ(uri.get_port(), 0);
   uri.set_port(80);
   ASSERT_EQ(uri.get_port(), 80);

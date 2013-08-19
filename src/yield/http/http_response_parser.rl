@@ -91,7 +91,7 @@ Object& HttpResponseParser::parse() {
       p = ps;
       return next_buffer;
     } else { // Error parsing
-      HTTPResponse& http_response
+      HttpResponse& http_response
         = create_http_response(400, NULL, http_version);
       http_response.set_field("Content-Length", 14, "0", 1);
       return http_response;

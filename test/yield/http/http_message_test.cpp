@@ -35,13 +35,13 @@
 namespace yield {
 namespace http {
 TEST(HTTPMessage, get_body) {
-  ASSERT_EQ(HTTPRequest(HTTPRequest::Method::GET, "/").get_body(), static_cast<Object*>(NULL));
+  ASSERT_EQ(HttpRequest(HttpRequest::Method::GET, "/").get_body(), static_cast<Object*>(NULL));
 
   auto_Object<Buffer> body = Buffer::copy("body");
   ASSERT_EQ(
     memcmp(
       *static_cast<Buffer*>(
-        HTTPRequest(HTTPRequest::Method::GET, "/", &body->inc_ref()).get_body()
+        HttpRequest(HttpRequest::Method::GET, "/", &body->inc_ref()).get_body()
       ),
       "body",
       4
@@ -51,16 +51,16 @@ TEST(HTTPMessage, get_body) {
 }
 
 TEST(HTTPMessage, get_date_field) {
-  auto_Object<HTTPRequest> http_request
-  = new HTTPRequest(HTTPRequest::Method::GET, "/");
+  auto_Object<HttpRequest> http_request
+  = new HttpRequest(HttpRequest::Method::GET, "/");
   http_request->set_field("Date", "Wed, 15 Nov 1995 06:25:24 GMT");
   DateTime date = http_request->get_date_field("Date");
   ASSERT_NE(date, DateTime::INVALID_DATE_TIME);
 }
 
 TEST(HTTPMessage, get_field) {
-  auto_Object<HTTPRequest> http_request
-  = new HTTPRequest(HTTPRequest::Method::GET, "/");
+  auto_Object<HttpRequest> http_request
+  = new HttpRequest(HttpRequest::Method::GET, "/");
   // Set a field before the desired field
   http_request->set_field("Host", "localhost");
   http_request->set_field("Date", "Wed, 15 Nov 1995 06:25:24 GMT");
@@ -91,8 +91,8 @@ TEST(HTTPMessage, get_field) {
 }
 
 TEST(HTTPMessage, get_fields) {
-  auto_Object<HTTPRequest> http_request
-  = new HTTPRequest(HTTPRequest::Method::GET, "/");
+  auto_Object<HttpRequest> http_request
+  = new HttpRequest(HttpRequest::Method::GET, "/");
   http_request->set_field("Host", "localhost");
   http_request->set_field("XHost", "localhost");
 

@@ -32,6 +32,6 @@
 
 namespace yield {
 namespace queue {
-INSTANTIATE_TYPED_TEST_CASE_P(TLSConcurrentQueue, QueueTest, TLSConcurrentQueue<uint32_t>);
+INSTANTIATE_TYPED_TEST_CASE_P(TlsConcurrentQueue, QueueTest, TlsConcurrentQueue<uint32_t>);
 }
 }

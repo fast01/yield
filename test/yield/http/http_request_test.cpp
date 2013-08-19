@@ -36,43 +36,43 @@
 
 namespace yield {
 namespace http {
-TEST(HTTPRequest, constructor) {
-  HTTPRequest(HTTPRequest::Method::GET, "/");
-  HTTPRequest(HTTPRequest::Method::GET, "/", &Buffer::copy("test"));
-  HTTPRequest(HTTPRequest::Method::GET, "/", &Buffer::copy("test"));
-  HTTPRequest(HTTPRequest::Method::GET, "/", &Buffer::copy("test"), 1);
+TEST(HttpRequest, constructor) {
+  HttpRequest(HttpRequest::Method::GET, "/");
+  HttpRequest(HttpRequest::Method::GET, "/", &Buffer::copy("test"));
+  HttpRequest(HttpRequest::Method::GET, "/", &Buffer::copy("test"));
+  HttpRequest(HttpRequest::Method::GET, "/", &Buffer::copy("test"), 1);
 }
 
-//TEST(HTTPRequest, get_creation_date_time) {
+//TEST(HttpRequest, get_creation_date_time) {
 //  DateTime now = DateTime::now();
 //  ASSERT_GE(
-//    HTTPRequest(HTTPRequest::Method::GET, "/").get_creation_date_time(),
+//    HttpRequest(HttpRequest::Method::GET, "/").get_creation_date_time(),
 //    DateTime.now()
 //  );
 //}
 
-TEST(HTTPRequest, get_method) {
+TEST(HttpRequest, get_method) {
   ASSERT_EQ(
-    HTTPRequest(HTTPRequest::Method::GET, "/").get_method(),
-    HTTPRequest::Method::GET
+    HttpRequest(HttpRequest::Method::GET, "/").get_method(),
+    HttpRequest::Method::GET
   );
 
   ASSERT_EQ(
-    HTTPRequest(HTTPRequest::Method::PUT, "/").get_method(),
-    HTTPRequest::Method::PUT
+    HttpRequest(HttpRequest::Method::PUT, "/").get_method(),
+    HttpRequest::Method::PUT
   );
 }
 
-TEST(HTTPRequest, get_uri) {
-  yield::uri::URI uri("/test");
-  ASSERT_EQ(HTTPRequest(HTTPRequest::Method::GET, uri).get_uri(), uri);
+TEST(HttpRequest, get_uri) {
+  yield::uri::Uri uri("/test");
+  ASSERT_EQ(HttpRequest(HttpRequest::Method::GET, uri).get_uri(), uri);
 }
 
-//TEST(HTTPRequest, respond) {
-//  auto_Object<HTTPRequest> http_request
-//    = new HTTPRequest(HTTPRequest::Method::GET, "/");
+//TEST(HttpRequest, respond) {
+//  auto_Object<HttpRequest> http_request
+//    = new HttpRequest(HttpRequest::Method::GET, "/");
 //
-//  http_request->respond(*new HTTPResponse(200));
+//  http_request->respond(*new HttpResponse(200));
 //  http_request->respond(404);
 //  http_request->respond(404, "test");
 //  http_request->respond(404, Buffer::copy("test"));

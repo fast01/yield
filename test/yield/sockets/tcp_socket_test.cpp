@@ -32,12 +32,12 @@
 
 namespace yield {
 namespace sockets {
-TEST(TCPSocket, dup) {
-  auto_Object<StreamSocket> socket_ = TCPSocket().dup();
+TEST(TcpSocket, dup) {
+  auto_Object<StreamSocket> socket_ = TcpSocket().dup();
 }
 
-TEST(TCPSocket, dup2) {
-  TCPSocket client_tcp_socket, listen_tcp_socket;
+TEST(TcpSocket, dup2) {
+  TcpSocket client_tcp_socket, listen_tcp_socket;
   if (listen_tcp_socket.bind(SocketAddress::IN_LOOPBACK))
     if (listen_tcp_socket.listen()) {
       if (client_tcp_socket.connect(*listen_tcp_socket.getsockname())) {
@@ -50,15 +50,15 @@ TEST(TCPSocket, dup2) {
   throw Exception();
 }
 
-TEST(TCPSocket, get_type_name) {
+TEST(TcpSocket, get_type_name) {
   ASSERT_EQ(
-    strcmp(TCPSocket().get_type_name(), "yield::sockets::TCPSocket"),
+    strcmp(TcpSocket().get_type_name(), "yield::sockets::TcpSocket"),
     0
   );
 }
 
-TEST(TCPSocket, setsockopt_NODELAY) {
-  if (!TCPSocket().setsockopt(TCPSocket::Option::NODELAY, true)) {
+TEST(TcpSocket, setsockopt_NODELAY) {
+  if (!TcpSocket().setsockopt(TcpSocket::Option::NODELAY, true)) {
     throw Exception();
   }
 }
