@@ -60,6 +60,7 @@
 #include "yield/sockets/aio/connect_aiocb.hpp"
 #include "yield/sockets/aio/nbio_queue.hpp"
 #include "yield/sockets/aio/recv_aiocb.hpp"
+#include "yield/sockets/aio/recvfrom_aiocb.hpp"
 #include "yield/sockets/aio/send_aiocb.hpp"
 #include "yield/sockets/aio/sendfile_aiocb.hpp"
 #include "yield/sockets/datagram_socket.hpp"

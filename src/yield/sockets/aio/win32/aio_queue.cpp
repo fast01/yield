@@ -307,7 +307,8 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
 
     DWORD dwFlags = static_cast<DWORD>(recvfrom_aiocb.get_flags());
     sockaddr* peername = recvfrom_aiocb.get_peername();
-    socklen_t peername_len = SocketAddress::len(recvfrom_aiocb.get_socket().get_domain());
+    socklen_t& peername_len = recvfrom_aiocb.get_peername_len();
+    peername_len = SocketAddress::len(recvfrom_aiocb.get_socket().get_domain());
 
     if (recvfrom_aiocb.get_buffer().get_next_buffer() == NULL) {
       iovec wsabuf = recvfrom_aiocb.get_buffer().as_read_iovec();

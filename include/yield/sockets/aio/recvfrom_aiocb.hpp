@@ -88,6 +88,14 @@ public:
     return peername;
   }
 
+  /**
+    Get the length in bytes of peername.
+    @return the length in bytes of peername
+  */
+  socklen_t& get_peername_len() {
+    return peername_len;
+  }
+
 public:
   // yield::Object
   uint32_t get_type_id() const {
@@ -102,6 +110,7 @@ private:
   Buffer& buffer;
   Socket::MessageFlags flags;
   SocketAddress peername;
+  socklen_t peername_len;
 };
 
 /**
