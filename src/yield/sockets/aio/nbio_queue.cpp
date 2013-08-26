@@ -37,6 +37,7 @@
 #include "yield/sockets/aio/nbio_queue.hpp"
 #include "yield/sockets/aio/connect_aiocb.hpp"
 #include "yield/sockets/aio/recv_aiocb.hpp"
+#include "yield/sockets/aio/recvfrom_aiocb.hpp"
 #include "yield/sockets/aio/send_aiocb.hpp"
 #include "yield/sockets/aio/sendfile_aiocb.hpp"
 
@@ -139,6 +140,8 @@ uint8_t NbioQueue::get_aiocb_priority(const Aiocb& aiocb) {
     return 1;
   case RecvAiocb::TYPE_ID:
     return 3;
+  case RecvfromAiocb::TYPE_ID:
+    return 3;
   case SendAiocb::TYPE_ID:
     return 2;
   case SendfileAiocb::TYPE_ID:
@@ -209,6 +212,8 @@ NbioQueue::RetryStatus NbioQueue::retry(Aiocb& aiocb, size_t& partial_send_len) 
     return retry_connect(static_cast<ConnectAiocb&>(aiocb), partial_send_len);
   case RecvAiocb::TYPE_ID:
     return retry_recv(static_cast<RecvAiocb&>(aiocb));
+  case RecvfromAiocb::TYPE_ID:
+    return retry_recvfrom(static_cast<RecvfromAiocb&>(aiocb));
   case SendAiocb::TYPE_ID:
     return retry_send(static_cast<SendAiocb&>(aiocb), partial_send_len);
   case SendfileAiocb::TYPE_ID:
@@ -319,6 +324,36 @@ NbioQueue::RetryStatus NbioQueue::retry_recv(RecvAiocb& recv_aiocb) {
   log_error(recv_aiocb);
   return RETRY_STATUS_ERROR;
 }
+
+NbioQueue::RetryStatus NbioQueue::retry_recvfrom(RecvfromAiocb& recvfrom_aiocb) {
+  log_retry(recvfrom_aiocb);
+
+  if (recvfrom_aiocb.get_socket().set_blocking_mode(false)) {
+    ssize_t recv_ret
+    = recvfrom_aiocb.get_socket().recvfrom(
+        recvfrom_aiocb.get_buffer(),
+        recvfrom_aiocb.get_flags(),
+        recvfrom_aiocb.get_peername()
+      );
+
+    if (recv_ret >= 0) {
+      recvfrom_aiocb.set_return(recv_ret);
+      log_completion(recvfrom_aiocb);
+      return RETRY_STATUS_COMPLETE;
+    } else if (recvfrom_aiocb.get_socket().want_recv()) {
+      log_wouldblock(recvfrom_aiocb, RETRY_STATUS_WANT_RECV);
+      return RETRY_STATUS_WANT_RECV;
+    } else if (recvfrom_aiocb.get_socket().want_send()) {
+      log_wouldblock(recvfrom_aiocb, RETRY_STATUS_WANT_SEND);
+      return RETRY_STATUS_WANT_SEND;
+    }
+  }
+
+  recvfrom_aiocb.set_error(Exception::get_last_error_code());
+  log_error(recvfrom_aiocb);
+  return RETRY_STATUS_ERROR;
+}
+
 
 NbioQueue::RetryStatus
 NbioQueue::retry_send(
@@ -495,6 +530,7 @@ Event* NbioQueue::timeddequeue(const Time& timeout) {
       case AcceptAiocb::TYPE_ID:
       case ConnectAiocb::TYPE_ID:
       case RecvAiocb::TYPE_ID:
+      case RecvfromAiocb::TYPE_ID:
       case SendAiocb::TYPE_ID:
       case SendfileAiocb::TYPE_ID: {
         Aiocb* aiocb = static_cast<Aiocb*>(event);

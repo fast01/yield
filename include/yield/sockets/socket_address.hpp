@@ -277,7 +277,14 @@ public:
     @param family the address family (e.g., AF_INET) of the struct sockaddr
   */
   void assign(const sockaddr& sockaddr_, int family) {
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4365)
+#endif
     memcpy_s(&this->addr, sizeof(this->addr), &sockaddr_, len(family));
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
     this->addr.ss_family = static_cast<uint16_t>(family);
   }
 

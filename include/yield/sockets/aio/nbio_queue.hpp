@@ -44,6 +44,7 @@ namespace aio {
 class AcceptAiocb;
 class ConnectAiocb;
 class RecvAiocb;
+class RecvfromAiocb;
 class SendAiocb;
 class SendfileAiocb;
 
@@ -122,6 +123,7 @@ private:
   RetryStatus retry_accept(AcceptAiocb&);
   RetryStatus retry_connect(ConnectAiocb&, size_t& partial_send_len);
   RetryStatus retry_recv(RecvAiocb&);
+  RetryStatus retry_recvfrom(RecvfromAiocb&);
   RetryStatus retry_send(SendAiocb&, size_t& partial_send_len);
   template <class AiocbType>
   RetryStatus retry_send(AiocbType&, const Buffer&, size_t& partial_send_len);

@@ -35,6 +35,7 @@
 #include "yield/sockets/aio/accept_aiocb.hpp"
 #include "yield/sockets/aio/connect_aiocb.hpp"
 #include "yield/sockets/aio/recv_aiocb.hpp"
+#include "yield/sockets/aio/recvfrom_aiocb.hpp"
 #include "yield/sockets/aio/send_aiocb.hpp"
 #include "yield/sockets/aio/sendfile_aiocb.hpp"
 #include "yield/sockets/aio/aio_queue.hpp"
@@ -299,6 +300,65 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
   }
   break;
 
+  case RecvfromAiocb::TYPE_ID: {
+    RecvfromAiocb& recvfrom_aiocb = static_cast<RecvfromAiocb&>(event);
+
+    log_enqueue(recvfrom_aiocb);
+
+    DWORD dwFlags = static_cast<DWORD>(recvfrom_aiocb.get_flags());
+    sockaddr* peername = recvfrom_aiocb.get_peername();
+    socklen_t peername_len = SocketAddress::len(recvfrom_aiocb.get_socket().get_domain());
+
+    if (recvfrom_aiocb.get_buffer().get_next_buffer() == NULL) {
+      iovec wsabuf = recvfrom_aiocb.get_buffer().as_read_iovec();
+
+      if (
+        WSARecvFrom(
+          recvfrom_aiocb.get_socket(),
+          reinterpret_cast<WSABUF*>(&wsabuf),
+          1,
+          NULL,
+          &dwFlags,
+          peername,
+          &peername_len,
+          recvfrom_aiocb,
+          NULL
+        ) == 0
+        ||
+        WSAGetLastError() == WSA_IO_PENDING
+      ) {
+        return true;
+      }
+    } else { // Scatter I/O
+      vector<iovec> wsabufs;
+      Buffers::as_read_iovecs(recvfrom_aiocb.get_buffer(), wsabufs);
+
+      if (
+        WSARecvFrom(
+          recvfrom_aiocb.get_socket(),
+          reinterpret_cast<WSABUF*>(&wsabufs[0]),
+          wsabufs.size(),
+          NULL,
+          &dwFlags,
+          peername,
+          &peername_len,
+          recvfrom_aiocb,
+          NULL
+        ) == 0
+        ||
+        WSAGetLastError() == WSA_IO_PENDING
+      ) {
+        return true;
+      }
+    }
+
+    recvfrom_aiocb.set_error(WSAGetLastError());
+    log_error(recvfrom_aiocb);
+
+    return true;
+  }
+  break;
+
   case SendAiocb::TYPE_ID: {
     SendAiocb& send_aiocb = static_cast<SendAiocb&>(event);
 
@@ -535,6 +595,21 @@ YO_NEW_REF Event* AioQueue::timeddequeue(const Time& timeout) {
       }
 
       log_completion(recv_aiocb);
+    }
+    break;
+
+    case RecvfromAiocb::TYPE_ID: {
+      RecvfromAiocb& recvfrom_aiocb = static_cast<RecvfromAiocb&>(aiocb);
+
+      if (recvfrom_aiocb.get_return() > 0) {
+        Buffers::put(
+          recvfrom_aiocb.get_buffer(),
+          NULL,
+          static_cast<size_t>(recvfrom_aiocb.get_return())
+        );
+      }
+
+      log_completion(recvfrom_aiocb);
     }
     break;
 

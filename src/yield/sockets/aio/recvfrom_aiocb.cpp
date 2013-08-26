@@ -1,4 +1,4 @@
-// yield/sockets/posix/datagram_socket.cpp
+// yield/sockets/aio/recvfrom_aiocb.cpp
 
 // Copyright (c) 2013 Minor Gordon
 // All rights reserved
@@ -27,56 +27,35 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/sockets/datagram_socket.hpp"
-
-#include <sys/socket.h>
+#include "yield/debug.hpp"
+#include "yield/buffer.hpp"
+#include "yield/sockets/aio/recvfrom_aiocb.hpp"
 
 namespace yield {
 namespace sockets {
-const int DatagramSocket::TYPE = SOCK_DGRAM;
-
-ssize_t
-DatagramSocket::sendmsg(
-  const iovec* iov,
-  int iovlen,
-  const MessageFlags& flags,
-  const SocketAddress& peername
-) {
-  msghdr msghdr_;
-  memset(&msghdr_, 0, sizeof(msghdr_));
-  msghdr_.msg_iov = const_cast<iovec*>(iov);
-  msghdr_.msg_iovlen = iovlen;
-  const SocketAddress* peername_ = peername.filter(get_domain());
-  if (peername_ != NULL) {
-    const sockaddr* peername_sockaddr = *peername_;
-    msghdr_.msg_name = const_cast<sockaddr*>(peername_sockaddr);
-    msghdr_.msg_namelen = peername_->len();
-  } else {
-    return -1;
-  }
-  return ::sendmsg(*this, &msghdr_, flags);
+namespace aio {
+RecvfromAiocb::~RecvfromAiocb() {
+  Buffer::dec_ref(buffer);
 }
 
-ssize_t
-DatagramSocket::sendto(
-  const void* buf,
-  size_t buflen,
-  const MessageFlags& flags,
-  const SocketAddress& peername
-) {
-  const SocketAddress* peername_ = peername.filter(get_domain());
-  if (peername_ != NULL) {
-    return ::sendto(
-             *this,
-             static_cast<const char*>(buf),
-             buflen,
-             flags,
-             *peername_,
-             peername_->len()
-           );
-  } else {
-    return -1;
-  }
+std::ostream& operator<<(std::ostream& os, RecvfromAiocb& recvfrom_aiocb) {
+  os <<
+     recvfrom_aiocb.get_type_name() <<
+     "(" <<
+     "buffer=" << recvfrom_aiocb.get_buffer() <<
+     ", " <<
+     "error=" << recvfrom_aiocb.get_error() <<
+     ", " <<
+     "flags=" << recvfrom_aiocb.get_flags() <<
+     ", " <<
+     "peername=" << recvfrom_aiocb.get_peername() <<
+     ", " <<
+     "return=" << recvfrom_aiocb.get_return() <<
+     ", " <<
+     "socket=" << recvfrom_aiocb.get_socket() <<
+     ")";
+  return os;
+}
 }
 }
 }

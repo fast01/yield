@@ -162,6 +162,24 @@ ssize_t Socket::recv(void* buf, size_t buflen, const MessageFlags& flags) {
 }
 
 ssize_t
+Socket::recvfrom(
+  void* buf,
+  size_t buflen,
+  const MessageFlags& flags,
+  SocketAddress& peername
+) {
+  socklen_t peernamelen = peername.len();
+  return ::recvfrom(
+           *this,
+           static_cast<char*>(buf),
+           buflen,
+           flags,
+           static_cast<sockaddr*>(peername),
+           &peernamelen
+         );
+}
+
+ssize_t
 Socket::recvmsg(
   const iovec* iov,
   int iovlen,
@@ -171,6 +189,22 @@ Socket::recvmsg(
   memset(&msghdr_, 0, sizeof(msghdr_));
   msghdr_.msg_iov = const_cast<iovec*>(iov);
   msghdr_.msg_iovlen = iovlen;
+  return ::recvmsg(*this, &msghdr_, flags);
+}
+
+ssize_t
+Socket::recvmsg(
+  const iovec* iov,
+  int iovlen,
+  const MessageFlags& flags,
+  SocketAddress& peername
+) {
+  msghdr msghdr_;
+  memset(&msghdr_, 0, sizeof(msghdr_));
+  msghdr_.msg_iov = const_cast<iovec*>(iov);
+  msghdr_.msg_iovlen = iovlen;
+  msghdr_.msg_name = peername;
+  msghdr_.msg_namelen = peername.len();
   return ::recvmsg(*this, &msghdr_, flags);
 }
 

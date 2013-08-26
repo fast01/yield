@@ -270,7 +270,14 @@ public:
     } else {
       vector<iovec> iov;
       Buffers::as_read_iovecs(buffer, iov);
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4365)
+#endif
       ssize_t recv_ret = recvmsg(&iov[0], iov.size(), flags);
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
       if (recv_ret > 0) {
         Buffers::put(buffer, NULL, static_cast<size_t>(recv_ret));
       }
@@ -288,6 +295,64 @@ public:
   virtual ssize_t recv(void* buf, size_t buflen, const MessageFlags& flags);
 
   /**
+    Read from the socket into a Buffer, also recording the sender's address.
+    May be a recvfrom(void*, size_t, const MessageFlags&, SocketAddress&) or a
+      recvmsg(const iovec*, int, const MessageFlags&, SocketAddress&),
+      depending on whether buffer is a single buffer or a linked list of them.
+    Updates buffer's size depending on how many bytes were read.
+    @param[in, out] buffer the buffer to read data into
+    @param[out] peername the sender's address
+    @param flags flags altering the behavior of the underlying system call
+    @return the number of bytes read on success, -1+errno on failure
+  */
+  ssize_t
+  recvfrom(
+    Buffer& buffer,
+    const MessageFlags& flags,
+    SocketAddress& peername
+  ) {
+    if (buffer.get_next_buffer() == NULL) {
+      iovec iov = buffer.as_read_iovec();
+      ssize_t recv_ret = recvfrom(iov.iov_base, iov.iov_len, flags, peername);
+      if (recv_ret > 0) {
+        buffer.put(NULL, static_cast<size_t>(recv_ret));
+      }
+      return recv_ret;
+    } else {
+      vector<iovec> iov;
+      Buffers::as_read_iovecs(buffer, iov);
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4365)
+#endif
+      ssize_t recv_ret = recvmsg(&iov[0], iov.size(), flags, peername);
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
+      if (recv_ret > 0) {
+        Buffers::put(buffer, NULL, static_cast<size_t>(recv_ret));
+      }
+      return recv_ret;
+    }
+  }
+
+  /**
+    Read from the socket into a single buffer, also recording the sender's address.
+    @param[in, out] buf pointer to the buffer
+    @param buflen the length of the memory region pointed to by buf
+    @param flags flags altering the behavior of the underlying system call
+    @param[out] peername the sender's address
+    @return the number of bytes read on success, -1+errno on failure
+  */
+  virtual ssize_t
+  recvfrom(
+    void* buf,
+    size_t buflen,
+    const MessageFlags& flags,
+    SocketAddress& peername
+  );
+
+  /**
     Read from the socket into multiple buffers (scatter I/O).
     @param[in, out] iov array of I/O vectors describing the buffers
     @param iovlen length of the I/O vectors array
@@ -298,6 +363,23 @@ public:
     const iovec* iov,
     int iovlen,
     const MessageFlags& flags
+  );
+
+  /**
+    Read from the socket into multiple buffers (scatter I/O),
+      also recording the sender's address.
+    @param[in, out] iov array of I/O vectors describing the buffers
+    @param iovlen length of the I/O vectors array
+    @param flags flags altering the behavior of the underlying system call
+    @param[out] peername the sender's address
+    @return the number of bytes read on success, -1+errno on failure
+  */
+  virtual ssize_t
+  recvmsg(
+    const iovec* iov,
+    int iovlen,
+    const MessageFlags& flags,
+    SocketAddress& peername
   );
 
 public:
@@ -317,7 +399,14 @@ public:
     } else {
       vector<iovec> iov;
       Buffers::as_write_iovecs(buffer, iov);
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable: 4365)
+#endif
       return sendmsg(&iov[0], iov.size(), flags);
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
     }
   }
 

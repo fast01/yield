@@ -38,9 +38,11 @@
 #include "yield/fs/file.hpp"
 #include "yield/fs/file_system.hpp"
 #include "yield/fs/stat.hpp"
+#include "yield/sockets/datagram_socket_pair.hpp"
 #include "yield/sockets/stream_socket_pair.hpp"
 #include "yield/sockets/tcp_socket.hpp"
 #include "yield/sockets/aio/recv_aiocb.hpp"
+#include "yield/sockets/aio/recvfrom_aiocb.hpp"
 #include "yield/sockets/aio/send_aiocb.hpp"
 #include "yield/sockets/aio/sendfile_aiocb.hpp"
 #include "gtest/gtest.h"
@@ -90,6 +92,32 @@ TYPED_TEST_P(AioQueueTest, recv) {
 
   auto_Object<RecvAiocb> out_aiocb
   = Object::cast<RecvAiocb>(aio_queue.dequeue());
+  ASSERT_EQ(&out_aiocb.get(), &aiocb.get());
+  ASSERT_EQ(out_aiocb->get_error(), 0);
+  ASSERT_EQ(out_aiocb->get_return(), 1);
+  ASSERT_EQ(buffer->size(), 1);
+  ASSERT_EQ((*buffer)[0], 'm');
+}
+
+TYPED_TEST_P(AioQueueTest, recvfrom) {
+  TypeParam aio_queue;
+
+  DatagramSocketPair sockets;
+  if (!aio_queue.associate(sockets.first())) {
+    throw Exception();
+  }
+
+  sockets.second().send("m", 1, 0);
+
+  auto_Object<Buffer> buffer = new Buffer(4096);
+  auto_Object<RecvfromAiocb> aiocb
+  = new RecvfromAiocb(sockets.first(), buffer->inc_ref(), 0);
+  if (!aio_queue.enqueue(aiocb->inc_ref())) {
+    throw Exception();
+  }
+
+  auto_Object<RecvfromAiocb> out_aiocb
+  = Object::cast<RecvfromAiocb>(aio_queue.dequeue());
   ASSERT_EQ(&out_aiocb.get(), &aiocb.get());
   ASSERT_EQ(out_aiocb->get_error(), 0);
   ASSERT_EQ(out_aiocb->get_return(), 1);
@@ -301,7 +329,7 @@ TYPED_TEST_P(AioQueueTest, sendmsg) {
   ASSERT_EQ(memcmp(test_string, "test string", 11), 0);
 }
 
-REGISTER_TYPED_TEST_CASE_P(AioQueueTest, associate, recv, recvmsg, recv_queued, recv_split, send, sendmsg, sendfile);
+REGISTER_TYPED_TEST_CASE_P(AioQueueTest, associate, recv, recvfrom, recvmsg, recv_queued, recv_split, send, sendmsg, sendfile);
 }
 }
 }

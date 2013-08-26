@@ -147,6 +147,12 @@ public:
     ~Map();
 
   public:
+    // yield::Object
+    File::Map& inc_ref() {
+      return Object::inc_ref(*this);
+    }
+
+  public:
     /**
       Get the file underlying this map.
       @return the file underlying this map

@@ -1,4 +1,4 @@
-// yield/sockets/aio/connect_aiocb.hpp
+// yield/sockets/aio/recvfrom_aiocb.hpp
 
 // Copyright (c) 2013 Minor Gordon
 // All rights reserved
@@ -27,66 +27,66 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_SOCKETS_AIO_CONNECT_AIOCB_HPP_
-#define _YIELD_SOCKETS_AIO_CONNECT_AIOCB_HPP_
+#ifndef _YIELD_SOCKETS_AIO_RECVFROM_AIOCB_HPP_
+#define _YIELD_SOCKETS_AIO_RECVFROM_AIOCB_HPP_
 
+#include "yield/sockets/socket.hpp"
 #include "yield/sockets/aio/aiocb.hpp"
 
 namespace yield {
-class Buffer;
-
 namespace sockets {
-class StreamSocket;
-
 namespace aio {
 /**
-  AIO control block for connect operations on sockets.
+  AIO control block for receive operations on sockets.
 */
-class ConnectAiocb : public Aiocb {
+class RecvfromAiocb : public Aiocb {
 public:
-  const static uint32_t TYPE_ID = 2458109810UL;
+  const static uint32_t TYPE_ID = 3045195540UL;
 
 public:
   /**
-    Construct a ConnectAiocb with an optional buffer for sending data
-      after a connection is established.
-    @param socket_ socket to connect
-    @param peername address of the peer to connect to
+    Construct a RecvAiocb, passing the same parameters as to recv.
+    @param socket_ socket to receive data on
+    @param buffer buffer to receive data into
+    @param flags flags to pass to the recv method
     @param context optional context object
-    @param send_buffer optional buffer of data to send after the connection is
-      established
   */
-  ConnectAiocb(
-    StreamSocket& socket_,
-    SocketAddress& peername,
-    Object* context = NULL,
-    YO_NEW_REF Buffer* send_buffer = NULL
-  );
+  RecvfromAiocb(
+    Socket& socket_,
+    YO_NEW_REF Buffer& buffer,
+    const Socket::MessageFlags& flags,
+    Object* context = NULL
+  ) : Aiocb(socket_, context),
+    buffer(buffer),
+    flags(flags)
+  { }
 
-  ~ConnectAiocb();
+  ~RecvfromAiocb();
 
 public:
   /**
-    Get the address of the peer to connect to.
-    @return the address of the peer to connect to
+    Get the buffer in which to receive data.
+    @return the buffer in which to receive data
   */
-  const SocketAddress& get_peername() const {
+  Buffer& get_buffer() const {
+    return buffer;
+  }
+
+  /**
+    Get the flags to pass to the recv method.
+    @return the flags to pass to the recv method
+  */
+  const Socket::MessageFlags& get_flags() const {
+    return flags;
+  }
+
+  /**
+    Get the address of the peer who sent the data.
+    @return the address of the peer who sent the data.
+  */
+  SocketAddress& get_peername() {
     return peername;
   }
-
-  /**
-    Get the buffer of data to send after the connection is established.
-    @return the buffer of data to send after the connection is established
-  */
-  Buffer* get_send_buffer() {
-    return send_buffer;
-  }
-
-  /**
-    Get the socket in this connect operation.
-    @return the socket in this connect operation
-  */
-  StreamSocket& get_socket();
 
 public:
   // yield::Object
@@ -95,21 +95,22 @@ public:
   }
 
   const char* get_type_name() const {
-    return "yield::sockets::aio::ConnectAiocb";
+    return "yield::sockets::aio::RecvAiocb";
   }
 
 private:
-  SocketAddress& peername;
-  Buffer* send_buffer;
+  Buffer& buffer;
+  Socket::MessageFlags flags;
+  SocketAddress peername;
 };
 
 /**
-  Print a string representation of a ConnectAiocb to a std::ostream.
+  Print a string representation of a RecvAiocb to a std::ostream.
   @param os std::ostream to print to
-  @param connect_aiocb ConnectAiocb to print
+  @param recv_aiocb RecvAiocb to print
   @return os
 */
-std::ostream& operator<<(std::ostream& os, ConnectAiocb& connect_aiocb);
+std::ostream& operator<<(std::ostream& os, RecvfromAiocb& recv_aiocb);
 }
 }
 }
