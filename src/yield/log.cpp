@@ -82,12 +82,14 @@ void Log::write(const void* message, size_t message_len, const Level& level) {
 
 void Log::write(const void* message, size_t message_len) {
   bool str_is_printable = true;
-  for (size_t message_i = 0; message_i < message_len; message_i++) {
+  const uint8_t* uint8_message = static_cast<const uint8_t*>(message);
+  for (size_t uint8_message_i = 0; uint8_message_i < message_len; uint8_message_i++) {
+    uint8_t uint8_c = uint8_message[uint8_message_i];
     if (
-      static_cast<const uint8_t*>(message)[message_i] == '\r' ||
-      static_cast<const uint8_t*>(message)[message_i] == '\n' ||
-      (static_cast<const uint8_t*>(message)[message_i] >= 32 &&
-       static_cast<const uint8_t*>(message)[message_i] <= 126)
+      uint8_c == '\r' ||
+      uint8_c == '\t' ||
+      uint8_c == '\n' ||
+      (uint8_c >= 32 && uint8_c <= 126)
     ) {
       continue;
     } else {
