@@ -47,6 +47,37 @@ namespace thread {
 */
 class ReaderWriterLock {
 public:
+  class ReadHolder {
+  public:
+    ReadHolder(ReaderWriterLock& rwlock)
+      : rwlock(rwlock) {
+      rwlock.rdlock();
+    }
+
+    ~ReadHolder() {
+      rwlock.rdunlock();
+    }
+
+  private:
+    ReaderWriterLock& rwlock;
+  };
+
+  class WriteHolder {
+  public:
+    WriteHolder(ReaderWriterLock& rwlock)
+      : rwlock(rwlock) {
+      rwlock.wrlock();
+    }
+
+    ~WriteHolder() {
+      rwlock.wrunlock();
+    }
+
+  private:
+    ReaderWriterLock& rwlock;
+  };
+
+public:
   ReaderWriterLock();
   ~ReaderWriterLock();
 
