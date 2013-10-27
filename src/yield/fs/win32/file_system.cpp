@@ -61,9 +61,9 @@ bool FileSystem::isreg(const Path& path) {
   return dwAttributes != INVALID_FILE_ATTRIBUTES
          &&
          (
-           dwAttributes == FILE_ATTRIBUTE_NORMAL
+           (dwAttributes & FILE_ATTRIBUTE_NORMAL)
            ||
-           dwAttributes == FILE_ATTRIBUTE_ARCHIVE
+           (dwAttributes & FILE_ATTRIBUTE_ARCHIVE)
          );
 }
 
@@ -146,10 +146,10 @@ FileSystem::open(
 
   if ((flags & O_APPEND) == O_APPEND) {
     dwDesiredAccess |= FILE_APPEND_DATA;
-  } else if ((flags & O_RDWR) == O_RDWR) {
-    dwDesiredAccess |= GENERIC_READ | GENERIC_WRITE;
   } else if ((flags & O_WRONLY) == O_WRONLY) {
     dwDesiredAccess |= GENERIC_WRITE;
+  } else if ((flags & O_RDWR) == O_RDWR) {
+    dwDesiredAccess |= GENERIC_READ | GENERIC_WRITE;
   } else {
     dwDesiredAccess |= GENERIC_READ;
   }
