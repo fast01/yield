@@ -46,6 +46,22 @@ namespace thread {
 */
 class LightweightMutex {
 public:
+  class Holder {
+  public:
+    Holder(LightweightMutex& lock)
+      : lock(lock) {
+      lock.lock();
+    }
+
+    ~Holder() {
+      lock.unlock();
+    }
+
+  private:
+    LightweightMutex& lock;
+  };
+
+public:
   LightweightMutex();
   ~LightweightMutex();
 
