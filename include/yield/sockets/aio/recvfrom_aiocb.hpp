@@ -103,7 +103,7 @@ public:
   }
 
   const char* get_type_name() const {
-    return "yield::sockets::aio::RecvAiocb";
+    return "yield::sockets::aio::RecvfromAiocb";
   }
 
 private:
