@@ -288,6 +288,13 @@ public:
   */
   bool operator==(const Uri& other) const;
 
+  /**
+    Compare two URIs for less than. Used for sorting.
+    @param other Uri to compare this one to
+    @return true if this URI is less than the other URI.
+  */
+  bool operator<(const Uri& other) const;
+
 public:
   /**
     Concatenate a string to the Uri.

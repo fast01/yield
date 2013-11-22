@@ -191,6 +191,14 @@ bool Uri::operator==(const Uri& other) const {
     memcmp(userinfo.iov_base, other.userinfo.iov_base, userinfo.iov_len) == 0;
 }
 
+bool Uri::operator<(const Uri& other) const {
+  size_t cmp_max = \
+    this->buffer->size() < other.buffer->size() ?
+      this->buffer->size() :
+      other.buffer->size();
+  return memcmp(*this->buffer, *other.buffer, cmp_max) < 0;
+}
+
 Uri Uri::operator+(const char* s) const {
   std::ostringstream uri;
   uri << *this;
