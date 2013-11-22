@@ -76,6 +76,14 @@ public:
   { }
 
   /**
+    Construct a DateTime from a second offset from the Unix epoch (1/1/1970).
+    @param unix_date_time_s seconds offset from the Unix epoch
+  */
+  DateTime(uint32_t unix_date_time_s)
+    : unix_date_time_ns(unix_date_time_s* Time::NS_IN_S) {
+  }
+
+  /**
     Construct a DateTime from a seconds offset from the Unix epoch (1/1/1970).
     @param unix_date_time_s seconds offset from the Unix epoch
   */
