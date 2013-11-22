@@ -76,17 +76,6 @@ using std::vector;
 
 namespace yield {
 /**
-  Platform-specific type of integer operands in atomic operations (atomic_*).
-*/
-#if defined(_WIN64)
-typedef __int64 atomic_t;
-#elif defined(_WIN32)
-typedef long atomic_t;
-#else
-typedef intptr_t atomic_t;
-#endif
-
-/**
   Platform-specific file descriptor type (e.g., int on POSIX systems).
 */
 #ifdef _WIN32

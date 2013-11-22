@@ -30,7 +30,9 @@
 #ifndef _YIELD_OBJECT_HPP_
 #define _YIELD_OBJECT_HPP_
 
-#include "yield/atomic.hpp"
+#include "yield/types.hpp"
+
+#include <atomic>
 
 namespace yield {
 /**
@@ -79,7 +81,7 @@ public:
     @param object the object whose reference count should be decremented.
   */
   static inline void dec_ref(Object& object) {
-    if (atomic_dec(&object.refcnt) == 0) {
+    if (object.refcnt.fetch_sub(1) == 0) {
       delete &object;
     }
   }
@@ -121,7 +123,7 @@ public:
   */
   template <class ObjectType>
   static inline ObjectType& inc_ref(ObjectType& object) {
-    atomic_inc(&object.refcnt);
+    object.refcnt.fetch_add(1);
     return object;
   }
 
@@ -150,11 +152,18 @@ public:
   }
 
 protected:
-  Object() : refcnt(1) { }
+  Object()
+	  : refcnt(static_cast<uint32_t>(1)) {
+  }
+
+  Object(const Object& other)
+	  : refcnt(static_cast<uint32_t>(1)) {
+  }
+	
   virtual ~Object() { }
 
 private:
-  volatile atomic_t refcnt;
+  std::atomic_uint32_t refcnt;
 };
 
 

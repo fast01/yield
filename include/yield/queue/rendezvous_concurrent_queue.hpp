@@ -30,7 +30,9 @@
 #ifndef _YIELD_QUEUE_RENDEZVOUS_CONCURRENT_QUEUE_HPP_
 #define _YIELD_QUEUE_RENDEZVOUS_CONCURRENT_QUEUE_HPP_
 
-#include "yield/atomic.hpp"
+#include <yield/types.hpp>
+
+#include <atomic>
 
 namespace yield {
 namespace queue {
@@ -51,8 +53,9 @@ public:
     @return true if the enqueue was successful.
   */
   bool enqueue(ElementType& element) {
-    atomic_t atomic_element = reinterpret_cast<atomic_t>(&element);
-    return atomic_cas(&this->element, atomic_element, 0) == 0;
+    uintptr_t old_element = 0;
+    uintptr_t new_element = reinterpret_cast<uintptr_t>(&element);
+    return this->element.compare_exchange_weak(old_element, new_element);
   }
 
   /**
@@ -61,20 +64,17 @@ public:
     @return the dequeued element or NULL if the queue was empty
   */
   ElementType* trydequeue() {
-    atomic_t element = static_cast<atomic_t>(this->element);
-    while (element != 0) {
-      if (atomic_cas(&this->element, 0, element) == element) {
-        return reinterpret_cast<ElementType*>(element);
-      } else {
-        element = static_cast<atomic_t>(this->element);
-      }
+    uintptr_t old_element = element.load();
+    uintptr_t new_element = 0;
+    if (this->element.compare_exchange_weak(old_element, new_element)) {
+      return reinterpret_cast<ElementType*>(old_element);
+    } else {
+      return NULL;
     }
-
-    return NULL;
   }
 
 private:
-  volatile atomic_t element;
+  std::atomic_uintptr_t element;
 };
 }
 }
