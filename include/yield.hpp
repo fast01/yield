@@ -1,7 +1,6 @@
 #ifndef _YIELD_HPP_
 #define _YIELD_HPP_
 
-#include "yield/atomic.hpp"
 #include "yield/auto_object.hpp"
 #include "yield/buffer.hpp"
 #include "yield/buffers.hpp"
