@@ -40,9 +40,9 @@ struct iovec {
 };
 #define _STRUCT_IOVEC_DEFINED 1
 #endif
-typedef int64_t _off_t;
-typedef int64_t off_t;
-#define _OFF_T_DEFINED
+//typedef int64_t _off_t;
+//typedef int64_t off_t;
+//#define _OFF_T_DEFINED
 typedef intptr_t ssize_t;
 #else
 #include <sys/types.h>
