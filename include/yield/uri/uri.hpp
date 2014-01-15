@@ -31,7 +31,6 @@
 #define _YIELD_URI_URI_HPP_
 
 #include "yield/exception.hpp"
-#include "yield/object.hpp"
 
 #ifdef _WIN32
 #pragma warning(push)
@@ -45,7 +44,7 @@ namespace uri {
 /**
   A parsed Uniform Resource Identifier (Uri).
 */
-class Uri : public Object {
+class Uri {
 public:
   /**
     Construct a Uri from its constituent components:
@@ -317,12 +316,6 @@ public:
   */
   void set_port(uint16_t port) {
     this->port = port;
-  }
-
-public:
-  // yield::Object
-  Uri& inc_ref() {
-    return Object::inc_ref(*this);
   }
 
 private:
