@@ -163,7 +163,7 @@ protected:
   virtual ~Object() { }
 
 private:
-  std::atomic_uint32_t refcnt;
+  std::atomic_uint refcnt;
 };
 
 
