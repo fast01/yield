@@ -81,7 +81,7 @@ public:
     @param object the object whose reference count should be decremented.
   */
   static inline void dec_ref(Object& object) {
-    if (object.refcnt.fetch_sub(1) == 0) {
+    if (object.refcnt.fetch_sub(1) == 1) {
       delete &object;
     }
   }
@@ -152,12 +152,12 @@ public:
   }
 
 protected:
-  Object()
-	  : refcnt(static_cast<uint32_t>(1)) {
+  Object() {
+    refcnt.store(static_cast<unsigned int>(1));
   }
 
-  Object(const Object& other)
-	  : refcnt(static_cast<uint32_t>(1)) {
+  Object(const Object& other) {
+    refcnt.store(static_cast<unsigned int>(1));
   }
 	
   virtual ~Object() { }
