@@ -252,21 +252,22 @@ bool FileSystem::rmdir(const Path& path) {
 }
 
 bool FileSystem::rmtree(const Path& path) {
-  Directory* test_dir = opendir(path);
-  if (test_dir != NULL) {
-    auto_Object<Directory> dir(test_dir);
-    Directory::Entry* test_dentry = dir->read();
-    if (test_dentry != NULL) {
-      auto_Object<Directory::Entry> dentry(*test_dentry);
+  Directory* directory = opendir(path);
+  if (directory != NULL) {
+    auto_Object<Directory> directory_holder(directory);
+
+    Directory::Entry* dentry = directory_holder->read();
+    if (dentry != NULL) {
+      auto_Object<Directory::Entry> dentry_holder(*dentry);
 
       do {
-        if (dentry->is_special()) {
+        if (dentry_holder->is_special()) {
           continue;
         }
 
-        Path dentry_path(path / dentry->get_name());
+        Path dentry_path(path / dentry_holder->get_name());
 
-        if (dentry->ISDIR()) {
+        if (dentry_holder->ISDIR()) {
           if (rmtree(dentry_path)) {
             continue;
           } else {
@@ -277,13 +278,11 @@ bool FileSystem::rmtree(const Path& path) {
         } else {
           return false;
         }
-      } while (dir->read(*dentry));
-
-      return rmdir(path);
+      } while (directory_holder->read(*dentry_holder));
     }
   }
 
-  return false;
+  return rmdir(path);
 }
 
 Stat* FileSystem::stat(const Path& path) {
