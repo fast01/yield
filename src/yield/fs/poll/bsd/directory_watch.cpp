@@ -39,11 +39,10 @@ namespace bsd {
 DirectoryWatch::DirectoryWatch(
   int fd,
   FsEvent::Type fs_event_types,
-  const Path& path,
-  Log* log
+  const Path& path
 ) :
   yield::fs::poll::bsd::Watch(fd),
-  ScanningDirectoryWatch(fs_event_types, path, log) {
+  ScanningDirectoryWatch(fs_event_types, path) {
 }
 
 void

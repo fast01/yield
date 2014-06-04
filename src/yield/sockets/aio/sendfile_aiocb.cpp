@@ -127,21 +127,21 @@ void SendfileAiocb::init(fd_t fd) {
 #endif
 }
 
-std::ostream& operator<<(std::ostream& os, SendfileAiocb& sendfile_aiocb) {
+std::ostream& operator<<(std::ostream& os, const SendfileAiocb& sendfile_aiocb) {
   os <<
      sendfile_aiocb.get_type_name() <<
      "(" <<
      //"error=" << sendfile_aiocb.get_error() <<
      //", " <<
-     "fd=" << sendfile_aiocb.get_fd() <<
-     ", " <<
+     //"fd=" << sendfile_aiocb.get_fd() <<
+     //", " <<
      "nbytes=" << sendfile_aiocb.get_nbytes() <<
      ", " <<
      "offset=" << sendfile_aiocb.get_offset() <<
      ", " <<
      //"return=" << sendfile_aiocb.get_return() <<
      //"," <<
-     "socket=" << sendfile_aiocb.get_socket() <<
+     //"socket=" << sendfile_aiocb.get_socket() <<
      ")";
   return os;
 }

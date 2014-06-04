@@ -42,9 +42,8 @@ using std::pair;
 
 ScanningDirectoryWatch::ScanningDirectoryWatch(
   FsEvent::Type fs_event_types,
-  const Path& path,
-  Log* log
-) : ScanningWatch(fs_event_types, log, path) {
+  const Path& path
+) : ScanningWatch(fs_event_types, path) {
   dentries = new map<Path, Stat*>;
   Directory* directory = FileSystem().opendir(this->get_path());
   if (directory != NULL) {

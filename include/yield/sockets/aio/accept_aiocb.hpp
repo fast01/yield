@@ -130,7 +130,7 @@ private:
   @param accept_aiocb AcceptAiocb to print
   @return os
 */
-std::ostream& operator<<(std::ostream& os, AcceptAiocb& accept_aiocb);
+std::ostream& operator<<(std::ostream& os, const AcceptAiocb& accept_aiocb);
 }
 }
 }

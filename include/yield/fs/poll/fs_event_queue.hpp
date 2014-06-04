@@ -39,8 +39,6 @@
 #endif
 
 namespace yield {
-class Log;
-
 namespace fs {
 namespace poll {
 #if defined(__FreeBSD__) || defined(__linux__) || defined(__MACH__) || defined(_WIN32)
@@ -67,9 +65,8 @@ class FsEventQueue : public EventQueue {
 public:
   /**
     Construct an FsEventQueue, allocating any system resources as necessary.
-    @param log optional debug and error log
   */
-  FsEventQueue(YO_NEW_REF Log* log = NULL);
+  FsEventQueue();
 
   /**
     Destroy an FdEventQueue, deallocating any associated system resources.
@@ -103,7 +100,6 @@ public:
   YO_NEW_REF Event* timeddequeue(const Time& timeout);
 
 private:
-  Log* log;
 #if defined(__FreeBSD__) || defined(__MACH__)
   ::yield::queue::BlockingConcurrentQueue<Event> event_queue;
   int kq, wake_pipe[2];

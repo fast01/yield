@@ -43,13 +43,11 @@ public:
   HttpFileServer(
     const yield::fs::Path& root_directory_path,
     const yield::uri::Uri& root_uri,
-    const yield::sockets::SocketAddress& sockname,
-    YO_NEW_REF Log* log = NULL
+    const yield::sockets::SocketAddress& sockname
   )
     : HttpServer<AioQueueType>(
       *new HttpFileRequestHandler(root_directory_path, root_uri),
-      sockname,
-      log
+      sockname
     ) {
   }
 };

@@ -44,8 +44,7 @@ public:
   DirectoryWatch(
     int fd,
     FsEvent::Type fs_event_types,
-    const Path& path,
-    Log* log = NULL
+    const Path& path
   );
 
 public:

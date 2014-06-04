@@ -48,8 +48,7 @@ public:
     FsEvent::Type fs_event_types,
     int inotify_fd,
     const Path& path,
-    int wd,
-    Log* log = NULL
+    int wd
   );
 
   ~Watch();

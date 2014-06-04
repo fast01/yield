@@ -35,7 +35,7 @@
 #include "yield/debug.hpp"
 #include "yield/date_time.hpp"
 #include "yield/exception.hpp"
-#include "yield/log.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/file_system.hpp"
 #include "yield/fs/poll/fs_event.hpp"
 #include "yield/thread/thread.hpp"
@@ -91,7 +91,7 @@ TYPED_TEST_P(FsEventQueueTest, associate) {
 }
 
 TYPED_TEST_P(FsEventQueueTest, associate_change) {
-  TypeParam fs_event_queue(&Log::open(std::cout));
+  TypeParam fs_event_queue;
 
   if (!fs_event_queue.associate(this->get_test_root_path())) {
     throw Exception();
@@ -112,7 +112,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_change) {
 }
 
 TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_dir_add) {
-  TypeParam fs_event_queue(&Log::open(std::cout));
+  TypeParam fs_event_queue;
   if (
     !fs_event_queue.associate(
       this->get_test_root_path(),
@@ -137,7 +137,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_dir_modify) {
     throw Exception();
   }
 
-  TypeParam fs_event_queue(&Log::open(std::cout));
+  TypeParam fs_event_queue;
   if (
     !fs_event_queue.associate(
       this->get_test_root_path(),
@@ -164,7 +164,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_dir_modify) {
 //  if (!FileSystem().mkdir(get_test_directory_path()))
 //    throw Exception();
 //
-//  TypeParam fs_event_queue(&Log::open(std::cout));
+//  TypeParam fs_event_queue;
 //  if (!fs_event_queue.associate(get_test_root_path()))
 //    throw Exception();
 //
@@ -183,7 +183,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_dir_remove) {
     throw Exception();
   }
 
-  TypeParam fs_event_queue(&Log::open(std::cout));
+  TypeParam fs_event_queue;
   if (
     !fs_event_queue.associate(
       this->get_test_root_path(),
@@ -211,7 +211,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_dir_remove) {
 //  if (!FileSystem().mkdir(test_subdirectory_path))
 //    throw Exception();
 //
-//  TypeParam fs_event_queue(&Log::open(std::cout));
+//  TypeParam fs_event_queue;
 //  if (!fs_event_queue.associate(get_test_root_path(), FsEvent::TYPE_DIRECTORY_REMOVE))
 //    throw Exception();
 //
@@ -235,7 +235,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_dir_rename) {
       throw Exception();
     }
 
-  TypeParam fs_event_queue(&Log::open(std::cout));
+  TypeParam fs_event_queue;
   if (
     !fs_event_queue.associate(
       this->get_test_root_path(),
@@ -259,7 +259,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_dir_rename) {
 }
 
 TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_file_add) {
-  TypeParam fs_event_queue(&Log::open(std::cout));
+  TypeParam fs_event_queue;
   if (
     !fs_event_queue.associate(
       this->get_test_root_path(),
@@ -283,7 +283,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_file_add) {
 //  if (!FileSystem().mkdir(get_test_directory_path()))
 //    throw Exception();
 //
-//  TypeParam fs_event_queue(&Log::open(std::cout));
+//  TypeParam fs_event_queue;
 //  if (!fs_event_queue.associate(get_test_root_path()))
 //    throw Exception();
 //
@@ -302,7 +302,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_file_modify) {
     throw Exception();
   }
 
-  TypeParam fs_event_queue(&Log::open(std::cout));
+  TypeParam fs_event_queue;
   if (
     !fs_event_queue.associate(
       this->get_test_root_path(),
@@ -330,7 +330,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_file_remove) {
     throw Exception();
   }
 
-  TypeParam fs_event_queue(&Log::open(std::cout));
+  TypeParam fs_event_queue;
   if (
     !fs_event_queue.associate(
       this->get_test_root_path(),
@@ -358,7 +358,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_file_remove) {
 //  if (!FileSystem().touch(test_file_path))
 //    throw Exception();
 //
-//  TypeParam fs_event_queue(&Log::open(std::cout));
+//  TypeParam fs_event_queue;
 //  if (!fs_event_queue.associate(get_test_root_path(), FsEvent::TYPE_FILE_REMOVE))
 //    throw Exception();
 //
@@ -382,7 +382,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_file_rename) {
       throw Exception();
     }
 
-  TypeParam fs_event_queue(&Log::open(std::cout));
+  TypeParam fs_event_queue;
   if (
     !fs_event_queue.associate(
       this->get_test_root_path(),
@@ -410,7 +410,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_file_dequeue_file_modify) {
     throw Exception();
   }
 
-  TypeParam fs_event_queue(&Log::open(std::cout));
+  TypeParam fs_event_queue;
   if (
     !fs_event_queue.associate(
       this->get_test_file_path(),
@@ -438,7 +438,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_file_dequeue_file_remove) {
     throw Exception();
   }
 
-  TypeParam fs_event_queue(&Log::open(std::cout));
+  TypeParam fs_event_queue;
   if (
     !fs_event_queue.associate(
       this->get_test_file_path(),
@@ -459,7 +459,7 @@ TYPED_TEST_P(FsEventQueueTest, associate_file_dequeue_file_remove) {
 }
 
 TYPED_TEST_P(FsEventQueueTest, dissociate) {
-  TypeParam fs_event_queue(&Log::open(std::cout));
+  TypeParam fs_event_queue;
   fs_event_queue.associate(this->get_test_root_path());
 
   if (!FileSystem().touch(this->get_test_file_path())) {

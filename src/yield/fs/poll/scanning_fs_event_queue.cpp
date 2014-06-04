@@ -30,20 +30,18 @@
 #include "scanning_directory_watch.hpp"
 #include "scanning_file_watch.hpp"
 #include "watches.hpp"
-#include "yield/log.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/file_system.hpp"
 #include "yield/fs/poll/scanning_fs_event_queue.hpp"
 
 namespace yield {
 namespace fs {
 namespace poll {
-ScanningFsEventQueue::ScanningFsEventQueue(YO_NEW_REF Log* log)
-  : log(Object::inc_ref(log)) {
+ScanningFsEventQueue::ScanningFsEventQueue() {
   watches = new Watches<ScanningWatch>;
 }
 
 ScanningFsEventQueue::~ScanningFsEventQueue() {
-  Log::dec_ref(log);
   delete watches;
 }
 
@@ -58,9 +56,9 @@ ScanningFsEventQueue::associate(
   if (stbuf != NULL) {
     ScanningWatch* watch;
     if (stbuf->ISDIR()) {
-      watch = new ScanningDirectoryWatch(fs_event_types, path, log);
+      watch = new ScanningDirectoryWatch(fs_event_types, path);
     } else {
-      watch = new ScanningFileWatch(fs_event_types, path, log);
+      watch = new ScanningFileWatch(fs_event_types, path);
     }
     watches->insert(path, *watch);
     return true;

@@ -109,7 +109,7 @@ private:
   @param connect_aiocb ConnectAiocb to print
   @return os
 */
-std::ostream& operator<<(std::ostream& os, ConnectAiocb& connect_aiocb);
+std::ostream& operator<<(std::ostream& os, const ConnectAiocb& connect_aiocb);
 }
 }
 }

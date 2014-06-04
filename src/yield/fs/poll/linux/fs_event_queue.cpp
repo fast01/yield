@@ -30,7 +30,7 @@
 #include "watches.hpp"
 #include "yield/debug.hpp"
 #include "yield/exception.hpp"
-#include "yield/log.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/poll/fs_event_queue.hpp"
 
 #include <errno.h>
@@ -45,7 +45,7 @@ namespace fs {
 namespace poll {
 using linux::Watches;
 
-FsEventQueue::FsEventQueue(YO_NEW_REF Log* log) : log(log) {
+FsEventQueue::FsEventQueue() {
   epoll_fd = epoll_create(32768);
   if (epoll_fd != -1) {
     try {
@@ -105,7 +105,6 @@ FsEventQueue::FsEventQueue(YO_NEW_REF Log* log) : log(log) {
 
 FsEventQueue::~FsEventQueue() {
   close(inotify_fd);
-  Log::dec_ref(log);
   delete watches;
 }
 
@@ -153,7 +152,7 @@ FsEventQueue::associate(
 
   int wd = inotify_add_watch(inotify_fd, path.c_str(), mask);
   if (wd != -1) {
-    watch = new linux::Watch(fs_event_types, inotify_fd, path, wd, log);
+    watch = new linux::Watch(fs_event_types, inotify_fd, path, wd);
     watches->insert(*watch);
     return true;
   } else {

@@ -29,7 +29,7 @@
 
 #include "../../event_queue_test.hpp"
 #include "yield/auto_object.hpp"
-#include "yield/log.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/file.hpp"
 #include "yield/fs/file_system.hpp"
 #include "yield/fs/stat.hpp"
@@ -43,8 +43,8 @@ namespace http {
 namespace server {
 class TestHttpRequestQueue : public HttpRequestQueue<> {
 public:
-  TestHttpRequestQueue(YO_NEW_REF Log* log = NULL)
-    : HttpRequestQueue<>(8000, log) {
+  TestHttpRequestQueue()
+    : HttpRequestQueue<>(8000) {
   }
 };
 
@@ -90,7 +90,7 @@ protected:
 };
 
 TEST_F(HttpRequestQueueTest, dequeue) {
-  TestHttpRequestQueue http_request_queue(&Log::open(std::cout));
+  TestHttpRequestQueue http_request_queue;
   for (;;) {
     HttpRequest* http_request
     = Object::cast<HttpRequest>(http_request_queue.timeddequeue(30.0));

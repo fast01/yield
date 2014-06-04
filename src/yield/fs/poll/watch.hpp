@@ -34,13 +34,12 @@
 #include "yield/fs/poll/fs_event.hpp"
 
 namespace yield {
-class Log;
-
 namespace fs {
 namespace poll {
 class Watch {
 public:
-  virtual ~Watch();
+  virtual ~Watch() {
+  }
 
 public:
   FsEvent::Type get_fs_event_types() const {
@@ -52,13 +51,8 @@ public:
   }
 
 protected:
-  Watch(FsEvent::Type fs_event_types, Log* log, const Path& path);
+  Watch(FsEvent::Type fs_event_types, const Path& path);
   Watch(const Watch&);
-
-protected:
-  Log* get_log() const {
-    return log;
-  }
 
 protected:
   bool want_fs_event_type(FsEvent::Type fs_event_type) {
@@ -69,7 +63,6 @@ protected:
 
 private:
   FsEvent::Type fs_event_types;
-  Log* log;
   Path path;
 };
 }

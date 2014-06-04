@@ -37,8 +37,6 @@
 #endif
 
 namespace yield {
-class Log;
-
 namespace sockets {
 namespace aio {
 /**
@@ -53,12 +51,9 @@ namespace aio {
 class AioQueue : public EventQueue {
 public:
   /**
-    Construct an AioQueue with an optional error and tracing log.
-    @param log optional error and tracing log
+    Construct an AioQueue.
   */
-  AioQueue(YO_NEW_REF Log* log = NULL);
-
-  ~AioQueue();
+  AioQueue();
 
 public:
   /**
@@ -90,7 +85,6 @@ private:
 
 private:
   fd_t hIoCompletionPort;
-  Log* log;
 };
 #else
 typedef NbioQueue AioQueue;

@@ -29,7 +29,7 @@
 
 #include "watch.hpp"
 #include "yield/debug.hpp"
-#include "yield/log.hpp"
+#include "yield/logging.hpp"
 #include "yield/event_handler.hpp"
 #include "yield/fs/file_system.hpp"
 
@@ -42,9 +42,8 @@ namespace win32 {
 Watch::Watch(
   YO_NEW_REF Directory& directory,
   FsEvent::Type fs_event_types,
-  Log* log,
   const Path& path
-) : yield::fs::poll::Watch(fs_event_types, log, path),
+) : yield::fs::poll::Watch(fs_event_types, path),
   directory(&directory) {
   static_assert(sizeof(overlapped) == sizeof(::OVERLAPPED), "");
   memset(&overlapped, 0, sizeof(overlapped));
@@ -116,21 +115,19 @@ bool Watch::is_closed() const {
 }
 
 void Watch::log_read(const FILE_NOTIFY_INFORMATION& file_notify_info) {
-  if (get_log() != NULL) {
-    get_log()->get_stream(Log::Level::DEBUG) <<
-        "yield::fs::poll::win32::Watch(" <<
-        "path=" << get_path() <<
-        ")" <<
-        ": read FILE_NOTIFY_INFORMATION(" <<
-        "Action=" << file_notify_info.Action <<
-        ", "
-        "FileName=" <<
-        Path(
-          file_notify_info.FileName,
-          file_notify_info.FileNameLength / sizeof(wchar_t)
-        ) <<
-        ")";
-  }
+  LOG(DEBUG) <<
+      "yield::fs::poll::win32::Watch(" <<
+      "path=" << get_path() <<
+      ")" <<
+      ": read FILE_NOTIFY_INFORMATION(" <<
+      "Action=" << file_notify_info.Action <<
+      ", "
+      "FileName=" <<
+      Path(
+        file_notify_info.FileName,
+        file_notify_info.FileNameLength / sizeof(wchar_t)
+      ) <<
+      ")";
 }
 
 Watch::operator ::OVERLAPPED* () {

@@ -41,8 +41,7 @@ class ScanningDirectoryWatch : public ScanningWatch {
 public:
   ScanningDirectoryWatch(
     FsEvent::Type fs_event_types,
-    const Path& path,
-    Log* log = NULL
+    const Path& path
   );
 
   virtual ~ScanningDirectoryWatch();

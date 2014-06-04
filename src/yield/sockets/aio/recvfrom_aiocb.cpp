@@ -38,7 +38,7 @@ RecvfromAiocb::~RecvfromAiocb() {
   Buffer::dec_ref(buffer);
 }
 
-std::ostream& operator<<(std::ostream& os, RecvfromAiocb& recvfrom_aiocb) {
+std::ostream& operator<<(std::ostream& os, const RecvfromAiocb& recvfrom_aiocb) {
   os <<
      recvfrom_aiocb.get_type_name() <<
      "(" <<
@@ -48,11 +48,11 @@ std::ostream& operator<<(std::ostream& os, RecvfromAiocb& recvfrom_aiocb) {
      ", " <<
      "flags=" << recvfrom_aiocb.get_flags() <<
      ", " <<
-     "peername=" << recvfrom_aiocb.get_peername() <<
-     ", " <<
+     //"peername=" << recvfrom_aiocb.get_peername() <<
+     //", " <<
      "return=" << recvfrom_aiocb.get_return() <<
-     ", " <<
-     "socket=" << recvfrom_aiocb.get_socket() <<
+     //", " <<
+     //"socket=" << recvfrom_aiocb.get_socket() <<
      ")";
   return os;
 }

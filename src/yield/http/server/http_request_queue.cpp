@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/log.hpp"
+#include "yield/logging.hpp"
 #include "yield/http/server/http_connection.hpp"
 #include "yield/http/server/http_request_queue.hpp"
 #include "yield/sockets/tcp_socket.hpp"
@@ -49,10 +49,8 @@ using yield::sockets::aio::SendfileAiocb;
 
 template <class AioQueueType>
 HttpRequestQueue<AioQueueType>::HttpRequestQueue(
-  const SocketAddress& sockname,
-  YO_NEW_REF Log* log
-) throw(Exception) : aio_queue(*new AioQueueType(log)),
-  log(Object::inc_ref(log)),
+  const SocketAddress& sockname
+) throw(Exception) : aio_queue(*new AioQueueType()),
   socket_(*new TcpSocket(sockname.get_family())) {
   init(sockname);
 }
@@ -60,10 +58,8 @@ HttpRequestQueue<AioQueueType>::HttpRequestQueue(
 template <class AioQueueType>
 HttpRequestQueue<AioQueueType>::HttpRequestQueue(
   YO_NEW_REF TcpSocket& socket_,
-  const SocketAddress& sockname,
-  YO_NEW_REF Log* log
-) throw(Exception) : aio_queue(*new AioQueueType(log)),
-  log(Object::inc_ref(log)),
+  const SocketAddress& sockname
+) throw(Exception) : aio_queue(*new AioQueueType()),
   socket_(socket_) {
   init(sockname);
 }
@@ -87,7 +83,6 @@ HttpRequestQueue<AioQueueType>::~HttpRequestQueue() {
   socket_.close();
 
   AioQueue::dec_ref(aio_queue);
-  Log::dec_ref(log);
   TcpSocket::dec_ref(socket_);
 }
 
@@ -108,8 +103,7 @@ void HttpRequestQueue<AioQueueType>::handle(YO_NEW_REF AcceptAiocb& accept_aiocb
         aio_queue,
         aio_queue,
         *accept_aiocb.get_peername(),
-        static_cast<TcpSocket&>(accepted_socket),
-        log
+        static_cast<TcpSocket&>(accepted_socket)
       );
 
       connection->handle(accept_aiocb);

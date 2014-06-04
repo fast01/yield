@@ -82,7 +82,6 @@ protected:
   Watch(
     YO_NEW_REF Directory& directory,
     FsEvent::Type fs_event_types,
-    Log* log,
     const Path& path
   );
 

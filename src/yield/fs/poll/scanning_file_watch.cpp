@@ -38,9 +38,8 @@ namespace fs {
 namespace poll {
 ScanningFileWatch::ScanningFileWatch(
   FsEvent::Type fs_event_types,
-  const Path& path,
-  Log* log
-) : ScanningWatch(fs_event_types, log, path) {
+  const Path& path
+) : ScanningWatch(fs_event_types, path) {
   stbuf = FileSystem().stat(get_path());
   if (stbuf == NULL) {
     throw Exception();

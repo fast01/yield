@@ -42,9 +42,8 @@ public:
     YO_NEW_REF Directory& directory,
     const Path& directory_path,
     const Path& file_path,
-    FsEvent::Type fs_event_types,
-    Log* log = NULL
-  ) : Watch(directory, fs_event_types, log, file_path),
+    FsEvent::Type fs_event_types
+  ) : Watch(directory, fs_event_types, file_path),
     directory_path(directory_path) {
   }
 

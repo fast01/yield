@@ -34,8 +34,6 @@
 #include "yield/queue/synchronized_event_queue.hpp"
 
 namespace yield {
-class Log;
-
 namespace fs {
 namespace poll {
 class ScanningWatch;
@@ -51,9 +49,8 @@ class ScanningFsEventQueue : public EventQueue {
 public:
   /**
     Construct a ScanningFsEventQueue.
-    @param log optional debug and error log
   */
-  ScanningFsEventQueue(YO_NEW_REF Log* log = NULL);
+  ScanningFsEventQueue();
 
   ~ScanningFsEventQueue();
 
@@ -85,7 +82,6 @@ public:
 
 private:
   ::yield::queue::SynchronizedEventQueue event_queue;
-  Log* log;
   Watches<ScanningWatch>* watches;
 };
 }

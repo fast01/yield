@@ -29,7 +29,7 @@
 
 #include "directory_watch.hpp"
 #include "yield/debug.hpp"
-#include "yield/log.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/file_system.hpp"
 
 #include <Windows.h>
@@ -41,9 +41,8 @@ namespace win32 {
 DirectoryWatch::DirectoryWatch(
   YO_NEW_REF Directory& directory,
   FsEvent::Type fs_event_types,
-  const Path& path,
-  Log* log
-) : Watch(directory, fs_event_types, log, path) {
+  const Path& path
+) : Watch(directory, fs_event_types, path) {
   Directory::Entry* dirent = directory.read();
   if (dirent != NULL) {
     do {

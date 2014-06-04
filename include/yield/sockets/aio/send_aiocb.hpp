@@ -102,7 +102,7 @@ private:
   @param send_aiocb SendAiocb to print
   @return os
 */
-std::ostream& operator<<(std::ostream& os, SendAiocb& send_aiocb);
+std::ostream& operator<<(std::ostream& os, const SendAiocb& send_aiocb);
 }
 }
 }

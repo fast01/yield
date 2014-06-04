@@ -101,7 +101,7 @@ private:
   @param recv_aiocb RecvAiocb to print
   @return os
 */
-std::ostream& operator<<(std::ostream& os, RecvAiocb& recv_aiocb);
+std::ostream& operator<<(std::ostream& os, const RecvAiocb& recv_aiocb);
 }
 }
 }

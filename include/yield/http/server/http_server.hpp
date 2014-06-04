@@ -53,16 +53,14 @@ public:
     @param http_request_handler handler for HttpRequests and related Events
       originating from the server
     @param sockname address to listen to
-    @param log optional debug and error log
   */
   HttpServer(
     YO_NEW_REF EventHandler& http_request_handler,
-    const yield::sockets::SocketAddress& sockname,
-    YO_NEW_REF Log* log = NULL
+    const yield::sockets::SocketAddress& sockname
   )
     : yield::stage::Stage(
       http_request_handler,
-      *new HttpRequestQueue<AioQueueType>(sockname, log)
+      *new HttpRequestQueue<AioQueueType>(sockname)
     ) {
   }
 };

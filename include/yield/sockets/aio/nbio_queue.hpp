@@ -37,8 +37,6 @@
 #include <map>
 
 namespace yield {
-class Log;
-
 namespace sockets {
 namespace aio {
 class AcceptAiocb;
@@ -61,12 +59,9 @@ class SendfileAiocb;
 class NbioQueue : public EventQueue {
 public:
   /**
-    Construct an NbioQueue with an optional error and tracing log.
-    @param log optional error and tracing log
+    Construct an NbioQueue.
   */
-  NbioQueue(YO_NEW_REF Log* log = NULL);
-
-  ~NbioQueue();
+  NbioQueue();
 
 public:
   /**
@@ -131,7 +126,6 @@ private:
 
 private:
   yield::poll::FdEventQueue fd_event_queue;
-  Log* log;
   std::map<fd_t, SocketState*> socket_state;
 };
 }

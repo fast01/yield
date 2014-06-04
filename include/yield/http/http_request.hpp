@@ -57,6 +57,7 @@ public:
     */
     static Method CONNECT;
     static Method COPY;
+#undef DELETE
     static Method DELETE;
     static Method GET;
     static Method HEAD;

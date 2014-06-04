@@ -29,7 +29,7 @@
 
 #include "http_request_parser.hpp"
 #include "yield/debug.hpp"
-#include "yield/log.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/file.hpp"
 #include "yield/http/server/http_connection.hpp"
 
@@ -48,11 +48,9 @@ HttpConnection::HttpConnection(
   EventQueue& aio_queue,
   EventHandler& http_request_handler,
   SocketAddress& peername,
-  TcpSocket& socket_,
-  Log* log
+  TcpSocket& socket_
 ) : aio_queue(aio_queue.inc_ref()),
   http_request_handler(http_request_handler.inc_ref()),
-  log(Object::inc_ref(log)),
   peername(peername.inc_ref()),
   socket_(static_cast<TcpSocket&>(socket_.inc_ref())) {
   state = STATE_CONNECTED;
@@ -61,7 +59,6 @@ HttpConnection::HttpConnection(
 HttpConnection::~HttpConnection() {
   EventQueue::dec_ref(aio_queue);
   EventHandler::dec_ref(http_request_handler);
-  Log::dec_ref(log);
   TcpSocket::dec_ref(socket_);
 }
 
@@ -108,10 +105,7 @@ void
 HttpConnection::handle(
   YO_NEW_REF ::yield::http::HttpResponse& http_response
 ) {
-  if (log != NULL) {
-    log->get_stream(Log::Level::DEBUG) << get_type_name()
-                                       << ": sending " << http_response;
-  }
+  LOG(DEBUG) << get_type_name() << ": sending " << http_response;
 
   http_response.finalize();
   Buffer& http_response_header = http_response.get_header().inc_ref();
@@ -205,10 +199,7 @@ void HttpConnection::parse(Buffer& recv_buffer) {
     case HttpRequest::TYPE_ID: {
       HttpRequest& http_request = static_cast<HttpRequest&>(object);
 
-      if (log != NULL) {
-        log->get_stream(Log::Level::DEBUG) << get_type_name()
-                                           << ": parsed " << http_request;
-      }
+      LOG(DEBUG) << get_type_name() << ": parsed " << http_request;
 
       http_request_handler.handle(http_request);
     }
@@ -218,10 +209,7 @@ void HttpConnection::parse(Buffer& recv_buffer) {
       HttpResponse& http_response = static_cast<HttpResponse&>(object);
       debug_assert_eq(http_response.get_status_code(), 400);
 
-      if (log != NULL) {
-        log->get_stream(Log::Level::DEBUG) << get_type_name()
-                                           << ": parsed " << http_response;
-      }
+      LOG(DEBUG) << get_type_name() << ": parsed " << http_response;
 
       handle(http_response);
       return;

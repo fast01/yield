@@ -29,7 +29,7 @@
 
 #include "file_watch.hpp"
 #include "yield/debug.hpp"
-#include "yield/log.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/file_system.hpp"
 
 #include <Windows.h>

@@ -40,11 +40,10 @@ namespace bsd {
 FileWatch::FileWatch(
   int fd,
   FsEvent::Type fs_event_types,
-  const Path& path,
-  Log* log
+  const Path& path
 ) :
   yield::fs::poll::bsd::Watch(fd),
-  yield::fs::poll::Watch(fs_event_types, log, path) {
+  yield::fs::poll::Watch(fs_event_types, path) {
 }
 
 void

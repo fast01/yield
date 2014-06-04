@@ -29,7 +29,7 @@
 
 #include "watch.hpp"
 #include "yield/debug.hpp"
-#include "yield/log.hpp"
+#include "yield/logging.hpp"
 
 #include <iostream>
 #include <sys/inotify.h>
@@ -44,9 +44,8 @@ Watch::Watch(
   FsEvent::Type fs_event_types,
   int inotify_fd,
   const Path& path,
-  int wd,
-  Log* log
-) : yield::fs::poll::Watch(fs_event_types, log, path),
+  int wd
+) : yield::fs::poll::Watch(fs_event_types, path),
   inotify_fd(inotify_fd),
   wd(wd) {
 }
@@ -75,21 +74,19 @@ YO_NEW_REF FsEvent* Watch::parse(const inotify_event& inotify_event_) {
     path = this->get_path();
   }
 
-  if (get_log() != NULL) {
-    get_log()->get_stream(Log::Level::DEBUG) <<
-        get_type_name() << "(path=" << get_path() << ", wd=" << get_wd() << ")"
-        << ": read inotify_event(" <<
-        "cookie=" << inotify_event_.cookie <<
-        ", " <<
-        "isdir=" << (isdir ? "true" : "false") <<
-        ", " <<
-        "len=" << inotify_event_.len <<
-        ", " <<
-        "mask=" << inotify_event_.mask <<
-        ", "
-        "name=" << name <<
-        ")";
-  }
+  LOG(DEBUG) <<
+      get_type_name() << "(path=" << get_path() << ", wd=" << get_wd() << ")"
+      << ": read inotify_event(" <<
+      "cookie=" << inotify_event_.cookie <<
+      ", " <<
+      "isdir=" << (isdir ? "true" : "false") <<
+      ", " <<
+      "len=" << inotify_event_.len <<
+      ", " <<
+      "mask=" << inotify_event_.mask <<
+      ", "
+      "name=" << name <<
+      ")";
 
   FsEvent::Type fs_event_type;
 

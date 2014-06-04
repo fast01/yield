@@ -43,8 +43,7 @@ public:
   DirectoryWatch(
     YO_NEW_REF Directory& directory,
     FsEvent::Type fs_event_types,
-    const Path& path,
-    Log* log = NULL
+    const Path& path
   );
 
 public:

@@ -1,4 +1,4 @@
-// file_log_test.cpp
+// yield/logging.hpp
 
 // Copyright (c) 2013 Minor Gordon
 // All rights reserved
@@ -27,44 +27,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/fs/file_log.hpp"
-#include "yield/fs/file_system.hpp"
-#include "gtest/gtest.h"
+#ifndef _YIELD_LOGGING_HPP_
+#define _YIELD_LOGGING_HPP_
 
-namespace yield {
-namespace fs {
-class FileLogTest : public ::testing::Test {
-public:
-  void SetUp() {
-    TearDown();
-  }
+#define _ELPP_STL_LOGGING 1
+#include <easylogging++.h>
 
-  void TearDown() {
-    FileSystem().unlink(get_test_file_path());
-  }
+#define YIELD_LOGGING_INITIALIZE _INITIALIZE_EASYLOGGINGPP
 
-protected:
-  FileLogTest() : test_file_path("FileLogTest.txt") {
-  }
-
-protected:
-  const Path& get_test_file_path() const {
-    return test_file_path;
-  }
-
-private:
-  Path test_file_path;
-};
-
-TEST_F(FileLogTest, constructor) {
-  FileLog file_log(get_test_file_path());
-}
-
-TEST_F(FileLogTest, write) {
-  ASSERT_FALSE(FileSystem().exists(get_test_file_path()));
-  FileLog file_log(get_test_file_path());
-  static_cast<Log&>(file_log).write("test", Log::Level::DEBUG);
-  ASSERT_TRUE(FileSystem().exists(get_test_file_path()));
-}
-}
-}
+#endif

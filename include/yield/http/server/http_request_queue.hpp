@@ -35,8 +35,6 @@
 #include "yield/sockets/aio/aio_queue.hpp"
 
 namespace yield {
-class Log;
-
 namespace sockets {
 namespace aio {
 class AcceptAiocb;
@@ -65,11 +63,9 @@ public:
     Construct an HttpRequestQueue that listens for connections on the given
       socket address.
     @param sockname address to listen to
-    @param log optional debug and error log
   */
   HttpRequestQueue(
-    const yield::sockets::SocketAddress& sockname,
-    YO_NEW_REF Log* log = NULL
+    const yield::sockets::SocketAddress& sockname
   ) throw(Exception);
 
   /**
@@ -77,12 +73,10 @@ public:
       then be bound and listen to the given socket address.
     @param socket_ server socket to use
     @param sockname address to bind and listen to
-    @param log optional debug and error log
   */
   HttpRequestQueue(
     YO_NEW_REF yield::sockets::TcpSocket& socket_,
-    const yield::sockets::SocketAddress& sockname,
-    YO_NEW_REF Log* log = NULL
+    const yield::sockets::SocketAddress& sockname
   ) throw(Exception);
 
   ~HttpRequestQueue();
@@ -104,7 +98,6 @@ private:
 private:
   AioQueueType& aio_queue;
   vector<HttpConnection*> connections;
-  Log* log;
   yield::sockets::TcpSocket& socket_;
 };
 }

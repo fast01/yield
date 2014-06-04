@@ -30,7 +30,7 @@
 #include "../../win32/winsock.hpp"
 #include "yield/debug.hpp"
 #include "yield/buffer.hpp"
-#include "yield/log.hpp"
+#include "yield/logging.hpp"
 #include "yield/sockets/stream_socket.hpp"
 #include "yield/sockets/aio/accept_aiocb.hpp"
 #include "yield/sockets/aio/connect_aiocb.hpp"
@@ -48,15 +48,11 @@ static LPFN_CONNECTEX lpfnConnectEx = NULL;
 static LPFN_GETACCEPTEXSOCKADDRS lpfnGetAcceptExSockaddrs = NULL;
 static LPFN_TRANSMITFILE lpfnTransmitFile = NULL;
 
-AioQueue::AioQueue(YO_NEW_REF Log* log) : log(log) {
+AioQueue::AioQueue() {
   hIoCompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
   if (hIoCompletionPort == INVALID_HANDLE_VALUE) {
     throw Exception();
   }
-}
-
-AioQueue::~AioQueue() {
-  Log::dec_ref(log);
 }
 
 bool AioQueue::associate(socket_t socket_) {
@@ -474,26 +470,18 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
 
 template <class AiocbType> void AioQueue::log_completion(AiocbType& aiocb) {
   if (aiocb.get_return() >= 0) {
-    if (log != NULL)
-      log->get_stream(Log::Level::DEBUG) <<
-                                         get_type_name() << ": completed " << aiocb;
+    LOG(DEBUG) << get_type_name() << ": completed " << aiocb;
   } else {
     log_error(aiocb);
   }
 }
 
 template <class AiocbType> void AioQueue::log_enqueue(AiocbType& aiocb) {
-  if (log != NULL) {
-    log->get_stream(Log::Level::DEBUG) <<
-                                       get_type_name() << ": enqueuing " << aiocb;
-  }
+  LOG(DEBUG) << get_type_name() << ": enqueuing " << aiocb;
 }
 
 template <class AiocbType> void AioQueue::log_error(AiocbType& aiocb) {
-  if (log != NULL) {
-    log->get_stream(Log::Level::ERR) <<
-                                     get_type_name() << ": error on " << aiocb;
-  }
+  LOG(ERROR) << get_type_name() << ": error on " << aiocb;
 }
 
 YO_NEW_REF Event* AioQueue::timeddequeue(const Time& timeout) {

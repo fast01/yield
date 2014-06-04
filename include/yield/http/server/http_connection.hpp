@@ -41,8 +41,6 @@
 #include "yield/http/server/http_response.hpp"
 
 namespace yield {
-class Log;
-
 namespace http {
 namespace server {
 /**
@@ -57,8 +55,7 @@ public:
     EventQueue& aio_queue,
     EventHandler& http_request_handler,
     yield::sockets::SocketAddress& peername,
-    yield::sockets::TcpSocket& socket_,
-    Log* log = NULL
+    yield::sockets::TcpSocket& socket_
   );
 
   ~HttpConnection();
@@ -104,7 +101,6 @@ private:
 private:
   EventQueue& aio_queue;
   EventHandler& http_request_handler;
-  Log* log;
   yield::sockets::SocketAddress& peername;
   yield::sockets::TcpSocket& socket_;
   State state;

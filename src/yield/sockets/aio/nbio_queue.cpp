@@ -30,7 +30,7 @@
 #include "yield/debug.hpp"
 #include "yield/buffer.hpp"
 #include "yield/exception.hpp"
-#include "yield/log.hpp"
+#include "yield/logging.hpp"
 #include "yield/time.hpp"
 #include "yield/sockets/stream_socket.hpp"
 #include "yield/sockets/aio/accept_aiocb.hpp"
@@ -92,12 +92,8 @@ public:
   AiocbState* aiocb_state[4]; // accept, connect, send, recv
 };
 
-NbioQueue::NbioQueue(YO_NEW_REF Log* log)
-  : fd_event_queue(true), log(log) {
-}
-
-NbioQueue::~NbioQueue() {
-  Log::dec_ref(log);
+NbioQueue::NbioQueue()
+  : fd_event_queue(true) {
 }
 
 void NbioQueue::associate(Aiocb& aiocb, RetryStatus retry_status) {
@@ -153,55 +149,41 @@ uint8_t NbioQueue::get_aiocb_priority(const Aiocb& aiocb) {
 }
 
 template <class AiocbType> void NbioQueue::log_completion(AiocbType& aiocb) {
-  if (log != NULL) {
-    log->get_stream(Log::Level::DEBUG) <<
-                                       get_type_name() << ": completed " << aiocb;
-  }
+    LOG(DEBUG) << get_type_name() << ": completed " << aiocb;
 }
 
 template <class AiocbType> void NbioQueue::log_error(AiocbType& aiocb) {
-  if (log != NULL) {
-    log->get_stream(Log::Level::DEBUG) <<
-                                       get_type_name() << ": error on " << aiocb;
-  }
+  LOG(DEBUG) << get_type_name() << ": error on " << aiocb;
 }
 
 template <class AiocbType>
 void NbioQueue::log_partial_send(AiocbType& aiocb, size_t partial_send_len) {
-  if (log != NULL) {
-    log->get_stream(Log::Level::DEBUG) <<
-                                       get_type_name() << ": partial send (" << partial_send_len << ") on " << aiocb;
-  }
+  LOG(DEBUG) << get_type_name() << ": partial send (" << partial_send_len << ") on " << aiocb;
 }
 
 template <class AiocbType> void NbioQueue::log_retry(AiocbType& aiocb) {
-  if (log != NULL) {
-    log->get_stream(Log::Level::DEBUG) <<
-                                       get_type_name() << ": retrying " << aiocb;
-  }
+  LOG(DEBUG) << get_type_name() << ": retrying " << aiocb;
 }
 
 template <class AiocbType>
 void NbioQueue::log_wouldblock(AiocbType& aiocb, RetryStatus retry_status) {
-  if (log != NULL) {
-    const char* retry_status_str;
-    switch (retry_status) {
-    case RETRY_STATUS_WANT_RECV:
-      retry_status_str = "read";
-      break;
-    case RETRY_STATUS_WANT_SEND:
-      retry_status_str = "write";
-      break;
-    default:
-      debug_break();
-      retry_status_str = "";
-      break;
-    }
-
-    log->get_stream(Log::Level::DEBUG) <<
-                                       get_type_name() << ": " <<
-                                       aiocb << " would block on " << retry_status_str;
+  const char* retry_status_str;
+  switch (retry_status) {
+  case RETRY_STATUS_WANT_RECV:
+    retry_status_str = "read";
+    break;
+  case RETRY_STATUS_WANT_SEND:
+    retry_status_str = "write";
+    break;
+  default:
+    debug_break();
+    retry_status_str = "";
+    break;
   }
+
+  LOG(DEBUG) <<
+                                      get_type_name() << ": " <<
+                                      aiocb << " would block on " << retry_status_str;
 }
 
 NbioQueue::RetryStatus NbioQueue::retry(Aiocb& aiocb, size_t& partial_send_len) {

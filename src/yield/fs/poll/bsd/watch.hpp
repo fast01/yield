@@ -37,7 +37,6 @@ struct kevent;
 
 namespace yield {
 class EventHandler;
-class Log;
 
 namespace fs {
 namespace poll {

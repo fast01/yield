@@ -57,7 +57,7 @@ StreamSocket& ConnectAiocb::get_socket() {
   return static_cast<StreamSocket&>(Aiocb::get_socket());
 }
 
-std::ostream& operator<<(std::ostream& os, ConnectAiocb& connect_aiocb) {
+std::ostream& operator<<(std::ostream& os, const ConnectAiocb& connect_aiocb) {
   os <<
      connect_aiocb.get_type_name() <<
      "(" <<
@@ -66,10 +66,10 @@ std::ostream& operator<<(std::ostream& os, ConnectAiocb& connect_aiocb) {
      "peername=" << connect_aiocb.get_peername() <<
      ", " <<
      "return=" << connect_aiocb.get_return() <<
-     ", " <<
-     "send_buffer=" << connect_aiocb.get_send_buffer() <<
-     ", " <<
-     "socket=" << connect_aiocb.get_socket() <<
+     //", " <<
+     //"send_buffer=" << connect_aiocb.get_send_buffer() <<
+     //", " <<
+     //"socket=" << connect_aiocb.get_socket() <<
      ")";
   return os;
 }

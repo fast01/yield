@@ -32,7 +32,7 @@
 #include "../watches.hpp"
 #include "yield/debug.hpp"
 #include "yield/exception.hpp"
-#include "yield/log.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/poll/fs_event_queue.hpp"
 #include "yield/fs/file_system.hpp"
 
@@ -47,7 +47,7 @@
 namespace yield {
 namespace fs {
 namespace poll {
-FsEventQueue::FsEventQueue(YO_NEW_REF Log* log) : log(log) {
+FsEventQueue::FsEventQueue() {
   watches = NULL;
   kq = kqueue();
   if (kq != -1) {
@@ -80,7 +80,6 @@ FsEventQueue::FsEventQueue(YO_NEW_REF Log* log) : log(log) {
 
 FsEventQueue::~FsEventQueue() {
   close(kq);
-  Log::dec_ref(log);
   close(wake_pipe[0]);
   close(wake_pipe[1]);
   delete watches;
@@ -99,9 +98,9 @@ FsEventQueue::associate(
     if (::fstat(fd, &stbuf) == 0) {
       bsd::Watch* watch;
       if (S_ISDIR(stbuf.st_mode)) {
-        watch = new bsd::DirectoryWatch(fd, fs_event_types, path, log);
+        watch = new bsd::DirectoryWatch(fd, fs_event_types, path);
       } else {
-        watch = new bsd::FileWatch(fd, fs_event_types, path, log);
+        watch = new bsd::FileWatch(fd, fs_event_types, path);
       }
 
       // Don't try to be clever with fflags, since there

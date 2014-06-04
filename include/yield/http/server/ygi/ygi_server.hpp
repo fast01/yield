@@ -44,13 +44,11 @@ class YgiServer : public HttpServer<AioQueueType> {
 public:
   YgiServer(
     const yield::sockets::SocketAddress& sockname,
-    ygi_request_handler_t ygi_request_handler,
-    YO_NEW_REF Log* log = NULL
+    ygi_request_handler_t ygi_request_handler
   )
     : HttpServer<AioQueueType>(
       *new YgiRequestHandler(ygi_request_handler),
-      sockname,
-      log
+      sockname
     ) {
   }
 };

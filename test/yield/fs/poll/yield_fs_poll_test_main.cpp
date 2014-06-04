@@ -27,8 +27,10 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/types.hpp"
+#include "yield/logging.hpp"
 #include "gtest/gtest.h"
+
+YIELD_LOGGING_INITIALIZE
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);

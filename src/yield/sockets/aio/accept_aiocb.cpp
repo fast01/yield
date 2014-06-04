@@ -77,21 +77,21 @@ void AcceptAiocb::set_recv_buffer(YO_NEW_REF Buffer* recv_buffer) {
   this->recv_buffer = recv_buffer;
 }
 
-std::ostream& operator<<(std::ostream& os, AcceptAiocb& accept_aiocb) {
+std::ostream& operator<<(std::ostream& os, const AcceptAiocb& accept_aiocb) {
   os <<
      accept_aiocb.get_type_name() <<
      "(" <<
-     "accepted_socket=" << accept_aiocb.get_accepted_socket() <<
-     ", " <<
-     "error=" << accept_aiocb.get_error() <<
-     ", " <<
-     "peername=" << accept_aiocb.get_peername() <<
-     ", " <<
-     "recv_buffer=" << accept_aiocb.get_recv_buffer() <<
-     ", " <<
+     //"accepted_socket=" << accept_aiocb.get_accepted_socket() <<
+     //", " <<
+     //"error=" << accept_aiocb.get_error() <<
+     //", " <<
+     //"peername=" << accept_aiocb.get_peername() <<
+     //", " <<
+     //"recv_buffer=" << accept_aiocb.get_recv_buffer() <<
+     //", " <<
      "return=" << accept_aiocb.get_return() <<
-     ", " <<
-     "socket=" << accept_aiocb.get_socket() <<
+     //", " <<
+     //"socket=" << accept_aiocb.get_socket() <<
      ")";
   return os;
 }

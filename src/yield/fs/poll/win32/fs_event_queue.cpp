@@ -32,7 +32,7 @@
 #include "../watches.hpp"
 #include "yield/debug.hpp"
 #include "yield/exception.hpp"
-#include "yield/log.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/poll/fs_event_queue.hpp"
 #include "yield/fs/file_system.hpp"
 
@@ -44,7 +44,7 @@ namespace poll {
 using win32::DirectoryWatch;
 using win32::FileWatch;
 
-FsEventQueue::FsEventQueue(YO_NEW_REF Log* log) : log(log) {
+FsEventQueue::FsEventQueue() {
   hIoCompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
   if (hIoCompletionPort != INVALID_HANDLE_VALUE) {
     watches = new Watches<win32::Watch>;
@@ -55,7 +55,6 @@ FsEventQueue::FsEventQueue(YO_NEW_REF Log* log) : log(log) {
 }
 
 FsEventQueue::~FsEventQueue() {
-  Log::dec_ref(log);
   delete watches;
 }
 
@@ -88,15 +87,14 @@ bool FsEventQueue::associate(const Path& path, FsEvent::Type fs_event_types) {
     ) {
       win32::Watch* watch;
       if (path == directory_path) {
-        watch = new DirectoryWatch(*directory, fs_event_types, path, log);
+        watch = new DirectoryWatch(*directory, fs_event_types, path);
       } else {
         watch
         = new FileWatch(
           *directory,
           directory_path,
           path,
-          fs_event_types,
-          log
+          fs_event_types
         );
       }
 
