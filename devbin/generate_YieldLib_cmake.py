@@ -51,6 +51,5 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
 	target_link_libraries(yield kstat)
 endif()
 
-add_subdirectory(share)
 """ % locals())
 	

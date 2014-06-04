@@ -188,3 +188,4 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
 	target_link_libraries(yield kstat)
 endif()
+
