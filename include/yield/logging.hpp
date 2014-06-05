@@ -31,6 +31,9 @@
 #define _YIELD_LOGGING_HPP_
 
 #define _ELPP_STL_LOGGING 1
+#define _ELPP_THREAD_SAFE 1
+#define _ELPP_STACKTRACE_ON_CRASH 1
+
 #include <easylogging++.h>
 
 #define YIELD_LOGGING_INITIALIZE _INITIALIZE_EASYLOGGINGPP
