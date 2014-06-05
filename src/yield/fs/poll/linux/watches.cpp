@@ -28,7 +28,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "watches.hpp"
-#include "yield/debug.hpp"
+#include "yield/logging.hpp"
 
 namespace yield {
 namespace fs {
@@ -76,7 +76,7 @@ Watch* Watches::find(int wd) {
 
 void Watches::insert(Watch& watch) {
   iterator watch_i = map<int, Watch*>::find(watch.get_wd());
-  debug_assert_eq(watch_i, end());
+  CHECK_EQ(watch_i, end());
   map<int, Watch*>::insert(make_pair(watch.get_wd(), &watch));
 }
 }

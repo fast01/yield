@@ -28,7 +28,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "http_request_parser.hpp"
-#include "yield/debug.hpp"
 #include "yield/logging.hpp"
 #include "yield/fs/file.hpp"
 #include "yield/http/server/http_connection.hpp"
@@ -143,7 +142,7 @@ HttpConnection::handle(
     break;
 
     default:
-      debug_break();
+      CHECK(false);
     }
   }
 
@@ -180,7 +179,7 @@ HttpConnection::handle(
 }
 
 void HttpConnection::parse(Buffer& recv_buffer) {
-  debug_assert_false(recv_buffer.empty());
+  CHECK(!recv_buffer.empty());
 
   HttpRequestParser http_request_parser(*this, recv_buffer);
 
@@ -211,7 +210,7 @@ void HttpConnection::parse(Buffer& recv_buffer) {
 
     case HttpResponse::TYPE_ID: {
       HttpResponse& http_response = static_cast<HttpResponse&>(object);
-      debug_assert_eq(http_response.get_status_code(), 400);
+      CHECK_EQ(http_response.get_status_code(), 400);
 
 #ifdef _DEBUG
       LOG(DEBUG) << get_type_name() << ": parsed " << http_response;
@@ -223,7 +222,7 @@ void HttpConnection::parse(Buffer& recv_buffer) {
     break;
 
     default:
-      debug_break();
+      CHECK(false);
       break;
     }
   }

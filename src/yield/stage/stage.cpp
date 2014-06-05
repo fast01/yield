@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
 #include "yield/exception.hpp"
+#include "yield/logging.hpp"
 #include "yield/time.hpp"
 #include "yield/stage/stage.hpp"
 #include "yield/queue/synchronized_event_queue.hpp"
@@ -69,7 +69,7 @@ void Stage::enqueue(YO_NEW_REF Event& event) {
   } else {
     //cerr << event_handler.get_type_name() <<
     //  ": event queue full, stopping.";
-    debug_break();
+    CHECK(false);
   }
 }
 

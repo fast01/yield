@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
 #include "yield/exception.hpp"
+#include "yield/logging.hpp"
 #include "yield/sockets/socket_address.hpp"
 
 #include <arpa/inet.h>
@@ -84,7 +84,7 @@ SocketAddress::SocketAddress(const SocketAddress& other, uint16_t port) {
   break;
 
   default:
-    debug_break();
+    CHECK(false);
   }
 
   if (other.next_socket_address != NULL) {
@@ -264,7 +264,7 @@ socklen_t SocketAddress::len(int family) {
   case AF_INET6:
     return sizeof(sockaddr_in6);
   default:
-    debug_break();
+    CHECK(false);
     return 0;
   }
 }

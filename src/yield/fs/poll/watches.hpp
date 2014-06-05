@@ -30,7 +30,7 @@
 #ifndef _YIELD_FS_POLL_WATCHES_HPP_
 #define _YIELD_FS_POLL_WATCHES_HPP_
 
-#include "yield/debug.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/path.hpp"
 
 #include <map>
@@ -94,7 +94,7 @@ public:
     if (std::map<Path, WatchType*>::find(path) == end()) {
       std::map<Path, WatchType*>::insert(std::make_pair(path, &watch));
     } else {
-      debug_break();
+      CHECK(false);
     }
   }
 };

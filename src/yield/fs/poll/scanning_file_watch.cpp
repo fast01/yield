@@ -28,9 +28,9 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "scanning_file_watch.hpp"
-#include "yield/debug.hpp"
 #include "yield/exception.hpp"
 #include "yield/event_handler.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/file_system.hpp"
 
 namespace yield {
@@ -53,7 +53,7 @@ ScanningFileWatch::~ScanningFileWatch() {
 void ScanningFileWatch::scan(EventHandler& fs_event_handler) {
   Stat* new_stbuf = FileSystem().stat(get_path());
   Stat* old_stbuf = stbuf;
-  debug_assert_ne(old_stbuf, NULL);
+  CHECK_NE(old_stbuf, NULL);
   stbuf = NULL;
 
   FsEvent::Type fs_event_type;

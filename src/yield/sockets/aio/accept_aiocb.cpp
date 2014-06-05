@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
 #include "yield/buffer.hpp"
+#include "yield/logging.hpp"
 #include "yield/sockets/stream_socket.hpp"
 #include "yield/sockets/aio/accept_aiocb.hpp"
 
@@ -45,7 +45,7 @@ AcceptAiocb::AcceptAiocb(
   accepted_socket = NULL;
   peername = NULL;
   if (recv_buffer != NULL) {
-    debug_assert_eq(recv_buffer->get_next_buffer(), NULL);
+    CHECK_EQ(recv_buffer->get_next_buffer(), NULL);
   }
 }
 

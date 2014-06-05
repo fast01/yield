@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
 #include "yield/buffer.hpp"
 #include "yield/exception.hpp"
 #include "yield/logging.hpp"
@@ -104,7 +103,7 @@ void NbioQueue::associate(Aiocb& aiocb, RetryStatus retry_status) {
         aiocb.get_socket(),
         FdEvent::TYPE_READ_READY
       );
-    debug_assert_true(associate_ret);
+    CHECK(associate_ret);
   }
   break;
 
@@ -114,12 +113,12 @@ void NbioQueue::associate(Aiocb& aiocb, RetryStatus retry_status) {
         aiocb.get_socket(),
         FdEvent::TYPE_WRITE_READY
       );
-    debug_assert_true(associate_ret);
+    CHECK(associate_ret);
   }
   break;
 
   default:
-    debug_break();
+    CHECK(false);
     break;
   }
 }
@@ -143,7 +142,7 @@ uint8_t NbioQueue::get_aiocb_priority(const Aiocb& aiocb) {
   case SendfileAiocb::TYPE_ID:
     return 2;
   default:
-    debug_break();
+    CHECK(false);
     return 0;
   }
 }
@@ -184,7 +183,7 @@ void NbioQueue::log_wouldblock(AiocbType& aiocb, RetryStatus retry_status) {
     retry_status_str = "write";
     break;
   default:
-    debug_break();
+    CHECK(false);
     retry_status_str = "";
     break;
   }
@@ -211,7 +210,7 @@ NbioQueue::RetryStatus NbioQueue::retry(Aiocb& aiocb, size_t& partial_send_len) 
   case SendfileAiocb::TYPE_ID:
     return retry_sendfile(static_cast<SendfileAiocb&>(aiocb), partial_send_len);
   default:
-    debug_break();
+    CHECK(false);
     return RETRY_STATUS_ERROR;
   }
 }
@@ -467,7 +466,7 @@ Event* NbioQueue::timeddequeue(const Time& timeout) {
 
         map<fd_t, SocketState*>::iterator socket_state_i
         = this->socket_state.find(fd);
-        debug_assert_ne(socket_state_i, this->socket_state.end());
+        CHECK_NE(socket_state_i, this->socket_state.end());
         SocketState* socket_state = socket_state_i->second;
 
         uint16_t want_fd_event_types = 0;
@@ -512,10 +511,10 @@ Event* NbioQueue::timeddequeue(const Time& timeout) {
           }
         }
 
-        debug_assert_ne(want_fd_event_types, 0);
+        CHECK_NE(want_fd_event_types, 0);
         bool associate_ret
         = fd_event_queue.associate(fd, want_fd_event_types);
-        debug_assert_true(associate_ret);
+        CHECK(associate_ret);
       }
       break;
 
@@ -572,7 +571,7 @@ Event* NbioQueue::timeddequeue(const Time& timeout) {
             switch (retry_status) {
             case RETRY_STATUS_COMPLETE:
             case RETRY_STATUS_ERROR:
-              debug_assert_false(socket_state->empty());
+              CHECK(!socket_state->empty());
               return aiocb;
             default:
               associate(*aiocb, retry_status);

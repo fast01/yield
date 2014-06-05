@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
+#include "yield/logging.hpp"
 #include "yield/poll/fd_event_queue.hpp"
 
 #include <errno.h>
@@ -102,7 +102,7 @@ bool FdEventQueue::dissociate(fd_t fd) {
 bool FdEventQueue::enqueue(YO_NEW_REF Event& event) {
   if (event_queue.enqueue(event)) {
     ssize_t write_ret = write(wake_pipe[1], "m", 1);
-    debug_assert_eq(write_ret, 1);
+    CHECK_EQ(write_ret, 1);
     return true;
   } else {
     return false;
@@ -134,12 +134,12 @@ YO_NEW_REF Event* FdEventQueue::timeddequeue(const Time& timeout) {
       }
     } while (++pollfd_i != pollfds.end());
 
-    debug_break();
+    CHECK(false);
     return NULL;
   } else if (ret == 0 || errno == EINTR) {
     return NULL;
   } else {
-    debug_break();
+    CHECK(false);
     return NULL;
   }
 }

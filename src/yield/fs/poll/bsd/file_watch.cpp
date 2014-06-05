@@ -28,8 +28,8 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "file_watch.hpp"
-#include "yield/debug.hpp"
 #include "yield/event_handler.hpp"
+#include "yield/logging.hpp"
 
 #include <sys/event.h>
 
@@ -76,7 +76,7 @@ FileWatch::read(
       fflags ^= NOTE_WRITE;
       fs_event_type = FsEvent::TYPE_FILE_MODIFY;
     } else {
-      debug_break();
+      CHECK(false);
       return;
     }
 

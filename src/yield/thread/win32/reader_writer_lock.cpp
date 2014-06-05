@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
 #include "yield/exception.hpp"
+#include "yield/logging.hpp"
 #include "yield/thread/reader_writer_lock.hpp"
 
 #include <Windows.h>
@@ -90,14 +90,14 @@ bool ReaderWriterLock::rdlock() {
     }
 
     waiting_readers_count--;
-    debug_assert_ge(waiting_readers_count, 0);
+    CHECK_GE(waiting_readers_count, 0);
 
     active_writer_readers++;
   } else if ((++active_writer_readers == 1) && waiting_readers_count != 0) {
     notify_readers = true;
   }
 
-  debug_assert_eq(HIWORD(active_writer_readers), 0);
+  CHECK_EQ(HIWORD(active_writer_readers), 0);
 
   LeaveCriticalSection(cs);
 
@@ -111,8 +111,8 @@ bool ReaderWriterLock::rdlock() {
 void ReaderWriterLock::rdunlock() {
   EnterCriticalSection(cs);
 
-  debug_assert_eq(HIWORD(active_writer_readers), 0);
-  debug_assert_gt(LOWORD(active_writer_readers), 0);
+  CHECK_EQ(HIWORD(active_writer_readers), 0);
+  CHECK_GT(LOWORD(active_writer_readers), 0);
 
   if (--active_writer_readers == 0) {
     ResetEvent(hReadyToRead);
@@ -142,11 +142,11 @@ bool ReaderWriterLock::wrlock() {
 
   if (active_writer_readers != 0) {
     waiting_writers_count++;
-    debug_assert_gt(waiting_writers_count, 0);
+    CHECK_GT(waiting_writers_count, 0);
     LeaveCriticalSection(cs);
     WaitForSingleObject(hReadyToWrite, INFINITE);
   } else {
-    debug_assert_eq(active_writer_readers, 0);
+    CHECK_EQ(active_writer_readers, 0);
     active_writer_readers = MAKELONG(0, 1);
     LeaveCriticalSection(cs);
   }
@@ -159,8 +159,8 @@ void ReaderWriterLock::wrunlock() {
 
   EnterCriticalSection(cs);
 
-  debug_assert_eq(HIWORD(active_writer_readers), 1);
-  debug_assert_eq(LOWORD(active_writer_readers), 0);
+  CHECK_EQ(HIWORD(active_writer_readers), 1);
+  CHECK_EQ(LOWORD(active_writer_readers), 0);
 
   if (waiting_writers_count != 0) {
     waiting_writers_count--;

@@ -28,9 +28,9 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "scanning_directory_watch.hpp"
-#include "yield/debug.hpp"
 #include "yield/exception.hpp"
 #include "yield/event_handler.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/file_system.hpp"
 
 namespace yield {
@@ -53,7 +53,7 @@ ScanningDirectoryWatch::ScanningDirectoryWatch(
         if (!dentry->is_special()) {
           Stat* dentry_stat = stat(*dentry);
           if (dentry_stat != NULL) {
-            debug_assert_eq(
+            CHECK_EQ(
               dentries->find(dentry->get_name()),
               dentries->end()
             );
@@ -104,7 +104,7 @@ ScanningDirectoryWatch::scan(
         if (!new_dentry->is_special()) {
           Stat* new_dentry_stat = stat(*new_dentry);
           if (new_dentry_stat != NULL) {
-            debug_assert_eq(
+            CHECK_EQ(
               new_dentries->find(new_dentry->get_name()),
               new_dentries->end()
             );
@@ -135,7 +135,7 @@ ScanningDirectoryWatch::scan(
                   }
                 }
               } else { // dentry type has changed
-                debug_break();
+                CHECK(false);
               }
 
               Stat::dec_ref(*old_dentry_i->second);

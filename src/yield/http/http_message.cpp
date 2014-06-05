@@ -27,9 +27,9 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
 #include "yield/buffer.hpp"
 #include "yield/date_time.hpp"
+#include "yield/logging.hpp"
 #include "yield/http/http_message.hpp"
 #include "yield/http/http_message_parser.hpp"
 #include "yield/http/http_request.hpp"
@@ -224,9 +224,9 @@ set_field(
   const void* value,
   size_t value_len
 ) {
-  debug_assert_gt(fields_offset, 0);
-  debug_assert_gt(name_len, 0);
-  debug_assert_gt(value_len, 0);
+  CHECK_GT(fields_offset, 0);
+  CHECK_GT(name_len, 0);
+  CHECK_GT(value_len, 0);
 
   header.put(name, name_len);
   header.put(": ", 2);

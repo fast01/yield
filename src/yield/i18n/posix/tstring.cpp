@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
 #include "yield/exception.hpp"
+#include "yield/logging.hpp"
 #include "yield/i18n/iconv.hpp"
 #include "yield/i18n/tstring.hpp"
 

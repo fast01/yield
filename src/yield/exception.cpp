@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
 #include "yield/exception.hpp"
+#include "yield/logging.hpp"
 
 #ifdef _WIN32
 #include <lmerr.h>
@@ -184,7 +184,7 @@ void Exception::set_error_code(uint32_t error_code) {
 }
 
 void Exception::set_error_message(const char* error_message) {
-  debug_assert_ne(error_message, NULL);
+  CHECK_NOTNULL(error_message);
 
 #ifdef _WIN32
   LocalFree(this->error_message);

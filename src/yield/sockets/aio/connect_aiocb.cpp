@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
 #include "yield/buffer.hpp"
+#include "yield/logging.hpp"
 #include "yield/sockets/stream_socket.hpp"
 #include "yield/sockets/aio/connect_aiocb.hpp"
 
@@ -44,7 +44,7 @@ ConnectAiocb::ConnectAiocb(
   peername(peername.inc_ref()),
   send_buffer(send_buffer) {
   if (send_buffer != NULL) {
-    debug_assert_eq(send_buffer->get_next_buffer(), NULL);
+    CHECK_EQ(send_buffer->get_next_buffer(), NULL);
   }
 }
 

@@ -66,7 +66,7 @@ public:
     int iovlen,
     const MessageFlags& flags
   ) {
-    debug_assert_gt(iovlen, 0);
+    CHECK_GT(iovlen, 0);
     iovec iov0 = iov[0];
     iov0.iov_len = 1;
     return stream_socket.sendmsg(&iov0, 1, flags);

@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
+#include "yield/logging.hpp"
 #include "yield/poll/fd_event.hpp"
 
 #ifndef _WIN32
@@ -50,7 +50,7 @@ const FdEvent::Type FdEvent::TYPE_WRITE_READY = POLLOUT;
 #endif
 
 FdEvent::FdEvent(fd_t fd, Type type) : fd(fd), type(type) {
-  debug_assert(
+  CHECK(
     type == TYPE_ERROR
     ||
     type == TYPE_HUP

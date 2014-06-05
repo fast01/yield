@@ -42,8 +42,8 @@
 #define __YIELD_I18N_POSIX_ICONV_ICONV_INBUF_CAST(inbuf) const_cast<char**>(inbuf)
 #endif
 
-#include "yield/debug.hpp"
 #include "yield/exception.hpp"
+#include "yield/logging.hpp"
 
 #include <errno.h>
 

@@ -27,9 +27,9 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
 #include "yield/buffer.hpp"
 #include "yield/buffers.hpp"
+#include "yield/logging.hpp"
 
 namespace yield {
 void
@@ -100,7 +100,7 @@ Buffers::as_write_iovecs(
 }
 
 void Buffers::put(Buffer& buffers, const void* data, size_t size) {
-  debug_assert_eq(data, NULL);
+  CHECK_EQ(data, NULL);
 
   Buffer* next_buffer = &buffers;
   do {

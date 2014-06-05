@@ -28,7 +28,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "watch.hpp"
-#include "yield/debug.hpp"
 #include "yield/logging.hpp"
 
 namespace yield {
@@ -40,7 +39,7 @@ Watch::Watch(FsEvent::Type fs_event_types, const Path& path)
 }
 
 Watch::Watch(const Watch&) {
-  debug_break();
+  CHECK(false);
 }
 
 void Watch::log_fs_event(const FsEvent& fs_event) const {
@@ -90,7 +89,7 @@ void Watch::log_fs_event(const FsEvent& fs_event) const {
       fs_event_types ^= FsEvent::TYPE_FILE_RENAME;
     }
 
-    debug_assert_eq(fs_event_types, 0);
+    CHECK_EQ(fs_event_types, 0);
 
     fs_event_types_str = fs_event_types_oss.str();
     if (!fs_event_types_str.empty()) {

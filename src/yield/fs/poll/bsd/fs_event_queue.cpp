@@ -30,7 +30,6 @@
 #include "directory_watch.hpp"
 #include "file_watch.hpp"
 #include "../watches.hpp"
-#include "yield/debug.hpp"
 #include "yield/exception.hpp"
 #include "yield/logging.hpp"
 #include "yield/fs/poll/fs_event_queue.hpp"
@@ -142,7 +141,7 @@ bool FsEventQueue::dissociate(const Path& path) {
 bool FsEventQueue::enqueue(YO_NEW_REF Event& event) {
   if (event_queue.enqueue(event)) {
     ssize_t write_ret = write(wake_pipe[1], "m", 1);
-    debug_assert_eq(write_ret, 1);
+    CHECK_EQ(write_ret, 1);
     return true;
   } else {
     return false;
@@ -158,14 +157,14 @@ YO_NEW_REF Event* FsEventQueue::timeddequeue(const Time& timeout) {
     timespec timeout_ts = timeout;
     int ret = kevent(kq, 0, 0, &kevent_, 1, &timeout_ts);
     if (ret > 0) {
-      debug_assert_eq(ret, 1);
+      CHECK_EQ(ret, 1);
       if (static_cast<int>(kevent_.ident) == wake_pipe[0]) {
         char m;
         ssize_t read_ret = read(wake_pipe[0], &m, sizeof(m));
-        debug_assert_eq(read_ret, static_cast<ssize_t>(sizeof(m)));
+        CHECK_EQ(read_ret, static_cast<ssize_t>(sizeof(m)));
         return event_queue.trydequeue();
       } else {
-        debug_assert_eq(kevent_.filter, EVFILT_VNODE);
+        CHECK_EQ(kevent_.filter, EVFILT_VNODE);
         //if (log != NULL) {
         //  log->get_stream(Log::Level::DEBUG) <<
         //    get_type_name() << "(fd=" << fd << ", path=" << path << "): " <<
@@ -178,7 +177,7 @@ YO_NEW_REF Event* FsEventQueue::timeddequeue(const Time& timeout) {
     } else if (ret == 0 || errno == EINTR) {
       return NULL;
     } else {
-      debug_break();
+      CHECK(false);
       return NULL;
     }
   }

@@ -30,8 +30,6 @@
 #ifndef _YIELD_QUEUE_NON_BLOCKING_CONCURRENT_QUEUE_HPP_
 #define _YIELD_QUEUE_NON_BLOCKING_CONCURRENT_QUEUE_HPP_
 
-#include "yield/debug.hpp"
-
 #include <atomic>
 
 namespace yield {
@@ -63,9 +61,9 @@ public:
   */
   bool enqueue(ElementType& element) {
     uintptr_t new_element = reinterpret_cast<uintptr_t>(&element);
-    debug_assert_false(new_element & 1);
+    // CHECK(!(new_element & 1));
     new_element >>= 1;
-    debug_assert_false(new_element & POINTER_HIGH_BIT);
+    // CHECK(!(new_element & POINTER_HIGH_BIT));
 
     for (;;) {
       size_t tail_element_i_copy = tail_element_i.load(); // te

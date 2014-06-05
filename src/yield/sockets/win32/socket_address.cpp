@@ -28,8 +28,8 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "winsock.hpp"
-#include "yield/debug.hpp"
 #include "yield/exception.hpp"
+#include "yield/logging.hpp"
 #include "yield/sockets/socket_address.hpp"
 
 namespace yield {
@@ -67,7 +67,7 @@ SocketAddress::SocketAddress(const SocketAddress& other, uint16_t port) {
   break;
 
   default:
-    debug_break();
+    CHECK(false);
   }
 
   if (other.next_socket_address != NULL) {
@@ -136,7 +136,7 @@ void SocketAddress::assign(const sockaddr_in6& sockaddr_in6_) {
 }
 
 const SocketAddress* SocketAddress::filter(int family) const {
-  debug_assert_gt(len(family), 0);
+  CHECK_GT(len(family), 0);
 
   const SocketAddress* next_socket_address = this;
 
@@ -256,7 +256,7 @@ socklen_t SocketAddress::len(int family) {
   case AF_INET6:
     return sizeof(sockaddr_in6);
   default:
-    debug_break();
+    CHECK(false);
     return 0;
   }
 }

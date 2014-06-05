@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
 #include "yield/exception.hpp"
+#include "yield/logging.hpp"
 #include "yield/time.hpp"
 #include "yield/thread/condition_variable.hpp"
 
@@ -146,7 +146,7 @@ bool ConditionVariable::wait() {
       return mutex.lock();
     }
   } else {
-    debug_break();
+    CHECK(false);
     waiters_count_lock.lock();
     waiters_count--;
     waiters_count_lock.unlock();

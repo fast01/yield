@@ -28,7 +28,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "watches.hpp"
-#include "yield/debug.hpp"
 #include "yield/exception.hpp"
 #include "yield/logging.hpp"
 #include "yield/fs/poll/fs_event_queue.hpp"
@@ -119,7 +118,7 @@ FsEventQueue::associate(
       return true;
     } else {
       watch = watches->erase(path);
-      debug_assert_ne(watch, NULL);
+      CHECK_NOTNULL(watch);
       delete watch;
     }
   }
@@ -174,7 +173,7 @@ bool FsEventQueue::enqueue(YO_NEW_REF Event& event) {
   if (event_queue.enqueue(event)) {
     uint64_t data = 1;
     ssize_t write_ret = write(event_fd, &data, sizeof(data));
-    debug_assert_eq(write_ret, static_cast<ssize_t>(sizeof(data)));
+    CHECK_EQ(write_ret, static_cast<ssize_t>(sizeof(data)));
     return true;
   } else {
     return false;
@@ -192,19 +191,19 @@ YO_NEW_REF Event* FsEventQueue::timeddequeue(const Time& timeout) {
     int ret = epoll_wait(epoll_fd, &epoll_event_, 1, timeout_ms);
 
     if (ret > 0) {
-      debug_assert_eq(ret, 1);
+      CHECK_EQ(ret, 1);
 
       if (epoll_event_.data.fd == event_fd) {
         uint64_t data;
         read(event_fd, &data, sizeof(data));
         return event_queue.trydequeue();
       } else {
-        debug_assert_eq(epoll_event_.data.fd, inotify_fd);
+        CHECK_EQ(epoll_event_.data.fd, inotify_fd);
 
         char inotify_events[(sizeof(inotify_event) + PATH_MAX) * 16];
         ssize_t read_ret
         = ::read(inotify_fd, inotify_events, sizeof(inotify_events));
-        debug_assert_gt(read_ret, 0);
+        CHECK_GT(read_ret, 0);
 
         const char* inotify_events_p = inotify_events;
         const char* inotify_events_pe
@@ -228,7 +227,7 @@ YO_NEW_REF Event* FsEventQueue::timeddequeue(const Time& timeout) {
         return event_queue.trydequeue();
       }
     } else {
-      debug_assert_true(ret == 0 || errno == EINTR);
+      CHECK(ret == 0 || errno == EINTR);
       return NULL;
     }
   }

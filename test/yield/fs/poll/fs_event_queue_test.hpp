@@ -32,7 +32,6 @@
 
 #include "../../event_queue_test.hpp"
 #include "yield/auto_object.hpp"
-#include "yield/debug.hpp"
 #include "yield/date_time.hpp"
 #include "yield/exception.hpp"
 #include "yield/logging.hpp"

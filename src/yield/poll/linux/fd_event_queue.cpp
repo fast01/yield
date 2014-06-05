@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
+#include "yield/logging.hpp"
 #include "yield/poll/fd_event_queue.hpp"
 
 #include <iostream>
@@ -106,7 +106,7 @@ bool FdEventQueue::enqueue(Event& event) {
     ssize_t write_ret =
 #endif
       write(wake_fd, &data, sizeof(data));
-    debug_assert_eq(write_ret, static_cast<ssize_t>(sizeof(data)));
+    CHECK_EQ(write_ret, static_cast<ssize_t>(sizeof(data)));
     return true;
   } else {
     return false;
@@ -123,7 +123,7 @@ YO_NEW_REF Event* FdEventQueue::timeddequeue(const Time& timeout) {
     = (timeout == Time::FOREVER) ? -1 : static_cast<int>(timeout.ms());
     int ret = epoll_wait(epfd, &epoll_event_, 1, timeout_ms);
     if (ret > 0) {
-      debug_assert_eq(ret, 1);
+      CHECK_EQ(ret, 1);
 
       if (epoll_event_.data.fd == wake_fd) {
         uint64_t data;
@@ -131,13 +131,13 @@ YO_NEW_REF Event* FdEventQueue::timeddequeue(const Time& timeout) {
         ssize_t read_ret =
 #endif
           read(wake_fd, &data, sizeof(data));
-        debug_assert_eq(read_ret, static_cast<ssize_t>(sizeof(data)));
+        CHECK_EQ(read_ret, static_cast<ssize_t>(sizeof(data)));
         return event_queue.trydequeue();
       } else {
         return new FdEvent(epoll_event_.data.fd, epoll_event_.events);
       }
     } else {
-      debug_assert_true(ret == 0 || errno == EINTR);
+      CHECK(ret == 0 || errno == EINTR);
       return NULL;
     }
   }

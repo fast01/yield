@@ -31,10 +31,10 @@
 #define _YIELD_SOCKETS_AIO_AIO_QUEUE_TEST_HPP_
 
 #include "../../event_queue_test.hpp"
-#include "yield/debug.hpp"
 #include "yield/auto_object.hpp"
 #include "yield/buffer.hpp"
 #include "yield/exception.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/file.hpp"
 #include "yield/fs/file_system.hpp"
 #include "yield/fs/stat.hpp"

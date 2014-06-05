@@ -28,7 +28,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "file_watch.hpp"
-#include "yield/debug.hpp"
 #include "yield/logging.hpp"
 #include "yield/fs/file_system.hpp"
 
@@ -64,14 +63,14 @@ FileWatch::parse(
     break;
 
     case FILE_ACTION_RENAMED_OLD_NAME: {
-      debug_assert_true(old_name.empty());
+      CHECK(old_name.empty());
       old_name = name;
       return NULL;
     }
     break;
 
     default:
-      debug_break();
+      CHECK(false);
       return NULL;
     }
 
@@ -87,7 +86,7 @@ FileWatch::parse(
     &&
     file_notify_info.Action == FILE_ACTION_RENAMED_NEW_NAME
   ) {
-    debug_assert_eq(directory_path / old_name, get_path());
+    CHECK_EQ(directory_path / old_name, get_path());
     fs_event_type = FsEvent::TYPE_FILE_RENAME;
     if (want_fs_event_type(fs_event_type)) {
       FsEvent* fs_event = new FsEvent(get_path(), path, fs_event_type);

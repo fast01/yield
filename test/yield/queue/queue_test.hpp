@@ -30,7 +30,7 @@
 #ifndef _YIELD_QUEUE_QUEUE_TEST_HPP_
 #define _YIELD_QUEUE_QUEUE_TEST_HPP_
 
-#include "yield/debug.hpp"
+#include "yield/logging.hpp"
 #include "yield/types.hpp"
 #include "gtest/gtest.h"
 

@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
 #include "yield/buffers.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/file.hpp"
 #include "yield/fs/stat.hpp"
 
@@ -80,11 +80,11 @@ File::Map::Map(
   read_only(read_only),
   shared(shared) {
   if (data_ == reinterpret_cast<void*>(-1)) {
-    debug_assert_eq(file_mapping, NULL);
+    CHECK_EQ(file_mapping, NULL);
   } else {
-    debug_assert_ne(data_, NULL);
-    debug_assert_ne(file_mapping, NULL);
-    debug_assert_ne(file_mapping, INVALID_HANDLE_VALUE);
+    CHECK_NOTNULL(data_);
+    CHECK_NOTNULL(file_mapping);
+    CHECK_NE(file_mapping, INVALID_HANDLE_VALUE);
   }
 }
 
@@ -131,7 +131,7 @@ bool File::Map::unmap() {
       file_mapping = NULL;
       return true;
     } else {
-      debug_break();
+      CHECK(false);
       return false;
     }
   } else {

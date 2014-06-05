@@ -30,7 +30,6 @@
 #ifndef _YIELD_QUEUE_STL_EVENT_QUEUE_HPP_
 #define _YIELD_QUEUE_STL_EVENT_QUEUE_HPP_
 
-#include "yield/debug.hpp"
 #include "yield/event_queue.hpp"
 
 #include <queue>
@@ -44,7 +43,6 @@ class StlEventQueue : public EventQueue, private std::queue<Event*> {
 public:
   // yield::EventQueue
   YO_NEW_REF Event& dequeue() {
-    debug_assert_false(std::queue<Event*>::empty());
     return *trydequeue();
   }
 

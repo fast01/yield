@@ -57,8 +57,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
 #include "yield/buffer.hpp"
+#include "yield/logging.hpp"
 #include "yield/http/http_message_body_chunk.hpp"
 #include "yield/http/http_message_parser.hpp"
 #include "yield/http/http_request.hpp"
@@ -77,7 +77,7 @@ namespace yield {
 namespace http {
 HttpMessageParser::HttpMessageParser(Buffer& buffer)
   : buffer(buffer.inc_ref()) {
-  debug_assert_false(buffer.empty());
+  CHECK(!buffer.empty());
 
   ps = p = buffer;
   eof = ps + buffer.size();
@@ -85,7 +85,7 @@ HttpMessageParser::HttpMessageParser(Buffer& buffer)
 
 HttpMessageParser::HttpMessageParser(const string& buffer)
   : buffer(Buffer::copy(buffer)) {
-  debug_assert_false(buffer.empty());
+  CHECK(!buffer.empty());
 
   ps = p = this->buffer;
   eof = ps + this->buffer.size();

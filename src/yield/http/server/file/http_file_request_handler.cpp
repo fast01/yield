@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/file_system.hpp"
 #include "yield/http/server/http_request.hpp"
 #include "yield/http/server/file/http_file_request_handler.hpp"
@@ -50,7 +50,7 @@ HttpFileRequestHandler::HttpFileRequestHandler(
 }
 
 void HttpFileRequestHandler::handle(YO_NEW_REF Event& event) {
-  debug_assert_eq(event.get_type_id(), HttpRequest::TYPE_ID);
+  CHECK_EQ(event.get_type_id(), HttpRequest::TYPE_ID);
   HttpRequest& http_request = static_cast<HttpRequest&>(event);
 
   iovec http_request_uri_path;

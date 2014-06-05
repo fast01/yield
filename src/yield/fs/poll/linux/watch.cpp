@@ -28,7 +28,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "watch.hpp"
-#include "yield/debug.hpp"
 #include "yield/logging.hpp"
 
 #include <iostream>
@@ -110,7 +109,7 @@ YO_NEW_REF FsEvent* Watch::parse(const inotify_event& inotify_event_) {
       isdir ? FsEvent::TYPE_DIRECTORY_REMOVE : FsEvent::TYPE_FILE_REMOVE;
   } else if ((mask & IN_IGNORED) == IN_IGNORED) {
     mask ^= IN_IGNORED;
-    debug_assert_false(isdir);
+    CHECK(!isdir);
     fs_event_type = FsEvent::TYPE_FILE_REMOVE;
   } else if ((mask & IN_MODIFY) == IN_MODIFY) {
     mask ^= IN_MODIFY;
@@ -118,19 +117,19 @@ YO_NEW_REF FsEvent* Watch::parse(const inotify_event& inotify_event_) {
       isdir ? FsEvent::TYPE_DIRECTORY_MODIFY : FsEvent::TYPE_FILE_MODIFY;
   } else if ((mask & IN_MOVED_FROM) == IN_MOVED_FROM) {
     mask ^= IN_MOVED_FROM;
-    debug_assert_false(name.empty());
+    CHECK(!name.empty());
     old_names[inotify_event_.cookie] = name;
     return NULL;
   } else if ((mask & IN_MOVED_TO) == IN_MOVED_TO) {
     mask ^= IN_MOVED_TO;
-    debug_assert_eq(mask, 0);
+    CHECK_EQ(mask, 0);
 
     fs_event_type =
       isdir ? FsEvent::TYPE_DIRECTORY_RENAME : FsEvent::TYPE_FILE_RENAME;
 
     map<uint32_t, Path>::iterator old_name_i
     = old_names.find(inotify_event_.cookie);
-    debug_assert_ne(old_name_i, old_names.end());
+    CHECK_NE(old_name_i, old_names.end());
 
     if (want_fs_event_type(fs_event_type)) {
       FsEvent* fs_event
@@ -148,7 +147,7 @@ YO_NEW_REF FsEvent* Watch::parse(const inotify_event& inotify_event_) {
     }
   }
 
-  debug_assert_eq(mask, 0);
+  CHECK_EQ(mask, 0);
 
   if (want_fs_event_type(fs_event_type)) {
     FsEvent* fs_event = new FsEvent(path, fs_event_type);

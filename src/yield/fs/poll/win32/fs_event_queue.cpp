@@ -30,7 +30,6 @@
 #include "directory_watch.hpp"
 #include "file_watch.hpp"
 #include "../watches.hpp"
-#include "yield/debug.hpp"
 #include "yield/exception.hpp"
 #include "yield/logging.hpp"
 #include "yield/fs/poll/fs_event_queue.hpp"
@@ -111,7 +110,7 @@ bool FsEventQueue::associate(const Path& path, FsEvent::Type fs_event_types) {
           NULL
         )
       ) {
-        debug_assert_eq(dwBytesRead, 0);
+        CHECK_EQ(dwBytesRead, 0);
         watches->insert(path, *watch);
         return true;
       } else {
@@ -163,8 +162,8 @@ YO_NEW_REF Event* FsEventQueue::timeddequeue(const Time& timeout) {
   if (lpOverlapped != NULL) {
     win32::Watch& watch = win32::Watch::cast(*lpOverlapped);
     if (!watch.is_closed()) {
-      debug_assert_eq(bRet, TRUE);
-      debug_assert_gt(dwBytesTransferred, 0);
+      CHECK_EQ(bRet, TRUE);
+      CHECK_GT(dwBytesTransferred, 0);
 
       DWORD dwReadUntilBufferOffset = 0;
       for (;;) {

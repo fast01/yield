@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/directory.hpp"
 
 #include <sys/stat.h>
@@ -94,7 +94,7 @@ bool Directory::read(Entry*& entry) {
       entry_type = Entry::TYPE_SOCK;
       break;
     default:
-      debug_break();
+      CHECK(false);
       entry_type = Entry::TYPE_REG;
       break;
     }
@@ -120,7 +120,7 @@ bool Directory::read(Entry*& entry) {
       entry_type = Entry::TYPE_SOCK;
     } else {
       entry_type = Entry::TYPE_REG;
-      debug_break();
+      CHECK(false);
     }
 #endif
 

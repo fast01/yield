@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
+#include "yield/logging.hpp"
 #include "yield/fs/poll/fs_event.hpp"
 
 namespace yield {
@@ -48,8 +48,8 @@ const uint32_t FsEvent::TYPE_ID;
 
 FsEvent::FsEvent(const Path& path, Type type)
   : old_path(path), type(type) {
-  debug_assert_false(path.empty());
-  debug_assert(
+  CHECK(!path.empty());
+  CHECK(
     type == TYPE_DIRECTORY_ADD
     ||
     type == TYPE_DIRECTORY_MODIFY
@@ -66,9 +66,9 @@ FsEvent::FsEvent(const Path& path, Type type)
 
 FsEvent::FsEvent(const Path& old_path, const Path& new_path, Type type)
   : new_path(new_path), old_path(old_path), type(type) {
-  debug_assert_false(new_path.empty());
-  debug_assert_false(old_path.empty());
-  debug_assert(type == TYPE_DIRECTORY_RENAME || type == TYPE_FILE_RENAME);
+  CHECK(!new_path.empty());
+  CHECK(!old_path.empty());
+  CHECK(type == TYPE_DIRECTORY_RENAME || type == TYPE_FILE_RENAME);
 }
 
 std::ostream& operator<<(std::ostream& os, const FsEvent& fs_event) {
@@ -99,7 +99,7 @@ std::ostream& operator<<(std::ostream& os, const FsEvent& fs_event) {
     type = "FILE_RENAME";
     break;
   default:
-    debug_break();
+    CHECK(false);
     break;
   }
 

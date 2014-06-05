@@ -28,7 +28,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "directory_watch.hpp"
-#include "yield/debug.hpp"
 #include "yield/logging.hpp"
 #include "yield/fs/file_system.hpp"
 
@@ -108,7 +107,7 @@ DirectoryWatch::parse(
   break;
 
   case FILE_ACTION_RENAMED_NEW_NAME: {
-    debug_assert_false(old_paths.empty());
+    CHECK(!old_paths.empty());
 
     if (FileSystem().isdir(path)) {
       fs_event_type = FsEvent::TYPE_DIRECTORY_RENAME;
@@ -149,7 +148,7 @@ DirectoryWatch::parse(
   break;
 
   default:
-    debug_break();
+    CHECK(false);
     return NULL;
   }
 

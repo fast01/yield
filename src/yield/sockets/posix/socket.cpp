@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/debug.hpp"
+#include "yield/logging.hpp"
 #include "yield/sockets/socket.hpp"
 
 #include <arpa/inet.h>
@@ -140,7 +140,7 @@ string Socket::gethostname() {
 bool Socket::getpeername(SocketAddress& peername) const {
   socklen_t peernamelen = peername.len();
   if (::getpeername(*this, peername, &peernamelen) != -1) {
-    debug_assert_eq(peername.get_family(), get_domain());
+    CHECK_EQ(peername.get_family(), get_domain());
     return true;
   } else {
     return false;
@@ -150,7 +150,7 @@ bool Socket::getpeername(SocketAddress& peername) const {
 bool Socket::getsockname(SocketAddress& sockname) const {
   socklen_t socknamelen = sockname.len();
   if (::getsockname(*this, sockname, &socknamelen) != -1) {
-    debug_assert_eq(sockname.get_family(), get_domain());
+    CHECK_EQ(sockname.get_family(), get_domain());
     return true;
   } else {
     return false;
