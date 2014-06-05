@@ -30,9 +30,6 @@
 #ifndef _YIELD_DEBUG_HPP_
 #define _YIELD_DEBUG_HPP_
 
-#include <cstdio> // for snprintf
-#include <exception> // for std::exception
-
 #if defined(_WIN32)
 extern "C" {
   __declspec(dllimport) void __stdcall DebugBreak();
