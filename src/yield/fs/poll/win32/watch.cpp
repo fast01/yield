@@ -115,6 +115,7 @@ bool Watch::is_closed() const {
 }
 
 void Watch::log_read(const FILE_NOTIFY_INFORMATION& file_notify_info) {
+#ifdef _DEBUG
   LOG(DEBUG) <<
       "yield::fs::poll::win32::Watch(" <<
       "path=" << get_path() <<
@@ -128,6 +129,7 @@ void Watch::log_read(const FILE_NOTIFY_INFORMATION& file_notify_info) {
         file_notify_info.FileNameLength / sizeof(wchar_t)
       ) <<
       ")";
+#endif
 }
 
 Watch::operator ::OVERLAPPED* () {

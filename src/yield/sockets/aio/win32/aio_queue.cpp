@@ -470,18 +470,24 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
 
 template <class AiocbType> void AioQueue::log_completion(AiocbType& aiocb) {
   if (aiocb.get_return() >= 0) {
+#ifdef _DEBUG
     LOG(DEBUG) << get_type_name() << ": completed " << aiocb;
+#endif
   } else {
     log_error(aiocb);
   }
 }
 
 template <class AiocbType> void AioQueue::log_enqueue(AiocbType& aiocb) {
+#ifdef _DEBUG
   LOG(DEBUG) << get_type_name() << ": enqueuing " << aiocb;
+#endif
 }
 
 template <class AiocbType> void AioQueue::log_error(AiocbType& aiocb) {
+#ifdef _DEBUG
   LOG(ERROR) << get_type_name() << ": error on " << aiocb;
+#endif
 }
 
 YO_NEW_REF Event* AioQueue::timeddequeue(const Time& timeout) {

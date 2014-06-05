@@ -99,6 +99,7 @@ void Watch::log_fs_event(const FsEvent& fs_event) const {
     }
   }
 
+#ifdef _DEBUG
   LOG(DEBUG) <<
                                       "yield::fs::poll::Watch("
                                       "fs_event_types=" << fs_event_types_str <<
@@ -106,6 +107,7 @@ void Watch::log_fs_event(const FsEvent& fs_event) const {
                                       "path=" << get_path() <<
                                       ")" <<
                                       ": read " << fs_event;
+#endif
 }
 }
 }

@@ -74,6 +74,7 @@ YO_NEW_REF FsEvent* Watch::parse(const inotify_event& inotify_event_) {
     path = this->get_path();
   }
 
+#ifdef _DEBUG
   LOG(DEBUG) <<
       get_type_name() << "(path=" << get_path() << ", wd=" << get_wd() << ")"
       << ": read inotify_event(" <<
@@ -87,6 +88,7 @@ YO_NEW_REF FsEvent* Watch::parse(const inotify_event& inotify_event_) {
       ", "
       "name=" << name <<
       ")";
+#endif
 
   FsEvent::Type fs_event_type;
 
