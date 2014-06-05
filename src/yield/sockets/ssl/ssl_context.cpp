@@ -28,7 +28,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ssl_exception.hpp"
-#include "yield/debug.hpp"
+#include "yield/logging.hpp"
 #include "yield/sockets/ssl/ssl_context.hpp"
 
 #ifdef YIELD_HAVE_OPENSSL
@@ -92,7 +92,7 @@ void SslContext::init(SslVersion ssl_version) {
     method = DTLSv1_method();
     break;
   default:
-    debug_break();
+    CHECK(false);
     method = SSLv23_method();
     break;
   }
