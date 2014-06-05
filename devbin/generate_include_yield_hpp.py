@@ -17,7 +17,12 @@ for include_dir_path, _, include_file_names in os.walk(INCLUDE_DIR_PATH):
 		include_file_ext = os.path.splitext(include_file_name)[1]
 		if include_file_ext != '.hpp':
 			continue
-		includes.append('#include "%s"' % os.path.relpath(os.path.join(include_dir_path, include_file_name), INCLUDE_DIR_PATH).replace(os.path.sep, '/'))
+		include_file_path = os.path.join(include_dir_path, include_file_name)
+		include_file_relpath = os.path.relpath(include_file_path, INCLUDE_DIR_PATH)
+		include_file_relpath_posix = include_file_relpath.replace(os.path.sep, '/')
+		if include_file_relpath_posix == 'yield/logging.hpp':
+			continue
+		includes.append('#include "%s"' % include_file_relpath_posix)
 includes.sort()
 includes = "\n".join(includes)
 with open(os.path.join(INCLUDE_DIR_PATH, 'yield.hpp'), 'w+') as f:

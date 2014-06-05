@@ -41,7 +41,6 @@
 #include "yield/i18n/code.hpp"
 #include "yield/i18n/iconv.hpp"
 #include "yield/i18n/tstring.hpp"
-#include "yield/logging.hpp"
 #include "yield/object.hpp"
 #include "yield/poll/fd_event.hpp"
 #include "yield/poll/fd_event_queue.hpp"
