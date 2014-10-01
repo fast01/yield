@@ -1,6 +1,6 @@
 // yield/thread/linux/thread.cpp
 
-// Copyright (c) 2013 Minor Gordon
+// Copyright (c) 2014 Minor Gordon
 // All rights reserved
 
 // This source file is part of the Yield project.
