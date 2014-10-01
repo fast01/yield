@@ -43,6 +43,8 @@
 #endif
 
 namespace yield {
+using ::std::string;
+
 template <class ChannelPairType>
 class ChannelTest : public ::testing::Test {
 public:
@@ -67,7 +69,7 @@ protected:
     return channel_pair->get_read_channel();
   }
 
-  const string& get_test_string() const {
+  const ::std::string& get_test_string() const {
     return test_string;
   }
 
@@ -134,7 +136,7 @@ protected:
 
 private:
   ChannelPair* channel_pair;
-  string test_string;
+  ::std::string test_string;
 };
 
 TYPED_TEST_CASE_P(ChannelTest);

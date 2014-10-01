@@ -36,9 +36,10 @@
 namespace yield {
 namespace fs {
 namespace poll {
-using std::make_pair;
-using std::map;
-using std::pair;
+using ::std::make_pair;
+using ::std::map;
+using ::std::pair;
+using ::std::vector;
 
 ScanningDirectoryWatch::ScanningDirectoryWatch(
   FsEvent::Type fs_event_types,

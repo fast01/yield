@@ -34,6 +34,9 @@
 
 namespace yield {
 namespace http {
+using ::std::string;
+using ::std::vector;
+
 TEST(HTTPMessage, get_body) {
   ASSERT_EQ(HttpRequest(HttpRequest::Method::GET, "/").get_body(), static_cast<Object*>(NULL));
 

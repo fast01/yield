@@ -34,6 +34,8 @@
 
 namespace yield {
 namespace i18n {
+using ::std::string;
+
 tstring::tstring(char s, Code code) {
   init(&s, 1, code);
 }

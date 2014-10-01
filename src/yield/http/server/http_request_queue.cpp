@@ -38,14 +38,15 @@
 namespace yield {
 namespace http {
 namespace server {
-using yield::sockets::Socket;
-using yield::sockets::SocketAddress;
-using yield::sockets::TcpSocket;
-using yield::sockets::aio::AcceptAiocb;
-using yield::sockets::aio::AioQueue;
-using yield::sockets::aio::RecvAiocb;
-using yield::sockets::aio::SendAiocb;
-using yield::sockets::aio::SendfileAiocb;
+using ::std::vector;
+using ::yield::sockets::Socket;
+using ::yield::sockets::SocketAddress;
+using ::yield::sockets::TcpSocket;
+using ::yield::sockets::aio::AcceptAiocb;
+using ::yield::sockets::aio::AioQueue;
+using ::yield::sockets::aio::RecvAiocb;
+using ::yield::sockets::aio::SendAiocb;
+using ::yield::sockets::aio::SendfileAiocb;
 
 template <class AioQueueType>
 HttpRequestQueue<AioQueueType>::HttpRequestQueue(

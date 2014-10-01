@@ -97,7 +97,7 @@ public:
       iovec iov = buffer.as_write_iovec();
       return sendto(iov.iov_base, iov.iov_len, flags, peername);
     } else {
-      vector<iovec> iov;
+      ::std::vector<iovec> iov;
       Buffers::as_write_iovecs(buffer, iov);
 #ifdef _WIN32
 #pragma warning(push)

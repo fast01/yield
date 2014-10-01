@@ -38,6 +38,8 @@
 #endif
 
 namespace yield {
+using ::std::string;
+
 Exception::Exception()
   : error_message(NULL) {
   set_error_code(get_last_error_code());

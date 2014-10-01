@@ -37,6 +37,8 @@
 
 namespace yield {
 namespace fs {
+using ::std::string;
+
 class FilePair : public ChannelPair {
 public:
   FilePair() : path("file_test.txt") {

@@ -39,6 +39,8 @@ bool operator==(const iovec& left, const iovec& right) {
 }
 
 namespace yield {
+using ::std::vector;
+
 TEST(Buffers, as_read_iovecs) {
   auto_Object<Buffer> buffers = new Buffer(Buffer::getpagesize());
   buffers->set_next_buffer(new Buffer(Buffer::getpagesize()));

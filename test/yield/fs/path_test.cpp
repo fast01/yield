@@ -38,7 +38,8 @@
 
 namespace yield {
 namespace fs {
-using std::pair;
+using ::std::pair;
+using ::std::vector;
 
 const static Path TEST_DIR_NAME("path_test");
 const static Path TEST_FILE_NAME("path_test.txt");

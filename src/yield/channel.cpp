@@ -31,7 +31,12 @@
 #include "yield/buffers.hpp"
 #include "yield/channel.hpp"
 
+#include <vector>
+
 namespace yield {
+using ::std::string;
+using ::std::vector;
+
 ssize_t Channel::read(Buffer& buffer) {
   if (buffer.get_next_buffer() == NULL) {
     ssize_t read_ret = read(buffer, buffer.capacity() - buffer.size());

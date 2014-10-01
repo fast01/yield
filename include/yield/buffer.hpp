@@ -32,6 +32,8 @@
 
 #include "yield/object.hpp"
 
+#include <string>
+
 namespace yield {
 /**
   Generic buffer class, mainly used for I/O with aligned buffers.
@@ -117,7 +119,7 @@ public:
     @param data the data to copy
     @return the new <code>Buffer</code> copy
   */
-  static Buffer& copy(const string& data) {
+  static Buffer& copy(const ::std::string& data) {
     return copy(data.data(), data.size());
   }
 
@@ -327,7 +329,7 @@ public:
     @param other the other buffer.
     @return true if the buffers are the same
   */
-  bool operator==(const string& other) const;
+  bool operator==(const ::std::string& other) const;
 
   /**
     Contrast this buffer to another buffer.
@@ -358,7 +360,7 @@ public:
     @param other the other buffer.
     @return true if the buffers are not the same
   */
-  bool operator!=(const string& other) const {
+  bool operator!=(const ::std::string& other) const {
     return !operator==(other);
   }
 
@@ -391,7 +393,7 @@ public:
     Copy data into this buffer, increasing size.
     @param data data to copy into this buffer
   */
-  void put(const string& data) {
+  void put(const ::std::string& data) {
     put(data.c_str(), data.size());
   }
 

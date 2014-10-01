@@ -38,6 +38,8 @@
 
 namespace yield {
 namespace sockets {
+using ::std::string;
+
 template <class TypeParam>
 class SocketTest : public ::testing::Test {
 };

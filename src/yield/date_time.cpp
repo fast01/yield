@@ -37,7 +37,11 @@
 #include <sys/time.h> // For gettimeofday
 #endif
 
+#include <string>
+
 namespace yield {
+using ::std::string;
+
 const DateTime DateTime::INVALID_DATE_TIME = static_cast<uint64_t>(~0);
 
 #ifdef _WIN32
@@ -271,7 +275,7 @@ DateTime::operator string() const {
 }
 
 std::ostream& operator<<(std::ostream& os, const DateTime& date_time) {
-  os << static_cast<string>(date_time);
+  os << static_cast< ::std::string >(date_time);
   return os;
 }
 }

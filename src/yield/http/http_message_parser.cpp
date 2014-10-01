@@ -83,7 +83,7 @@ HttpMessageParser::HttpMessageParser(Buffer& buffer)
   eof = ps + buffer.size();
 }
 
-HttpMessageParser::HttpMessageParser(const string& buffer)
+HttpMessageParser::HttpMessageParser(const ::std::string& buffer)
   : buffer(Buffer::copy(buffer)) {
   CHECK(!buffer.empty());
 
@@ -1545,7 +1545,7 @@ void
 HttpMessageParser::parse_fields(
   const char* ps,
   const char* pe,
-  vector< std::pair<iovec, iovec> >& fields
+  ::std::vector< std::pair<iovec, iovec> >& fields
 ) {
   int cs;
   char* p = const_cast<char*>(ps);

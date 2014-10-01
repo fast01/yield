@@ -33,6 +33,8 @@
 #include "yield/types.hpp"
 #include "yield/i18n/code.hpp"
 
+#include <string>
+
 namespace yield {
 namespace i18n {
 /**
@@ -40,9 +42,9 @@ namespace i18n {
     a multibyte string with the default character set on POSIX systems.
 */
 #ifdef _WIN32
-class tstring : public std::wstring {
+class tstring : public ::std::wstring {
 #else
-class tstring : public std::string {
+class tstring : public ::std::string {
 #endif
 public:
   /**
@@ -69,7 +71,7 @@ public:
     @param s new contents of the tstring, copied
     @param code iconv code of the tstring
   */
-  tstring(const string& s, Code code = Code::CHAR);
+  tstring(const ::std::string& s, Code code = Code::CHAR);
 
   /**
     Construct a tstring from a string and length.
@@ -103,7 +105,7 @@ public:
     Construct a tstring from a C++ wstring.
     @param s new contents of the tstring, copied
   */
-  tstring(const std::wstring& s);
+  tstring(const ::std::wstring& s);
 #endif
 
   /**
@@ -111,7 +113,7 @@ public:
     @param tocode the iconv code with which to encode the tstring
     @return the encoded tstring as a multibyte C++ string
   */
-  string encode(Code tocode) const;
+  ::std::string encode(Code tocode) const;
 
 private:
   void init(const char*, size_t, Code);

@@ -33,6 +33,8 @@
 #include "yield/http/http_message.hpp"
 #include "yield/http/http_message_body_chunk.hpp"
 
+#include <vector>
+
 namespace yield {
 class DateTime;
 
@@ -46,7 +48,7 @@ class HTTPBodyChunk;
 class HttpMessageParser {
 protected:
   HttpMessageParser(Buffer& buffer);
-  HttpMessageParser(const string& buffer); // For testing
+  HttpMessageParser(const ::std::string& buffer); // For testing
   virtual ~HttpMessageParser();
 
 protected:
@@ -95,7 +97,7 @@ private:
   parse_fields(
     const char* ps,
     const char* pe,
-    vector< std::pair<iovec, iovec> >& fields
+    ::std::vector< std::pair<iovec, iovec> >& fields
   );
 
   static bool

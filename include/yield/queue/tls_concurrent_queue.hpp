@@ -38,8 +38,6 @@
 
 namespace yield {
 namespace queue {
-using yield::thread::Thread;
-
 /**
   A queue that can handle multiple concurrent enqueues and dequeues but may
     block the caller indefinitely in either operation.
@@ -82,17 +80,17 @@ private:
 
 public:
   TlsConcurrentQueue() {
-    tls_key = Thread::self()->key_create();
+    tls_key = ::yield::thread::Thread::self()->key_create();
     if (tls_key == static_cast<uintptr_t>(-1)) {
       throw Exception();
     }
   }
 
   ~TlsConcurrentQueue() {
-    Thread::self()->key_delete(tls_key);
+    ::yield::thread::Thread::self()->key_delete(tls_key);
 
     for (
-      typename vector<Stack*>::iterator stack_i = stacks.begin();
+      typename ::std::vector<Stack*>::iterator stack_i = stacks.begin();
       stack_i != stacks.end();
       stack_i++
     ) {
@@ -106,7 +104,7 @@ public:
     @return true if the enqueue was successful.
   */
   bool enqueue(ElementType& element) {
-    Stack* stack = static_cast<Stack*>(Thread::self()->getspecific(tls_key));
+    Stack* stack = static_cast<Stack*>(::yield::thread::Thread::self()->getspecific(tls_key));
 
     if (stack != NULL) {
       stack->push(element);
@@ -123,13 +121,13 @@ public:
   ElementType* trydequeue() {
     ElementType* element;
 
-    Stack* stack = static_cast<Stack*>(Thread::self()->getspecific(tls_key));
+    Stack* stack = static_cast<Stack*>(::yield::thread::Thread::self()->getspecific(tls_key));
 
     if (stack != NULL) {
       element = stack->pop();
     } else {
       stack = new Stack;
-      Thread::self()->setspecific(tls_key, stack);
+      ::yield::thread::Thread::self()->setspecific(tls_key, stack);
       stacks.push_back(stack);
       element = stack->pop();
     }
@@ -143,7 +141,7 @@ public:
 
 private:
   uintptr_t tls_key;
-  vector<Stack*> stacks;
+  ::std::vector<Stack*> stacks;
 };
 }
 }

@@ -38,6 +38,8 @@
 #endif
 
 namespace yield {
+using ::std::string;
+
 #ifndef _WIN32
 const uint32_t Buffer::TYPE_ID;
 #endif
@@ -213,7 +215,7 @@ bool Buffer::operator==(const char* other) const {
   }
 }
 
-bool Buffer::operator==(const string& other) const {
+bool Buffer::operator==(const ::std::string& other) const {
   if (size() == other.size()) {
     return memcmp(data(), other.data(), size()) == 0;
   } else {

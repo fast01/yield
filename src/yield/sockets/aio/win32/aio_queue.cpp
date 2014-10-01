@@ -42,6 +42,8 @@
 namespace yield {
 namespace sockets {
 namespace aio {
+using ::std::vector;
+
 static LPFN_ACCEPTEX lpfnAcceptEx = NULL;
 static LPFN_CONNECTEX lpfnConnectEx = NULL;
 static LPFN_GETACCEPTEXSOCKADDRS lpfnGetAcceptExSockaddrs = NULL;

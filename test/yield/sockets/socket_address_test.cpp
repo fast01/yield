@@ -36,6 +36,8 @@
 
 namespace yield {
 namespace sockets {
+using ::std::string;
+
 TEST(SocketAddress, copy_constructor) {
   SocketAddress sockaddr1(TEST_NODENAME, TEST_SERVNAME);
   SocketAddress sockaddr2(sockaddr1);

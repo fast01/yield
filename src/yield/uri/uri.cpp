@@ -36,6 +36,8 @@
 
 namespace yield {
 namespace uri {
+using ::std::string;
+
 Uri::Uri(
   Buffer& buffer,
   const iovec& fragment,

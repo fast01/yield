@@ -33,6 +33,8 @@
 
 namespace yield {
 namespace i18n {
+using ::std::string;
+
 iconv::iconv(Code tocode, Code fromcode)
   : fromcode(fromcode), tocode(tocode)
 { }

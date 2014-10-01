@@ -33,6 +33,7 @@
 #include "yield/event.hpp"
 
 #include <exception>
+#include <string>
 
 namespace yield {
 /**
@@ -69,7 +70,7 @@ public:
     Construct an Exception using a custom error message.
     Copies error_message.
   */
-  Exception(const string& error_message);
+  Exception(const ::std::string& error_message);
 
   /**
     Construct an Exception using a custom error code and message.
@@ -81,7 +82,7 @@ public:
     Construct an Exception using a custom error code and message.
     Copies error_message.
   */
-  Exception(uint32_t error_code, const string& error_message);
+  Exception(uint32_t error_code, const ::std::string& error_message);
 
   /**
     Copy constructor.
@@ -159,7 +160,7 @@ public:
     Copies error_message.
     @param error_message the new error message
   */
-  void set_error_message(const string& error_message);
+  void set_error_message(const ::std::string& error_message);
 
   /**
     Set the last system error code (errno or SetLastError)

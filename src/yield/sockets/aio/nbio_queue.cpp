@@ -43,8 +43,9 @@
 namespace yield {
 namespace sockets {
 namespace aio {
-using std::map;
-using yield::poll::FdEvent;
+using ::std::map;
+using ::std::vector;
+using ::yield::poll::FdEvent;
 
 class NbioQueue::AiocbState {
 public:

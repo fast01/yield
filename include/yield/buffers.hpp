@@ -32,6 +32,8 @@
 
 #include "yield/types.hpp"
 
+#include <vector>
+
 namespace yield {
 class Buffer;
 
@@ -50,7 +52,7 @@ public:
   static void
   as_read_iovecs(
     Buffer& buffers,
-    vector<iovec>& read_iovecs
+    ::std::vector<iovec>& read_iovecs
   );
 
   /**
@@ -62,7 +64,7 @@ public:
   static size_t
   as_write_iovecs(
     const Buffer& buffers,
-    vector<iovec>& write_iovecs
+    ::std::vector<iovec>& write_iovecs
   );
 
   /**
@@ -77,7 +79,7 @@ public:
   as_write_iovecs(
     const Buffer& buffers,
     size_t offset,
-    vector<iovec>& write_iovecs
+    ::std::vector<iovec>& write_iovecs
   );
 
 public:

@@ -41,6 +41,8 @@
 
 namespace yield {
 namespace i18n {
+using ::std::string;
+
 TEST(iconv, c_strings) {
   const char* inbuf = TEST_STRING_ISO88591;
   size_t inbytesleft = strlen(TEST_STRING_ISO88591);

@@ -33,6 +33,8 @@
 
 namespace yield {
 namespace sockets {
+using ::std::string;
+
 const int Socket::Option::RCVBUF = SO_RCVBUF;
 const int Socket::Option::REUSEADDR = SO_REUSEADDR;
 const int Socket::Option::SNDBUF = SO_SNDBUF;

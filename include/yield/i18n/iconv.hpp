@@ -33,6 +33,8 @@
 #include "yield/types.hpp"
 #include "yield/i18n/code.hpp"
 
+#include <string>
+
 namespace yield {
 namespace i18n {
 /**
@@ -82,7 +84,7 @@ public:
     @param[out] outbuf the output buffer
     @return true if the entire input buffer was converted
   */
-  bool operator()(const string& inbuf, string& outbuf);
+  bool operator()(const ::std::string& inbuf, ::std::string& outbuf);
 
 #ifdef _WIN32
   /**
@@ -91,7 +93,7 @@ public:
     @param[out] outbuf the output buffer
     @return true if the entire input buffer was converted
   */
-  bool operator()(const string& inbuf, std::wstring& outbuf);
+  bool operator()(const ::std::string& inbuf, ::std::wstring& outbuf);
 
   /**
     Perform character set conversion between a C++ wstring and a C++ string.
@@ -99,7 +101,7 @@ public:
     @param[out] outbuf the output buffer
     @return true if the entire input buffer was converted
   */
-  bool operator()(const std::wstring& inbuf, string& outbuf);
+  bool operator()(const ::std::wstring& inbuf, ::std::string& outbuf);
 #endif
 
 private:

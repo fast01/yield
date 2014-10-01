@@ -32,6 +32,8 @@
 #include "yield/logging.hpp"
 
 namespace yield {
+using ::std::vector;
+
 void
 Buffers::as_read_iovecs(
   Buffer& buffers,

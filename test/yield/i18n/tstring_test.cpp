@@ -32,6 +32,8 @@
 
 namespace yield {
 namespace i18n {
+using ::std::string;
+
 TEST(tstring, encode) {
   tstring ts(
     "\304rger mit b\366sen B\374bchen ohne Augenma\337",

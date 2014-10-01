@@ -69,10 +69,6 @@ typedef intptr_t ssize_t;
 #include <cstring>
 using std::memcpy;
 #endif
-#include <string>
-using std::string;
-#include <vector>
-using std::vector;
 
 namespace yield {
 /**

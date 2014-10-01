@@ -32,6 +32,8 @@
 #include "gtest/gtest.h"
 
 namespace yield {
+using ::std::string;
+
 TEST(Exception, clone) {
   Exception exc1(1, "what");
   auto_Object<Exception> exc2 = exc1.clone();

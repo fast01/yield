@@ -79,7 +79,7 @@ public:
     Construct a Uri by parsing a string.
     @param uri the Uri string
   */
-  Uri(const string& uri) throw(Exception);
+  Uri(const ::std::string& uri) throw(Exception);
 
   /**
     Construct a Uri by parsing a string.
@@ -108,7 +108,7 @@ public:
     Get the fragment component of the Uri, copying into a temporary string.
     @return the fragment component of the Uri
   */
-  string get_fragment() const {
+  ::std::string get_fragment() const {
     return iovec_to_string(fragment);
   }
 
@@ -125,7 +125,7 @@ public:
     Get the host component of the Uri, copying into a temporary string.
     @return the host component of the Uri
   */
-  string get_host() const {
+  ::std::string get_host() const {
     return iovec_to_string(host);
   }
 
@@ -142,7 +142,7 @@ public:
     Get the path component of the Uri, copying into a temporary string.
     @return the path component of the Uri
   */
-  string get_path() const {
+  ::std::string get_path() const {
     return iovec_to_string(path);
   }
 
@@ -167,7 +167,7 @@ public:
     Get the scheme component of the Uri, copying into a temporary string.
     @return the scheme component of the Uri
   */
-  string get_scheme() const {
+  ::std::string get_scheme() const {
     return iovec_to_string(scheme);
   }
 
@@ -184,7 +184,7 @@ public:
     Get the query component of the Uri, copying into a temporary string.
     @return the query component of the Uri
   */
-  string get_query() const {
+  ::std::string get_query() const {
     return iovec_to_string(query);
   }
 
@@ -201,7 +201,7 @@ public:
     Get the userinfo component of the Uri, copying into a temporary string.
     @return the userinfo component of the Uri
   */
-  string get_userinfo() const {
+  ::std::string get_userinfo() const {
     return iovec_to_string(userinfo);
   }
 
@@ -277,7 +277,7 @@ public:
     Return a string representation of the Uri.
     @return a string representation of the Uri
   */
-  operator string() const;
+  operator ::std::string() const;
 
 public:
   /**
@@ -307,7 +307,7 @@ public:
     @param s string to concatenate to the Uri
     @return a new Uri with the added string
   */
-  Uri operator+(const string& s) const;
+  Uri operator+(const ::std::string& s) const;
 
 public:
   /**
@@ -323,7 +323,7 @@ private:
 
 private:
   void init(const char* uri, size_t uri_len);
-  static string iovec_to_string(const iovec&);
+  static ::std::string iovec_to_string(const iovec&);
 
   void
   rebase(
@@ -344,7 +344,7 @@ private:
   iovec userinfo;
 };
 
-std::ostream& operator<<(std::ostream&, const Uri&);
+::std::ostream& operator<<(::std::ostream&, const Uri&);
 }
 }
 

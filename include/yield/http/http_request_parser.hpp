@@ -56,7 +56,7 @@ public:
     Only used for testing.
     @param buffer buffer to parse.
   */
-  HttpRequestParser(const string& buffer)
+  HttpRequestParser(const ::std::string& buffer)
     : HttpMessageParser(buffer)
   { }
 

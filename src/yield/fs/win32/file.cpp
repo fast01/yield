@@ -37,6 +37,9 @@
 
 namespace yield {
 namespace fs {
+using ::std::string;
+using ::std::vector;
+
 File::Lock::Lock(
   uint64_t start,
   uint64_t len,

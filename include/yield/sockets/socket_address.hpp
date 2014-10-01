@@ -367,7 +367,7 @@ public:
       see the GETNAMEINFO_FLAG constants
   */
   bool getnameinfo(
-    string& nodename,
+    ::std::string& nodename,
     uint16_t* servname = NULL,
     int flags = GETNAMEINFO_FLAG_NUMERICHOST | GETNAMEINFO_FLAG_NUMERICSERV
   ) const {
@@ -434,7 +434,7 @@ public:
     Cast to a human-readable string representation.
     @return a human-rceadable string representation
   */
-  operator string() const {
+  operator ::std::string() const {
     std::ostringstream repr;
     repr << *this;
     return repr.str();
@@ -534,7 +534,7 @@ operator<<(
   const SocketAddress& sockaddr_
 ) {
   if (sockaddr_.get_family() != 0) {
-    string nodename;
+    ::std::string nodename;
     uint16_t servname;
     if (sockaddr_.getnameinfo(nodename, &servname)) {
       os << nodename << ":" << servname;
@@ -546,9 +546,9 @@ operator<<(
 }
 
 static inline
-std::ostream&
+::std::ostream&
 operator<<(
-  std::ostream& os,
+  ::std::ostream& os,
   SocketAddress* socket_address
 ) {
   if (socket_address != NULL) {

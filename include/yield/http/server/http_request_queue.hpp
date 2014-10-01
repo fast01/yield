@@ -30,6 +30,8 @@
 #ifndef _YIELD_HTTP_SERVER_HTTP_REQUEST_QUEUE_HPP_
 #define _YIELD_HTTP_SERVER_HTTP_REQUEST_QUEUE_HPP_
 
+#include <vector>
+
 #include "yield/exception.hpp"
 #include "yield/sockets/socket_address.hpp"
 #include "yield/sockets/aio/aio_queue.hpp"
@@ -97,7 +99,7 @@ private:
 
 private:
   AioQueueType& aio_queue;
-  vector<HttpConnection*> connections;
+  ::std::vector<HttpConnection*> connections;
   yield::sockets::TcpSocket& socket_;
 };
 }

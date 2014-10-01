@@ -122,7 +122,7 @@ HttpMessage<HttpMessageType>::get_field(
 template <class HttpMessageType>
 void
 HttpMessage<HttpMessageType>::get_fields(
-  vector< std::pair<iovec, iovec> >& fields
+  ::std::vector< std::pair<iovec, iovec> >& fields
 ) const {
   return HttpMessageParser::parse_fields(
            static_cast<const char*>(header) + fields_offset,

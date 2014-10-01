@@ -151,13 +151,13 @@ public:
     Get the fully-qualified domain name (FQDN) of the current host.
     @return the fully-qualified domain name of the current host
   */
-  static string getfqdn();
+  static ::std::string getfqdn();
 
   /**
     Get the unqualified host name of the current host.
     @return the unqaulified host name of the current host.
   */
-  static string gethostname();
+  static ::std::string gethostname();
 
 public:
   /**
@@ -268,7 +268,7 @@ public:
       }
       return recv_ret;
     } else {
-      vector<iovec> iov;
+      ::std::vector<iovec> iov;
       Buffers::as_read_iovecs(buffer, iov);
 #ifdef _WIN32
 #pragma warning(push)
@@ -319,7 +319,7 @@ public:
       }
       return recv_ret;
     } else {
-      vector<iovec> iov;
+      ::std::vector<iovec> iov;
       Buffers::as_read_iovecs(buffer, iov);
 #ifdef _WIN32
 #pragma warning(push)
@@ -397,7 +397,7 @@ public:
       iovec iov = buffer.as_write_iovec();
       return send(iov.iov_base, iov.iov_len, flags);
     } else {
-      vector<iovec> iov;
+      ::std::vector<iovec> iov;
       Buffers::as_write_iovecs(buffer, iov);
 #ifdef _WIN32
 #pragma warning(push)

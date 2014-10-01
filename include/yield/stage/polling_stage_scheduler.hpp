@@ -30,6 +30,8 @@
 #ifndef _YIELD_STAGE_POLLING_STAGE_SCHEDULER_HPP_
 #define _YIELD_STAGE_POLLING_STAGE_SCHEDULER_HPP_
 
+#include <vector>
+
 #include "yield/queue/rendezvous_concurrent_queue.hpp"
 #include "yield/stage/stage_scheduler.hpp"
 #include "yield/thread/runnable.hpp"
@@ -57,7 +59,7 @@ protected:
   protected:
     StagePoller(Stage&);
 
-    vector<Stage*>& get_stages();
+    ::std::vector<Stage*>& get_stages();
     inline bool should_run() const {
       return _should_run;
     }
@@ -65,7 +67,7 @@ protected:
   private:
     ::yield::queue::RendezvousConcurrentQueue<Stage> new_stage;
     bool _should_run;
-    vector<Stage*> stages;
+    ::std::vector<Stage*> stages;
   };
 
 protected:
@@ -74,7 +76,7 @@ protected:
   virtual YO_NEW_REF StagePoller& createStagePoller(Stage&) = 0;
 
 private:
-  vector< ::yield::thread::Thread*> threads;
+  ::std::vector< ::yield::thread::Thread*> threads;
 };
 }
 }

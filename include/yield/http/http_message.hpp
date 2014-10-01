@@ -32,7 +32,9 @@
 
 #include "yield/event.hpp"
 
+#include <string>
 #include <utility> // for std::pair
+#include <vector>
 
 namespace yield {
 class Buffer;
@@ -107,10 +109,10 @@ public:
     @param default_value a default value to return if the field is not present
     @return the field value or default_value if the field is not present
   */
-  string get_field(const char* name, const char* default_value = "") const {
+  ::std::string get_field(const char* name, const char* default_value = "") const {
     iovec value_iov;
     if (get_field(name, value_iov)) {
-      return string(
+      return ::std::string(
                static_cast<char*>(value_iov.iov_base),
                value_iov.iov_len
              );
@@ -145,7 +147,7 @@ public:
     @param[out] fields growable vector of name-value pairs as pointers
       into the HttpMessage's underlying buffer
   */
-  void get_fields(vector<std::pair<iovec, iovec> >& fields) const;
+  void get_fields(::std::vector<std::pair<iovec, iovec> >& fields) const;
 
 public:
   /**
@@ -193,7 +195,7 @@ public:
     @param name the field name
     @return the field value or an empty string if the field is not present
   */
-  string operator[](const char* name) {
+  ::std::string operator[](const char* name) {
     return get_field(name);
   }
 
@@ -221,7 +223,7 @@ public:
     @param value the field value
     @return *this
   */
-  HttpMessageType& set_field(const string& name, const char* value) {
+  HttpMessageType& set_field(const ::std::string& name, const char* value) {
     return set_field(name.data(), name.size(), value);
   }
 
@@ -257,7 +259,7 @@ public:
     @param value the field value
     @return *this
   */
-  HttpMessageType& set_field(const string& name, const iovec& value) {
+  HttpMessageType& set_field(const ::std::string& name, const iovec& value) {
     return set_field(name.data(), name.size(), value);
   }
 
@@ -291,7 +293,7 @@ public:
   HttpMessageType&
   set_field(
     const char* name,
-    const string& value
+    const ::std::string& value
   ) {
     return set_field(name, strlen(name), value);
   }
@@ -302,7 +304,7 @@ public:
     @param value the field value
     @return *this
   */
-  HttpMessageType& set_field(const string& name, const string& value) {
+  HttpMessageType& set_field(const ::std::string& name, const ::std::string& value) {
     return set_field(name.data(), name.size(), value);
   }
 
@@ -317,7 +319,7 @@ public:
   set_field(
     const char* name,
     size_t name_len,
-    const string& value
+    const ::std::string& value
   ) {
     return set_field(name, name_len, value.data(), value.size());
   }
@@ -338,7 +340,7 @@ public:
     @param value the field value
     @return *this
   */
-  HttpMessageType& set_field(const string& name, size_t value) {
+  HttpMessageType& set_field(const ::std::string& name, size_t value) {
     return set_field(name.data(), name.size(), value);
   }
 
@@ -367,7 +369,7 @@ public:
     @param value the field value
     @return *this
   */
-  HttpMessageType& set_field(const string& name, const DateTime& value) {
+  HttpMessageType& set_field(const ::std::string& name, const DateTime& value) {
     return set_field(name.data(), name.size(), value);
   }
 
@@ -412,7 +414,7 @@ public:
     @return *this
   */
   HttpMessageType& set_field(
-    const string& name,
+    const ::std::string& name,
     const void* value,
     size_t value_len
   ) {

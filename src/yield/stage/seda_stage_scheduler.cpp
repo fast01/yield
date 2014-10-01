@@ -36,7 +36,8 @@
 
 namespace yield {
 namespace stage {
-using yield::thread::Thread;
+using ::std::vector;
+using ::yield::thread::Thread;
 
 class SedaStageScheduler::SedaStage : public ::yield::thread::Runnable {
 public:

@@ -36,6 +36,8 @@
 #endif
 
 namespace yield {
+using ::std::string;
+
 #ifndef _WIN32
 TEST(DateTime, as_timeval) {
   DateTime date_time(DateTime::now());

@@ -37,6 +37,8 @@ namespace yield {
 namespace fs {
 namespace poll {
 namespace win32 {
+using ::std::vector;
+
 DirectoryWatch::DirectoryWatch(
   YO_NEW_REF Directory& directory,
   FsEvent::Type fs_event_types,

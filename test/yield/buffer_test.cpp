@@ -34,6 +34,8 @@
 #include <sstream>
 
 namespace yield {
+using ::std::string;
+
 TEST(Buffer, as_read_iovec) {
   auto_Object<Buffer> buffer = new Buffer(2);
   iovec read_iovec = buffer->as_read_iovec();

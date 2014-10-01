@@ -33,7 +33,9 @@
 #include "yield/i18n/tstring.hpp"
 
 #include <ostream> // For std::ostream
+#include <string>
 #include <utility> // For std::make_pair, std::pair
+#include <vector>
 
 namespace yield {
 namespace fs {
@@ -86,7 +88,7 @@ public:
     Construct a Path from a C++ string.
     @param path new contents of the Path, copied
   */
-  Path(const string& path) : tstring(path) { }
+  Path(const ::std::string& path) : tstring(path) { }
 
   /**
     Construct a Path from a tstring.
@@ -118,7 +120,7 @@ public:
     Construct a Path from a C++ wstring.
     @param path new contents of the Path, copied
   */
-  Path(const std::wstring& path) : tstring(path) { }
+  Path(const ::std::wstring& path) : tstring(path) { }
 #endif
 
   /**
@@ -127,7 +129,7 @@ public:
   */
   Path parent_path() const {
     if (size() > 1 || operator[](0) != SEPARATOR) {
-      vector<Path> components;
+      ::std::vector<Path> components;
       split(components);
       if (components.size() > 1) {
         return components[components.size() - 2];

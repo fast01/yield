@@ -51,8 +51,8 @@ public:
   YO_NEW_REF FsEvent* parse(const FILE_NOTIFY_INFORMATION&);
 
 private:
-  std::stack<Path> old_paths;
-  vector<Path> subdirectory_names;
+  ::std::stack<Path> old_paths;
+  ::std::vector<Path> subdirectory_names;
 };
 }
 }

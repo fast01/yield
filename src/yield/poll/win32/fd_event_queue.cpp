@@ -35,6 +35,8 @@
 
 namespace yield {
 namespace poll {
+using ::std::vector;
+
 class FdEventQueue::Impl : public EventQueue {
 public:
   virtual ~Impl() {

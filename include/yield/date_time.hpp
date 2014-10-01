@@ -259,7 +259,7 @@ public:
     Return a string representation of the datetime.
     @return a string representation of the datetime
   */
-  operator string() const;
+  operator ::std::string() const;
 
   /**
     Add this DateTime to another, returning a new DateTime.
@@ -355,7 +355,7 @@ private:
   @param date_time DateTime to print
   @return os
 */
-std::ostream& operator<<(std::ostream& os, const DateTime& date_time);
+::std::ostream& operator<<(::std::ostream& os, const DateTime& date_time);
 }
 
 #endif

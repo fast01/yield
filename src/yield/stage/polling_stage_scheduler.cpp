@@ -32,7 +32,8 @@
 
 namespace yield {
 namespace stage {
-using yield::thread::Thread;
+using ::std::vector;
+using ::yield::thread::Thread;
 
 PollingStageScheduler::~PollingStageScheduler() {
   for (
