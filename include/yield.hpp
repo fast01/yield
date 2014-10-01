@@ -6,6 +6,7 @@
 #include "yield/buffers.hpp"
 #include "yield/channel.hpp"
 #include "yield/channel_pair.hpp"
+#include "yield/config.hpp"
 #include "yield/date_time.hpp"
 #include "yield/event.hpp"
 #include "yield/event_handler.hpp"

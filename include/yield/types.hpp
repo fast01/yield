@@ -117,4 +117,6 @@ memcpy_s(
 #pragma GCC diagnostic warning "-Wunused-parameter"
 #endif
 
+#include "yield/config.hpp"
+
 #endif
