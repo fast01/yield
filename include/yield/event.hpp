@@ -45,7 +45,9 @@ public:
 
 public:
   // yield::Object
-  virtual uint32_t get_type_id() const = 0;
+  virtual uint32_t get_type_id() const {
+    return 0;
+  }
 
   virtual const char* get_type_name() const {
     return "yield::Event";
