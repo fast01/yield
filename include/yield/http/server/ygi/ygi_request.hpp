@@ -43,93 +43,132 @@ public:
   YgiRequest(HttpRequest& http_request);
 
 public:
-  size_t CONTENT_LENGTH();
-  iovec DOCUMENT_ROOT();
-  iovec HTTP_(const char* field_name);
-  iovec HTTP_REFERER();
-  iovec HTTP_USER_AGENT();
-  iovec PATH_INFO();
-  iovec PATH_TRANSLATED();
-  iovec QUERY_STRING();
-  iovec REMOTE_ADDR();
-  iovec REMOTE_HOST();
-  iovec REQUEST_METHOD();
-  iovec SCRIPT_NAME();
-  iovec SERVER_NAME();
-  uint16_t SERVER_PORT();
+  // RFC 3875 meta-variables
+  iovec AUTH_TYPE() const;
+  size_t CONTENT_LENGTH() const;
+  iovec CONTENT_TYPE() const;
+  iovec DOCUMENT_ROOT() const;
+  iovec GATEWAY_INTERFACE() const;
+  iovec HTTP_(const char* field_name) const;
+  iovec HTTP_REFERER() const;
+  iovec HTTP_USER_AGENT() const;
+  iovec PATH_INFO() const;
+  iovec PATH_TRANSLATED() const;
+  iovec QUERY_STRING() const;
+  iovec REMOTE_ADDR() const;
+  iovec REMOTE_HOST() const;
+  iovec REMOTE_IDENT() const;
+  iovec REMOTE_USER() const;
+  iovec REQUEST_METHOD() const;
+  iovec SCRIPT_NAME() const;
+  iovec SERVER_NAME() const;
+  uint16_t SERVER_PORT() const;
+  iovec SERVER_PROTOCOL() const;
+  iovec SERVER_SOFTWARE() const;
 
 public:
   ygi_response_t* respond(uint16_t status_code);
 
 private:
-  static size_t __CONTENT_LENGTH(ygi_request_t* this_) {
-    return static_cast<YgiRequest*>(this_)->CONTENT_LENGTH();
+  static iovec static_AUTH_TYPE(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->AUTH_TYPE();
   }
 
-  static iovec __DOCUMENT_ROOT(ygi_request_t* this_) {
-    return static_cast<YgiRequest*>(this_)->DOCUMENT_ROOT();
+  static size_t static_CONTENT_LENGTH(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->CONTENT_LENGTH();
   }
 
-  static iovec __HTTP_(ygi_request_t* this_, const char* field_name) {
-    return static_cast<YgiRequest*>(this_)->HTTP_(field_name);
+  static iovec static_CONTENT_TYPE(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->CONTENT_TYPE();
   }
 
-  static iovec __HTTP_REFERER(ygi_request_t* this_) {
-    return static_cast<YgiRequest*>(this_)->HTTP_REFERER();
+  static iovec static_DOCUMENT_ROOT(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->DOCUMENT_ROOT();
   }
 
-  static iovec __HTTP_USER_AGENT(ygi_request_t* this_) {
-    return static_cast<YgiRequest*>(this_)->HTTP_USER_AGENT();
+  static iovec static_GATEWAY_INTERFACE(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->GATEWAY_INTERFACE();
   }
 
-  static iovec __PATH_INFO(ygi_request_t* this_) {
-    return static_cast<YgiRequest*>(this_)->PATH_INFO();
+  static iovec static_HTTP_(const ygi_request_t* this_, const char* field_name) {
+    return static_cast<const YgiRequest*>(this_)->HTTP_(field_name);
   }
 
-  static iovec __PATH_TRANSLATED(ygi_request_t* this_) {
-    return static_cast<YgiRequest*>(this_)->PATH_TRANSLATED();
+  static iovec static_HTTP_REFERER(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->HTTP_REFERER();
   }
 
-  static iovec __QUERY_STRING(ygi_request_t* this_) {
-    return static_cast<YgiRequest*>(this_)->QUERY_STRING();
+  static iovec static_HTTP_USER_AGENT(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->HTTP_USER_AGENT();
   }
 
-  static iovec __REMOTE_ADDR(ygi_request_t* this_) {
-    return static_cast<YgiRequest*>(this_)->REMOTE_ADDR();
+  static iovec static_PATH_INFO(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->PATH_INFO();
   }
 
-  static iovec __REMOTE_HOST(ygi_request_t* this_) {
-    return static_cast<YgiRequest*>(this_)->REMOTE_HOST();
+  static iovec static_PATH_TRANSLATED(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->PATH_TRANSLATED();
   }
 
-  static iovec __REQUEST_METHOD(ygi_request_t* this_) {
-    return static_cast<YgiRequest*>(this_)->REQUEST_METHOD();
+  static iovec static_QUERY_STRING(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->QUERY_STRING();
   }
 
-  static iovec __SCRIPT_NAME(ygi_request_t* this_) {
-    return static_cast<YgiRequest*>(this_)->SCRIPT_NAME();
+  static iovec static_REMOTE_ADDR(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->REMOTE_ADDR();
   }
 
-  static iovec __SERVER_NAME(ygi_request_t* this_) {
-    return static_cast<YgiRequest*>(this_)->SERVER_NAME();
+  static iovec static_REMOTE_HOST(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->REMOTE_HOST();
   }
 
-  static uint16_t __SERVER_PORT(ygi_request_t* this_) {
-    return static_cast<YgiRequest*>(this_)->SERVER_PORT();
+  static iovec static_REMOTE_IDENT(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->REMOTE_IDENT();
+  }
+
+  static iovec static_REMOTE_USER(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->REMOTE_USER();
+  }
+
+  static iovec static_REQUEST_METHOD(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->REQUEST_METHOD();
+  }
+
+  static iovec static_SCRIPT_NAME(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->SCRIPT_NAME();
+  }
+
+  static iovec static_SERVER_NAME(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->SERVER_NAME();
+  }
+
+  static uint16_t static_SERVER_PORT(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->SERVER_PORT();
+  }
+
+  static iovec static_SERVER_PROTOCOL(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->SERVER_PROTOCOL();
+  }
+
+  static iovec static_SERVER_SOFTWARE(const ygi_request_t* this_) {
+    return static_cast<const YgiRequest*>(this_)->SERVER_SOFTWARE();
   }
 
   static ygi_response_t*
-  __respond(
+  static_respond(
     ygi_request_t* this_,
     uint16_t status_code
   ) {
     return static_cast<YgiRequest*>(this_)->respond(status_code);
   }
 
-  ygi_response_t* __respond(uint16_t status_code);
+  ygi_response_t* static_respond(uint16_t status_code);
 
 private:
-  HttpRequest& http_request;
+  HttpRequest& http_request_;
+  ::std::string remote_addr_;
+  ::std::string remote_host_;
+  iovec server_protocol_;
 };
 }
 }
