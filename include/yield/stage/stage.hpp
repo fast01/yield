@@ -40,17 +40,6 @@ class EventQueue;
 namespace stage {
 class Stage : public EventHandler {
 public:
-  class ShutdownEvent : public Event {
-  public:
-    const static uint32_t TYPE_ID = 1809111020UL;
-
-    // yield::Object
-    uint32_t get_type_id() const {
-      return TYPE_ID;
-    }
-  };
-
-public:
   Stage(YO_NEW_REF EventHandler&);
   Stage(YO_NEW_REF EventHandler&, YO_NEW_REF EventQueue&);
   ~Stage();

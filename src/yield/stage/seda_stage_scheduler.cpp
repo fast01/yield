@@ -42,25 +42,26 @@ using ::yield::thread::Thread;
 class SedaStageScheduler::SedaStage : public ::yield::thread::Runnable {
 public:
   SedaStage(Stage& stage)
-    : stage(stage.inc_ref()) {
+    : stage(stage.inc_ref()),
+      visit_timeout(5) {
     should_run = true;
   }
 
   void stop() {
     should_run = false;
-    stage.handle(*new Stage::ShutdownEvent);
   }
 
   // yield::thread::Runnable
   void run() {
     while (should_run) {
-      stage.visit();
+      stage.visit(visit_timeout);
     }
   }
 
 private:
   bool should_run;
   Stage& stage;
+  Time visit_timeout;
 };
 
 
