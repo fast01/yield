@@ -78,10 +78,6 @@ public:
     return TYPE_ID;
   }
 
-  virtual const char* get_type_name() const {
-    return "yield::poll::FdEvent";
-  }
-
 private:
   fd_t fd;
   Type type;

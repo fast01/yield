@@ -532,8 +532,7 @@ private:
 */
 static std::ostream& operator<<(std::ostream& os, Socket& socket_) {
   os <<
-     socket_.get_type_name() <<
-     "(";
+     "Socket(";
   SocketAddress sockname;
   if (socket_.getsockname(sockname)) {
     os << sockname;

@@ -91,10 +91,6 @@ public:
     return TYPE_ID;
   }
 
-  virtual const char* get_type_name() const {
-    return "yield::http::HttpMessageBodyChunk";
-  }
-
   HttpMessageBodyChunk& inc_ref() {
     return Object::inc_ref(*this);
   }

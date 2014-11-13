@@ -253,15 +253,14 @@ std::ostream& operator<<(std::ostream& os, const HttpResponse& http_response) {
     if (http_response.get_body()->get_type_id() == Buffer::TYPE_ID) {
       body << static_cast<Buffer*>(http_response.get_body());
     } else {
-      body << http_response.get_body()->get_type_name();
+      body << "Buffer";
     }
   } else {
     body << "NULL";
   }
 
   os <<
-     http_response.get_type_name() <<
-     "(" <<
+     "Buffer(" <<
      "content_length=" << http_response.get_content_length() <<
      ", " <<
      "http_version=" <<

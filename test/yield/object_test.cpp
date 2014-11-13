@@ -54,6 +54,5 @@ TEST(Object, inc_ref) {
 TEST(Object, rtti) {
   TestObject test_object;
   ASSERT_EQ(test_object.get_type_id(), 0);
-  ASSERT_EQ(strcmp(test_object.get_type_name(), "yield::Object"), 0);
 }
 }

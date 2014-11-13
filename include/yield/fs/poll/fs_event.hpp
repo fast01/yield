@@ -156,10 +156,6 @@ public:
     return TYPE_ID;
   }
 
-  const char* get_type_name() const {
-    return "yield::fs::poll::FsEvent";
-  }
-
 private:
   Path new_path, old_path;
   Type type;

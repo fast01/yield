@@ -165,11 +165,6 @@ YO_NEW_REF Event* FsEventQueue::timeddequeue(const Time& timeout) {
         return event_queue.trydequeue();
       } else {
         CHECK_EQ(kevent_.filter, EVFILT_VNODE);
-        //if (log != NULL) {
-        //  log->get_stream(Log::Level::DEBUG) <<
-        //    get_type_name() << "(fd=" << fd << ", path=" << path << "): " <<
-        //      "read kevent(fflags=" << kevent_.fflags << ")";
-        //}
         bsd::Watch* watch = static_cast<bsd::Watch*>(kevent_.udata);
         watch->read(kevent_, *this);
         return event_queue.trydequeue();

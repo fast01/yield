@@ -235,10 +235,6 @@ public:
     return TYPE_ID;
   }
 
-  const char* get_type_name() const {
-    return "yield::http::HttpRequest";
-  }
-
 protected:
   friend class HttpRequestParser;
 

@@ -40,10 +40,6 @@ public:
   uint32_t get_type_id() const {
     return 0;
   }
-
-  const char* get_type_name() const {
-    return "yield::stage::TestEvent";
-  }
 };
 }
 }

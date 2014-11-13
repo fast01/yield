@@ -102,10 +102,6 @@ public:
     return TYPE_ID;
   }
 
-  const char* get_type_name() const {
-    return "yield::sockets::aio::RecvfromAiocb";
-  }
-
 private:
   Buffer& buffer;
   Socket::MessageFlags flags;

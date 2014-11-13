@@ -441,10 +441,6 @@ public:
     return TYPE_ID;
   }
 
-  const char* get_type_name() const {
-    return "yield::Buffer";
-  }
-
   Buffer& inc_ref() {
     return Object::inc_ref(*this);
   }

@@ -107,8 +107,7 @@ std::ostream& operator<<(std::ostream& os, const FsEvent& fs_event) {
   case FsEvent::TYPE_DIRECTORY_RENAME:
   case FsEvent::TYPE_FILE_RENAME: {
     os <<
-       fs_event.get_type_name() <<
-       "("
+       "FsEvent("
        "type=" << type <<
        ", " <<
        "old_path=" << fs_event.get_old_path() <<
@@ -120,8 +119,7 @@ std::ostream& operator<<(std::ostream& os, const FsEvent& fs_event) {
 
   default: {
     os <<
-       fs_event.get_type_name() <<
-       "("
+       "FsEvent("
        "type=" << type <<
        ", " <<
        "path=" << fs_event.get_path() <<

@@ -110,10 +110,6 @@ public:
     return TYPE_ID;
   }
 
-  const char* get_type_name() const {
-    return "yield::sockets::aio::SendfileAiocb";
-  }
-
 private:
   void init(fd_t fd);
 

@@ -67,9 +67,7 @@ void Stage::enqueue(YO_NEW_REF Event& event) {
   if (event_queue.enqueue(event)) {
     return;
   } else {
-    //cerr << event_handler.get_type_name() <<
-    //  ": event queue full, stopping.";
-    CHECK(false);
+    LOG(ERROR) << "event queue full, stopping.";
   }
 }
 

@@ -104,10 +104,6 @@ public:
     return TYPE_ID;
   }
 
-  const char* get_type_name() const {
-    return "yield::sockets::aio::AcceptAiocb";
-  }
-
 protected:
 #ifdef _WIN32
   friend class AioQueue;

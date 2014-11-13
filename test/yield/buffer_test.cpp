@@ -158,11 +158,6 @@ TEST(Buffer, get_type_id) {
   ASSERT_EQ(buffer->get_type_id(), Buffer::TYPE_ID);
 }
 
-TEST(Buffer, get_type_name) {
-  auto_Object<Buffer> buffer = new Buffer(2);
-  ASSERT_EQ(strcmp(buffer->get_type_name(), "yield::Buffer"), 0);
-}
-
 TEST(Buffer, inc_ref) {
   auto_Object<Buffer> buffer = new Buffer(2);
   buffer->inc_ref();

@@ -39,8 +39,7 @@ SendAiocb::~SendAiocb() {
 
 std::ostream& operator<<(std::ostream& os, const SendAiocb& send_aiocb) {
   os <<
-     send_aiocb.get_type_name() <<
-     "(" <<
+     "SendAiocb(" <<
      "buffer=" << send_aiocb.get_buffer() <<
      ", " <<
      "error=" << send_aiocb.get_error() <<

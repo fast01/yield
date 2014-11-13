@@ -74,7 +74,7 @@ YO_NEW_REF FsEvent* Watch::parse(const inotify_event& inotify_event_) {
   }
 
   DLOG(DEBUG) <<
-      get_type_name() << "(path=" << get_path() << ", wd=" << get_wd() << ")"
+      "Watch(path=" << get_path() << ", wd=" << get_wd() << ")"
       << ": read inotify_event(" <<
       "cookie=" << inotify_event_.cookie <<
       ", " <<

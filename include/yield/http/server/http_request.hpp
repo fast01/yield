@@ -172,10 +172,6 @@ public:
     return TYPE_ID;
   }
 
-  const char* get_type_name() const {
-    return "yield::http::server::HttpRequest";
-  }
-
   HttpRequest& inc_ref() {
     return Object::inc_ref(*this);
   }

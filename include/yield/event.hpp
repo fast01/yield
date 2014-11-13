@@ -49,10 +49,6 @@ public:
     return 0;
   }
 
-  virtual const char* get_type_name() const {
-    return "yield::Event";
-  }
-
   Event& inc_ref() {
     return Object::inc_ref(*this);
   }

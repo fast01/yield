@@ -75,16 +75,6 @@ TEST(FsEvent, get_type_id) {
   );
 }
 
-TEST(FsEvent, get_type_name) {
-  ASSERT_EQ(
-    strcmp(
-      FsEvent("path", FsEvent::TYPE_FILE_ADD).get_type_name(),
-      "yield::fs::poll::FsEvent"
-    ),
-    0
-  );
-}
-
 TEST(FsEvent, print) {
   std::ostringstream oss;
   oss << FsEvent("path", FsEvent::TYPE_FILE_ADD);

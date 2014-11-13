@@ -59,8 +59,7 @@ StreamSocket& ConnectAiocb::get_socket() {
 
 std::ostream& operator<<(std::ostream& os, const ConnectAiocb& connect_aiocb) {
   os <<
-     connect_aiocb.get_type_name() <<
-     "(" <<
+     "ConnectAiocb(" <<
      "error=" << connect_aiocb.get_error() <<
      ", " <<
      "peername=" << connect_aiocb.get_peername() <<

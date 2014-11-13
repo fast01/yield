@@ -62,11 +62,6 @@ public:
   YO_NEW_REF FsEvent* parse(const inotify_event&);
 
 public:
-  // yield::Object
-  const char* get_type_name() const {
-    return "yield::fs::poll::linux::Watch";
-  }
-
   // yield::fs::poll::Watch
   bool is_directory_watch() const {
     return true;

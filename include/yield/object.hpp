@@ -107,14 +107,6 @@ public:
     return 0;
   }
 
-  /**
-    Return a human-readable, fully-qualified run-time type name.
-    @return a human-readable, fully-qualified run-time type name
-  */
-  virtual const char* get_type_name() const {
-    return "yield::Object";
-  }
-
 public:
   /**
     Atomically increment the reference count of an Object and return it.

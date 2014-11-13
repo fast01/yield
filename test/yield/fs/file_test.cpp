@@ -158,13 +158,6 @@ TEST_F(FileTest, get_type_id) {
   ASSERT_EQ(get_write_file().get_type_id(), File::TYPE_ID);
 }
 
-TEST_F(FileTest, get_type_name) {
-  ASSERT_EQ(
-    strcmp(get_write_file().get_type_name(), "yield::fs::File"),
-    0
-  );
-}
-
 TEST_F(FileTest, map) {
   auto_Object<File::Map> mmf = get_read_file().mmap();
 }

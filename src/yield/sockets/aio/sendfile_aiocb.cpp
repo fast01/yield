@@ -129,8 +129,7 @@ void SendfileAiocb::init(fd_t fd) {
 
 std::ostream& operator<<(std::ostream& os, const SendfileAiocb& sendfile_aiocb) {
   os <<
-     sendfile_aiocb.get_type_name() <<
-     "(" <<
+     "SendfileAiocb(" <<
      //"error=" << sendfile_aiocb.get_error() <<
      //", " <<
      //"fd=" << sendfile_aiocb.get_fd() <<

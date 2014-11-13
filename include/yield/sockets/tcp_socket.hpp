@@ -80,10 +80,6 @@ public:
 
 public:
   // yield::Object
-  const char* get_type_name() const {
-    return "yield::sockets::TcpSocket";
-  }
-
   TcpSocket& inc_ref() {
     return Object::inc_ref(*this);
   }

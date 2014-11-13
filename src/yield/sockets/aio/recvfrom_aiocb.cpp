@@ -40,8 +40,7 @@ RecvfromAiocb::~RecvfromAiocb() {
 
 std::ostream& operator<<(std::ostream& os, const RecvfromAiocb& recvfrom_aiocb) {
   os <<
-     recvfrom_aiocb.get_type_name() <<
-     "(" <<
+     "RecvfromAiocb(" <<
      "buffer=" << recvfrom_aiocb.get_buffer() <<
      ", " <<
      "error=" << recvfrom_aiocb.get_error() <<

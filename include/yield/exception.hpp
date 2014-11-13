@@ -174,10 +174,6 @@ public:
     return TYPE_ID;
   }
 
-  const char* get_type_name() const {
-    return "yield::Exception";
-  }
-
 public:
   // yield::Response
   bool is_exception() const {

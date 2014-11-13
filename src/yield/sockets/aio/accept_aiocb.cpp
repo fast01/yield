@@ -79,8 +79,7 @@ void AcceptAiocb::set_recv_buffer(YO_NEW_REF Buffer* recv_buffer) {
 
 std::ostream& operator<<(std::ostream& os, const AcceptAiocb& accept_aiocb) {
   os <<
-     accept_aiocb.get_type_name() <<
-     "(" <<
+     "AcceptAiocb(" <<
      //"accepted_socket=" << accept_aiocb.get_accepted_socket() <<
      //", " <<
      //"error=" << accept_aiocb.get_error() <<

@@ -149,20 +149,20 @@ uint8_t NbioQueue::get_aiocb_priority(const Aiocb& aiocb) {
 }
 
 template <class AiocbType> void NbioQueue::log_completion(AiocbType& aiocb) {
-  DLOG(DEBUG) << get_type_name() << ": completed " << aiocb;
+  DLOG(DEBUG) << "completed " << aiocb;
 }
 
 template <class AiocbType> void NbioQueue::log_error(AiocbType& aiocb) {
-  DLOG(DEBUG) << get_type_name() << ": error on " << aiocb;
+  DLOG(DEBUG) << "error on " << aiocb;
 }
 
 template <class AiocbType>
 void NbioQueue::log_partial_send(AiocbType& aiocb, size_t partial_send_len) {
-  DLOG(DEBUG) << get_type_name() << ": partial send (" << partial_send_len << ") on " << aiocb;
+  DLOG(DEBUG) << "partial send (" << partial_send_len << ") on " << aiocb;
 }
 
 template <class AiocbType> void NbioQueue::log_retry(AiocbType& aiocb) {
-  DLOG(DEBUG) << get_type_name() << ": retrying " << aiocb;
+  DLOG(DEBUG) << "retrying " << aiocb;
 }
 
 template <class AiocbType>
@@ -181,9 +181,7 @@ void NbioQueue::log_wouldblock(AiocbType& aiocb, RetryStatus retry_status) {
     break;
   }
 
-  DLOG(DEBUG) <<
-                                      get_type_name() << ": " <<
-                                      aiocb << " would block on " << retry_status_str;
+  DLOG(DEBUG) << aiocb << " would block on " << retry_status_str;
 }
 
 NbioQueue::RetryStatus NbioQueue::retry(Aiocb& aiocb, size_t& partial_send_len) {

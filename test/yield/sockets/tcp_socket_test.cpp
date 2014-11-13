@@ -50,13 +50,6 @@ TEST(TcpSocket, dup2) {
   throw Exception();
 }
 
-TEST(TcpSocket, get_type_name) {
-  ASSERT_EQ(
-    strcmp(TcpSocket().get_type_name(), "yield::sockets::TcpSocket"),
-    0
-  );
-}
-
 TEST(TcpSocket, setsockopt_NODELAY) {
   if (!TcpSocket().setsockopt(TcpSocket::Option::NODELAY, true)) {
     throw Exception();

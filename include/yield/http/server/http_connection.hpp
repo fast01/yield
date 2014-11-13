@@ -87,10 +87,6 @@ public:
 
 public:
   // yield::Object
-  const char* get_type_name() const {
-    return "yield::http::server::HttpConnection";
-  }
-
   HttpConnection& inc_ref() {
     return Object::inc_ref(*this);
   }

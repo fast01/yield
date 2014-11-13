@@ -177,8 +177,7 @@ std::ostream& operator<<(std::ostream& os, const Buffer& buffer) {
   data_str.append(1, '\"');
 
   os <<
-     buffer.get_type_name() <<
-     "(" <<
+     "Buffer(" <<
      "capacity=" << buffer.capacity() <<
      ", " <<
      "data=" << data_str <<

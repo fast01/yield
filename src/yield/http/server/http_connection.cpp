@@ -104,7 +104,7 @@ void
 HttpConnection::handle(
   YO_NEW_REF ::yield::http::HttpResponse& http_response
 ) {
-  DLOG(DEBUG) << get_type_name() << ": sending " << http_response;
+  DLOG(DEBUG) << "sending " << http_response;
 
   http_response.finalize();
   Buffer& http_response_header = http_response.get_header().inc_ref();
@@ -198,7 +198,7 @@ void HttpConnection::parse(Buffer& recv_buffer) {
     case HttpRequest::TYPE_ID: {
       HttpRequest& http_request = static_cast<HttpRequest&>(object);
 
-      DLOG(DEBUG) << get_type_name() << ": parsed " << http_request;
+      DLOG(DEBUG) << "parsed " << http_request;
 
       http_request_handler.handle(http_request);
     }
@@ -208,7 +208,7 @@ void HttpConnection::parse(Buffer& recv_buffer) {
       HttpResponse& http_response = static_cast<HttpResponse&>(object);
       CHECK_EQ(http_response.get_status_code(), 400);
 
-      DLOG(DEBUG) << get_type_name() << ": parsed " << http_response;
+      DLOG(DEBUG) << "parsed " << http_response;
 
       handle(http_response);
       return;

@@ -59,15 +59,5 @@ TEST(FdEvent, get_type_id) {
     FdEvent::TYPE_ID
   );
 }
-
-TEST(FdEvent, get_type_name) {
-  ASSERT_EQ(
-    strcmp(
-      FdEvent(static_cast<fd_t>(0), FdEvent::TYPE_READ_READY).get_type_name(),
-      "yield::poll::FdEvent"
-    ),
-    0
-  );
-}
 }
 }
