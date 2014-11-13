@@ -39,15 +39,15 @@ HttpRequest::HttpRequest(
   HttpConnection& connection,
   Method method,
   const yield::uri::Uri& uri,
-  YO_NEW_REF Object* body,
+  YO_NEW_REF Buffer* body,
   uint8_t http_version
 ) : yield::http::HttpRequest(method, uri, body, http_version),
-    connection(connection.inc_ref()),
-    creation_date_time(DateTime::now()) {
+    connection_(connection_.inc_ref()),
+    creation_date_time_(DateTime::now()) {
 }
 
 HttpRequest::HttpRequest(
-  YO_NEW_REF Object* body,
+  YO_NEW_REF Buffer* body,
   HttpConnection& connection,
   uint16_t fields_offset,
   Buffer& header,
@@ -63,26 +63,26 @@ HttpRequest::HttpRequest(
     method,
     uri
   ),
-  connection(connection.inc_ref()),
-  creation_date_time(DateTime::now()) {
+  connection_(connection.inc_ref()),
+  creation_date_time_(DateTime::now()) {
 }
 
 HttpRequest::~HttpRequest() {
-  HttpConnection::dec_ref(connection);
+  HttpConnection::dec_ref(connection_);
 }
 
 void
 HttpRequest::respond(
   YO_NEW_REF ::yield::http::HttpResponse& http_response
 ) {
-  connection.handle(http_response);
+  connection_.handle(http_response);
 }
 
 void
 HttpRequest::respond(
   ::yield::http::HttpMessageBodyChunk& http_message_body_chunk
 ) {
-  connection.handle(http_message_body_chunk);
+  connection_.handle(http_message_body_chunk);
 }
 
 void HttpRequest::respond(uint16_t status_code) {
@@ -90,7 +90,7 @@ void HttpRequest::respond(uint16_t status_code) {
 }
 
 void HttpRequest::respond(uint16_t status_code, YO_NEW_REF Buffer* body) {
-  HttpResponse* http_response = new HttpResponse(status_code, body, get_http_version());
+  HttpResponse* http_response = new HttpResponse(http_version(), status_code, body);
   if (body != NULL) {
     http_response->set_field("Content-Length", 14, body->size());
   } else {
@@ -100,7 +100,7 @@ void HttpRequest::respond(uint16_t status_code, YO_NEW_REF Buffer* body) {
 }
 
 void HttpRequest::respond(uint16_t status_code, YO_NEW_REF Buffer& body) {
-  HttpResponse* http_response = new HttpResponse(status_code, &body, get_http_version());
+  HttpResponse* http_response = new HttpResponse(http_version(), status_code, &body);
   http_response->set_field("Content-Length", 14, body.size());
   respond(*http_response);
 }
@@ -111,14 +111,6 @@ void HttpRequest::respond(uint16_t status_code, const char* body) {
 
 void HttpRequest::respond(uint16_t status_code, const Exception& body) {
   respond(status_code, Buffer::copy(body.get_error_message()));
-}
-
-void HttpRequest::respond(uint16_t status_code, YO_NEW_REF Object* body) {
-  respond(*new HttpResponse(status_code, body, get_http_version()));
-}
-
-void HttpRequest::respond(uint16_t status_code, YO_NEW_REF Object& body) {
-  respond(status_code, &body);
 }
 }
 }

@@ -37,14 +37,14 @@ namespace http {
 using ::std::string;
 using ::std::vector;
 
-TEST(HTTPMessage, get_body) {
-  ASSERT_EQ(HttpRequest(HttpRequest::Method::GET, "/").get_body(), static_cast<Object*>(NULL));
+TEST(HTTPMessage, body_buffer) {
+  ASSERT_EQ(HttpRequest(HttpRequest::Method::GET, "/").body_buffer(), static_cast<Object*>(NULL));
 
   auto_Object<Buffer> body = Buffer::copy("body");
   ASSERT_EQ(
     memcmp(
       *static_cast<Buffer*>(
-        HttpRequest(HttpRequest::Method::GET, "/", &body->inc_ref()).get_body()
+        HttpRequest(HttpRequest::Method::GET, "/", &body->inc_ref()).body_buffer()
       ),
       "body",
       4

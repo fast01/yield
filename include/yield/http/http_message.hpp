@@ -40,6 +40,10 @@ namespace yield {
 class Buffer;
 class DateTime;
 
+namespace fs {
+class File;
+}
+
 namespace http {
 /**
   An RFC 2616 HTTP message, the parent class of HttpRequest and HttpResponse.
@@ -70,13 +74,18 @@ public:
 public:
   /**
     Get the body of this HTTP message.
-    This may be a Buffer*. The caller should first check if get_body is NULL,
-      then switch on get_body()->get_type_id() to determine whether the body
-      is a Buffer or some other object type.
-    @return the body of this HTTP messag, or NULL if no body is present
+    @return the body of this HTTP message, or NULL if no body is present
   */
-  Object* get_body() const {
-    return body;
+  Buffer* body_buffer() const {
+    return body_buffer_;
+  }
+
+  /**
+    Get the body of this HTTP message.
+    @return the body of this HTTP message, or NULL if no body is present
+  */
+  ::yield::fs::File* body_file() const {
+    return body_file_;
   }
 
 public:
@@ -151,25 +160,6 @@ public:
 
 public:
   /**
-    Get the buffer underlying the HTTP message's header
-      (request or response line, fields).
-  */
-  Buffer& get_header() const {
-    return header;
-  }
-
-public:
-  /**
-    Get the HTTP version of this message as a single byte
-    (0 or 1, for HTTP/1.0 and HTTP/1.0, respectively).
-    @return the HTTP version
-  */
-  uint8_t get_http_version() const {
-    return http_version;
-  }
-
-public:
-  /**
     Check if a field is present.
     @param name the field name
     @return true if the field is present, false if not
@@ -191,6 +181,25 @@ public:
 
 public:
   /**
+    Get the buffer underlying the HTTP message's header
+      (request or response line, fields).
+  */
+  Buffer& header() const {
+    return header_;
+  }
+
+public:
+  /**
+    Get the HTTP version of this message as a single byte
+    (0 or 1, for HTTP/1.0 and HTTP/1.0, respectively).
+    @return the HTTP version
+  */
+  uint8_t http_version() const {
+    return http_version_;
+  }
+
+public:
+  /**
     Get a field value, copying into a temporary string.
     @param name the field name
     @return the field value or an empty string if the field is not present
@@ -204,7 +213,13 @@ public:
     Set the body of an HTTP message.
     Steals the reference to body and decrements the existing body, if present.
   */
-  void set_body(YO_NEW_REF Object* body);
+  void set_body(YO_NEW_REF Buffer* body_buffer);
+
+  /**
+    Set the body of an HTTP message.
+    Steals the reference to body and decrements the existing body, if present.
+  */
+  void set_body(YO_NEW_REF ::yield::fs::File* body_file);
 
 public:
   /**
@@ -439,10 +454,15 @@ public:
   );
 
 protected:
-  HttpMessage(YO_NEW_REF Object* body, uint8_t http_version);
+  HttpMessage(
+    YO_NEW_REF Buffer* body_buffer,
+    YO_NEW_REF ::yield::fs::File* body_file,
+    uint8_t http_version
+  );
 
   HttpMessage(
-    YO_NEW_REF Object* body,
+    YO_NEW_REF Buffer* body_buffer,
+    YO_NEW_REF ::yield::fs::File* body_file,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version
@@ -452,14 +472,15 @@ protected:
 
 protected:
   void set_fields_offset(uint16_t fields_offset) {
-    this->fields_offset = fields_offset;
+    this->fields_offset_ = fields_offset;
   }
 
 private:
-  Object* body;
-  uint16_t fields_offset;
-  Buffer& header;
-  uint8_t http_version;
+  Buffer* body_buffer_;
+  ::yield::fs::File* body_file_;
+  uint16_t fields_offset_;
+  Buffer& header_;
+  uint8_t http_version_;
 };
 }
 }

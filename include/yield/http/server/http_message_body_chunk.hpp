@@ -56,7 +56,7 @@ public:
 public:
   /**
     Construct an HttpMessageBodyChunk that originates from the given
-      server connection.
+      server connection_.
     @param connection the server connection
     @param data the chunk data
   */
@@ -68,8 +68,8 @@ public:
     Get the server connection from which this chunk originated.
     @return the server connection from which this chunk originated
   */
-  const HttpConnection& get_connection() const {
-    return connection;
+  const HttpConnection& connection() const {
+    return connection_;
   }
 
 public:
@@ -83,7 +83,7 @@ public:
   }
 
 private:
-  HttpConnection& connection;
+  HttpConnection& connection_;
 };
 }
 }

@@ -44,7 +44,7 @@ namespace yield {
 namespace http {
 namespace server {
 /**
-  A server-side HTTP connection.
+  A server-side HTTP connection_.
 */
 class HttpConnection : public Object {
 public:

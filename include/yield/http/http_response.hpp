@@ -37,7 +37,7 @@ namespace http {
 /**
   An RFC 2616 HTTP response.
   Unlike its counterparts in yield.http.client and yield.http.server, this
-    HttpResponse is not tied to a particular connection.
+    HttpResponse is not tied to a particular connection_.
 */
 class HttpResponse : public HttpMessage<HttpResponse> {
 public:
@@ -47,14 +47,44 @@ public:
   /**
     Construct an HttpResponse from its constituent parts.
     @param status_code numeric status code e.g., 200
-    @param body optional body, usually a Buffer
+  */
+  HttpResponse(
+    uint16_t status_code
+  );
+
+  /**
+    Construct an HttpResponse from its constituent parts.
+    @param status_code numeric status code e.g., 200
+    @param body optional body
+  */
+  HttpResponse(
+    uint16_t status_code,
+    YO_NEW_REF Buffer* body
+  );
+
+  /**
+    Construct an HttpResponse from its constituent parts.
+    @param http_version HTTP version as a single byte (0 or 1 for HTTP/1.0 or
+      HTTP/1.1, respectively.)
+    @param status_code numeric status code e.g., 200
+    @param body optional body
+  */
+  HttpResponse(
+    uint8_t http_version,
+    uint16_t status_code,
+    YO_NEW_REF Buffer* body
+  );
+
+  /**
+    Construct an HttpResponse from its constituent parts.
+    @param status_code numeric status code e.g., 200
+    @param body optional body
     @param http_version HTTP version as a single byte (0 or 1 for HTTP/1.0 or
       HTTP/1.1, respectively.)
   */
   HttpResponse(
     uint16_t status_code,
-    YO_NEW_REF Object* body = NULL,
-    uint8_t http_version = HTTP_VERSION_DEFAULT
+    YO_NEW_REF ::yield::fs::File* body
   );
 
   /**
@@ -67,8 +97,8 @@ public:
     Get the numeric status code e.g., 200.
     @return the numeric status code
   */
-  uint16_t get_status_code() const {
-    return status_code;
+  uint16_t status_code() const {
+    return status_code_;
   }
 
 public:
@@ -84,10 +114,17 @@ public:
   }
 
 protected:
+  friend class HttpRequestParser;
   friend class HttpResponseParser;
 
   HttpResponse(
-    YO_NEW_REF Object* body,
+    YO_NEW_REF Buffer* body,
+    uint8_t http_version,
+    uint16_t status_code
+  );
+
+  HttpResponse(
+    YO_NEW_REF Buffer* body,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version,
@@ -95,7 +132,10 @@ protected:
   );
 
 private:
-  uint16_t status_code;
+  void init();
+
+private:
+  uint16_t status_code_;
 };
 
 std::ostream& operator<<(std::ostream&, const HttpResponse&);

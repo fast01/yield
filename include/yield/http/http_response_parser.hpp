@@ -78,16 +78,16 @@ public:
 protected:
   virtual HttpResponse&
   create_http_response(
-    uint16_t status_code,
-    YO_NEW_REF Object* body = NULL,
-    uint8_t http_version = HttpResponse::HTTP_VERSION_DEFAULT
+    YO_NEW_REF Buffer* body,
+    uint8_t http_version,
+    uint16_t status_code
   ) {
-    return *new HttpResponse(status_code, body, http_version);
+    return *new HttpResponse(body, http_version, status_code);
   }
 
   virtual HttpResponse&
   create_http_response(
-    YO_NEW_REF Object* body,
+    YO_NEW_REF Buffer* body,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version,

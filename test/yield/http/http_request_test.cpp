@@ -51,21 +51,21 @@ TEST(HttpRequest, constructor) {
 //  );
 //}
 
-TEST(HttpRequest, get_method) {
+TEST(HttpRequest, method) {
   ASSERT_EQ(
-    HttpRequest(HttpRequest::Method::GET, "/").get_method(),
+    HttpRequest(HttpRequest::Method::GET, "/").method(),
     HttpRequest::Method::GET
   );
 
   ASSERT_EQ(
-    HttpRequest(HttpRequest::Method::PUT, "/").get_method(),
+    HttpRequest(HttpRequest::Method::PUT, "/").method(),
     HttpRequest::Method::PUT
   );
 }
 
-TEST(HttpRequest, get_uri) {
+TEST(HttpRequest, uri) {
   yield::uri::Uri uri("/test");
-  ASSERT_EQ(HttpRequest(HttpRequest::Method::GET, uri).get_uri(), uri);
+  ASSERT_EQ(HttpRequest(HttpRequest::Method::GET, uri).uri(), uri);
 }
 
 //TEST(HttpRequest, respond) {

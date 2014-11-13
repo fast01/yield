@@ -98,7 +98,7 @@ HttpMessageParser::~HttpMessageParser() {
 bool
 HttpMessageParser::parse_body(
   size_t content_length,
-  YO_NEW_REF Object*& body
+  YO_NEW_REF Buffer*& body
 ) {
   if (
     content_length == 0

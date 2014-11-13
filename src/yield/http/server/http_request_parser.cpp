@@ -40,23 +40,23 @@ using yield::sockets::SocketAddress;
 
 HttpRequestParser::HttpRequestParser(HttpConnection& connection, Buffer& data)
   : yield::http::HttpRequestParser(data),
-    connection(connection.inc_ref()) {
+    connection_(connection.inc_ref()) {
 }
 
 HttpRequestParser::~HttpRequestParser() {
-  HttpConnection::dec_ref(connection);
+  HttpConnection::dec_ref(connection_);
 }
 
 YO_NEW_REF yield::http::HttpMessageBodyChunk&
 HttpRequestParser::create_http_message_body_chunk(
   YO_NEW_REF Buffer* data
 ) {
-  return *new HttpMessageBodyChunk(connection, data);
+  return *new HttpMessageBodyChunk(connection_, data);
 }
 
 YO_NEW_REF yield::http::HttpRequest&
 HttpRequestParser::create_http_request(
-  YO_NEW_REF Object* body,
+  YO_NEW_REF Buffer* body,
   uint16_t fields_offset,
   Buffer& header,
   uint8_t http_version,
@@ -65,7 +65,7 @@ HttpRequestParser::create_http_request(
 ) {
   return *new HttpRequest(
            body,
-           connection,
+           connection_,
            fields_offset,
            header,
            http_version,

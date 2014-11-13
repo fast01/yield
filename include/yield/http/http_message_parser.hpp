@@ -60,7 +60,7 @@ protected:
   }
 
 protected:
-  bool parse_body(size_t content_length, YO_NEW_REF Object*& body);
+  bool parse_body(size_t content_length, YO_NEW_REF Buffer*& body);
   Object* parse_body_chunk();
 
 protected:

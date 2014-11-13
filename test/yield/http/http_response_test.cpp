@@ -36,12 +36,12 @@ namespace http {
 TEST(HttpResponse, constructor) {
   HttpResponse(404);
   HttpResponse(404, &Buffer::copy("test"));
-  HttpResponse(404, &Buffer::copy("test"), 1);
+  HttpResponse(1, 404, &Buffer::copy("test"));
 }
 
-TEST(HttpResponse, get_status_code) {
-  ASSERT_EQ(HttpResponse(200).get_status_code(), 200);
-  ASSERT_EQ(HttpResponse(404).get_status_code(), 404);
+TEST(HttpResponse, status_code) {
+  ASSERT_EQ(HttpResponse(200).status_code(), 200);
+  ASSERT_EQ(HttpResponse(404).status_code(), 404);
 }
 }
 }

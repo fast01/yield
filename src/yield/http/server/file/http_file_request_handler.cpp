@@ -54,7 +54,7 @@ void HttpFileRequestHandler::handle(YO_NEW_REF Event& event) {
   HttpRequest& http_request = static_cast<HttpRequest&>(event);
 
   iovec http_request_uri_path;
-  http_request.get_uri().get_path(http_request_uri_path);
+  http_request.uri().get_path(http_request_uri_path);
 
   if (http_request_uri_path.iov_len > root_uri_path.iov_len) {
     if (

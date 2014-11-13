@@ -129,7 +129,7 @@ public:
 
 public:
   /**
-    Shut down part of the socket's connection.
+    Shut down part of the socket's connection_.
     @param shut_rd shut down the read half of the connection
     @param shut_wr shut down the write half of the connection
     @return true on success, false+errno on failure

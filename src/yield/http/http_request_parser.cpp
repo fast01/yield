@@ -116,7 +116,7 @@ Object& HttpRequestParser::parse() {
       uint16_t fields_offset;
       size_t content_length;
       if (parse_fields(fields_offset, content_length)) {
-        Object* body;
+        Buffer* body;
         if (parse_body(content_length, body)) {
           return create_http_request(
                    body,
@@ -157,7 +157,7 @@ Object& HttpRequestParser::parse() {
       return next_buffer;
     } else { // Error parsing
       HttpResponse& http_response
-      = create_http_response(400, NULL, http_version);
+      = create_http_response(NULL, http_version, 400);
       http_response.set_field("Content-Length", 14, "0", 1);
       return http_response;
     }

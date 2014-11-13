@@ -40,7 +40,7 @@ TEST(HttpResponseParser, MalformedReasonPhraseMissing) {
   HttpResponseParser http_response_parser("HTTP/1.1 200\r\n\r\n");
   HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
   ASSERT_NE(http_response, static_cast<Object*>(NULL));
-  ASSERT_EQ(http_response->get_status_code(), 400);
+  ASSERT_EQ(http_response->status_code(), 400);
   HttpResponse::dec_ref(http_response);
 }
 
@@ -48,7 +48,7 @@ TEST(HttpResponseParser, MalformedStatusCodeAlpha) {
   HttpResponseParser http_response_parser("HTTP/1.1 XX OK\r\n\r\n");
   HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
   ASSERT_NE(http_response, static_cast<Object*>(NULL));
-  ASSERT_EQ(http_response->get_status_code(), 400);
+  ASSERT_EQ(http_response->status_code(), 400);
   HttpResponse::dec_ref(http_response);
 }
 
@@ -56,7 +56,7 @@ TEST(HttpResponseParser, MalformedStatusCodeMissing) {
   HttpResponseParser http_response_parser("HTTP/1.1 OK\r\n\r\n");
   HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
   ASSERT_NE(http_response, static_cast<Object*>(NULL));
-  ASSERT_EQ(http_response->get_status_code(), 400);
+  ASSERT_EQ(http_response->status_code(), 400);
   HttpResponse::dec_ref(http_response);
 }
 
@@ -64,7 +64,7 @@ TEST(HttpResponseParser, MalformedStatusLineMissing) {
   HttpResponseParser http_response_parser("Host: localhost\r\n\r\n");
   HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
   ASSERT_NE(http_response, static_cast<Object*>(NULL));
-  ASSERT_EQ(http_response->get_status_code(), 400);
+  ASSERT_EQ(http_response->status_code(), 400);
   HttpResponse::dec_ref(http_response);
 }
 
@@ -72,8 +72,8 @@ TEST(HttpResponseParser, WellFormedStatusLineOnly) {
   HttpResponseParser http_response_parser("HTTP/1.1 200 OK\r\n\r\n");
   HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
   ASSERT_NE(http_response, static_cast<Object*>(NULL));
-  ASSERT_EQ(http_response->get_status_code(), 200);
-  ASSERT_EQ(http_response->get_body(), static_cast<Object*>(NULL));
+  ASSERT_EQ(http_response->status_code(), 200);
+  ASSERT_EQ(http_response->body_buffer(), static_cast<Buffer*>(NULL));
   HttpResponse::dec_ref(http_response);
 }
 }

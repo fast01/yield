@@ -56,7 +56,7 @@ protected:
   // yield::http::HttpRequestParser
   virtual YO_NEW_REF yield::http::HttpRequest&
   create_http_request(
-    YO_NEW_REF Object* body,
+    YO_NEW_REF Buffer* body,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version,
@@ -65,7 +65,7 @@ protected:
   );
 
 private:
-  HttpConnection& connection;
+  HttpConnection& connection_;
 };
 }
 }

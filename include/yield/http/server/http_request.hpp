@@ -65,7 +65,7 @@ public:
     HttpConnection& connection,
     Method method,
     const yield::uri::Uri& uri,
-    YO_NEW_REF Object* body = NULL,
+    YO_NEW_REF Buffer* body = NULL,
     uint8_t http_version = HTTP_VERSION_DEFAULT
   );
 
@@ -76,8 +76,8 @@ public:
     Get the server connection from which this HTTP request originated.
     @return the server connection from which this HTTP request originated
   */
-  const HttpConnection& get_connection() const {
-    return connection;
+  const HttpConnection& connection() const {
+    return connection_;
   }
 
   /**
@@ -85,8 +85,8 @@ public:
     Used in logging.
     @return the date-time this HttpRequest was constructed
   */
-  const DateTime& get_creation_date_time() const {
-    return creation_date_time;
+  const DateTime& creation_date_time() const {
+    return creation_date_time_;
   }
 
 public:
@@ -150,22 +150,6 @@ public:
   */
   void respond(uint16_t status_code, const Exception& body);
 
-  /**
-    Respond to the HTTP request.
-    This method should only be called once.
-    @param status_code response status code e.g., 200
-    @param body response body
-  */
-  void respond(uint16_t status_code, YO_NEW_REF Object* body);
-
-  /**
-    Respond to the HTTP request.
-    This method should only be called once.
-    @param status_code response status code e.g., 200
-    @param body response body
-  */
-  void respond(uint16_t status_code, YO_NEW_REF Object& body);
-
 public:
   // yield::Object
   uint32_t get_type_id() const {
@@ -180,7 +164,7 @@ protected:
   friend class HttpRequestParser;
 
   HttpRequest(
-    YO_NEW_REF Object* body,
+    YO_NEW_REF Buffer* body,
     HttpConnection& connection,
     uint16_t fields_offset,
     Buffer& header,
@@ -190,8 +174,8 @@ protected:
   );
 
 private:
-  HttpConnection& connection;
-  DateTime creation_date_time;
+  HttpConnection& connection_;
+  DateTime creation_date_time_;
 };
 }
 }

@@ -53,11 +53,11 @@ INSTANTIATE_TYPED_TEST_CASE_P(HttpRequestQueue, EventQueueTest, TestHttpRequestQ
 class HttpRequestQueueTest : public ::testing::Test {
 protected:
   void handle(HttpRequest& http_request) {
-    if (http_request.get_uri().get_path() == "/") {
+    if (http_request.uri().get_path() == "/") {
       http_request.respond(200, "Hello world");
-    } else if (http_request.get_uri().get_path() == "/drop") {
+    } else if (http_request.uri().get_path() == "/drop") {
       ;
-    } else if (http_request.get_uri().get_path() == "/sendfile") {
+    } else if (http_request.uri().get_path() == "/sendfile") {
       yield::fs::File* file
 #ifdef _WIN32
       = yield::fs::FileSystem().open("yield.http.server.Makefile");

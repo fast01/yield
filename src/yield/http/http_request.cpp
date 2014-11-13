@@ -112,7 +112,7 @@ HttpRequest::Method::parse(
 }
 
 HttpRequest::HttpRequest(
-  YO_NEW_REF Object* body,
+  YO_NEW_REF Buffer* body_buffer,
   uint16_t fields_offset,
   Buffer& header,
   uint8_t http_version,
@@ -120,39 +120,40 @@ HttpRequest::HttpRequest(
   const yield::uri::Uri& uri
 )
   : HttpMessage<HttpRequest>(
-    body,
+    body_buffer,
+    NULL,
     fields_offset,
     header,
     http_version
   ),
-  method(method),
-  uri(uri)
+  method_(method),
+  uri_(uri)
 { }
 
 HttpRequest::HttpRequest(
   Method method,
   const yield::uri::Uri& uri,
-  YO_NEW_REF Object* body,
+  YO_NEW_REF Buffer* body_buffer,
   uint8_t http_version
 )
-  : HttpMessage<HttpRequest>(body, http_version),
-    method(method),
-    uri(uri) {
-  get_header().put(method.get_name(), method.get_name_len());
+  : HttpMessage<HttpRequest>(body_buffer, NULL, http_version),
+    method_(method),
+    uri_(uri) {
+  header().put(method.get_name(), method.get_name_len());
 
-  get_header().put(' ');
+  header().put(' ');
 
   iovec uri_path;
   uri.get_path(uri_path);
-  get_header().put(uri_path);
+  header().put(uri_path);
 
   if (http_version == 0) {
-    get_header().put(" HTTP/1.0\r\n", 11);
+    header().put(" HTTP/1.0\r\n", 11);
   } else {
-    get_header().put(" HTTP/1.1\r\n", 11);
+    header().put(" HTTP/1.1\r\n", 11);
   }
 
-  set_fields_offset(static_cast<uint16_t>(get_header().size()));
+  set_fields_offset(static_cast<uint16_t>(header().size()));
 
   if (uri.has_host()) {
     iovec uri_host;
@@ -194,12 +195,10 @@ HttpRequest::HttpRequest(
 
 std::ostream& operator<<(std::ostream& os, const HttpRequest& http_request) {
   std::ostringstream body;
-  if (http_request.get_body() != NULL) {
-    if (http_request.get_body()->get_type_id() == Buffer::TYPE_ID) {
-      body << static_cast<Buffer*>(http_request.get_body());
-    } else {
-      body << "Buffer";
-    }
+  if (http_request.body_buffer() != NULL) {
+    body << static_cast<Buffer*>(http_request.body_buffer());
+  } else if (http_request.body_file() != NULL) {
+    body << "File";
   } else {
     body << "NULL";
   }
@@ -209,11 +208,11 @@ std::ostream& operator<<(std::ostream& os, const HttpRequest& http_request) {
      "content_length=" << http_request.get_content_length() <<
      ", " <<
      "http_version=" <<
-     static_cast<uint16_t>(http_request.get_http_version()) <<
+     static_cast<uint16_t>(http_request.http_version()) <<
      ", " <<
-     "method=" << http_request.get_method() <<
+     "method=" << http_request.method() <<
      ", " <<
-     "uri=" << http_request.get_uri() <<
+     "uri=" << http_request.uri() <<
      ", " <<
      "body=" << body.str() <<
      ")";

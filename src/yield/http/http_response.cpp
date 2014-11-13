@@ -36,7 +36,7 @@
 namespace yield {
 namespace http {
 HttpResponse::HttpResponse(
-  YO_NEW_REF Object* body,
+  YO_NEW_REF Buffer* body,
   uint16_t fields_offset,
   Buffer& header,
   uint8_t http_version,
@@ -44,24 +44,74 @@ HttpResponse::HttpResponse(
 )
   : HttpMessage<HttpResponse>(
     body,
+    NULL,
     fields_offset,
     header,
     http_version
   ),
-  status_code(status_code)
+  status_code_(status_code)
 { }
 
 HttpResponse::HttpResponse(
+  uint8_t http_version,
   uint16_t status_code,
-  YO_NEW_REF Object* body,
-  uint8_t http_version
+  YO_NEW_REF Buffer* body
+) : HttpMessage<HttpResponse>(
+    body,
+    NULL,
+    http_version
+  ),
+  status_code_(status_code)
+{
+  init();
+}
+
+HttpResponse::HttpResponse(
+  YO_NEW_REF Buffer* body,
+  uint8_t http_version,
+  uint16_t status_code
 )
-  : HttpMessage<HttpResponse>(body, http_version),
-    status_code(status_code) {
+  : HttpMessage<HttpResponse>(
+    body,
+    NULL,
+    http_version
+  ),
+  status_code_(status_code)
+{
+  init();
+}
+
+HttpResponse::HttpResponse(
+  uint16_t status_code
+)
+  : HttpMessage<HttpResponse>(NULL, NULL, HTTP_VERSION_DEFAULT),
+    status_code_(status_code) {
+  init();
+}
+
+HttpResponse::HttpResponse(
+  uint16_t status_code,
+  YO_NEW_REF Buffer* body
+)
+  : HttpMessage<HttpResponse>(body, NULL, HTTP_VERSION_DEFAULT),
+    status_code_(status_code) {
+  init();
+}
+
+HttpResponse::HttpResponse(
+  uint16_t status_code,
+  YO_NEW_REF ::yield::fs::File* body
+)
+  : HttpMessage<HttpResponse>(NULL, body, HTTP_VERSION_DEFAULT),
+    status_code_(status_code) {
+  init();
+}
+
+void HttpResponse::init() {
   const char* status_line;
   size_t status_line_len;
 
-  switch (status_code) {
+  switch (status_code_) {
   case 100:
     status_line = "HTTP/1.1 100 Continue\r\n";
     status_line_len = 23;
@@ -240,21 +290,19 @@ HttpResponse::HttpResponse(
     break;
   }
 
-  get_header().put(status_line, status_line_len);
+  header().put(status_line, status_line_len);
 
-  set_fields_offset(static_cast<uint16_t>(get_header().size()));
+  set_fields_offset(static_cast<uint16_t>(header().size()));
 
   set_field("Date", DateTime::now());
 }
 
 std::ostream& operator<<(std::ostream& os, const HttpResponse& http_response) {
   std::ostringstream body;
-  if (http_response.get_body() != NULL) {
-    if (http_response.get_body()->get_type_id() == Buffer::TYPE_ID) {
-      body << static_cast<Buffer*>(http_response.get_body());
-    } else {
-      body << "Buffer";
-    }
+  if (http_response.body_buffer() != NULL) {
+    body << static_cast<Buffer*>(http_response.body_buffer());
+  } else if (http_response.body_file() != NULL) {
+    body << "File";
   } else {
     body << "NULL";
   }
@@ -264,9 +312,9 @@ std::ostream& operator<<(std::ostream& os, const HttpResponse& http_response) {
      "content_length=" << http_response.get_content_length() <<
      ", " <<
      "http_version=" <<
-     static_cast<uint16_t>(http_response.get_http_version()) <<
+     static_cast<uint16_t>(http_response.http_version()) <<
      ", " <<
-     "status_code=" << http_response.get_status_code() <<
+     "status_code=" << http_response.status_code() <<
      ", " <<
      "body=" << body.str() <<
      ")";

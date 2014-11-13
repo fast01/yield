@@ -107,40 +107,31 @@ HttpConnection::handle(
   DLOG(DEBUG) << "sending " << http_response;
 
   http_response.finalize();
-  Buffer& http_response_header = http_response.get_header().inc_ref();
-  Object* http_response_body = Object::inc_ref(http_response.get_body());
+  Buffer& http_response_header = http_response.header().inc_ref();
+  Buffer* http_response_body_buffer = Object::inc_ref(http_response.body_buffer());
+  File* http_response_body_file = Object::inc_ref(http_response.body_file());
   HttpResponse::dec_ref(http_response);
 
-  if (http_response_body != NULL) {
-    switch (http_response_body->get_type_id()) {
-    case Buffer::TYPE_ID: {
-      http_response_header.set_next_buffer(
-        static_cast<Buffer*>(http_response_body)
+  if (http_response_body_buffer != NULL) {
+    CHECK_EQ(http_response_body_file, NULL);
+    http_response_header.set_next_buffer(
+      static_cast<Buffer*>(http_response_body_buffer)
       );
-    }
-    break;
-
-    case File::TYPE_ID: {
-      SendAiocb* send_aiocb
-        = new SendAiocb(socket_, http_response_header, 0, this);
-      if (aio_queue.enqueue(*send_aiocb)) {
-        SendfileAiocb* sendfile_aiocb
-        = new SendfileAiocb(socket_, *static_cast<File*>(http_response_body), this);
-        if (aio_queue.enqueue(*sendfile_aiocb)) {
-          return;
-        } else {
-          SendfileAiocb::dec_ref(*sendfile_aiocb);
-          state = STATE_ERROR;
-        }
+  } else if (http_response_body_file != NULL) {
+    SendAiocb* send_aiocb
+      = new SendAiocb(socket_, http_response_header, 0, this);
+    if (aio_queue.enqueue(*send_aiocb)) {
+      SendfileAiocb* sendfile_aiocb
+      = new SendfileAiocb(socket_, *static_cast<File*>(http_response_body_file), this);
+      if (aio_queue.enqueue(*sendfile_aiocb)) {
+        return;
       } else {
-        SendAiocb::dec_ref(*send_aiocb);
+        SendfileAiocb::dec_ref(*sendfile_aiocb);
         state = STATE_ERROR;
       }
-    }
-    break;
-
-    default:
-      CHECK(false);
+    } else {
+      SendAiocb::dec_ref(*send_aiocb);
+      state = STATE_ERROR;
     }
   }
 
@@ -206,7 +197,7 @@ void HttpConnection::parse(Buffer& recv_buffer) {
 
     case HttpResponse::TYPE_ID: {
       HttpResponse& http_response = static_cast<HttpResponse&>(object);
-      CHECK_EQ(http_response.get_status_code(), 400);
+      CHECK_EQ(http_response.status_code(), 400);
 
       DLOG(DEBUG) << "parsed " << http_response;
 

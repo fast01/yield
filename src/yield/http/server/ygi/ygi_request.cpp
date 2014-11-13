@@ -63,12 +63,12 @@ YgiRequest::YgiRequest(HttpRequest& http_request)
   ygi_request_t::SERVER_PROTOCOL = static_SERVER_PROTOCOL;
   ygi_request_t::SERVER_SOFTWARE = static_SERVER_SOFTWARE;
 
-  http_request_.get_connection().get_peername().getnameinfo(remote_addr_, NULL, SocketAddress::GETNAMEINFO_FLAG_NUMERICHOST | SocketAddress::GETNAMEINFO_FLAG_NUMERICSERV);
-  http_request_.get_connection().get_peername().getnameinfo(remote_host_, NULL, SocketAddress::GETNAMEINFO_FLAG_NAMEREQD | SocketAddress::GETNAMEINFO_FLAG_NUMERICSERV);
+  http_request_.connection().get_peername().getnameinfo(remote_addr_, NULL, SocketAddress::GETNAMEINFO_FLAG_NUMERICHOST | SocketAddress::GETNAMEINFO_FLAG_NUMERICSERV);
+  http_request_.connection().get_peername().getnameinfo(remote_host_, NULL, SocketAddress::GETNAMEINFO_FLAG_NAMEREQD | SocketAddress::GETNAMEINFO_FLAG_NUMERICSERV);
 
-  if (http_request_.get_http_version() == 0) {
+  if (http_request_.http_version() == 0) {
     server_protocol_.iov_base = "HTTP/1.0";
-  } else if (http_request.get_http_version() == 1) {
+  } else if (http_request.http_version() == 1) {
     server_protocol_.iov_base = "HTTP/1.1";
   } else {
     CHECK(false);
@@ -123,7 +123,7 @@ iovec YgiRequest::HTTP_USER_AGENT() const {
 
 iovec YgiRequest::PATH_INFO() const {
   iovec path_info = { 0, 0 };
-  http_request_.get_uri().get_path(path_info);
+  http_request_.uri().get_path(path_info);
   return path_info;
 }
 
@@ -133,7 +133,7 @@ iovec YgiRequest::PATH_TRANSLATED() const {
 
 iovec YgiRequest::QUERY_STRING() const {
   iovec query_string = { 0, 0 };
-  http_request_.get_uri().get_query(query_string);
+  http_request_.uri().get_query(query_string);
   return query_string;
 }
 
@@ -164,8 +164,8 @@ iovec YgiRequest::REMOTE_USER() const {
 iovec YgiRequest::REQUEST_METHOD() const  {
   iovec request_method;
   request_method.iov_base
-  = const_cast<char*>(http_request_.get_method().get_name());
-  request_method.iov_len = http_request_.get_method().get_name_len();
+  = const_cast<char*>(http_request_.method().get_name());
+  request_method.iov_len = http_request_.method().get_name_len();
   return request_method;
 }
 
@@ -186,8 +186,8 @@ iovec YgiRequest::SERVER_NAME() const {
 }
 
 uint16_t YgiRequest::SERVER_PORT() const {
-  if (http_request_.get_uri().has_port()) {
-    return http_request_.get_uri().get_port();
+  if (http_request_.uri().has_port()) {
+    return http_request_.uri().get_port();
   } else {
     return 80;
   }

@@ -40,7 +40,7 @@ namespace http {
 /**
   An RFC 2616 HTTP request.
   Unlike its counterparts in yield.http.client and yield.http.server, this
-    HttpRequest is not tied to a particular connection.
+    HttpRequest is not tied to a particular connection_.
 */
 class HttpRequest : public HttpMessage<HttpRequest> {
 public:
@@ -197,7 +197,7 @@ public:
   HttpRequest(
     Method method,
     const yield::uri::Uri& uri,
-    YO_NEW_REF Object* body = NULL,
+    YO_NEW_REF Buffer* body_buffer = NULL,
     uint8_t http_version = HTTP_VERSION_DEFAULT
   );
 
@@ -211,16 +211,16 @@ public:
     Get the HTTP request method e.g., HttpRequest::Method::GET
     @return the request method
   */
-  Method get_method() const {
-    return method;
+  Method method() const {
+    return method_;
   }
 
   /**
     Get the HTTP request Uri e.g., /
     @return the request Uri
   */
-  const yield::uri::Uri& get_uri() const {
-    return uri;
+  const yield::uri::Uri& uri() const {
+    return uri_;
   }
 
 public:
@@ -239,7 +239,7 @@ protected:
   friend class HttpRequestParser;
 
   HttpRequest(
-    YO_NEW_REF Object* body,
+    YO_NEW_REF Buffer* body_buffer,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version,
@@ -248,8 +248,8 @@ protected:
   );
 
 private:
-  Method method;
-  yield::uri::Uri uri;
+  Method method_;
+  yield::uri::Uri uri_;
 };
 
 std::ostream& operator<<(std::ostream&, const HttpRequest&);

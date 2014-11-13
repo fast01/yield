@@ -82,9 +82,9 @@ TEST(HttpRequestParser, WellFormedRequestLineOnly) {
   HttpRequestParser http_request_parser("GET / HTTP/1.1\r\n\r\n");
   HttpRequest* http_request = Object::cast<HttpRequest>(http_request_parser.parse());
   ASSERT_NE(http_request, static_cast<Object*>(NULL));
-  ASSERT_EQ(http_request->get_method(), HttpRequest::Method::GET);
-  ASSERT_EQ(http_request->get_http_version(), 1);
-  ASSERT_EQ(http_request->get_body(), static_cast<Object*>(NULL));
+  ASSERT_EQ(http_request->method(), HttpRequest::Method::GET);
+  ASSERT_EQ(http_request->http_version(), 1);
+  ASSERT_EQ(http_request->body_buffer(), static_cast<Object*>(NULL));
   HttpRequest::dec_ref(http_request);
 }
 }
