@@ -40,7 +40,7 @@ namespace http {
 /**
   An RFC 2616 HTTP request.
   Unlike its counterparts in yield.http.client and yield.http.server, this
-    HttpRequest is not tied to a particular connection_.
+    HttpRequest is not tied to a particular connection.
 */
 class HttpRequest : public HttpMessage<HttpRequest> {
 public:

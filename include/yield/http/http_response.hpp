@@ -37,7 +37,7 @@ namespace http {
 /**
   An RFC 2616 HTTP response.
   Unlike its counterparts in yield.http.client and yield.http.server, this
-    HttpResponse is not tied to a particular connection_.
+    HttpResponse is not tied to a particular connection.
 */
 class HttpResponse : public HttpMessage<HttpResponse> {
 public:

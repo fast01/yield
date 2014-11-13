@@ -56,7 +56,7 @@ public:
 public:
   /**
     Construct an HttpMessageBodyChunk that originates from the given
-      server connection_.
+      server connection.
     @param connection the server connection
     @param data the chunk data
   */
