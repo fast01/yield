@@ -129,7 +129,7 @@ iconv::operator()(
   }
 }
 
-bool iconv::operator()(const string& inbuf, string& outbuf) {
+bool iconv::operator()(const ::std::string& inbuf, ::std::string& outbuf) {
   if (reset()) {
     return iconv_to_string(inbuf.data(), inbuf.size(), outbuf);
   } else {

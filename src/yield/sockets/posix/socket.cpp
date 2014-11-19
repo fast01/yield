@@ -75,7 +75,7 @@ socket_t Socket::create(int domain, int type, int protocol) {
   return ::socket(domain, type, protocol);
 }
 
-string Socket::getfqdn() {
+::std::string Socket::getfqdn() {
   char fqdn[256];
   ::gethostname(fqdn, 256);
   char* first_dot = strstr(fqdn, ".");
@@ -131,7 +131,7 @@ string Socket::getfqdn() {
   return fqdn;
 }
 
-string Socket::gethostname() {
+::std::string Socket::gethostname() {
   char hostname[256];
   ::gethostname(hostname, 256);
   return hostname;

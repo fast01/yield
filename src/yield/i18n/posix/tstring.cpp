@@ -44,7 +44,7 @@ tstring::tstring(const char* s, Code code) {
   init(s, strlen(s), code);
 }
 
-tstring::tstring(const string& s, Code code) {
+tstring::tstring(const ::std::string& s, Code code) {
   init(s.data(), s.size(), code);
 }
 
@@ -52,11 +52,11 @@ tstring::tstring(const char* s, size_t len, Code code) {
   init(s, len, code);
 }
 
-string tstring::encode(Code tocode) const {
+::std::string tstring::encode(Code tocode) const {
   if (tocode == Code::CHAR) {
     return *this;
   } else {
-    string outbuf;
+    ::std::string outbuf;
     iconv(tocode, Code::CHAR)(*this, outbuf);
     return outbuf;
   }
@@ -66,7 +66,7 @@ void tstring::init(const char* s, size_t len, Code code) {
   if (code == Code::CHAR) {
     assign(s, len);
   } else {
-    if (!iconv(Code::CHAR, code)(string(s, len), *this)) {
+    if (!iconv(Code::CHAR, code)(::std::string(s, len), *this)) {
       throw Exception();
     }
   }

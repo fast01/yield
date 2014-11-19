@@ -30,6 +30,8 @@
 #ifndef _YIELD_SOCKETS_AIO_ACCEPT_AIOCB_HPP_
 #define _YIELD_SOCKETS_AIO_ACCEPT_AIOCB_HPP_
 
+#include <ostream>
+
 #include "yield/sockets/aio/aiocb.hpp"
 
 namespace yield {
@@ -126,7 +128,7 @@ private:
   @param accept_aiocb AcceptAiocb to print
   @return os
 */
-std::ostream& operator<<(std::ostream& os, const AcceptAiocb& accept_aiocb);
+::std::ostream& operator<<(::std::ostream& os, const AcceptAiocb& accept_aiocb);
 }
 }
 }

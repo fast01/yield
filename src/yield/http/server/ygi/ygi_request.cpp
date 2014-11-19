@@ -67,9 +67,9 @@ YgiRequest::YgiRequest(HttpRequest& http_request)
   http_request_.connection().get_peername().getnameinfo(remote_host_, NULL, SocketAddress::GETNAMEINFO_FLAG_NAMEREQD | SocketAddress::GETNAMEINFO_FLAG_NUMERICSERV);
 
   if (http_request_.http_version() == 0) {
-    server_protocol_.iov_base = "HTTP/1.0";
+    server_protocol_.iov_base = const_cast<char*>("HTTP/1.0");
   } else if (http_request.http_version() == 1) {
-    server_protocol_.iov_base = "HTTP/1.1";
+    server_protocol_.iov_base = const_cast<char*>("HTTP/1.1");
   } else {
     CHECK(false);
   }
@@ -98,7 +98,7 @@ iovec YgiRequest::DOCUMENT_ROOT() const {
 
 iovec YgiRequest::GATEWAY_INTERFACE() const {
   iovec gateway_interface;
-  gateway_interface.iov_base = "CGI/1.1";
+  gateway_interface.iov_base = const_cast<char*>("CGI/1.1");
   gateway_interface.iov_len = 7;
   return gateway_interface;
 }
@@ -199,7 +199,7 @@ iovec YgiRequest::SERVER_PROTOCOL() const {
 
 iovec YgiRequest::SERVER_SOFTWARE() const {
   iovec server_software;
-  server_software.iov_base = "Yield";
+  server_software.iov_base = const_cast<char*>("Yield");
   server_software.iov_len = 5;
   return server_software;
 }

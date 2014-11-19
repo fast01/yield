@@ -148,7 +148,7 @@ protected:
     refcnt.store(static_cast<unsigned int>(1));
   }
 
-  Object(const Object& other) {
+  Object(const Object&) {
     refcnt.store(static_cast<unsigned int>(1));
   }
 	

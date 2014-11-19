@@ -253,7 +253,7 @@ ssize_t File::pread(Buffer& buffer, off_t offset) {
     }
     return pread_ret;
   } else {
-    vector<iovec> iov;
+    ::std::vector<iovec> iov;
     Buffers::as_read_iovecs(buffer, iov);
     ssize_t preadv_ret = preadv(&iov[0], iov.size(), offset);
     if (preadv_ret > 0) {
@@ -284,7 +284,7 @@ ssize_t File::pwrite(const Buffer& buffer, off_t offset) {
   if (buffer.get_next_buffer() == NULL) {
     return pwrite(buffer, buffer.size(), offset);
   } else {
-    vector<iovec> iov;
+    ::std::vector<iovec> iov;
     Buffers::as_write_iovecs(buffer, iov);
     return pwritev(&iov[0], iov.size(), offset);
   }

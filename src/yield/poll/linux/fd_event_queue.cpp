@@ -102,10 +102,7 @@ bool FdEventQueue::dissociate(fd_t fd) {
 bool FdEventQueue::enqueue(Event& event) {
   if (event_queue.enqueue(event)) {
     uint64_t data = 1;
-#ifdef _DEBUG
-    ssize_t write_ret =
-#endif
-      write(wake_fd, &data, sizeof(data));
+    ssize_t write_ret = write(wake_fd, &data, sizeof(data));
     CHECK_EQ(write_ret, static_cast<ssize_t>(sizeof(data)));
     return true;
   } else {
@@ -127,10 +124,7 @@ YO_NEW_REF Event* FdEventQueue::timeddequeue(const Time& timeout) {
 
       if (epoll_event_.data.fd == wake_fd) {
         uint64_t data;
-#ifdef _DEBUG
-        ssize_t read_ret =
-#endif
-          read(wake_fd, &data, sizeof(data));
+        ssize_t read_ret = read(wake_fd, &data, sizeof(data));
         CHECK_EQ(read_ret, static_cast<ssize_t>(sizeof(data)));
         return event_queue.trydequeue();
       } else {
