@@ -41,6 +41,22 @@ namespace thread {
 */
 class Mutex {
 public:
+  class Holder {
+  public:
+    Holder(Mutex& lock)
+      : lock(lock) {
+      lock.lock();
+    }
+
+    ~Holder() {
+      lock.unlock();
+    }
+
+  private:
+    Mutex& lock;
+  };
+
+public:
   Mutex();
   ~Mutex();
 
