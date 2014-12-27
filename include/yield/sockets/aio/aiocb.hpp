@@ -114,14 +114,6 @@ public:
   operator ::OVERLAPPED* ();
 #endif
 
-public:
-  // yield::Object
-  virtual uint32_t get_type_id() const = 0;
-
-  Aiocb& inc_ref() {
-    return Object::inc_ref(*this);
-  }
-
 protected:
   Aiocb(Socket& socket_, Object* context = NULL);
   Aiocb(Socket& socket_, off_t offset, Object* context = NULL);

@@ -52,12 +52,5 @@ TEST(FdEvent, get_type) {
     FdEvent::TYPE_READ_READY
   );
 }
-
-TEST(FdEvent, get_type_id) {
-  ASSERT_EQ(
-    FdEvent(static_cast<fd_t>(0), FdEvent::TYPE_READ_READY).get_type_id(),
-    FdEvent::TYPE_ID
-  );
-}
 }
 }

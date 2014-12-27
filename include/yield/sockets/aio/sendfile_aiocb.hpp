@@ -104,12 +104,6 @@ public:
   */
   StreamSocket& get_socket();
 
-public:
-  // yield::Object
-  uint32_t get_type_id() const {
-    return TYPE_ID;
-  }
-
 private:
   void init(fd_t fd);
 

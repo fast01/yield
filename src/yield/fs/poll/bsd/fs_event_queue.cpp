@@ -138,14 +138,16 @@ bool FsEventQueue::dissociate(const Path& path) {
   }
 }
 
-bool FsEventQueue::enqueue(YO_NEW_REF Event& event) {
-  if (event_queue.enqueue(event)) {
-    ssize_t write_ret = write(wake_pipe[1], "m", 1);
-    CHECK_EQ(write_ret, 1);
-    return true;
-  } else {
-    return false;
-  }
+bool FsEventQueue::enqueue(YO_NEW_REF FsEvent& event) {
+  CHECK(false);
+  return false;
+  //if (event_queue.enqueue(event)) {
+  //  ssize_t write_ret = write(wake_pipe[1], "m", 1);
+  //  CHECK_EQ(write_ret, 1);
+  //  return true;
+  //} else {
+  //  return false;
+  //}
 }
 
 YO_NEW_REF Event* FsEventQueue::timeddequeue(const Time& timeout) {

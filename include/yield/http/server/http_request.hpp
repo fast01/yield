@@ -150,16 +150,6 @@ public:
   */
   void respond(uint16_t status_code, const Exception& body);
 
-public:
-  // yield::Object
-  uint32_t get_type_id() const {
-    return TYPE_ID;
-  }
-
-  HttpRequest& inc_ref() {
-    return Object::inc_ref(*this);
-  }
-
 protected:
   friend class HttpRequestParser;
 

@@ -32,11 +32,11 @@
 
 #include "yield/object.hpp"
 
+#include <memory>
 
 namespace yield {
 namespace stage {
 class Stage;
-
 
 class StageScheduler : public Object {
 public:
@@ -58,11 +58,11 @@ public:
   };
 
 public:
-  virtual void schedule(Stage& stage) {
+  virtual void schedule(::std::shared_ptr<Stage>& stage) {
     return schedule(stage, ConcurrencyLevel::DEFAULT);
   }
 
-  virtual void schedule(Stage&, ConcurrencyLevel) = 0;
+  virtual void schedule(::std::shared_ptr<Stage>&, ConcurrencyLevel) = 0;
 };
 }
 }

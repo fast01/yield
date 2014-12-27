@@ -49,7 +49,7 @@ HttpFileRequestHandler::HttpFileRequestHandler(
   this->root_uri.get_path(root_uri_path);
 }
 
-void HttpFileRequestHandler::handle(YO_NEW_REF Event& event) {
+void HttpFileRequestHandler::handle(YO_NEW_REF HttpRequest& event) {
   CHECK_EQ(event.get_type_id(), HttpRequest::TYPE_ID);
   HttpRequest& http_request = static_cast<HttpRequest&>(event);
 

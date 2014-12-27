@@ -68,13 +68,6 @@ TEST(FsEvent, get_type) {
   );
 }
 
-TEST(FsEvent, get_type_id) {
-  ASSERT_EQ(
-    FsEvent("path", FsEvent::TYPE_FILE_ADD).get_type_id(),
-    FsEvent::TYPE_ID
-  );
-}
-
 TEST(FsEvent, print) {
   std::ostringstream oss;
   oss << FsEvent("path", FsEvent::TYPE_FILE_ADD);

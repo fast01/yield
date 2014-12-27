@@ -67,17 +67,17 @@ PollingStageScheduler::schedule(
 
 
 PollingStageScheduler::StagePoller::StagePoller(Stage& first_stage) {
-  stages.push_back(&first_stage.inc_ref());
+  stages.push_back(&first_stage);
 }
 
 PollingStageScheduler::StagePoller::~StagePoller() {
-  for (
-    vector<Stage*>::iterator stage_i = stages.begin();
-    stage_i != stages.end();
-    ++stage_i
-  ) {
-    Stage::dec_ref(**stage_i);
-  }
+  //for (
+  //  vector<Stage*>::iterator stage_i = stages.begin();
+  //  stage_i != stages.end();
+  //  ++stage_i
+  //) {
+  //  Stage::dec_ref(**stage_i);
+  //}
 }
 
 vector<Stage*>& PollingStageScheduler::StagePoller::get_stages() {
@@ -91,7 +91,7 @@ vector<Stage*>& PollingStageScheduler::StagePoller::get_stages() {
 }
 
 void PollingStageScheduler::StagePoller::schedule(Stage& stage) {
-  stage.inc_ref();
+  //stage.inc_ref();
   while (!new_stage.enqueue(stage)) {
     ;
   }

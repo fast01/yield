@@ -44,9 +44,6 @@ namespace aio {
 */
 class ConnectAiocb : public Aiocb {
 public:
-  const static uint32_t TYPE_ID = 2458109810UL;
-
-public:
   /**
     Construct a ConnectAiocb with an optional buffer for sending data
       after a connection is established.
@@ -87,12 +84,6 @@ public:
     @return the socket in this connect operation
   */
   StreamSocket& get_socket();
-
-public:
-  // yield::Object
-  uint32_t get_type_id() const {
-    return TYPE_ID;
-  }
 
 private:
   SocketAddress& peername;

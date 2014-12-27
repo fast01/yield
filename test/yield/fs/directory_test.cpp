@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/auto_object.hpp"
 #include "yield/exception.hpp"
 #include "yield/fs/directory.hpp"
 #include "yield/fs/file_system.hpp"
@@ -35,6 +34,8 @@
 
 namespace yield {
 namespace fs {
+using ::std::unique_ptr;
+
 class DirectoryTest : public ::testing::Test {
 protected:
   DirectoryTest()
@@ -63,7 +64,6 @@ protected:
   }
 
   void TearDown() {
-    Directory::dec_ref(directory);
     directory = NULL;
 
     if (FileSystem().exists(get_test_dir_name())) {
@@ -91,7 +91,7 @@ protected:
   }
 
 private:
-  Directory* directory;
+  unique_ptr<Directory> directory;
   Path test_dir_name, test_file_name, test_file_path;
 };
 
@@ -104,7 +104,7 @@ TEST_F(DirectoryTest, close) {
 
 #ifndef _WIN32
 TEST_F(DirectoryTest, read_dev) {
-  auto_Object<Directory> directory = FileSystem().opendir("/dev");
+  unique_ptr<Directory> directory = FileSystem().opendir("/dev");
   Directory::Entry* dentry = directory->read();
   while (dentry != NULL) {
     Directory::Entry::dec_ref(*dentry);
@@ -115,7 +115,7 @@ TEST_F(DirectoryTest, read_dev) {
 
 TEST_F(DirectoryTest, read) {
   for (uint8_t i = 0; i < 3; i++) {
-    auto_Object<Directory::Entry> dentry = get_directory().read();
+    unique_ptr<Directory::Entry> dentry = get_directory().read();
     if (dentry->get_name() == Path::CURRENT_DIRECTORY) {
       ASSERT_TRUE(dentry->ISDIR());
       ASSERT_TRUE(dentry->is_special());
@@ -133,7 +133,7 @@ TEST_F(DirectoryTest, read) {
 TEST_F(DirectoryTest, rewind) {
   for (uint8_t i = 0; i < 2; i++) {
     for (uint8_t j = 0; j < 3; j++) {
-      auto_Object<Directory::Entry> dentry = get_directory().read();
+      unique_ptr<Directory::Entry> dentry = get_directory().read();
       ASSERT_TRUE(
         dentry->get_name() == Path::CURRENT_DIRECTORY
         ||

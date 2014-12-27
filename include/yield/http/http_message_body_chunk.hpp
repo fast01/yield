@@ -85,16 +85,6 @@ public:
     return data_ != NULL ? data_->size() : 0;
   }
 
-public:
-  // yield::Object
-  virtual uint32_t get_type_id() const {
-    return TYPE_ID;
-  }
-
-  HttpMessageBodyChunk& inc_ref() {
-    return Object::inc_ref(*this);
-  }
-
 private:
   Buffer* data_;
 };

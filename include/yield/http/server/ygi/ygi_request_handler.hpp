@@ -38,7 +38,7 @@ namespace yield {
 namespace http {
 namespace server {
 namespace ygi {
-class YgiRequestHandler : public EventHandler {
+class YgiRequestHandler : public EventHandler<> {
 public:
   YgiRequestHandler(ygi_request_handler_t ygi_request_handler);
 

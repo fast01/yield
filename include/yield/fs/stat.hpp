@@ -31,7 +31,6 @@
 #define _YIELD_FS_STAT_HPP_
 
 #include "yield/date_time.hpp"
-#include "yield/object.hpp"
 
 #ifdef _WIN32
 struct _BY_HANDLE_FILE_INFORMATION;
@@ -50,7 +49,7 @@ namespace fs {
 /**
   File metadata, akin to struct stat on POSIX systems.
 */
-class Stat : public Object {
+class Stat {
 public:
 #ifdef _WIN32
   /**
@@ -318,12 +317,6 @@ public:
   */
   virtual Stat& operator=(const WIN32_FIND_DATA& win32_find_data);
 #endif
-
-public:
-  // yield::Object
-  Stat& inc_ref() {
-    return Object::inc_ref(*this);
-  }
 
 private:
   void set_size(uint32_t nFileSizeLow, uint32_t nFileSizeHigh);

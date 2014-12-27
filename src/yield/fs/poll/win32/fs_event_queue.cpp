@@ -135,7 +135,7 @@ bool FsEventQueue::dissociate(const Path& path) {
   }
 }
 
-bool FsEventQueue::enqueue(YO_NEW_REF Event& event) {
+bool FsEventQueue::enqueue(YO_NEW_REF FsEvent& event) {
   return PostQueuedCompletionStatus(
            hIoCompletionPort,
            0,
@@ -145,7 +145,7 @@ bool FsEventQueue::enqueue(YO_NEW_REF Event& event) {
          == TRUE;
 }
 
-YO_NEW_REF Event* FsEventQueue::timeddequeue(const Time& timeout) {
+YO_NEW_REF FsEvent* FsEventQueue::timeddequeue(const Time& timeout) {
   DWORD dwBytesTransferred = 0;
   ULONG_PTR ulCompletionKey = 0;
   LPOVERLAPPED lpOverlapped = NULL;
@@ -203,7 +203,7 @@ YO_NEW_REF Event* FsEventQueue::timeddequeue(const Time& timeout) {
       return NULL;
     }
   } else if (ulCompletionKey != 0) {
-    return reinterpret_cast<Event*>(ulCompletionKey);
+    return reinterpret_cast<FsEvent*>(ulCompletionKey);
   } else {
     return NULL;
   }

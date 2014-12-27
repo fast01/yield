@@ -4,7 +4,7 @@ include(YieldFlags.cmake)
 
 include_directories(
 	include
-	share/gtest-1.6.0/fused-src
+	share/gtest-1.7.0/fused-src
 )
 
 add_subdirectory(share)

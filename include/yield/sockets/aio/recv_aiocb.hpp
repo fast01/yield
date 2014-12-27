@@ -41,9 +41,6 @@ namespace aio {
 */
 class RecvAiocb : public Aiocb {
 public:
-  const static uint32_t TYPE_ID = 3045195539UL;
-
-public:
   /**
     Construct a RecvAiocb, passing the same parameters as to recv.
     @param socket_ socket to receive data on
@@ -78,12 +75,6 @@ public:
   */
   const Socket::MessageFlags& get_flags() const {
     return flags;
-  }
-
-public:
-  // yield::Object
-  uint32_t get_type_id() const {
-    return TYPE_ID;
   }
 
 private:

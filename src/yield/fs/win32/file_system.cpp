@@ -28,7 +28,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "named_pipe.hpp"
-#include "yield/auto_object.hpp"
 #include "yield/logging.hpp"
 #include "yield/fs/path.hpp"
 #include "yield/fs/directory.hpp"
@@ -41,7 +40,7 @@
 
 namespace yield {
 namespace fs {
-YO_NEW_REF File* FileSystem::creat(const Path& path) {
+::std::unique_ptr<File> FileSystem::creat(const Path& path) {
   return open(path, O_CREAT | O_WRONLY | O_TRUNC);
 }
 
@@ -75,7 +74,7 @@ bool FileSystem::mkdir(const Path& path) {
   return CreateDirectory(path.c_str(), NULL) == TRUE;
 }
 
-File* FileSystem::mkfifo(const Path& path, uint32_t flags) {
+::std::unique_ptr<File> FileSystem::mkfifo(const Path& path, uint32_t flags) {
   if (path.find_first_of(L"\\\\.\\pipe") != Path::npos) {
     DWORD dwOpenMode = 0;
     if ((flags & O_ASYNC) == O_ASYNC) {
@@ -109,7 +108,7 @@ File* FileSystem::mkfifo(const Path& path, uint32_t flags) {
       );
 
     if (hNamedPipe != INVALID_HANDLE_VALUE) {
-      return new NamedPipe(hNamedPipe);
+      return ::std::unique_ptr<NamedPipe>(new NamedPipe(hNamedPipe));
     } else {
       return NULL;
     }
@@ -134,7 +133,7 @@ bool FileSystem::mktree(const Path& path) {
   return ret;
 }
 
-File*
+::std::unique_ptr<File>
 FileSystem::open(
   const Path& path,
   uint32_t flags,
@@ -200,13 +199,13 @@ FileSystem::open(
       SetEndOfFile(fd);
     }
 
-    return new File(fd);
+    return ::std::unique_ptr<File>(new File(fd));
   }
 
   return NULL;
 }
 
-Directory* FileSystem::opendir(const Path& path) {
+::std::unique_ptr<Directory> FileSystem::opendir(const Path& path) {
   HANDLE hDirectory
   = CreateFile(
       path.c_str(),
@@ -219,7 +218,7 @@ Directory* FileSystem::opendir(const Path& path) {
     );
 
   if (hDirectory != INVALID_HANDLE_VALUE) {
-    return new Directory(hDirectory);
+    return ::std::unique_ptr<Directory>(new Directory(hDirectory));
   } else {
     return NULL;
   }
@@ -252,22 +251,18 @@ bool FileSystem::rmdir(const Path& path) {
 }
 
 bool FileSystem::rmtree(const Path& path) {
-  Directory* directory = opendir(path);
+  ::std::unique_ptr<Directory> directory = opendir(path);
   if (directory != NULL) {
-    auto_Object<Directory> directory_holder(directory);
-
-    Directory::Entry* dentry = directory_holder->read();
+    ::std::unique_ptr<Directory::Entry> dentry = directory->read();
     if (dentry != NULL) {
-      auto_Object<Directory::Entry> dentry_holder(*dentry);
-
       do {
-        if (dentry_holder->is_special()) {
+        if (dentry->is_special()) {
           continue;
         }
 
-        Path dentry_path(path / dentry_holder->get_name());
+        Path dentry_path(path / dentry->get_name());
 
-        if (dentry_holder->ISDIR()) {
+        if (dentry->ISDIR()) {
           if (rmtree(dentry_path)) {
             continue;
           } else {
@@ -278,17 +273,17 @@ bool FileSystem::rmtree(const Path& path) {
         } else {
           return false;
         }
-      } while (directory_holder->read(*dentry_holder));
+      } while (directory->read(*dentry));
     }
   }
 
   return rmdir(path);
 }
 
-Stat* FileSystem::stat(const Path& path) {
+::std::unique_ptr<Stat> FileSystem::stat(const Path& path) {
   WIN32_FILE_ATTRIBUTE_DATA stbuf;
   if (GetFileAttributesEx(path.c_str(), GetFileExInfoStandard, &stbuf)) {
-    return new Stat(stbuf);
+    return ::std::unique_ptr<Stat>(new Stat(stbuf));
   } else {
     return NULL;
   }
@@ -322,13 +317,8 @@ bool FileSystem::statvfs(const Path& path, struct statvfs& stbuf) {
 }
 
 bool FileSystem::touch(const Path& path) {
-  File* file = creat(path);
-  if (file != NULL) {
-    File::dec_ref(*file);
-    return true;
-  } else {
-    return false;
-  }
+  ::std::unique_ptr<File> file = creat(path);
+  return file != NULL;
 }
 
 bool FileSystem::unlink(const Path& path) {
@@ -386,13 +376,10 @@ bool FileSystem::utime(
       }
     }
   } else {
-    File* file = open(path, O_WRONLY);
+    ::std::unique_ptr<File> file = open(path, O_WRONLY);
     if (file != NULL) {
       if (SetFileTime(*file, ftCreationTime, ftLastAccessTime, ftLastWriteTime)) {
-        File::dec_ref(*file);
         return true;
-      } else {
-        File::dec_ref(*file);
       }
     }
   }

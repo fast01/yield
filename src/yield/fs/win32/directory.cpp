@@ -61,10 +61,10 @@ bool Directory::close() {
   }
 }
 
-Directory::Entry* Directory::read() {
+::std::unique_ptr<Directory::Entry> Directory::read() {
   Entry* entry = NULL;
   if (read(entry)) {
-    return entry;
+    return ::std::unique_ptr<Entry>(entry);
   } else {
     return NULL;
   }

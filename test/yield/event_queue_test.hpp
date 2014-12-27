@@ -30,7 +30,6 @@
 #ifndef _YIELD_EVENT_QUEUE_TEST_HPP_
 #define _YIELD_EVENT_QUEUE_TEST_HPP_
 
-#include "yield/auto_object.hpp"
 #include "yield/event.hpp"
 #include "yield/event_queue.hpp"
 #include "gtest/gtest.h"
@@ -41,9 +40,6 @@ class EventQueueTest : public ::testing::Test {
 protected:
   class MockEvent : public Event {
   public:
-    uint32_t get_type_id() const {
-      return 0;
-    }
   };
 };
 

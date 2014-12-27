@@ -30,7 +30,8 @@
 #ifndef _YIELD_FS_DIRECTORY_HPP_
 #define _YIELD_FS_DIRECTORY_HPP_
 
-#include "yield/object.hpp"
+#include <memory>
+
 #include "yield/fs/path.hpp"
 
 #ifdef _WIN32
@@ -45,7 +46,7 @@ namespace fs {
   A simple directory iterator, returned by FileSystem::opendir.
   Wraps a platform-specific directory handle.
 */
-class Directory : public Object {
+class Directory {
 public:
   /**
     Metadata for a directory entry, mainly name and entry type.
@@ -78,6 +79,10 @@ public:
       TYPE_SOCK
 #endif
     };
+
+  public:
+    virtual ~Entry() {
+    }
 
   public:
     /**
@@ -219,17 +224,11 @@ public:
 #endif
 
 public:
-  YO_NEW_REF Entry* read();
+  ::std::unique_ptr<Entry> read();
   bool read(Entry&);
 
 public:
   void rewind();
-
-public:
-  // yield::Object
-  Directory& inc_ref() {
-    return Object::inc_ref(*this);
-  }
 
 private:
   bool read(Entry*&);

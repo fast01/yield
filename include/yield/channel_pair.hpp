@@ -30,15 +30,13 @@
 #ifndef _YIELD_CHANNEL_PAIR_HPP_
 #define _YIELD_CHANNEL_PAIR_HPP_
 
-#include "yield/object.hpp"
-
 namespace yield {
 class Channel;
 
 /**
   Interface for a pair of connected channels (pipes, socketpairs, et al.).
 */
-class ChannelPair : public Object {
+class ChannelPair {
 public:
 
   /**

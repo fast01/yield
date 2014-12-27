@@ -30,22 +30,17 @@
 #ifndef _YIELD_EXCEPTION_HPP_
 #define _YIELD_EXCEPTION_HPP_
 
-#include "yield/event.hpp"
-
 #include <exception>
 #include <string>
+
+#include "yield/event.hpp"
+#include "yield/types.hpp"
 
 namespace yield {
 /**
   Generic exceptions, also used in the event-driven concurrency subsystem.
 */
 class Exception : public Event, public std::exception {
-public:
-  /**
-    Run-time type ID.
-  */
-  const static uint32_t TYPE_ID = 3282856065UL;
-
 public:
   /**
     Construct an Exception using get_last_error_code and
@@ -99,7 +94,7 @@ public:
     Clone this Exception on the heap.
     @return a new'd copy of this Exception
   */
-  virtual YO_NEW_REF Exception& clone() const {
+  virtual Exception& clone() const {
     return *new Exception(*this);
   }
 
@@ -167,12 +162,6 @@ public:
     @param error_code the new system error code
   */
   static void set_last_error_code(uint32_t error_code);
-
-public:
-  // yield::Object
-  uint32_t get_type_id() const {
-    return TYPE_ID;
-  }
 
 public:
   // yield::Response

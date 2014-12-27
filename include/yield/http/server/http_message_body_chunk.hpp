@@ -72,16 +72,6 @@ public:
     return connection_;
   }
 
-public:
-  // yield::Object
-  uint32_t get_type_id() const {
-    return TYPE_ID;
-  }
-
-  HttpMessageBodyChunk& inc_ref() {
-    return Object::inc_ref(*this);
-  }
-
 private:
   HttpConnection& connection_;
 };

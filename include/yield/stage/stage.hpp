@@ -30,68 +30,22 @@
 #ifndef _YIELD_STAGE_STAGE_HPP_
 #define _YIELD_STAGE_STAGE_HPP_
 
-#include "yield/event.hpp"
-#include "yield/event_handler.hpp"
 #include "yield/time.hpp"
 
 namespace yield {
-class EventQueue;
-
 namespace stage {
-class Stage : public EventHandler {
+class Stage {
 public:
-  Stage(YO_NEW_REF EventHandler&);
-  Stage(YO_NEW_REF EventHandler&, YO_NEW_REF EventQueue&);
-  ~Stage();
-
-public:
-  double get_arrival_rate_s() const {
-    return arrival_rate_s;
-  }
-
-  double get_rho() const {
-    return rho;
-  }
-
-  double get_service_rate_s() const {
-    return service_rate_s;
-  }
-
-  void visit(); // Blocking
-  bool visit(const Time& timeout);
-
-public:
-  // yield::Object
-  Stage& inc_ref() {
-    return Object::inc_ref(*this);
+  virtual ~Stage() {
   }
 
 public:
-  // yield::EventHandler
-  void handle(YO_NEW_REF Event& event) {
-    enqueue(event);
-  }
+  virtual double get_arrival_rate_s() const = 0;
+  virtual double get_rho() const = 0;
+  virtual double get_service_rate_s() const = 0;
 
-protected:
-  Stage(YO_NEW_REF EventQueue&);
-
-  EventQueue& get_event_queue() {
-    return event_queue;
-  }
-
-private:
-  void enqueue(YO_NEW_REF Event& event);
-  void init();
-  virtual void service(YO_NEW_REF Event& event);
-
-private:
-  double arrival_rate_s;
-  EventHandler* event_handler;
-  EventQueue& event_queue;
-  uint32_t event_queue_arrival_count, event_queue_length;
-  double rho;
-  double service_rate_s;
-  // Sampler<uint64_t, 1024, Mutex> service_times;
+  virtual void visit() = 0;
+  virtual bool visit(const Time& timeout) = 0;
 };
 };
 };

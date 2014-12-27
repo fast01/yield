@@ -125,7 +125,7 @@ public:
     @param path path to the new file
     @return a new File object on success, NULL+errno on failure
   */
-  YO_NEW_REF File* creat(const Path& path);
+  ::std::unique_ptr<File> creat(const Path& path);
 
 #ifndef _WIN32
   /**
@@ -135,7 +135,7 @@ public:
     @param mode mode (permissions) of the new file
     @return a new File object on success, NULL+errno on failure
   */
-  YO_NEW_REF File* creat(const Path& path, mode_t mode);
+  ::std::unique_ptr<File> creat(const Path& path, mode_t mode);
 #endif
 
 public:
@@ -205,7 +205,7 @@ public:
     @param flags (same as open flags) for the new named pipe
     @return a new File object on success, NULL+errno on failure
   */
-  YO_NEW_REF File* mkfifo(const Path& path, uint32_t flags = 0);
+  ::std::unique_ptr<File> mkfifo(const Path& path, uint32_t flags = 0);
 #else
   /**
     Create a named pipe.
@@ -253,7 +253,7 @@ public:
     @param attributes Win32 attributes of a new file
     @return a new File object on success, NULL+errno on failure
   */
-  YO_NEW_REF File*
+  ::std::unique_ptr<File>
   open(
     const Path& path,
     uint32_t flags = 0,
@@ -281,7 +281,7 @@ public:
     @param path path to the directory
     @return a new Directory object on success, NULL+errno on failure
   */
-  YO_NEW_REF Directory* opendir(const Path& path);
+  ::std::unique_ptr<Directory> opendir(const Path& path);
 
 public:
 #ifndef _WIN32
@@ -335,7 +335,7 @@ public:
     @param path path to the file
     @return a new Stat object on success, NULL+errno on failure
   */
-  YO_NEW_REF Stat* stat(const Path& path);
+  ::std::unique_ptr<Stat> stat(const Path& path);
 
   /**
     Retrieve metadata for a file system.

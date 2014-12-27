@@ -46,12 +46,9 @@ public:
         "named_pipe_test.txt"
 #endif
     ) {
-    read_file = write_file = NULL;
   }
 
   ~NamedPipePair() {
-    File::dec_ref(read_file);
-    File::dec_ref(write_file);
     FileSystem().unlink(path);
   }
 
@@ -89,7 +86,7 @@ public:
 
 private:
   Path path;
-  File* read_file, *write_file;
+  ::std::unique_ptr<File> read_file, write_file;
 };
 
 INSTANTIATE_TYPED_TEST_CASE_P(NamedPipe, ChannelTest, NamedPipePair);

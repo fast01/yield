@@ -30,25 +30,21 @@
 #ifndef _YIELD_BUFFER_HPP_
 #define _YIELD_BUFFER_HPP_
 
-#include "yield/object.hpp"
-
+#include <memory>
 #include <string>
+
+#include "yield/types.hpp"
 
 namespace yield {
 /**
   Generic buffer class, mainly used for I/O with aligned buffers.
 */
-class Buffer : public Object {
+class Buffer {
 public:
   /**
     Default alignment boundary.
   */
   const static size_t ALIGNMENT_DEFAULT = sizeof(void*);
-
-  /**
-    Run-time type ID.
-  */
-  const static uint32_t TYPE_ID = 4078143893UL;
 
 public:
   /**
@@ -99,7 +95,7 @@ public:
     Copy the contents of the buffer (data(), size()) into a new Buffer.
     @return the new <code>Buffer</code> copy
   */
-  Buffer& copy() const {
+  ::std::unique_ptr<Buffer> copy() const {
     return copy(*this);
   }
 
@@ -109,7 +105,7 @@ public:
     @param data the data to copy
     @return the new <code>Buffer</code> copy
   */
-  static Buffer& copy(const Buffer& data) {
+  static ::std::unique_ptr<Buffer> copy(const Buffer& data) {
     return copy(data, data.capacity());
   }
 
@@ -119,7 +115,7 @@ public:
     @param data the data to copy
     @return the new <code>Buffer</code> copy
   */
-  static Buffer& copy(const ::std::string& data) {
+  static ::std::unique_ptr<Buffer> copy(const ::std::string& data) {
     return copy(data.data(), data.size());
   }
 
@@ -128,7 +124,7 @@ public:
     @param data the data to copy
     @return the new <code>Buffer</code> copy
   */
-  static Buffer& copy(const char* data) {
+  static ::std::unique_ptr<Buffer> copy(const char* data) {
     return copy(data, strlen(data));
   }
 
@@ -138,7 +134,7 @@ public:
     @param size size of the data
     @return the new <code>Buffer</code> copy
   */
-  static Buffer& copy(const void* data, size_t size) {
+  static ::std::unique_ptr<Buffer> copy(const void* data, size_t size) {
     return copy(size, data, size);
   }
 
@@ -150,7 +146,7 @@ public:
     @param size size of the data
     @return the new <code>Buffer</code> copy
   */
-  static Buffer& copy(size_t capacity, const void* data, size_t size) {
+  static ::std::unique_ptr<Buffer> copy(size_t capacity, const void* data, size_t size) {
     return copy(ALIGNMENT_DEFAULT, capacity, data, size);
   }
 
@@ -163,7 +159,7 @@ public:
     @param size size of the data
     @return the new <code>Buffer</code> copy
   */
-  static Buffer&
+  static ::std::unique_ptr<Buffer>
   copy(
     size_t alignment,
     size_t capacity,
@@ -202,7 +198,7 @@ public:
     Get the next Buffer in a linked list of <code>Buffer</code>s.
     @return the next Buffer in a linked list of <code>Buffer</code>s
   */
-  Buffer* get_next_buffer() const {
+  ::std::shared_ptr<Buffer> get_next_buffer() const {
     return next_buffer;
   }
 
@@ -417,13 +413,7 @@ public:
     Set the next Buffer in a linked list of <code>Buffer</code>s.
     @param next_buffer the next Buffer in a linked list of <code>Buffer</code>s
   */
-  void set_next_buffer(YO_NEW_REF Buffer* next_buffer);
-
-  /**
-    Set the next Buffer in a linked list of <code>Buffer</code>s.
-    @param next_buffer the next Buffer in a linked list of <code>Buffer</code>s
-  */
-  void set_next_buffer(YO_NEW_REF Buffer& next_buffer);
+  void set_next_buffer(::std::shared_ptr<Buffer> next_buffer);
 
 public:
   /**
@@ -433,16 +423,6 @@ public:
   */
   size_t size() const {
     return size_;
-  }
-
-public:
-  // yield::Object
-  uint32_t get_type_id() const {
-    return TYPE_ID;
-  }
-
-  Buffer& inc_ref() {
-    return Object::inc_ref(*this);
   }
 
 protected:
@@ -464,7 +444,7 @@ private:
 
 private:
   static size_t pagesize;
-  Buffer* next_buffer;
+  ::std::shared_ptr<Buffer> next_buffer;
   size_t size_;
 };
 

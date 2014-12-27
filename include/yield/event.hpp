@@ -30,28 +30,16 @@
 #ifndef _YIELD_EVENT_HPP_
 #define _YIELD_EVENT_HPP_
 
-#include "yield/object.hpp"
-
 namespace yield {
 /**
   Abstract base class for events in the event-driven concurrency subsystem.
 */
-class Event : public Object {
+class Event {
 public:
   /**
     Empty virtual destructor.
   */
   virtual ~Event() { }
-
-public:
-  // yield::Object
-  virtual uint32_t get_type_id() const {
-    return 0;
-  }
-
-  Event& inc_ref() {
-    return Object::inc_ref(*this);
-  }
 };
 }
 

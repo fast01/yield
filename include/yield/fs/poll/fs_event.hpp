@@ -150,12 +150,6 @@ public:
     return type;
   }
 
-public:
-  // yield::Object
-  uint32_t get_type_id() const {
-    return TYPE_ID;
-  }
-
 private:
   Path new_path, old_path;
   Type type;

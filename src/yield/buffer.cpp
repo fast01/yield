@@ -71,7 +71,6 @@ Buffer::~Buffer() {
 #else
   free(data_);
 #endif
-  Buffer::dec_ref(next_buffer);
 }
 
 void Buffer::alloc(size_t alignment, size_t capacity) {
@@ -98,7 +97,7 @@ iovec Buffer::as_write_iovec() const {
   return write_iovec;
 }
 
-Buffer&
+::std::unique_ptr<Buffer>
 Buffer::copy(
   size_t alignment,
   size_t capacity,
@@ -108,7 +107,7 @@ Buffer::copy(
   Buffer* buffer = new Buffer(alignment, capacity);
   memcpy_s(*buffer, buffer->capacity(), data, size);
   buffer->size_ = size;
-  return *buffer;
+  return ::std::unique_ptr<Buffer>(buffer);
 }
 
 size_t Buffer::getpagesize() {
@@ -241,17 +240,7 @@ void Buffer::put(const void* data, size_t size) {
   }
 }
 
-void Buffer::set_next_buffer(YO_NEW_REF Buffer* next_buffer) {
-  if (next_buffer != NULL) {
-    set_next_buffer(*next_buffer);
-  } else if (this->next_buffer != NULL) {
-    Buffer::dec_ref(*this->next_buffer);
-    this->next_buffer = NULL;
-  }
-}
-
-void Buffer::set_next_buffer(YO_NEW_REF Buffer& next_buffer) {
-  Buffer::dec_ref(this->next_buffer);
-  this->next_buffer = &next_buffer;
+void Buffer::set_next_buffer(::std::shared_ptr<Buffer> next_buffer) {
+  this->next_buffer = next_buffer;
 }
 }

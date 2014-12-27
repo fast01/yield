@@ -61,7 +61,7 @@ template <class> class Watches;
 /**
   EventQueue for file system change events (<code>FsEvent</code>s).
 */
-class FsEventQueue : public EventQueue {
+class FsEventQueue : public EventQueue<FsEvent> {
 public:
   /**
     Construct an FsEventQueue, allocating any system resources as necessary.
@@ -96,8 +96,8 @@ public:
 
 public:
   // yield::EventQueue
-  bool enqueue(YO_NEW_REF Event& event);
-  YO_NEW_REF Event* timeddequeue(const Time& timeout);
+  bool enqueue(YO_NEW_REF FsEvent& event);
+  YO_NEW_REF FsEvent* timeddequeue(const Time& timeout);
 
 private:
 #if defined(__FreeBSD__) || defined(__MACH__)

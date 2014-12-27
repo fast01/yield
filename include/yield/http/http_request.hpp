@@ -223,18 +223,6 @@ public:
     return uri_;
   }
 
-public:
-  // yield::Object
-  HttpRequest& inc_ref() {
-    return Object::inc_ref(*this);
-  }
-
-public:
-  // yield::Event
-  uint32_t get_type_id() const {
-    return TYPE_ID;
-  }
-
 protected:
   friend class HttpRequestParser;
 

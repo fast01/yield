@@ -41,9 +41,6 @@ namespace aio {
 */
 class SendAiocb : public Aiocb {
 public:
-  const static uint32_t TYPE_ID = 2368940288UL;
-
-public:
   /**
     Construct a SendAiocb, passing the same parameters as to send.
     @param socket_ socket to send data on
@@ -78,12 +75,6 @@ public:
   */
   const Socket::MessageFlags& get_flags() const {
     return flags;
-  }
-
-public:
-  // yield::Object
-  uint32_t get_type_id() const {
-    return TYPE_ID;
   }
 
 private:

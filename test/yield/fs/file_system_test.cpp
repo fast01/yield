@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/auto_object.hpp"
 #include "yield/exception.hpp"
 #include "yield/fs/file.hpp"
 #include "yield/fs/file_system.hpp"
@@ -41,6 +40,8 @@
 
 namespace yield {
 namespace fs {
+using ::std::unique_ptr;
+
 class FileSystemTest : public ::testing::Test {
 public:
   virtual ~FileSystemTest() { }
@@ -87,14 +88,14 @@ TEST_F(FileSystemTest, access) {
 }
 
 TEST_F(FileSystemTest, chmod) {
-  auto_Object<Stat> stbuf = FileSystem().stat(get_test_file_name());
+  unique_ptr<Stat> stbuf = FileSystem().stat(get_test_file_name());
   ASSERT_TRUE(
     FileSystem().chmod(get_test_file_name(), stbuf->get_mode())
   );
 }
 
 TEST_F(FileSystemTest, chown) {
-  auto_Object<Stat> stbuf = FileSystem().stat(get_test_file_name());
+  unique_ptr<Stat> stbuf = FileSystem().stat(get_test_file_name());
 
   ASSERT_TRUE(
     FileSystem().chown(get_test_file_name(), stbuf->get_uid())
@@ -111,10 +112,8 @@ TEST_F(FileSystemTest, chown) {
 #endif
 
 TEST_F(FileSystemTest, creat) {
-  File* file = FileSystem().creat(get_test_file_name());
-  if (file != NULL) {
-    File::dec_ref(*file);
-  } else {
+  unique_ptr<File> file = FileSystem().creat(get_test_file_name());
+  if (file == NULL) {
     throw Exception();
   }
 }
@@ -152,7 +151,7 @@ TEST_F(FileSystemTest, lstat) {
   if (!FileSystem().symlink(get_test_file_name(), get_test_link_name())) {
     throw Exception();
   }
-  auto_Object<Stat> stbuf = FileSystem().lstat(get_test_link_name());
+  unique_ptr<Stat> stbuf = FileSystem().lstat(get_test_link_name());
   ASSERT_TRUE(stbuf->ISLNK());
 }
 #endif
@@ -172,11 +171,10 @@ TEST_F(FileSystemTest, mktree) {
 }
 
 TEST_F(FileSystemTest, open) {
-  auto_Object<File> file = FileSystem().open(get_test_file_name());
+  unique_ptr<File> file = FileSystem().open(get_test_file_name());
 
-  File* no_file = FileSystem().open(Path("nofile.txt"), O_RDONLY);
+  unique_ptr<File> no_file = FileSystem().open(Path("nofile.txt"), O_RDONLY);
   if (no_file != NULL) {
-    File::dec_ref(*no_file);
     ASSERT_TRUE(false);
   }
 }
@@ -240,7 +238,7 @@ TEST_F(FileSystemTest, rmtree) {
 
 TEST_F(FileSystemTest, stat) {
   DateTime now = DateTime::now();
-  auto_Object<Stat> stbuf = FileSystem().stat(get_test_file_name());
+  unique_ptr<Stat> stbuf = FileSystem().stat(get_test_file_name());
   ASSERT_NE(stbuf->get_atime(), DateTime::INVALID_DATE_TIME);
   ASSERT_LE(stbuf->get_atime(), now);
   ASSERT_NE(stbuf->get_ctime(), DateTime::INVALID_DATE_TIME);
@@ -293,7 +291,7 @@ TEST_F(FileSystemTest, utime) {
            mtime = DateTime::now();
 
   if (FileSystem().utime(get_test_file_name(), atime, mtime)) {
-    auto_Object<Stat> stbuf = FileSystem().stat(get_test_file_name());
+    unique_ptr<Stat> stbuf = FileSystem().stat(get_test_file_name());
     ASSERT_LE(stbuf->get_atime() - atime, Time::NS_IN_S);
     ASSERT_LE(stbuf->get_mtime() - mtime, Time::NS_IN_S);
   } else {
@@ -308,7 +306,7 @@ TEST_F(FileSystemTest, utime_win32) {
   DateTime ctime = DateTime::now();
 
   if (FileSystem().utime(get_test_file_name(), atime, mtime, ctime)) {
-    auto_Object<Stat> stbuf = FileSystem().stat(get_test_file_name());
+    unique_ptr<Stat> stbuf = FileSystem().stat(get_test_file_name());
     ASSERT_LE(stbuf->get_atime() - atime, Time::NS_IN_S);
     ASSERT_LE(stbuf->get_mtime() - mtime, Time::NS_IN_S);
     ASSERT_LE(stbuf->get_ctime() - ctime, Time::NS_IN_S);

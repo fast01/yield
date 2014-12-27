@@ -30,7 +30,7 @@
 #ifndef _YIELD_CHANNEL_HPP_
 #define _YIELD_CHANNEL_HPP_
 
-#include "yield/object.hpp"
+#include "yield/types.hpp"
 
 namespace yield {
 class Buffer;
@@ -38,7 +38,7 @@ class Buffer;
 /**
   An abstract class for read-write channels (files, sockets, etc.).
 */
-class Channel : public Object {
+class Channel {
 public:
   /**
     Empty virtual destructor.
@@ -104,12 +104,6 @@ public:
     @return the number of bytes written on success, -1+errno on failure
   */
   virtual ssize_t writev(const iovec* iov, int iovlen);
-
-public:
-  // yield::Object
-  Channel& inc_ref() {
-    return Object::inc_ref(*this);
-  }
 };
 }
 

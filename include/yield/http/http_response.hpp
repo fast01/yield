@@ -41,9 +41,6 @@ namespace http {
 */
 class HttpResponse : public HttpMessage<HttpResponse> {
 public:
-  const static uint32_t TYPE_ID = 654743796;
-
-public:
   /**
     Construct an HttpResponse from its constituent parts.
     @param status_code numeric status code e.g., 200
@@ -99,18 +96,6 @@ public:
   */
   uint16_t status_code() const {
     return status_code_;
-  }
-
-public:
-  // yield::Object
-  HttpResponse& inc_ref() {
-    return Object::inc_ref(*this);
-  }
-
-public:
-  // yield::Event
-  uint32_t get_type_id() const {
-    return TYPE_ID;
   }
 
 protected:

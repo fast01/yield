@@ -28,7 +28,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../channel_test.hpp"
-#include "yield/auto_object.hpp"
 #include "yield/fs/file.hpp"
 #include "yield/fs/file_system.hpp"
 #include "yield/fs/stat.hpp"
@@ -38,16 +37,15 @@
 namespace yield {
 namespace fs {
 using ::std::string;
+using ::std::shared_ptr;
+using ::std::unique_ptr;
 
 class FilePair : public ChannelPair {
 public:
   FilePair() : path("file_test.txt") {
-    read_file = write_file = NULL;
   }
 
-  ~FilePair() {
-    File::dec_ref(read_file);
-    File::dec_ref(write_file);
+  virtual ~FilePair() {
     FileSystem().unlink(path);
   }
 
@@ -88,7 +86,7 @@ public:
 
 private:
   Path path;
-  File* read_file, *write_file;
+  unique_ptr<File> read_file, write_file;
 };
 
 
@@ -124,17 +122,13 @@ TEST_F(FileTest, datasync) {
 }
 
 TEST_F(FileTest, dup) {
-  File* dup_file = get_read_file().dup();
-  if (dup_file != NULL) {
-    File::dec_ref(*dup_file);
-  } else {
+  unique_ptr<File> dup_file = get_read_file().dup();
+  if (dup_file == NULL) {
     throw Exception();
   }
 
   dup_file = File::dup(static_cast<fd_t>(get_read_file()));
-  if (dup_file != NULL) {
-    File::dec_ref(*dup_file);
-  } else {
+  if (dup_file == NULL) {
     throw Exception();
   }
 }
@@ -154,12 +148,8 @@ TEST_F(FileTest, getlk) {
 }
 #endif
 
-TEST_F(FileTest, get_type_id) {
-  ASSERT_EQ(get_write_file().get_type_id(), File::TYPE_ID);
-}
-
 TEST_F(FileTest, map) {
-  auto_Object<File::Map> mmf = get_read_file().mmap();
+  unique_ptr<File::Map> mmf = get_read_file().mmap();
 }
 
 //class FileMapReadTest : public FileTest {
@@ -171,7 +161,7 @@ TEST_F(FileTest, map) {
 //  // ::testing::Test
 //  void run() {
 //    {
-//      auto_Object<File::Map> mmf = get_test_file().mmap();
+//      unique_ptr<File::Map> mmf = get_test_file().mmap();
 //
 //      mmf->reserve(get_test_string().size());
 //
@@ -190,9 +180,9 @@ TEST_F(FileTest, map) {
 //    }
 //
 //    {
-//      auto_Object<File> test_file = FileSystem().open(get_test_file_name());
+//      unique_ptr<File> test_file = FileSystem().open(get_test_file_name());
 //
-//      auto_Object<File::Map> mmf
+//      unique_ptr<File::Map> mmf
 //      = get_test_file().mmap(
 //          SIZE_MAX,
 //          0,
@@ -219,7 +209,7 @@ TEST_F(FileTest, map) {
 //
 //  // ::testing::Test
 //  void run() {
-//    auto_Object<File::Map> mmf = get_test_file().mmap();
+//    unique_ptr<File::Map> mmf = get_test_file().mmap();
 //
 //    mmf->reserve(get_test_string().size());
 //
@@ -259,7 +249,7 @@ TEST_F(FileTest, pread) {
 TEST_F(FileTest, pread_Buffer) {
   write();
 
-  auto_Object<Buffer> buffer = new Buffer(Buffer::getpagesize(), 7);
+  unique_ptr<Buffer> buffer(new Buffer(Buffer::getpagesize(), 7));
   ssize_t pread_ret = get_read_file().pread(*buffer, 4);
   if (pread_ret >= 0) {
     ASSERT_EQ(pread_ret, 7);
@@ -272,9 +262,9 @@ TEST_F(FileTest, pread_Buffer) {
 TEST_F(FileTest, pread_Buffers) {
   write();
 
-  auto_Object<Buffer> _str = new Buffer(Buffer::getpagesize(), 4);
-  auto_Object<Buffer> ing = new Buffer(Buffer::getpagesize(), 3);
-  _str->set_next_buffer(ing->inc_ref());
+  shared_ptr<Buffer> _str(new Buffer(Buffer::getpagesize(), 4));
+  shared_ptr<Buffer> ing(new Buffer(Buffer::getpagesize(), 3));
+  _str->set_next_buffer(ing);
 
   ssize_t pread_ret = get_read_file().pread(*_str, 4);
   if (pread_ret >= 0) {
@@ -345,7 +335,7 @@ TEST_F(FileTest, pwrite) {
 }
 
 TEST_F(FileTest, pwrite_Buffer) {
-  auto_Object<Buffer> buffer = Buffer::copy(" string");
+  unique_ptr<Buffer> buffer = Buffer::copy(" string");
   ssize_t pwrite_ret = get_write_file().pwrite(*buffer, 4);
   if (pwrite_ret >= 0) {
     ASSERT_EQ(pwrite_ret, 7);
@@ -364,9 +354,9 @@ TEST_F(FileTest, pwrite_Buffer) {
 }
 
 TEST_F(FileTest, pwrite_Buffers) {
-  auto_Object<Buffer> _str = Buffer::copy(" str");
-  auto_Object<Buffer> ing = Buffer::copy("ing");
-  _str->set_next_buffer(ing->inc_ref());
+  shared_ptr<Buffer> _str = Buffer::copy(" str");
+  shared_ptr<Buffer> ing = Buffer::copy("ing");
+  _str->set_next_buffer(ing);
 
   ssize_t pwrite_ret = get_write_file().pwrite(*_str, 4);
   if (pwrite_ret >= 0) {
@@ -480,7 +470,7 @@ TEST_F(FileTest, setlkw) {
 
 TEST_F(FileTest, stat) {
   DateTime now = DateTime::now();
-  auto_Object<Stat> stbuf = get_write_file().stat();
+  unique_ptr<Stat> stbuf = get_write_file().stat();
   ASSERT_NE(stbuf->get_atime(), DateTime::INVALID_DATE_TIME);
   ASSERT_LE(stbuf->get_atime(), now);
   ASSERT_NE(stbuf->get_ctime(), DateTime::INVALID_DATE_TIME);

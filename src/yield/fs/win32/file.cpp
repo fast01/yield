@@ -71,13 +71,13 @@ bool File::Lock::is_exclusive() const {
 File::Map::Map(
   size_t capacity,
   void* data,
-  File& file,
+  fd_t fd,
   fd_t file_mapping,
   uint64_t file_offset,
   bool read_only,
   bool shared
 ) : Buffer(capacity, data, capacity),
-  file(file.inc_ref()),
+  fd(fd),
   file_mapping(file_mapping),
   file_offset(file_offset),
   read_only(read_only),
@@ -94,7 +94,7 @@ File::Map::Map(
 File::Map::~Map() {
   unmap();
   data_ = NULL;
-  File::dec_ref(file);
+  ::CloseHandle(fd);
 }
 
 bool File::Map::is_read_only() const {
@@ -170,7 +170,7 @@ bool File::datasync() {
   return FlushFileBuffers(*this) != 0;
 }
 
-YO_NEW_REF File* File::dup(fd_t fd) {
+::std::unique_ptr<File> File::dup(fd_t fd) {
   fd_t dup_fd;
   if (
     DuplicateHandle(
@@ -183,17 +183,17 @@ YO_NEW_REF File* File::dup(fd_t fd) {
       DUPLICATE_SAME_ACCESS
     )
   ) {
-    return new File(dup_fd);
+    return ::std::unique_ptr<File>(new File(dup_fd));
   } else {
     return NULL;
   }
 }
 
-YO_NEW_REF File* File::dup(FILE* file) {
+::std::unique_ptr<File> File::dup(FILE* file) {
   return dup(reinterpret_cast<fd_t>(_get_osfhandle(_fileno(file))));
 }
 
-YO_NEW_REF File::Map*
+::std::unique_ptr<File::Map>
 File::mmap(
   size_t length,
   off_t offset,
@@ -261,7 +261,7 @@ File::mmap(
     lpMapAddress = reinterpret_cast<LPVOID>(-1);
   }
 
-  return new
+  return ::std::unique_ptr<Map>(new
          Map(
            length,
            lpMapAddress,
@@ -270,7 +270,7 @@ File::mmap(
            offset,
            read_only,
            shared
-         );
+         ));
 }
 
 ssize_t File::pread(Buffer& buffer, off_t offset) {
@@ -592,10 +592,10 @@ bool File::setlk(const Lock& lock, bool wait) {
   return false;
 }
 
-YO_NEW_REF Stat* File::stat() {
+::std::unique_ptr<Stat> File::stat() {
   BY_HANDLE_FILE_INFORMATION by_handle_file_information;
   if (GetFileInformationByHandle(*this, &by_handle_file_information) != 0) {
-    return new Stat(by_handle_file_information);
+    return ::std::unique_ptr<Stat>(new Stat(by_handle_file_information));
   } else {
     return NULL;
   }

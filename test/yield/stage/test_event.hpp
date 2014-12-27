@@ -35,11 +35,6 @@
 namespace yield {
 namespace stage {
 class TestEvent : public Event {
-public:
-  // yield::Object
-  uint32_t get_type_id() const {
-    return 0;
-  }
 };
 }
 }

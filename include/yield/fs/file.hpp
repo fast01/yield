@@ -54,13 +54,10 @@ class Stat;
 */
 class File : public Channel {
 public:
-  const static uint32_t TYPE_ID = 1965528734UL;
-
-public:
   /**
     An advisory file lock.
   */
-  class Lock : public Object {
+  class Lock {
   public:
     Lock(
       uint64_t start,
@@ -121,12 +118,6 @@ public:
     }
 #endif
 
-  public:
-    // yield::Object
-    File::Lock& inc_ref() {
-      return Object::inc_ref(*this);
-    }
-
   private:
 #ifdef _WIN32
     bool exclusive;
@@ -147,20 +138,6 @@ public:
     ~Map();
 
   public:
-    // yield::Object
-    File::Map& inc_ref() {
-      return Object::inc_ref(*this);
-    }
-
-  public:
-    /**
-      Get the file underlying this map.
-      @return the file underlying this map
-    */
-    File& get_file() {
-      return file;
-    }
-
     /**
       Get the offset in the file at which this map starts.
       @return the offset in the file at which this map starts
@@ -218,7 +195,7 @@ public:
     Map(
       size_t capacity,
       void* data,
-      File& file,
+      fd_t fd,
 #ifdef _WIN32
       fd_t file_mapping,
 #endif
@@ -233,7 +210,7 @@ public:
     );
 
   private:
-    File& file;
+    fd_t fd;
 #ifdef _WIN32
     fd_t file_mapping;
 #endif
@@ -272,7 +249,7 @@ public:
     Duplicate the underlying file descriptor and wrap that in a new File.
     @return a new File with a dup'd file descriptor on success, NULL+errno on failure
   */
-  YO_NEW_REF File* dup() {
+  ::std::unique_ptr<File> dup() {
     return dup(fd);
   }
 
@@ -281,14 +258,14 @@ public:
     @param fd file descriptor to duplicate
     @return a new File with a dup'd file descriptor on success, NULL+errno on failure
   */
-  static YO_NEW_REF File* dup(fd_t fd);
+  static ::std::unique_ptr<File> dup(fd_t fd);
 
   /**
     Duplicate a file stream's underlying descriptor and wrap it in a new File.
     @param file file stream with a descriptor to duplicate
     @return a new File with a dup'd file descriptor on success, NULL+errno on failure
   */
-  static YO_NEW_REF File* dup(FILE* file);
+  static ::std::unique_ptr<File> dup(FILE* file);
 
 public:
 #ifndef _WIN32
@@ -314,7 +291,7 @@ public:
       visible only to the mapper)
     @return a new Map object on success, NULL+errno on failure
   */
-  YO_NEW_REF Map*
+  ::std::unique_ptr<Map>
   mmap(
     size_t length = SIZE_MAX,
     off_t offset = 0,
@@ -418,7 +395,7 @@ public:
     Retrieve the metadata for this file.
     @return a new Stat object on success, NULL+errno on failure.
   */
-  YO_NEW_REF Stat* stat();
+  ::std::unique_ptr<Stat> stat();
 
 public:
   /**
@@ -451,16 +428,6 @@ public:
     @return true on success, false+errno on failure
   */
   bool unlk(const Lock& lock);
-
-public:
-  // yield::Object
-  uint32_t get_type_id() const {
-    return TYPE_ID;
-  }
-
-  File& inc_ref() {
-    return Object::inc_ref(*this);
-  }
 
 public:
   // yield::Channel

@@ -31,6 +31,7 @@
 #define _YIELD_POLL_FD_EVENT_HPP_
 
 #include "yield/event.hpp"
+#include "yield/types.hpp"
 
 namespace yield {
 namespace poll {
@@ -70,12 +71,6 @@ public:
   */
   Type get_type() const {
     return type;
-  }
-
-public:
-  // yield::Object
-  virtual uint32_t get_type_id() const {
-    return TYPE_ID;
   }
 
 private:

@@ -33,26 +33,32 @@
 #pragma comment(lib, "ws2_32.lib")
 #include <Windows.h>
 
+#include "yield/logging.hpp"
+
 namespace yield {
 namespace poll {
 using ::std::vector;
 
-class FdEventQueue::Impl : public EventQueue {
+class FdEventQueue::Impl : public EventQueue<FdEvent> {
 public:
   virtual ~Impl() {
   }
 
+public:
   virtual bool associate(fd_t fd, FdEvent::Type fd_event_types) = 0;
   virtual bool dissociate(fd_t fd) = 0;
 
-protected:
-  ::yield::queue::BlockingConcurrentQueue<Event> event_queue;
+public:
+  bool enqueue(FdEvent& event) {
+    CHECK(false);
+    return false;
+  }
 };
 
 
-class FdEventQueue::FDImpl : public Impl {
+class FdEventQueue::FdImpl : public Impl {
 public:
-  FDImpl() {
+  FdImpl() {
     HANDLE hWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
     if (hWakeEvent != NULL) {
       fd_event_types.push_back(FdEvent::TYPE_READ_READY);
@@ -62,22 +68,13 @@ public:
     }
   }
 
-  ~FDImpl() {
+  ~FdImpl() {
     CloseHandle(handles[0]);
   }
 
 public:
   // yield::EventQueue
-  bool enqueue(Event& event) {
-    if (event_queue.enqueue(event)) {
-      SetEvent(handles[0]);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  YO_NEW_REF Event* timeddequeue(const Time& timeout) {
+  YO_NEW_REF FdEvent* timeddequeue(const Time& timeout) {
     DWORD dwRet
     = WaitForMultipleObjectsEx(
         handles.size(),
@@ -88,7 +85,7 @@ public:
       );
 
     if (dwRet == WAIT_OBJECT_0) {
-      return event_queue.trydequeue();
+      return NULL;
     } else if (dwRet > WAIT_OBJECT_0 && dwRet < WAIT_OBJECT_0 + handles.size()) {
       return new FdEvent(
                handles[dwRet - WAIT_OBJECT_0],
@@ -156,17 +153,6 @@ class FdEventQueue::SocketImpl : public Impl {
 public:
   virtual bool associate(socket_t socket_, FdEvent::Type fd_event_types) = 0;
   virtual bool dissociate(socket_t socket_) = 0;
-
-public:
-  // yield::EventQuueue
-  bool enqueue(YO_NEW_REF Event& event) {
-    if (event_queue.enqueue(event)) {
-      send(wake_socket_pair[1], "m", 1, 0);
-      return true;
-    } else {
-      return false;
-    }
-  }
 
 public:
   // yield::poll::FdEventQueue::Impl
@@ -281,7 +267,7 @@ public:
 
 public:
   // yield::EventQueue
-  YO_NEW_REF Event* timeddequeue(const Time& timeout) {
+  YO_NEW_REF FdEvent* timeddequeue(const Time& timeout) {
     // Scan pollfds once for outstanding revents from the last WSAPoll,
     // then call WSAPoll again if necessary.
     int ret = 0;
@@ -296,7 +282,7 @@ public:
             pollfd_.revents = 0;
             char m;
             recv(wake_socket_pair[0], &m, 1, 0);
-            return event_queue.trydequeue();
+            return NULL;
           } else {
             fd_t fd = reinterpret_cast<fd_t>(pollfd_.fd);
             uint16_t revents;
@@ -381,7 +367,7 @@ public:
 
 public:
   // yield::EventQueue
-  YO_NEW_REF Event* timeddequeue(const Time& timeout) {
+  YO_NEW_REF FdEvent* timeddequeue(const Time& timeout) {
     fd_set except_fd_set_copy, read_fd_set_copy, write_fd_set_copy;
 
     memcpy_s(
@@ -454,7 +440,7 @@ public:
           if (socket_ == wake_socket_pair[0]) {
             char m;
             recv(wake_socket_pair[0], &m, 1, 0);
-            return event_queue.trydequeue();
+            return NULL;
           } else {
             return new FdEvent(
                      reinterpret_cast<fd_t>(socket_),
@@ -546,7 +532,7 @@ FdEventQueue::FdEventQueue(bool for_sockets_only) throw(Exception) {
     pimpl = new SocketSelector;
 #endif
   } else {
-    pimpl = new FDImpl;
+    pimpl = new FdImpl;
   }
 }
 
@@ -562,11 +548,11 @@ bool FdEventQueue::dissociate(fd_t fd) {
   return pimpl->dissociate(fd);
 }
 
-bool FdEventQueue::enqueue(Event& event) {
+bool FdEventQueue::enqueue(FdEvent& event) {
   return pimpl->enqueue(event);
 }
 
-YO_NEW_REF Event* FdEventQueue::timeddequeue(const Time& timeout) {
+YO_NEW_REF FdEvent* FdEventQueue::timeddequeue(const Time& timeout) {
   return pimpl->timeddequeue(timeout);
 }
 }

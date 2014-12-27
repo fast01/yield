@@ -42,7 +42,7 @@ using ::yield::thread::Thread;
 class SedaStageScheduler::SedaStage : public ::yield::thread::Runnable {
 public:
   SedaStage(Stage& stage)
-    : stage(stage.inc_ref()),
+    : stage(stage),
       visit_timeout(5) {
     should_run = true;
   }
@@ -79,7 +79,7 @@ SedaStageScheduler::~SedaStageScheduler() {
 
 void
 SedaStageScheduler::schedule(
-  Stage& stage,
+  YO_NEW_REF Stage& stage,
   ConcurrencyLevel concurrency_level
 ) {
   auto_Object<SedaStage> seda_stage = new SedaStage(stage);

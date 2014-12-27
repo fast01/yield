@@ -169,15 +169,17 @@ bool FsEventQueue::dissociate(const Path& path) {
   }
 }
 
-bool FsEventQueue::enqueue(YO_NEW_REF Event& event) {
-  if (event_queue.enqueue(event)) {
-    uint64_t data = 1;
-    ssize_t write_ret = write(event_fd, &data, sizeof(data));
-    CHECK_EQ(write_ret, static_cast<ssize_t>(sizeof(data)));
-    return true;
-  } else {
-    return false;
-  }
+bool FsEventQueue::enqueue(YO_NEW_REF FsEvent& event) {
+  CHECK(false);
+  return false;
+  //if (event_queue.enqueue(event)) {
+  //  uint64_t data = 1;
+  //  ssize_t write_ret = write(event_fd, &data, sizeof(data));
+  //  CHECK_EQ(write_ret, static_cast<ssize_t>(sizeof(data)));
+  //  return true;
+  //} else {
+  //  return false;
+  //}
 }
 
 YO_NEW_REF Event* FsEventQueue::timeddequeue(const Time& timeout) {

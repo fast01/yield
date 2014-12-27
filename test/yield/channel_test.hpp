@@ -30,7 +30,6 @@
 #ifndef _YIELD_CHANNEL_TEST_HPP_
 #define _YIELD_CHANNEL_TEST_HPP_
 
-#include "yield/auto_object.hpp"
 #include "yield/buffer.hpp"
 #include "yield/channel.hpp"
 #include "yield/channel_pair.hpp"
@@ -43,7 +42,9 @@
 #endif
 
 namespace yield {
+using ::std::shared_ptr;
 using ::std::string;
+using ::std::unique_ptr;
 
 template <class ChannelPairType>
 class ChannelTest : public ::testing::Test {
@@ -52,11 +53,10 @@ public:
   }
 
   virtual void SetUp() {
-    channel_pair = new ChannelPairType();
+    channel_pair.reset(new ChannelPairType());
   }
 
   virtual void TearDown() {
-    ChannelPair::dec_ref(channel_pair);
     channel_pair = NULL;
   }
 
@@ -135,7 +135,7 @@ protected:
   }
 
 private:
-  ChannelPair* channel_pair;
+  unique_ptr<ChannelPair> channel_pair;
   ::std::string test_string;
 };
 
@@ -154,14 +154,14 @@ TYPED_TEST_P(ChannelTest, read) {
 
 TYPED_TEST_P(ChannelTest, read_Buffer) {
   this->write();
-  auto_Object<Buffer> test_buffer = new Buffer(this->get_test_string().size());
+  unique_ptr<Buffer> test_buffer(new Buffer(this->get_test_string().size()));
   this->check_read(*test_buffer, this->get_read_channel().read(*test_buffer));
 }
 
 TYPED_TEST_P(ChannelTest, read_Buffers) {
   this->write();
-  auto_Object<Buffer> test_buffer = new Buffer(this->get_test_string().size());
-  test_buffer->set_next_buffer(new Buffer(this->get_test_string().size()));
+  unique_ptr<Buffer> test_buffer(new Buffer(this->get_test_string().size()));
+  test_buffer->set_next_buffer(::std::shared_ptr<Buffer>(new Buffer(this->get_test_string().size())));
   this->check_read(*test_buffer, this->get_read_channel().read(*test_buffer));
 }
 
@@ -203,15 +203,15 @@ TYPED_TEST_P(ChannelTest, write) {
 }
 
 TYPED_TEST_P(ChannelTest, write_Buffer) {
-  auto_Object<Buffer> test_buffer = Buffer::copy(this->get_test_string());
+  unique_ptr<Buffer> test_buffer = Buffer::copy(this->get_test_string());
   this->check_write(this->get_write_channel().write(*test_buffer));
 
   this->read();
 }
 
 TYPED_TEST_P(ChannelTest, write_Buffers) {
-  auto_Object<Buffer> test_buffer = Buffer::copy(this->get_test_string());
-  test_buffer->set_next_buffer(new Buffer(1));
+  unique_ptr<Buffer> test_buffer = Buffer::copy(this->get_test_string());
+  test_buffer->set_next_buffer(::std::shared_ptr<Buffer>(new Buffer(1)));
   this->check_write(this->get_write_channel().write(*test_buffer));
 
   this->read();

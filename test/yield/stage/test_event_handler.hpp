@@ -36,7 +36,7 @@
 
 namespace yield {
 namespace stage {
-class TestEventHandler : public EventHandler {
+class TestEventHandler : public EventHandler<> {
 public:
   TestEventHandler() {
     seen_events_count = 0;

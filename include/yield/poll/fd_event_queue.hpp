@@ -45,7 +45,7 @@ namespace poll {
   EventQueue for file descriptor events (<code>FdEvent</code>s).
   Implemented in terms of efficient poll() variants on different platforms.
 */
-class FdEventQueue : public EventQueue {
+class FdEventQueue : public EventQueue<FdEvent> {
 public:
   /**
     Construct an FdEventQueue, allocating any associated system resources.
@@ -78,8 +78,8 @@ public:
 
 public:
   // yield::EventQueue
-  bool enqueue(YO_NEW_REF Event& event);
-  YO_NEW_REF Event* timeddequeue(const Time& timeout);
+  bool enqueue(YO_NEW_REF FdEvent& event);
+  YO_NEW_REF FdEvent* timeddequeue(const Time& timeout);
 
 private:
   ::yield::queue::BlockingConcurrentQueue<Event> event_queue;
@@ -90,7 +90,7 @@ private:
 #elif defined(__sun)
   int port;
 #elif defined(_WIN32)
-  class FDImpl;
+  class FdImpl;
   class Impl;
   class SocketImpl;
   class SocketPoller;

@@ -30,14 +30,15 @@
 #ifndef _YIELD_EVENT_HANDLER_HPP_
 #define _YIELD_EVENT_HANDLER_HPP_
 
-#include "yield/object.hpp"
+#include <memory>
+
+#include "yield/event.hpp"
 
 namespace yield {
-class Event;
-
 /**
   Abstract base class for event handlers in the event-driven concurrency subsystem.
 */
+template <class EventT = Event>
 class EventHandler : public Object {
 public:
   /**
@@ -52,7 +53,7 @@ public:
       processing code.
     @param event a new reference to an Event to handle
   */
-  virtual void handle(YO_NEW_REF Event& event) = 0;
+  virtual void handle(::std::shared_ptr<EventT> event) = 0;
 
 public:
   // yield::Object

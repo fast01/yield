@@ -153,17 +153,6 @@ TEST(Buffer, getpagesize) {
   ASSERT_EQ(pagesize % 2, 0);
 }
 
-TEST(Buffer, get_type_id) {
-  auto_Object<Buffer> buffer = new Buffer(2);
-  ASSERT_EQ(buffer->get_type_id(), Buffer::TYPE_ID);
-}
-
-TEST(Buffer, inc_ref) {
-  auto_Object<Buffer> buffer = new Buffer(2);
-  buffer->inc_ref();
-  Buffer::dec_ref(*buffer);
-}
-
 TEST(Buffer, is_page_aligned) {
   auto_Object<Buffer> buffer
   = new Buffer(Buffer::getpagesize(), Buffer::getpagesize());

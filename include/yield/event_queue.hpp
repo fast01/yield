@@ -30,15 +30,17 @@
 #ifndef _YIELD_EVENT_QUEUE_HPP_
 #define _YIELD_EVENT_QUEUE_HPP_
 
+#include <memory>
+
 #include "yield/event_handler.hpp"
 #include "yield/time.hpp"
-
 
 namespace yield {
 /**
   Abstract base class for event queues in the event-driven concurrency subsystem.
 */
-class EventQueue : public EventHandler {
+template <class EventT = Event>
+class EventQueue : public EventHandler<EventT> {
 public:
   /**
     Empty virtual destructor.
@@ -49,8 +51,8 @@ public:
     Blocking dequeue. Always returns a new reference to an Event.
     @return a new reference to an Event.
   */
-  virtual YO_NEW_REF Event& dequeue() {
-    Event* event;
+  virtual ::std::shared_ptr<EventT> dequeue() {
+    EventT* event;
     do {
       event = timeddequeue(Time::FOREVER);
     } while (event == NULL);
@@ -64,7 +66,7 @@ public:
     @param event the new Event reference to enqueue
     @return true if the enqueue succeeded.
   */
-  virtual bool enqueue(YO_NEW_REF Event& event) = 0;
+  virtual bool enqueue(::std::shared_ptr<EventT> event) = 0;
 
   /**
     Timed dequeue.
@@ -73,7 +75,7 @@ public:
     @param timeout the time to wait for new Events
     @return a new reference to an Event or NULL
   */
-  virtual YO_NEW_REF Event* timeddequeue(const Time& timeout) = 0;
+  virtual ::std::shared_ptr<EventT> timeddequeue(const Time& timeout) = 0;
 
   /**
     Non-blocking dequeue.
@@ -81,7 +83,7 @@ public:
     This method is guaranteed not to block.
     @return a new reference to an Event or NULL.
   */
-  virtual YO_NEW_REF Event* trydequeue() {
+  virtual ::std::shared_ptr<EventT> trydequeue() {
     return timeddequeue(0);
   }
 
@@ -93,7 +95,7 @@ public:
 
 public:
   // yield::EventHandler
-  void handle(YO_NEW_REF Event& event) {
+  void handle(YO_NEW_REF EventT& event) {
     enqueue(event);
   }
 };

@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/auto_object.hpp"
 #include "yield/date_time.hpp"
 #include "yield/exception.hpp"
 #include "yield/fs/file_system.hpp"
@@ -42,6 +41,8 @@
 
 namespace yield {
 namespace fs {
+using ::std::unique_ptr;
+
 class StatTest : public ::testing::Test {
 public:
   StatTest() : test_dir_name("stat_test"), test_file_name("stat_test.txt")
@@ -77,7 +78,7 @@ TEST_F(StatTest, get_atime) {
   }
 
   DateTime now = DateTime::now();
-  auto_Object<Stat> stbuf = FileSystem().stat(get_test_dir_name());
+  unique_ptr<Stat> stbuf = FileSystem().stat(get_test_dir_name());
   ASSERT_NE(stbuf->get_atime(), DateTime::INVALID_DATE_TIME);
   ASSERT_LE(stbuf->get_atime(), now);
 }
@@ -87,7 +88,7 @@ TEST_F(StatTest, get_ctime) {
     throw Exception();
   }
   DateTime now = DateTime::now();
-  auto_Object<Stat> stbuf = FileSystem().stat(get_test_dir_name());
+  unique_ptr<Stat> stbuf = FileSystem().stat(get_test_dir_name());
   ASSERT_NE(stbuf->get_ctime(), DateTime::INVALID_DATE_TIME);
   ASSERT_LE(stbuf->get_ctime(), now);
 }
@@ -97,7 +98,7 @@ TEST_F(StatTest, get_mtime) {
     throw Exception();
   }
   DateTime now = DateTime::now();
-  auto_Object<Stat> stbuf = FileSystem().stat(get_test_dir_name());
+  unique_ptr<Stat> stbuf = FileSystem().stat(get_test_dir_name());
   ASSERT_NE(stbuf->get_mtime(), DateTime::INVALID_DATE_TIME);
   ASSERT_LE(stbuf->get_mtime(), now);
 }
@@ -106,7 +107,7 @@ TEST_F(StatTest, get_nlink) {
   if (!FileSystem().mkdir(get_test_dir_name())) {
     throw Exception();
   }
-  auto_Object<Stat> stbuf = FileSystem().stat(get_test_dir_name());
+  unique_ptr<Stat> stbuf = FileSystem().stat(get_test_dir_name());
   ASSERT_EQ(stbuf->get_nlink(), 1);
 }
 
@@ -114,20 +115,20 @@ TEST_F(StatTest, get_size) {
   if (!FileSystem().mkdir(get_test_dir_name())) {
     throw Exception();
   }
-  auto_Object<Stat> stbuf = FileSystem().stat(get_test_dir_name());
+  unique_ptr<Stat> stbuf = FileSystem().stat(get_test_dir_name());
   ASSERT_EQ(stbuf->get_size(), 0);
 }
 
 #ifdef __linux__
 TEST(Stat, ISBLK) {
   if (FileSystem().exists("/dev/cdrom")) {
-    auto_Object<Stat> stbuf = FileSystem().stat("/dev/cdrom");
+    unique_ptr<Stat> stbuf = FileSystem().stat("/dev/cdrom");
     ASSERT_TRUE(stbuf->ISBLK());
   }
 }
 
 TEST(Stat, ISCHR) {
-  auto_Object<Stat> stbuf = FileSystem().stat("/dev/tty");
+  unique_ptr<Stat> stbuf = FileSystem().stat("/dev/tty");
   ASSERT_TRUE(stbuf->ISCHR());
 }
 #endif
@@ -136,7 +137,7 @@ TEST_F(StatTest, ISDIR) {
   if (!FileSystem().mkdir(get_test_dir_name())) {
     throw Exception();
   }
-  auto_Object<Stat> stbuf = FileSystem().stat(get_test_dir_name());
+  unique_ptr<Stat> stbuf = FileSystem().stat(get_test_dir_name());
   ASSERT_TRUE(stbuf->ISDIR());
 }
 
@@ -145,7 +146,7 @@ TEST_F(StatTest, ISFIFO) {
   if (!FileSystem().mkfifo(get_test_file_name())) {
     throw Exception();
   }
-  auto_Object<Stat> stbuf = FileSystem().stat(get_test_file_name());
+  unique_ptr<Stat> stbuf = FileSystem().stat(get_test_file_name());
   ASSERT_TRUE(stbuf->ISFIFO());
 }
 
@@ -153,7 +154,7 @@ TEST_F(StatTest, ISLNK) {
   if (!FileSystem().symlink(get_test_dir_name(), get_test_file_name())) {
     throw Exception();
   }
-  auto_Object<Stat> stbuf = FileSystem().lstat(get_test_file_name());
+  unique_ptr<Stat> stbuf = FileSystem().lstat(get_test_file_name());
   ASSERT_TRUE(stbuf->ISLNK());
 }
 #endif
@@ -162,7 +163,7 @@ TEST_F(StatTest, ISREG) {
   if (!FileSystem().touch(get_test_file_name())) {
     throw Exception();
   }
-  auto_Object<Stat> stbuf = FileSystem().stat(get_test_file_name());
+  unique_ptr<Stat> stbuf = FileSystem().stat(get_test_file_name());
   ASSERT_TRUE(stbuf->ISREG());
 }
 
@@ -170,8 +171,8 @@ TEST_F(StatTest, operator_equals) {
   if (!FileSystem().touch(get_test_file_name())) {
     throw Exception();
   }
-  auto_Object<Stat> stbuf1 = FileSystem().stat(get_test_file_name());
-  auto_Object<Stat> stbuf2 = FileSystem().stat(get_test_file_name());
+  unique_ptr<Stat> stbuf1 = FileSystem().stat(get_test_file_name());
+  unique_ptr<Stat> stbuf2 = FileSystem().stat(get_test_file_name());
   ASSERT_EQ(*stbuf1, *stbuf2);
 }
 
@@ -181,7 +182,7 @@ TEST_F(StatTest, operator_as_BY_HANDLE_FILE_INFORMATION) {
     throw Exception();
   }
 
-  auto_Object<Stat> stbuf1 = FileSystem().stat(get_test_file_name());
+  unique_ptr<Stat> stbuf1 = FileSystem().stat(get_test_file_name());
 
   BY_HANDLE_FILE_INFORMATION bhfi = *stbuf1;
 
@@ -219,7 +220,7 @@ TEST_F(StatTest, operator_as_WIN32_FILE_ATTRIBUTE_DATA) {
     throw Exception();
   }
 
-  auto_Object<Stat> stbuf1 = FileSystem().stat(get_test_file_name());
+  unique_ptr<Stat> stbuf1 = FileSystem().stat(get_test_file_name());
 
   WIN32_FILE_ATTRIBUTE_DATA fad = *stbuf1;
 
@@ -252,7 +253,7 @@ TEST_F(StatTest, operator_as_WIN32_FIND_DATA) {
     throw Exception();
   }
 
-  auto_Object<Stat> stbuf1 = FileSystem().stat(get_test_file_name());
+  unique_ptr<Stat> stbuf1 = FileSystem().stat(get_test_file_name());
 
   WIN32_FIND_DATA fd = *stbuf1;
 
@@ -288,7 +289,7 @@ TEST_F(StatTest, operator_as_struct_stat) {
     throw Exception();
   }
 
-  auto_Object<Stat> stbuf1 = FileSystem().stat(get_test_file_name());
+  unique_ptr<Stat> stbuf1 = FileSystem().stat(get_test_file_name());
 
   struct stat ss = static_cast<struct stat>(*stbuf1);
   ASSERT_EQ(ss.st_blksize, stbuf1->get_blksize());
