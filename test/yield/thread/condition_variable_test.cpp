@@ -35,6 +35,8 @@
 
 namespace yield {
 namespace thread {
+using ::std::unique_ptr;
+
 class ConditionVariableTest : public ::testing::Test {
 public:
   // ::testing::Test
@@ -78,7 +80,7 @@ TEST_F(ConditionVariableTest, timedwait) {
   bool wait_ret = cond->timedwait(0.1);
   ASSERT_FALSE(wait_ret);
 
-  Thread thread(*new OtherThread(*cond));
+  Thread thread(unique_ptr<Runnable>(new OtherThread(*cond)));
 
   Thread::sleep(0.01);
 
@@ -91,7 +93,7 @@ TEST_F(ConditionVariableTest, wait) {
   bool lock_ret = cond->lock_mutex();
   ASSERT_TRUE(lock_ret);
 
-  Thread thread(*new OtherThread(*cond));
+  Thread thread(unique_ptr<Runnable>(new OtherThread(*cond)));
 
   bool wait_ret = cond->wait();
   ASSERT_TRUE(wait_ret);

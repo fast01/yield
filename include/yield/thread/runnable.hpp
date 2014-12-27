@@ -30,25 +30,21 @@
 #ifndef _YIELD_THREAD_RUNNABLE_HPP_
 #define _YIELD_THREAD_RUNNABLE_HPP_
 
-#include "yield/object.hpp"
-
 namespace yield {
 namespace thread {
 /**
   Simple interface for fiber/thread entry points.
 */
-class Runnable : public Object {
+class Runnable {
+public:
+  virtual ~Runnable() {
+  }
+
 public:
   /**
     Fiber/thread entry point.
   */
   virtual void run() = 0;
-
-public:
-  // yield::Object
-  Runnable& inc_ref() {
-    return Object::inc_ref(*this);
-  }
 };
 }
 }

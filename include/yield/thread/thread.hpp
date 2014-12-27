@@ -30,14 +30,14 @@
 #ifndef _YIELD_THREAD_THREAD_HPP_
 #define _YIELD_THREAD_THREAD_HPP_
 
-#include "yield/auto_object.hpp"
-
 #ifndef _WIN32
 #include <pthread.h>
 #ifdef __sun
 #include <thread.h>
 #endif
 #endif
+
+#include <memory>
 
 namespace yield {
 class Time;
@@ -49,13 +49,13 @@ class Runnable;
 /**
   A kernel-level thread.
 */
-class Thread : public Object {
+class Thread {
 public:
   /**
     Construct and start a thread with the entry point runnable.
     @param runnable the thread entry point.
   */
-  Thread(YO_NEW_REF Runnable& runnable);
+  Thread(::std::unique_ptr<Runnable> runnable);
 
   /**
     Cancel and destroy the thread.
@@ -68,14 +68,14 @@ public:
   */
   bool cancel();
 
-public:
-  /**
-    Get the Runnable associated with this thread.
-    @return the Runnable associated with this thread
-  */
-  Runnable* get_runnable() const {
-    return runnable;
-  }
+//public:
+//  /**
+//    Get the Runnable associated with this thread.
+//    @return the Runnable associated with this thread
+//  */
+//  Runnable* get_runnable() const {
+//    return runnable;
+//  }
 
 public:
   /**
@@ -99,7 +99,7 @@ public:
     @return true if this thread is running
   */
   bool is_running() {
-    return state == STATE_RUNNING;
+    return state_ == STATE_RUNNING;
   }
 
 public:
@@ -121,7 +121,7 @@ public:
     Wrap the caller's thread in a Thread object.
     @return the caller's Thread
   */
-  static auto_Object<Thread> self();
+  static ::std::unique_ptr<Thread> self();
 
 public:
   /**
@@ -200,8 +200,8 @@ private:
 #endif
 #endif
 
-  Runnable* runnable;
-  enum { STATE_READY, STATE_RUNNING, STATE_SUSPENDED } state;
+  ::std::unique_ptr<Runnable> runnable_;
+  enum { STATE_READY, STATE_RUNNING, STATE_SUSPENDED } state_;
 };
 }
 }

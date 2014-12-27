@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/auto_object.hpp"
 #include "yield/time.hpp"
 #include "yield/thread/runnable.hpp"
 #include "yield/thread/semaphore.hpp"
@@ -36,6 +35,8 @@
 
 namespace yield {
 namespace thread {
+using ::std::unique_ptr;
+
 class SemaphoreTest : public ::testing::Test {
 public:
   void SetUp() {
@@ -79,7 +80,7 @@ protected:
 
 TEST_F(SemaphoreTest, threaded) {
   semaphore->post();
-  Thread thread(*new OtherThread(exit_count, *semaphore));
+  Thread thread(unique_ptr<Runnable>(new OtherThread(exit_count, *semaphore)));
   while (exit_count < 1) {
     Thread::self()->yield();
   }

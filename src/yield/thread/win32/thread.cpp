@@ -37,14 +37,14 @@
 
 namespace yield {
 namespace thread {
-Thread::Thread(Runnable& runnable)
-  : runnable(&runnable) {
-  state = STATE_READY;
+Thread::Thread(::std::unique_ptr<Runnable> runnable) {
+  runnable_.reset(runnable.release());
+  state_ = STATE_READY;
 
   handle = CreateThread(NULL, 0, run, this, NULL, &id);
 
   if (handle != NULL) {
-    while (state == STATE_READY) {
+    while (state_ == STATE_READY) {
       yield();
     }
   } else {
@@ -53,12 +53,12 @@ Thread::Thread(Runnable& runnable)
 }
 
 Thread::Thread(HANDLE handle, DWORD id)
-  : handle(handle), id(id), runnable(NULL) {
-  state = STATE_RUNNING;
+  : handle(handle), id(id) {
+  state_ = STATE_RUNNING;
 }
 
 Thread::~Thread() {
-  if (get_runnable() != NULL) {
+  if (runnable_ != NULL) {
     if (is_running()) {
       cancel();
       join();
@@ -66,8 +66,6 @@ Thread::~Thread() {
 
     CloseHandle(handle);
   }
-
-  Runnable::dec_ref(runnable);
 }
 
 bool Thread::cancel() {
@@ -95,14 +93,14 @@ unsigned long __stdcall Thread::run(void* this_) {
 }
 
 unsigned long Thread::run() {
-  state = STATE_RUNNING;
-  runnable->run();
-  state = STATE_SUSPENDED;
+  state_ = STATE_RUNNING;
+  runnable_->run();
+  state_ = STATE_SUSPENDED;
   return 0;
 }
 
-auto_Object<Thread> Thread::self() {
-  return new Thread(GetCurrentThread(), GetCurrentThreadId());
+::std::unique_ptr<Thread> Thread::self() {
+  return ::std::unique_ptr<Thread>(new Thread(GetCurrentThread(), GetCurrentThreadId()));
 }
 
 //
