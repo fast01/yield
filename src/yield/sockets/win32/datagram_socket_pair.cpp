@@ -33,31 +33,32 @@
 namespace yield {
 namespace sockets {
 DatagramSocketPair::DatagramSocketPair() {
-  sockets[0] = new DatagramSocket(AF_INET);
-  sockets[1] = new DatagramSocket(AF_INET);
+  first_.reset(new DatagramSocket(AF_INET));
+  second_.reset(new DatagramSocket(AF_INET));
 
-  try {
-    SocketAddress socknames[2];
-    for (uint8_t i = 0; i < 2; ++i) {
-      if (sockets[i]->bind(SocketAddress::IN_LOOPBACK)) {
-        if (!sockets[i]->getsockname(socknames[i])) {
-          throw Exception();
-        }
-      } else {
-        throw Exception();
-      }
-    }
+  SocketAddress socknames[2];
 
-    for (uint8_t i = 0; i < 2; ++i) {
-      if (!sockets[i]->connect(socknames[(i + 1) % 2])) {
-        throw Exception();
-      }
+  if (first_->bind(SocketAddress::IN_LOOPBACK)) {
+    if (!first_->getsockname(socknames[0])) {
+      throw Exception();
     }
-  } catch (Exception&) {
-    for (uint8_t i = 0; i < 2; ++i) {
-      DatagramSocket::dec_ref(*sockets[i]);
+  } else {
+    throw Exception();
+  }
+
+  if (second_->bind(SocketAddress::IN_LOOPBACK)) {
+    if (!second_->getsockname(socknames[1])) {
+      throw Exception();
     }
-    throw;
+  } else {
+    throw Exception();
+  }
+
+  if (!first_->connect(socknames[1])) {
+    throw Exception();
+  }
+  if (!second_->connect(socknames[0])) {
+    throw Exception();
   }
 }
 }

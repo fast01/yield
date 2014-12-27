@@ -37,17 +37,16 @@ StreamSocketPair::StreamSocketPair() {
   if (listen_stream_socket.bind(SocketAddress::IN_LOOPBACK)) {
     if (listen_stream_socket.listen()) {
       try {
-        sockets[0] = new StreamSocket(AF_INET);
-        if (sockets[0]->connect(*listen_stream_socket.getsockname())) {
-          sockets[1] = listen_stream_socket.accept();
-          if (sockets[1] == NULL) {
+        first_.reset(new StreamSocket(AF_INET));
+        if (first_->connect(*listen_stream_socket.getsockname())) {
+          second_ = listen_stream_socket.accept();
+          if (second_ == NULL) {
             throw Exception();
           }
         } else {
           throw Exception();
         }
       } catch (Exception&) {
-        StreamSocket::dec_ref(sockets[0]);
         throw;
       }
     } else {

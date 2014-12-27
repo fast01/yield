@@ -126,12 +126,6 @@ public:
     const SocketAddress& peername
   );
 
-public:
-  // yield::Object
-  DatagramSocket& inc_ref() {
-    return Object::inc_ref(*this);
-  }
-
 private:
   friend class DatagramSocketPair;
 

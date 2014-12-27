@@ -83,7 +83,7 @@ public:
     Accept an incoming connection on the socket.
     @return the accepted StreamSocket on success, NULL+errno on failure
   */
-  YO_NEW_REF StreamSocket* accept() {
+  ::std::unique_ptr<StreamSocket> accept() {
     SocketAddress peername;
     return accept(peername);
   }
@@ -94,17 +94,17 @@ public:
     @param[out] peername address of the new peer
     @return the accepted StreamSocket on success, NULL+errno on failure
   */
-  virtual YO_NEW_REF StreamSocket* accept(SocketAddress& peername);
+  virtual ::std::unique_ptr<StreamSocket> accept(SocketAddress& peername);
 
 public:
   /**
     Duplicate this socket, including its underlying descriptor.
     @return the duplicate StreamSocket on success, NULL+errno on failure.
   */
-  virtual YO_NEW_REF StreamSocket* dup() {
+  virtual ::std::unique_ptr<StreamSocket> dup() {
     socket_t socket_ = Socket::create(get_domain(), TYPE, get_protocol());
     if (socket_ != static_cast<socket_t>(-1)) {
-      return new StreamSocket(get_domain(), get_protocol(), socket_);
+      return ::std::unique_ptr<StreamSocket>(new StreamSocket(get_domain(), get_protocol(), socket_));
     } else {
       return NULL;
     }
@@ -152,12 +152,6 @@ public:
   virtual bool want_connect() const;
 
 public:
-  // yield::Object
-  StreamSocket& inc_ref() {
-    return Object::inc_ref(*this);
-  }
-
-public:
   // yield::Socket
   virtual bool setsockopt(int option_name, int option_value);
 
@@ -169,8 +163,8 @@ protected:
   { }
 
 protected:
-  virtual YO_NEW_REF StreamSocket* dup2(socket_t socket_) {
-    return new StreamSocket(get_domain(), get_protocol(), socket_);
+  virtual ::std::unique_ptr<StreamSocket> dup2(socket_t socket_) {
+    return ::std::unique_ptr<StreamSocket>(new StreamSocket(get_domain(), get_protocol(), socket_));
   }
 };
 }

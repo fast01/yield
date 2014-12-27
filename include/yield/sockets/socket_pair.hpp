@@ -30,6 +30,8 @@
 #ifndef _YIELD_SOCKETS_SOCKET_PAIR_HPP_
 #define _YIELD_SOCKETS_SOCKET_PAIR_HPP_
 
+#include <memory>
+
 #include "yield/channel_pair.hpp"
 
 namespace yield {
@@ -48,9 +50,7 @@ public:
   /**
     Destruct the SocketPair, releasing underlying system resources as necessary.
   */
-  ~SocketPair() {
-    SocketType::dec_ref(sockets[0]);
-    SocketType::dec_ref(sockets[1]);
+  virtual ~SocketPair() {
   }
 
 public:
@@ -60,7 +60,7 @@ public:
     @return the "first" socket in the pair
   */
   SocketType& first() {
-    return *sockets[0];
+    return *first_;
   }
 
   /**
@@ -69,7 +69,7 @@ public:
     @return the "second" socket in the pair
   */
   SocketType& second() {
-    return *sockets[1];
+    return *second_;
   }
 
 public:
@@ -84,11 +84,11 @@ public:
 
 protected:
   SocketPair() {
-    sockets[0] = sockets[1] = NULL;
   }
 
 protected:
-  SocketType* sockets[2];
+  ::std::unique_ptr<SocketType> first_;
+  ::std::unique_ptr<SocketType> second_;
 };
 }
 }

@@ -30,8 +30,9 @@
 #ifndef _YIELD_SOCKETS_SOCKET_ADDRESS_HPP_
 #define _YIELD_SOCKETS_SOCKET_ADDRESS_HPP_
 
+#include <memory>
+
 #include "yield/exception.hpp"
-#include "yield/object.hpp"
 #include "yield/uri/uri.hpp"
 
 #ifndef _WIN32
@@ -62,7 +63,7 @@ namespace sockets {
   The address of a socket, such as an IP-port pair.
   Roughly equivalent to a sockaddr_storage.
 */
-class SocketAddress : public Object {
+class SocketAddress final {
 public:
   /**
     getnameinfo flag: return the unqualified host name for an address instead
@@ -218,7 +219,7 @@ public:
   */
   SocketAddress(SocketAddress& other) {
     memcpy_s(&addr, sizeof(addr), &other.addr, sizeof(other.addr));
-    next_socket_address = Object::inc_ref(other.next_socket_address);
+    next_socket_address = other.next_socket_address;
   }
 
   /**
@@ -228,9 +229,7 @@ public:
   SocketAddress(const SocketAddress& other) {
     memcpy_s(&addr, sizeof(addr), &other.addr, sizeof(other.addr));
     if (other.next_socket_address != NULL) {
-      next_socket_address = new SocketAddress(*other.next_socket_address);
-    } else {
-      next_socket_address = NULL;
+      next_socket_address.reset(new SocketAddress(*other.next_socket_address));
     }
   }
 
@@ -240,13 +239,6 @@ public:
     @param port port of the new copy
   */
   SocketAddress(const SocketAddress& other, uint16_t port);
-
-  /**
-    Destructor.
-  */
-  ~SocketAddress() {
-    dec_ref(next_socket_address);
-  }
 
 public:
   /**
@@ -325,7 +317,7 @@ public:
     @param servname service name to resolve into a port
     @return the resolved SocketAddress on success, NULL+errno on failure
   */
-  static YO_NEW_REF SocketAddress*
+  static ::std::unique_ptr<SocketAddress>
   getaddrinfo(
     const char* nodename,
     const char* servname
@@ -337,7 +329,7 @@ public:
     @param port port of the new SocketAddress
     @return the resolved SocketAddress on success, NULL+errno on failure
   */
-  static YO_NEW_REF SocketAddress*
+  static ::std::unique_ptr<SocketAddress>
   getaddrinfo(
     const char* nodename,
     uint16_t port
@@ -482,12 +474,6 @@ public:
     return !operator==(other);
   }
 
-public:
-  // yield::Object
-  SocketAddress& inc_ref() {
-    return Object::inc_ref(*this);
-  }
-
 private:
   SocketAddress(
     uint32_t in_addr_,
@@ -495,7 +481,7 @@ private:
     uint16_t port
   ) {
     assign(in_addr_, port);
-    next_socket_address = new SocketAddress(in6_addr_, port);
+    next_socket_address.reset(new SocketAddress(in6_addr_, port));
   }
 
   static addrinfo* _getaddrinfo(const char*, const char*);
@@ -524,7 +510,7 @@ private:
   sockaddr_storage addr;
 #endif
 
-  SocketAddress* next_socket_address;
+  ::std::shared_ptr<SocketAddress> next_socket_address;
 };
 
 static inline

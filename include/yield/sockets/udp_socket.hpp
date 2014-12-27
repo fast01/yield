@@ -64,12 +64,6 @@ public:
     Empty virtual destructor.
   */
   virtual ~UdpSocket() { }
-
-public:
-  // yield::Object
-  UdpSocket& inc_ref() {
-    return Object::inc_ref(*this);
-  }
 };
 }
 }

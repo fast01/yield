@@ -71,9 +71,9 @@ SocketAddress::SocketAddress(const SocketAddress& other, uint16_t port) {
   }
 
   if (other.next_socket_address != NULL) {
-    next_socket_address = new SocketAddress(*other.next_socket_address, port);
+    next_socket_address.reset(new SocketAddress(*other.next_socket_address, port));
   } else {
-    next_socket_address = NULL;
+    next_socket_address.reset();
   }
 }
 
@@ -89,11 +89,10 @@ void SocketAddress::assign(const addrinfo& addrinfo_) {
   );
   addr.ss_family = static_cast<uint16_t>(addrinfo_.ai_family);
 
-  SocketAddress::dec_ref(next_socket_address);
   if (addrinfo_.ai_next != NULL) {
-    next_socket_address = new SocketAddress(*addrinfo_.ai_next);
+    next_socket_address.reset(new SocketAddress(*addrinfo_.ai_next));
   } else {
-    next_socket_address = NULL;
+    next_socket_address.reset();
   }
 }
 
@@ -144,7 +143,7 @@ const SocketAddress* SocketAddress::filter(int family) const {
     if (next_socket_address->get_family() == family) {
       return next_socket_address;
     } else {
-      next_socket_address = next_socket_address->next_socket_address;
+      next_socket_address = next_socket_address->next_socket_address.get();
     }
   } while (next_socket_address != NULL);
 
@@ -153,14 +152,14 @@ const SocketAddress* SocketAddress::filter(int family) const {
   return NULL;
 }
 
-SocketAddress*
+::std::unique_ptr<SocketAddress>
 SocketAddress::getaddrinfo(
   const char* nodename,
   const char* servname
 ) {
   addrinfo* addrinfo_ = _getaddrinfo(nodename, servname);
   if (addrinfo_ != NULL) {
-    SocketAddress* socket_address = new SocketAddress(*addrinfo_);
+    ::std::unique_ptr<SocketAddress> socket_address(new SocketAddress(*addrinfo_));
     freeaddrinfo(addrinfo_);
     return socket_address;
   } else {
@@ -225,7 +224,7 @@ SocketAddress::getnameinfo(
       return true;
     }
 
-    next_socket_address = next_socket_address->next_socket_address;
+    next_socket_address = next_socket_address->next_socket_address.get();
   } while (next_socket_address != NULL);
 
   return false;

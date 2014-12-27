@@ -31,7 +31,6 @@
 #define _YIELD_SOCKETS_SOCKET_TEST_HPP_
 
 #include "../channel_test.hpp"
-#include "yield/auto_object.hpp"
 #include "yield/sockets/socket_address.hpp"
 #include "yield/sockets/stream_socket.hpp"
 #include "gtest/gtest.h"
@@ -124,7 +123,7 @@ TYPED_TEST_P(SocketTest, want_recv) {
   if (!sockets.first().set_blocking_mode(false)) {
     throw Exception();
   }
-  auto_Object<Buffer> buffer = new Buffer(1);
+  ::std::unique_ptr<Buffer> buffer(new Buffer(1));
   ssize_t recv_ret = sockets.first().recv(*buffer, 0);
   ASSERT_EQ(recv_ret, -1);
   ASSERT_TRUE(sockets.first().want_recv());

@@ -30,7 +30,6 @@
 #ifndef _YIELD_SOCKETS_SOCKET_HPP_
 #define _YIELD_SOCKETS_SOCKET_HPP_
 
-#include "yield/auto_object.hpp"
 #include "yield/buffer.hpp"
 #include "yield/buffers.hpp"
 #include "yield/channel.hpp"
@@ -164,17 +163,12 @@ public:
     Get the address of the peer this socket is connected to.
     @return the address of the peer this socket is connected to
   */
-  auto_Object<SocketAddress> getpeername() const throw(Exception) {
-    SocketAddress* peername = new SocketAddress;
-    try {
-      if (getpeername(*peername)) {
-        return peername;
-      } else {
-        throw Exception();
-      }
-    } catch (Exception&) {
-      SocketAddress::dec_ref(*peername);
-      throw;
+  ::std::unique_ptr<SocketAddress> getpeername() const throw(Exception) {
+    ::std::unique_ptr<SocketAddress> peername(new SocketAddress);
+    if (getpeername(*peername)) {
+      return peername;
+    } else {
+      throw Exception();
     }
   }
 
@@ -199,17 +193,12 @@ public:
     Get the address this socket is bound to.
     @return the address this socket is bound to
   */
-  auto_Object<SocketAddress> getsockname() const throw(Exception) {
-    SocketAddress* sockname = new SocketAddress;
-    try {
-      if (getsockname(*sockname)) {
-        return sockname;
-      } else {
-        throw Exception();
-      }
-    } catch (Exception&) {
-      SocketAddress::dec_ref(*sockname);
-      throw;
+  ::std::unique_ptr<SocketAddress> getsockname() const throw(Exception) {
+    ::std::unique_ptr<SocketAddress> sockname(new SocketAddress);
+    if (getsockname(*sockname)) {
+      return sockname;
+    } else {
+      throw Exception();
     }
   }
 
@@ -474,12 +463,6 @@ public:
     @return true if the last send call failed because it would have blocked
   */
   virtual bool want_send() const;
-
-public:
-  // yield::Object
-  Socket& inc_ref() {
-    return Object::inc_ref(*this);
-  }
 
 public:
   // yield::Channel

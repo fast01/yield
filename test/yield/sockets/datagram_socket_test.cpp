@@ -28,7 +28,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "socket_test.hpp"
-#include "yield/auto_object.hpp"
 #include "yield/sockets/datagram_socket_pair.hpp"
 
 namespace yield {

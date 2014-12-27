@@ -79,29 +79,15 @@ public:
   virtual ~TcpSocket() { }
 
 public:
-  // yield::Object
-  TcpSocket& inc_ref() {
-    return Object::inc_ref(*this);
-  }
-
-public:
   // yield::sockets::Socket
   virtual bool setsockopt(int option_name, int option_value);
 
 public:
   // yield::sockets::StreamSocket
-  virtual YO_NEW_REF TcpSocket* accept() {
-    return static_cast<TcpSocket*>(StreamSocket::accept());
-  }
-
-  virtual YO_NEW_REF TcpSocket* accept(SocketAddress& peername) {
-    return static_cast<TcpSocket*>(StreamSocket::accept(peername));
-  }
-
-  virtual YO_NEW_REF TcpSocket* dup() {
+  virtual ::std::unique_ptr<StreamSocket> dup() override {
     socket_t socket_ = Socket::create(get_domain(), TYPE, PROTOCOL);
     if (socket_ != static_cast<socket_t>(-1)) {
-      return new TcpSocket(get_domain(), socket_);
+      return ::std::unique_ptr<StreamSocket>(new TcpSocket(get_domain(), socket_));
     } else {
       return NULL;
     }
@@ -114,8 +100,8 @@ protected:
 
 protected:
   // yield::sockets::StreamSocket
-  virtual TcpSocket* dup2(socket_t socket_) {
-    return new TcpSocket(get_domain(), socket_);
+  virtual ::std::unique_ptr<StreamSocket> dup2(socket_t socket_) {
+    return ::std::unique_ptr<StreamSocket>(new TcpSocket(get_domain(), socket_));
   }
 };
 }

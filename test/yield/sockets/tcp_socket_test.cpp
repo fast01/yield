@@ -32,8 +32,10 @@
 
 namespace yield {
 namespace sockets {
+using ::std::unique_ptr;
+
 TEST(TcpSocket, dup) {
-  auto_Object<StreamSocket> socket_ = TcpSocket().dup();
+  unique_ptr<StreamSocket> socket_ = TcpSocket().dup();
 }
 
 TEST(TcpSocket, dup2) {
@@ -41,7 +43,7 @@ TEST(TcpSocket, dup2) {
   if (listen_tcp_socket.bind(SocketAddress::IN_LOOPBACK))
     if (listen_tcp_socket.listen()) {
       if (client_tcp_socket.connect(*listen_tcp_socket.getsockname())) {
-        auto_Object<StreamSocket> server_tcp_socket
+        unique_ptr<StreamSocket> server_tcp_socket
         = listen_tcp_socket.accept();
         return;
       }

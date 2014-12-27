@@ -36,6 +36,8 @@
 
 namespace yield {
 namespace sockets {
+using ::std::unique_ptr;
+
 INSTANTIATE_TYPED_TEST_CASE_P(StreamSocket, ChannelTest, StreamSocketPair);
 INSTANTIATE_TYPED_TEST_CASE_P(StreamSocket, SocketTest, StreamSocketPair);
 
@@ -45,7 +47,7 @@ TEST(StreamSocket, accept) {
   if (listen_stream_socket.bind(SocketAddress::IN_LOOPBACK)) {
     if (listen_stream_socket.listen()) {
       if (client_stream_socket.connect(*listen_stream_socket.getsockname())) {
-        auto_Object<StreamSocket> server_stream_socket
+        unique_ptr<StreamSocket> server_stream_socket
         = listen_stream_socket.accept();
         return;
       }
@@ -56,7 +58,7 @@ TEST(StreamSocket, accept) {
 }
 
 TEST(StreamSocket, dup) {
-  auto_Object<StreamSocket> socket_ = StreamSocketPair().first().dup();
+  unique_ptr<StreamSocket> socket_ = StreamSocketPair().first().dup();
 }
 
 TEST(StreamSocket, getsockname_exception) {
@@ -75,10 +77,6 @@ TEST(StreamSocket, getpeername_exception) {
     return;
   }
   ASSERT_TRUE(false);
-}
-
-TEST(StreamSocket, inc_ref) {
-  auto_Object<StreamSocket> socket_ = StreamSocketPair().first().inc_ref();
 }
 
 TEST(StreamSocket, listen) {
@@ -103,7 +101,7 @@ class StreamSocketSendFileTest : public ::testing::Test {
 public:
   void SetUp() {
     TearDown();
-    auto_Object<yield::fs::File> file
+    unique_ptr<yield::fs::File> file
     = yield::fs::FileSystem().creat(test_file_path);
     file->write("test", 4);
     file->close();
@@ -123,9 +121,9 @@ protected:
 };
 
 TEST_F(StreamSocketSendFileTest, sendfile) {
-  auto_Object<yield::fs::File> file
+  unique_ptr<yield::fs::File> file
   = yield::fs::FileSystem().open(test_file_path);
-  auto_Object<yield::fs::Stat> stbuf = file->stat();
+  unique_ptr<yield::fs::Stat> stbuf = file->stat();
   size_t size = static_cast<size_t>(stbuf->get_size());
 
   StreamSocketPair stream_sockets;
@@ -175,8 +173,8 @@ TEST(StreamSocket, want_accept) {
   if (listen_stream_socket.bind(SocketAddress::IN_LOOPBACK)) {
     if (listen_stream_socket.listen()) {
       if (listen_stream_socket.set_blocking_mode(false)) {
-        StreamSocket* server_stream_socket = listen_stream_socket.accept();
-        ASSERT_EQ(server_stream_socket, static_cast<StreamSocket*>(NULL));
+        unique_ptr<StreamSocket> server_stream_socket = listen_stream_socket.accept();
+        ASSERT_EQ(server_stream_socket.get(), static_cast<StreamSocket*>(NULL));
         ASSERT_TRUE(listen_stream_socket.want_accept());
         return;
       }
