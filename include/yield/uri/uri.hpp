@@ -30,6 +30,8 @@
 #ifndef _YIELD_URI_URI_HPP_
 #define _YIELD_URI_URI_HPP_
 
+#include <memory>
+
 #include "yield/exception.hpp"
 
 #ifdef _WIN32
@@ -44,7 +46,7 @@ namespace uri {
 /**
   A parsed Uniform Resource Identifier (Uri).
 */
-class Uri {
+class Uri final {
 public:
   /**
     Construct a Uri from its constituent components:
@@ -59,7 +61,7 @@ public:
     @param userinfo userinfo component of the Uri
   */
   Uri(
-    Buffer& buffer,
+    ::std::shared_ptr<Buffer> buffer,
     const iovec& fragment,
     const iovec& host,
     const iovec& path,
@@ -100,8 +102,6 @@ public:
       buffer instead of taking a reference to it.
   */
   Uri(const Uri& other);
-
-  ~Uri();
 
 public:
   /**
@@ -334,7 +334,7 @@ private:
   );
 
 private:
-  Buffer* buffer;
+  ::std::shared_ptr<Buffer> buffer;
   iovec fragment;
   iovec host;
   iovec path;

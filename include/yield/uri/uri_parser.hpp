@@ -52,10 +52,10 @@ public:
     Construct a Uri parser on the specified buffer.
     @param buffer buffer with the Uri
   */
-  UriParser(Buffer& buffer) {
-    p = buffer;
-    ps = buffer;
-    pe = static_cast<const char*>(buffer) + buffer.size();
+  UriParser(::std::shared_ptr<Buffer> buffer) {
+    p = *buffer;
+    ps = *buffer;
+    pe = static_cast<const char*>(*buffer) + buffer->size();
   }
 
   /**

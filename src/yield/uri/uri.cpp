@@ -39,7 +39,7 @@ namespace uri {
 using ::std::string;
 
 Uri::Uri(
-  Buffer& buffer,
+  ::std::shared_ptr<Buffer> buffer,
   const iovec& fragment,
   const iovec& host,
   const iovec& path,
@@ -48,7 +48,7 @@ Uri::Uri(
   const iovec& scheme,
   const iovec& userinfo
 )
-  : buffer(&buffer.inc_ref()),
+  : buffer(buffer),
     fragment(fragment),
     host(host),
     path(path),
@@ -74,7 +74,7 @@ Uri::Uri(const char* uri, size_t uri_len) throw(Exception)
 }
 
 Uri::Uri(Uri& other)
-  : buffer(&other.buffer->inc_ref()),
+  : buffer(other.buffer),
     fragment(other.fragment),
     host(other.host),
     path(other.path),
@@ -85,7 +85,7 @@ Uri::Uri(Uri& other)
 { }
 
 Uri::Uri(const Uri& other)
-  : buffer(&other.buffer->copy()),
+  : buffer(other.buffer->copy()),
     port(other.port) {
   char* old_base = static_cast<char*>(*other.buffer);
   char* new_base = static_cast<char*>(*this->buffer);
@@ -97,15 +97,11 @@ Uri::Uri(const Uri& other)
   rebase(old_base, other.userinfo, new_base, userinfo);
 }
 
-Uri::~Uri() {
-  Buffer::dec_ref(*buffer);
-}
-
 void Uri::init(const char* uri, size_t uri_len) {
-  buffer = &Buffer::copy(uri, uri_len);
+  buffer = Buffer::copy(uri, uri_len);
 
   if (
-    !UriParser(*buffer).parse(
+    !UriParser(buffer).parse(
       fragment,
       host,
       path,
