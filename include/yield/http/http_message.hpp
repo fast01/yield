@@ -211,15 +211,14 @@ public:
 public:
   /**
     Set the body of an HTTP message.
-    Steals the reference to body and decrements the existing body, if present.
   */
-  void set_body(YO_NEW_REF Buffer* body_buffer);
+  void set_body(::std::shared_ptr<Buffer> body_buffer);
 
   /**
     Set the body of an HTTP message.
     Steals the reference to body and decrements the existing body, if present.
   */
-  void set_body(YO_NEW_REF ::yield::fs::File* body_file);
+  void set_body(::std::shared_ptr< ::yield::fs::File > body_file);
 
 public:
   /**

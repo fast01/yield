@@ -52,11 +52,11 @@ protected:
   virtual ~HttpMessageParser();
 
 protected:
-  virtual YO_NEW_REF HttpMessageBodyChunk&
+  virtual ::std::unique_ptr<HttpMessageBodyChunk>
   create_http_message_body_chunk(
-    YO_NEW_REF Buffer* data
+    ::std::shared_ptr<Buffer> data
   ) {
-    return *new HttpMessageBodyChunk(data);
+    return ::std::unique_ptr<HttpMessageBodyChunk>(new HttpMessageBodyChunk(data));
   }
 
 protected:

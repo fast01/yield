@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/auto_object.hpp"
 #include "yield/buffer.hpp"
 #include "yield/buffers.hpp"
 #include "gtest/gtest.h"
@@ -39,11 +38,13 @@ bool operator==(const iovec& left, const iovec& right) {
 }
 
 namespace yield {
+using ::std::make_shared;
+using ::std::unique_ptr;
 using ::std::vector;
 
 TEST(Buffers, as_read_iovecs) {
-  auto_Object<Buffer> buffers = new Buffer(Buffer::getpagesize());
-  buffers->set_next_buffer(new Buffer(Buffer::getpagesize()));
+  unique_ptr<Buffer> buffers(new Buffer(Buffer::getpagesize()));
+  buffers->set_next_buffer(make_shared<Buffer>(Buffer::getpagesize()));
   vector<iovec> read_iovecs;
   Buffers::as_read_iovecs(*buffers, read_iovecs);
   ASSERT_EQ(read_iovecs[0], buffers->as_read_iovec());
@@ -51,8 +52,8 @@ TEST(Buffers, as_read_iovecs) {
 }
 
 TEST(Buffers, as_write_iovecs) {
-  auto_Object<Buffer> buffers = new Buffer(Buffer::getpagesize());
-  buffers->set_next_buffer(new Buffer(Buffer::getpagesize()));
+  unique_ptr<Buffer> buffers(new Buffer(Buffer::getpagesize()));
+  buffers->set_next_buffer(make_shared<Buffer>(Buffer::getpagesize()));
   vector<iovec> write_iovecs;
   Buffers::as_write_iovecs(*buffers, write_iovecs);
   ASSERT_EQ(write_iovecs.size(), 2);
@@ -61,7 +62,7 @@ TEST(Buffers, as_write_iovecs) {
 }
 
 TEST(Buffers, as_write_iovecs_offset) {
-  auto_Object<Buffer> buffers = Buffer::copy("test ");
+  unique_ptr<Buffer> buffers = Buffer::copy("test ");
   buffers->set_next_buffer(Buffer::copy("string"));
   vector<iovec> write_iovecs;
 
@@ -102,8 +103,8 @@ TEST(Buffers, as_write_iovecs_offset) {
 }
 
 TEST(Buffers, put) {
-  auto_Object<Buffer> buffers = new Buffer(Buffer::getpagesize());
-  buffers->set_next_buffer(new Buffer(Buffer::getpagesize()));
+  unique_ptr<Buffer> buffers(new Buffer(Buffer::getpagesize()));
+  buffers->set_next_buffer(make_shared<Buffer>(Buffer::getpagesize()));
   Buffers::put(*buffers, NULL, Buffer::getpagesize() / 2);
   ASSERT_EQ(Buffers::size(*buffers), Buffer::getpagesize() / 2);
   Buffers::put(*buffers, NULL, Buffer::getpagesize() / 2);
@@ -116,8 +117,8 @@ TEST(Buffers, put) {
 }
 
 TEST(Buffers, size) {
-  auto_Object<Buffer> buffers = new Buffer(Buffer::getpagesize());
-  buffers->set_next_buffer(new Buffer(Buffer::getpagesize()));
+  unique_ptr<Buffer> buffers(new Buffer(Buffer::getpagesize()));
+  buffers->set_next_buffer(make_shared<Buffer>(Buffer::getpagesize()));
   Buffers::put(*buffers, NULL, Buffer::getpagesize() / 2);
   ASSERT_EQ(Buffers::size(*buffers), Buffer::getpagesize() / 2);
   Buffers::put(*buffers, NULL, Buffer::getpagesize() / 2);

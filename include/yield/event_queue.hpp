@@ -95,7 +95,7 @@ public:
 
 public:
   // yield::EventHandler
-  void handle(YO_NEW_REF EventT& event) {
+  void handle(::std::shared_ptr<EventT> event) {
     enqueue(event);
   }
 };

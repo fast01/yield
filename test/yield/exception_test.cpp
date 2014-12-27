@@ -27,16 +27,19 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/auto_object.hpp"
 #include "yield/exception.hpp"
+
+#include <memory>
+
 #include "gtest/gtest.h"
 
 namespace yield {
 using ::std::string;
+using ::std::unique_ptr;
 
 TEST(Exception, clone) {
   Exception exc1(1, "what");
-  auto_Object<Exception> exc2 = exc1.clone();
+  unique_ptr<Exception> exc2(&exc1.clone());
   ASSERT_EQ(exc2->get_error_code(), 1);
   ASSERT_EQ(strcmp(exc2->what(), "what"), 0);
 }

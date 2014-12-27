@@ -81,7 +81,7 @@ public:
   */
   HttpResponse(
     uint16_t status_code,
-    YO_NEW_REF ::yield::fs::File* body
+    ::std::shared_ptr< ::yield::fs::File > body
   );
 
   /**

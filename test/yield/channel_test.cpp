@@ -32,6 +32,9 @@
 #include "gtest/gtest.h"
 
 namespace yield {
+using ::std::make_shared;
+using ::std::shared_ptr;
+
 class MockChannel : public Channel {
 public:
   // yield::Channel
@@ -74,13 +77,13 @@ TEST(Channel, read_Buffer) {
 }
 
 TEST(Channel, read_Buffers) {
-  Buffer buffer2(Buffer::getpagesize());
-  Buffer buffer1(Buffer::getpagesize());
-  buffer1.set_next_buffer(buffer2.inc_ref());
-  ssize_t read_ret = MockChannel().read(buffer1);
+  shared_ptr<Buffer> buffer2 = make_shared<Buffer>(Buffer::getpagesize());
+  shared_ptr<Buffer> buffer1 = make_shared<Buffer>(Buffer::getpagesize());
+  buffer1->set_next_buffer(buffer2);
+  ssize_t read_ret = MockChannel().read(*buffer1);
   ASSERT_EQ(read_ret, static_cast<ssize_t>(Buffer::getpagesize() / 2));
-  ASSERT_EQ(buffer1.size(), Buffer::getpagesize() / 2);
-  ASSERT_EQ(buffer2.size(), 0);
+  ASSERT_EQ(buffer1->size(), Buffer::getpagesize() / 2);
+  ASSERT_EQ(buffer2->size(), 0);
 }
 
 TEST(Channel, write_Buffer) {
@@ -91,12 +94,12 @@ TEST(Channel, write_Buffer) {
 }
 
 TEST(Channel, write_Buffers) {
-  Buffer buffer2(Buffer::getpagesize());
-  buffer2.put(NULL, Buffer::getpagesize() / 4);
-  Buffer buffer1(Buffer::getpagesize());
-  buffer1.put(NULL, Buffer::getpagesize() / 4);
-  buffer1.set_next_buffer(buffer2.inc_ref());
-  ssize_t write_ret = MockChannel().write(buffer1);
+  shared_ptr<Buffer> buffer2 = make_shared<Buffer>(Buffer::getpagesize());
+  buffer2->put(NULL, Buffer::getpagesize() / 4);
+  shared_ptr<Buffer> buffer1 = make_shared<Buffer>(Buffer::getpagesize());
+  buffer1->put(NULL, Buffer::getpagesize() / 4);
+  buffer1->set_next_buffer(buffer2);
+  ssize_t write_ret = MockChannel().write(*buffer1);
   ASSERT_EQ(write_ret, static_cast<ssize_t>(Buffer::getpagesize() / 2));
 }
 
