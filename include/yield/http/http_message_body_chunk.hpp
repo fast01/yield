@@ -42,9 +42,6 @@ namespace http {
 */
 class HttpMessageBodyChunk : public Event {
 public:
-  const static uint32_t TYPE_ID = 3435197009UL;
-
-public:
   /**
     Construct an HttpMessageBodyChunk with the given data.
     Steals the reference to data.

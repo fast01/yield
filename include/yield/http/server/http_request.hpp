@@ -49,9 +49,6 @@ class HttpRequestParser;
 */
 class HttpRequest : public ::yield::http::HttpRequest {
 public:
-  const static uint32_t TYPE_ID = 2792000307UL;
-
-public:
   /**
     Construct an HttpRequest that originates from the given server connection.
     @param connection the server connection

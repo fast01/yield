@@ -41,9 +41,6 @@ namespace poll {
 */
 class FdEvent : public Event {
 public:
-  const static uint32_t TYPE_ID = 117149474;
-
-public:
   typedef uint16_t Type;
   const static Type TYPE_ERROR;
   const static Type TYPE_HUP;

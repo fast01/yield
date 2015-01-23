@@ -52,11 +52,11 @@ public:
     @return a new reference to an Event.
   */
   virtual ::std::shared_ptr<EventT> dequeue() {
-    EventT* event;
+    ::std::shared_ptr<EventT> event;
     do {
       event = timeddequeue(Time::FOREVER);
     } while (event == NULL);
-    return *event;
+    return event;
   }
 
   /**

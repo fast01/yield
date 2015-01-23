@@ -51,9 +51,6 @@ class HttpConnection;
 */
 class HttpMessageBodyChunk : public ::yield::http::HttpMessageBodyChunk {
 public:
-  const static uint32_t TYPE_ID = 3690639367UL;
-
-public:
   /**
     Construct an HttpMessageBodyChunk that originates from the given
       server connection.

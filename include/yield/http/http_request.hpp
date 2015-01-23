@@ -44,9 +44,6 @@ namespace http {
 */
 class HttpRequest : public HttpMessage<HttpRequest> {
 public:
-  const static uint32_t TYPE_ID = 707981577;
-
-public:
   /**
     A method enum class.
   */

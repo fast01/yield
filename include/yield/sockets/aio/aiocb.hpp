@@ -52,7 +52,8 @@ class NbioQueue;
 */
 class Aiocb : public Event {
 public:
-  virtual ~Aiocb();
+  virtual ~Aiocb() {
+  }
 
 public:
 #ifdef _WIN32
@@ -67,14 +68,6 @@ public:
 #endif
 
 public:
-  /**
-    Get the context object.
-    @return the context object, or NULL if it was not set in the constructor.
-  */
-  Object* get_context() {
-    return context;
-  }
-
   /**
     Get the error code of the AIO operation associated with this control block,
       once the operation is complete.
@@ -102,7 +95,7 @@ public:
     Get the socket associated with this control block.
   */
   Socket& get_socket() {
-    return socket_;
+    return *socket_;
   }
 
 public:
@@ -115,8 +108,8 @@ public:
 #endif
 
 protected:
-  Aiocb(Socket& socket_, Object* context = NULL);
-  Aiocb(Socket& socket_, off_t offset, Object* context = NULL);
+  Aiocb(::std::shared_ptr<Socket> socket_);
+  Aiocb(::std::shared_ptr<Socket> socket_, off_t offset);
 
 protected:
 #ifdef _WIN32
@@ -152,10 +145,9 @@ private:
   Aiocb* this_;
 #endif
 
-  Object* context;
   uint32_t error;
   ssize_t return_;
-  Socket& socket_;
+  ::std::shared_ptr<Socket> socket_;
 };
 }
 }

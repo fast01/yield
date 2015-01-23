@@ -44,9 +44,6 @@ namespace aio {
 */
 class SendfileAiocb : public Aiocb {
 public:
-  const static uint32_t TYPE_ID = 2151573397UL;
-
-public:
   /**
     Construct a SendfileAiocb, passing the same parameters as to sendfile.
     @param socket_ socket to send data on

@@ -78,8 +78,8 @@ public:
 
 public:
   // yield::EventQueue
-  bool enqueue(YO_NEW_REF FdEvent& event);
-  YO_NEW_REF FdEvent* timeddequeue(const Time& timeout);
+  bool enqueue(::std::shared_ptr<FdEvent> event);
+  ::std::shared_ptr<FdEvent> timeddequeue(const Time& timeout);
 
 private:
   ::yield::queue::BlockingConcurrentQueue<Event> event_queue;
@@ -97,7 +97,7 @@ private:
   class SocketSelector;
   Impl* pimpl;
 #else
-  vector<pollfd> pollfds;
+  ::std::vector<pollfd> pollfds;
   int wake_pipe[2];
 #endif
 };

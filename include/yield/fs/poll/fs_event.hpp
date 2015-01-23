@@ -42,9 +42,6 @@ namespace poll {
 */
 class FsEvent  : public Event {
 public:
-  const static uint32_t TYPE_ID = 1640119324;
-
-public:
   /**
     Type enum. An integer instead of a proper enum to allow
       FsEventQueue::associate to take a bitmask of desired types.

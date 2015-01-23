@@ -37,6 +37,8 @@
 
 namespace yield {
 namespace poll {
+using ::std::make_shared;
+using ::std::shared_ptr;
 using ::std::vector;
 
 class FdEventQueue::Impl : public EventQueue<FdEvent> {
@@ -49,7 +51,7 @@ public:
   virtual bool dissociate(fd_t fd) = 0;
 
 public:
-  bool enqueue(FdEvent& event) {
+  bool enqueue(shared_ptr<FdEvent> event) {
     CHECK(false);
     return false;
   }
@@ -74,7 +76,7 @@ public:
 
 public:
   // yield::EventQueue
-  YO_NEW_REF FdEvent* timeddequeue(const Time& timeout) {
+  ::std::shared_ptr<FdEvent> timeddequeue(const Time& timeout) {
     DWORD dwRet
     = WaitForMultipleObjectsEx(
         handles.size(),
@@ -87,7 +89,7 @@ public:
     if (dwRet == WAIT_OBJECT_0) {
       return NULL;
     } else if (dwRet > WAIT_OBJECT_0 && dwRet < WAIT_OBJECT_0 + handles.size()) {
-      return new FdEvent(
+      return ::std::make_shared<FdEvent>(
                handles[dwRet - WAIT_OBJECT_0],
                fd_event_types[dwRet - WAIT_OBJECT_0]
              );
@@ -145,8 +147,8 @@ public:
   }
 
 private:
-  vector<FdEvent::Type> fd_event_types;
-  vector<HANDLE> handles;
+  ::std::vector<FdEvent::Type> fd_event_types;
+  ::std::vector<HANDLE> handles;
 };
 
 class FdEventQueue::SocketImpl : public Impl {
@@ -267,7 +269,7 @@ public:
 
 public:
   // yield::EventQueue
-  YO_NEW_REF FdEvent* timeddequeue(const Time& timeout) {
+  ::std::shared_ptr<FdEvent> timeddequeue(const Time& timeout) {
     // Scan pollfds once for outstanding revents from the last WSAPoll,
     // then call WSAPoll again if necessary.
     int ret = 0;
@@ -292,7 +294,7 @@ public:
               revents = pollfd_.revents;
             }
             pollfd_.revents = 0;
-            return new FdEvent(fd, revents);
+            return ::std::make_shared<FdEvent>(fd, revents);
           }
         }
       } while (++pollfd_i < pollfds.end());
@@ -367,7 +369,7 @@ public:
 
 public:
   // yield::EventQueue
-  YO_NEW_REF FdEvent* timeddequeue(const Time& timeout) {
+  ::std::shared_ptr<FdEvent> timeddequeue(const Time& timeout) {
     fd_set except_fd_set_copy, read_fd_set_copy, write_fd_set_copy;
 
     memcpy_s(
@@ -442,7 +444,7 @@ public:
             recv(wake_socket_pair[0], &m, 1, 0);
             return NULL;
           } else {
-            return new FdEvent(
+            return ::std::make_shared<FdEvent>(
                      reinterpret_cast<fd_t>(socket_),
                      fd_event_types
                    );
@@ -520,7 +522,7 @@ public:
 
 private:
   fd_set except_fd_set, read_fd_set, write_fd_set;
-  vector<SOCKET> sockets;
+  ::std::vector<SOCKET> sockets;
 };
 
 
@@ -548,11 +550,11 @@ bool FdEventQueue::dissociate(fd_t fd) {
   return pimpl->dissociate(fd);
 }
 
-bool FdEventQueue::enqueue(FdEvent& event) {
+bool FdEventQueue::enqueue(shared_ptr<FdEvent> event) {
   return pimpl->enqueue(event);
 }
 
-YO_NEW_REF FdEvent* FdEventQueue::timeddequeue(const Time& timeout) {
+shared_ptr<FdEvent> FdEventQueue::timeddequeue(const Time& timeout) {
   return pimpl->timeddequeue(timeout);
 }
 }

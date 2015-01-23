@@ -42,9 +42,6 @@ const FsEvent::Type FsEvent::TYPE_FILE_ADD = 16;
 const FsEvent::Type FsEvent::TYPE_FILE_MODIFY = 32;
 const FsEvent::Type FsEvent::TYPE_FILE_REMOVE = 64;
 const FsEvent::Type FsEvent::TYPE_FILE_RENAME = 128;
-#ifndef _WIN32
-const uint32_t FsEvent::TYPE_ID;
-#endif
 
 FsEvent::FsEvent(const Path& path, Type type)
   : old_path(path), type(type) {

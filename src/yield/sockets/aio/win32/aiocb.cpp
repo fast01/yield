@@ -35,9 +35,8 @@
 namespace yield {
 namespace sockets {
 namespace aio {
-Aiocb::Aiocb(Socket& socket_, Object* context)
-  : context(Object::inc_ref(context)),
-    socket_(socket_.inc_ref()) {
+Aiocb::Aiocb(::std::shared_ptr<Socket> socket_)
+  : socket_(socket_) {
   static_assert(sizeof(overlapped) == sizeof(::OVERLAPPED), "");
   memset(&overlapped, 0, sizeof(overlapped));
   this_ = this;
@@ -46,9 +45,8 @@ Aiocb::Aiocb(Socket& socket_, Object* context)
   return_ = -1;
 }
 
-Aiocb::Aiocb(Socket& socket_, off_t offset, Object *context)
-  : context(Object::inc_ref(context)),
-    socket_(socket_.inc_ref()) {
+Aiocb::Aiocb(::std::shared_ptr<Socket> socket_, off_t offset)
+  : socket_(socket_) {
   memset(&overlapped, 0, sizeof(overlapped));
   overlapped.Offset = static_cast<uint32_t>(offset);
   overlapped.OffsetHigh = static_cast<uint32_t>(offset >> 32);
@@ -56,11 +54,6 @@ Aiocb::Aiocb(Socket& socket_, off_t offset, Object *context)
 
   error = 0;
   return_ = -1;
-}
-
-Aiocb::~Aiocb() {
-  Object::dec_ref(context);
-  Socket::dec_ref(socket_);
 }
 
 Aiocb& Aiocb::cast(::OVERLAPPED& lpOverlapped) {

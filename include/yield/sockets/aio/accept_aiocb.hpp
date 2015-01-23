@@ -48,21 +48,16 @@ namespace aio {
 */
 class AcceptAiocb : public Aiocb {
 public:
-  const static uint32_t TYPE_ID = 3895043741UL;
-
-public:
   /**
     Construct an AcceptAiocb with an optional buffer for receiving data
       after a new connection is accepted.
     @param socket_ listen socket to accept on
-    @param context optional context object
     @param recv_buffer optional buffer for receiving data after a new
       connection is accepted
   */
   AcceptAiocb(
     StreamSocket& socket_,
-    Object* context = NULL,
-    YO_NEW_REF Buffer* recv_buffer = NULL
+    ::std::unique_ptr<Buffer> recv_buffer
   );
 
   ~AcceptAiocb();

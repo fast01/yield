@@ -44,7 +44,6 @@ const FdEvent::Type FdEvent::TYPE_WRITE_READY = 0x0010;
 #else
 const FdEvent::Type FdEvent::TYPE_ERROR = POLLERR;
 const FdEvent::Type FdEvent::TYPE_HUP = POLLHUP;
-const uint32_t FdEvent::TYPE_ID;
 const FdEvent::Type FdEvent::TYPE_READ_READY = POLLIN;
 const FdEvent::Type FdEvent::TYPE_WRITE_READY = POLLOUT;
 #endif

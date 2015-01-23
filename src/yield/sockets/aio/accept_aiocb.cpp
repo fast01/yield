@@ -37,7 +37,6 @@ namespace sockets {
 namespace aio {
 AcceptAiocb::AcceptAiocb(
   StreamSocket& socket_,
-  Object* context,
   YO_NEW_REF Buffer* recv_buffer
 )
   : Aiocb(socket_, context),
