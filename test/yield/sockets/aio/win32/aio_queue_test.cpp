@@ -35,7 +35,6 @@ namespace sockets {
 namespace aio {
 namespace win32 {
 INSTANTIATE_TYPED_TEST_CASE_P(AioQueue, AioQueueTest, AioQueue);
-INSTANTIATE_TYPED_TEST_CASE_P(AioQueue, EventQueueTest, AioQueue);
 }
 }
 }

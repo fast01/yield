@@ -38,7 +38,7 @@ namespace sockets {
 /**
   A connected pair of stream sockets.
 */
-class StreamSocketPair : public SocketPair<StreamSocket> {
+class StreamSocketPair : public SocketPair {
 public:
   /**
     Construct a connected pair of stream sockets.

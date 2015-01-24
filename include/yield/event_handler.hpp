@@ -54,12 +54,6 @@ public:
     @param event a new reference to an Event to handle
   */
   virtual void handle(::std::shared_ptr<EventT> event) = 0;
-
-public:
-  // yield::Object
-  EventHandler& inc_ref() {
-    return Object::inc_ref(*this);
-  }
 };
 }
 

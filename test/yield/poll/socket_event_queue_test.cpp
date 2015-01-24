@@ -28,7 +28,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../event_queue_test.hpp"
-#include "yield/auto_object.hpp"
 #include "yield/exception.hpp"
 #include "yield/poll/fd_event_queue.hpp"
 #include "yield/sockets/stream_socket_pair.hpp"

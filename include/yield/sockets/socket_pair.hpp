@@ -33,6 +33,7 @@
 #include <memory>
 
 #include "yield/channel_pair.hpp"
+#include "yield/sockets/socket.hpp"
 
 namespace yield {
 namespace sockets {
@@ -44,7 +45,6 @@ namespace sockets {
     to each other at full-duplex.
   Equivalent to socketpair(2) sockets on POSIX systems.
 */
-template <class SocketType>
 class SocketPair : public ChannelPair {
 public:
   /**
@@ -59,8 +59,8 @@ public:
     Since the two sockets are functionally equivalent this is only a convention.
     @return the "first" socket in the pair
   */
-  SocketType& first() {
-    return *first_;
+  ::std::shared_ptr<Socket>& first() {
+    return first_;
   }
 
   /**
@@ -68,18 +68,18 @@ public:
     Since the two sockets are functionally equivalent this is only a convention.
     @return the "second" socket in the pair
   */
-  SocketType& second() {
-    return *second_;
+  ::std::shared_ptr<Socket>& second() {
+    return second_;
   }
 
 public:
   // yield::ChannelPair
   Channel& get_read_channel() {
-    return first();
+    return *first();
   }
 
   Channel& get_write_channel() {
-    return second();
+    return *second();
   }
 
 protected:
@@ -87,8 +87,8 @@ protected:
   }
 
 protected:
-  ::std::unique_ptr<SocketType> first_;
-  ::std::unique_ptr<SocketType> second_;
+  ::std::shared_ptr<Socket> first_;
+  ::std::shared_ptr<Socket> second_;
 };
 }
 }

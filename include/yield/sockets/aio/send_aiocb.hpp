@@ -77,6 +77,10 @@ public:
     return flags_;
   }
 
+  Type::Enum type() const {
+    return Type::SEND;
+  }
+
 private:
   ::std::shared_ptr<Buffer> buffer_;
   Socket::MessageFlags flags_;

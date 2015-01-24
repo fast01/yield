@@ -38,7 +38,7 @@ namespace sockets {
 /**
   A connected pair of datagram sockets.
 */
-class DatagramSocketPair : public SocketPair<DatagramSocket> {
+class DatagramSocketPair : public SocketPair {
 public:
   /**
     Construct a connected pair of datagram sockets.

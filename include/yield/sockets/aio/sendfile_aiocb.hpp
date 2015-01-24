@@ -102,6 +102,10 @@ public:
     return static_cast<StreamSocket&>(Aiocb::socket());
   }
 
+  Type::Enum type() const {
+    return Type::SENDFILE;
+  }
+
 private:
   void init(fd_t fd);
 

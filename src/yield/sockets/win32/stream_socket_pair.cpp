@@ -37,7 +37,7 @@ StreamSocketPair::StreamSocketPair() {
   if (listen_stream_socket.bind(SocketAddress::IN_LOOPBACK)) {
     if (listen_stream_socket.listen()) {
       try {
-        first_.reset(new StreamSocket(AF_INET));
+        first_ = ::std::make_shared<StreamSocket>(AF_INET);
         if (first_->connect(*listen_stream_socket.getsockname())) {
           second_ = listen_stream_socket.accept();
           if (second_ == NULL) {

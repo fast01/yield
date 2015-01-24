@@ -50,7 +50,7 @@ TEST(NbioQueue, partial_send) {
   auto_Object<SendAiocb> aiocb
   = new SendAiocb(*partial_send_stream_socket, Buffer::copy("test"), 0);
 
-  if (!aio_queue.enqueue(aiocb->inc_ref())) {
+  if (!aio_queue.enqueue(aiocb)) {
     throw Exception();
   }
 
@@ -100,7 +100,7 @@ TEST_F(NBIOQueuePartialSendFileTest, partial_sendfile) {
   ASSERT_EQ(aiocb->get_nbytes(), stbuf->get_size());
   ASSERT_EQ(aiocb->get_offset(), 0);
 
-  if (!aio_queue.enqueue(aiocb->inc_ref())) {
+  if (!aio_queue.enqueue(aiocb)) {
     throw Exception();
   }
 
@@ -132,8 +132,8 @@ TEST(NbioQueue, partial_sendmsg) {
   auto_Object<Buffer> buffer = Buffer::copy("test");
   buffer->set_next_buffer(Buffer::copy(" string"));
   auto_Object<SendAiocb> aiocb
-  = new SendAiocb(*partial_send_stream_socket, buffer->inc_ref(), 0);
-  if (!aio_queue.enqueue(aiocb->inc_ref())) {
+  = new SendAiocb(*partial_send_stream_socket, buffer, 0);
+  if (!aio_queue.enqueue(aiocb)) {
     throw Exception();
   }
 

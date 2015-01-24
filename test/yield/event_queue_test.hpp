@@ -35,6 +35,8 @@
 #include "gtest/gtest.h"
 
 namespace yield {
+using ::std::shared_ptr;
+
 template <class TypeParam>
 class EventQueueTest : public ::testing::Test {
 protected:
@@ -46,13 +48,13 @@ protected:
 TYPED_TEST_CASE_P(EventQueueTest);
 
 TYPED_TEST_P(EventQueueTest, dequeue) {
-  auto_Object<Event> event = new typename EventQueueTest<TypeParam>::MockEvent;
+  shared_ptr<Event> event = new typename EventQueueTest<TypeParam>::MockEvent;
   TypeParam event_queue;
 
   bool enqueue_ret = event_queue.enqueue(event->inc_ref());
   ASSERT_TRUE(enqueue_ret);
 
-  auto_Object<Event> dequeued_event = event_queue.dequeue();
+  shared_ptr<Event> dequeued_event = event_queue.dequeue();
   ASSERT_EQ(event, dequeued_event);
 
   Event* null_event = static_cast<EventQueue&>(event_queue).trydequeue();
@@ -60,13 +62,13 @@ TYPED_TEST_P(EventQueueTest, dequeue) {
 }
 
 TYPED_TEST_P(EventQueueTest, timeddequeue) {
-  auto_Object<Event> event = new typename EventQueueTest<TypeParam>::MockEvent;
+  shared_ptr<Event> event = new typename EventQueueTest<TypeParam>::MockEvent;
   TypeParam event_queue;
 
   bool enqueue_ret = event_queue.enqueue(event->inc_ref());
   ASSERT_TRUE(enqueue_ret);
 
-  auto_Object<Event> dequeued_event = event_queue.timeddequeue(1.0);
+  shared_ptr<Event> dequeued_event = event_queue.timeddequeue(1.0);
   ASSERT_EQ(event, dequeued_event);
 
   Event* null_event = event_queue.timeddequeue(1.0);
@@ -74,13 +76,13 @@ TYPED_TEST_P(EventQueueTest, timeddequeue) {
 }
 
 TYPED_TEST_P(EventQueueTest, trydequeue) {
-  auto_Object<Event> event = new typename EventQueueTest<TypeParam>::MockEvent;
+  shared_ptr<Event> event = new typename EventQueueTest<TypeParam>::MockEvent;
   TypeParam event_queue;
 
   bool enqueue_ret = event_queue.enqueue(event->inc_ref());
   ASSERT_TRUE(enqueue_ret);
 
-  auto_Object<Event> dequeued_event
+  shared_ptr<Event> dequeued_event
   = static_cast<EventQueue&>(event_queue).trydequeue();
   ASSERT_EQ(event, dequeued_event);
 

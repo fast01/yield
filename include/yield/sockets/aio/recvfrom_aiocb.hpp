@@ -93,6 +93,10 @@ public:
     return peername_len_;
   }
 
+  Type::Enum type() const {
+    return Type::RECVFROM;
+  }
+
 private:
   ::std::shared_ptr<Buffer> buffer_;
   Socket::MessageFlags flags_;

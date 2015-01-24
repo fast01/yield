@@ -97,6 +97,10 @@ public:
     return static_cast<StreamSocket&>(Aiocb::socket());
   }
 
+  Type::Enum type() const {
+    return Type::ACCEPT;
+  }
+
 protected:
 #ifdef _WIN32
   friend class AioQueue;

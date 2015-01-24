@@ -33,8 +33,8 @@
 namespace yield {
 namespace sockets {
 DatagramSocketPair::DatagramSocketPair() {
-  first_.reset(new DatagramSocket(AF_INET));
-  second_.reset(new DatagramSocket(AF_INET));
+  first_ = ::std::make_shared<DatagramSocket>(AF_INET);
+  second_ = ::std::make_shared<DatagramSocket>(AF_INET);
 
   SocketAddress socknames[2];
 

@@ -87,6 +87,10 @@ public:
     return static_cast<StreamSocket&>(Aiocb::socket());
   }
 
+  Type::Enum type() const {
+    return Type::CONNECT;
+  }
+
 private:
   ::std::shared_ptr<SocketAddress> peername_;
   ::std::shared_ptr<Buffer> send_buffer_;

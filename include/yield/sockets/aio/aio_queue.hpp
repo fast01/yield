@@ -32,6 +32,7 @@
 
 #ifdef _WIN32
 #include "yield/event_queue.hpp"
+#include "yield/sockets/aio/aiocb.hpp"
 #else
 #include "yield/sockets/aio/nbio_queue.hpp"
 #endif
