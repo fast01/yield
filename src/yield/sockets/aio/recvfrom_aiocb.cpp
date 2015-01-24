@@ -43,8 +43,8 @@ std::ostream& operator<<(std::ostream& os, const RecvfromAiocb& recvfrom_aiocb) 
      ", " <<
      "flags=" << recvfrom_aiocb.flags() <<
      ", " <<
-     //"peername=" << recvfrom_aiocb.get_peername() <<
-     //", " <<
+     "peername=" << recvfrom_aiocb.peername() <<
+     ", " <<
      "return=" << recvfrom_aiocb.return_() <<
      //", " <<
      //"socket=" << recvfrom_aiocb.get_socket() <<

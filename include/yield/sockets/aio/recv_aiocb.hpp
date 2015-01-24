@@ -65,7 +65,15 @@ public:
     Get the buffer in which to receive data.
     @return the buffer in which to receive data
   */
-  ::std::shared_ptr<Buffer> buffer() const {
+  const Buffer& buffer() const {
+    return *buffer_;
+  }
+
+  /**
+    Get the buffer in which to receive data.
+    @return the buffer in which to receive data
+  */
+  ::std::shared_ptr<Buffer>& buffer() {
     return buffer_;
   }
 

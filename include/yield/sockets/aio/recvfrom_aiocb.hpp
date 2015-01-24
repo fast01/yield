@@ -65,7 +65,15 @@ public:
     Get the buffer in which to receive data.
     @return the buffer in which to receive data
   */
-  ::std::shared_ptr<Buffer> buffer() const {
+  const Buffer& buffer() const {
+    return *buffer_;
+  }
+
+  /**
+    Get the buffer in which to receive data.
+    @return the buffer in which to receive data
+  */
+  ::std::shared_ptr<Buffer>& buffer() {
     return buffer_;
   }
 
@@ -82,6 +90,14 @@ public:
     @return the address of the peer who sent the data.
   */
   SocketAddress& peername() {
+    return peername_;
+  }
+
+  /**
+    Get the address of the peer who sent the data.
+    @return the address of the peer who sent the data.
+  */
+  const SocketAddress& peername() const {
     return peername_;
   }
 

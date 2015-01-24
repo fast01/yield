@@ -67,7 +67,7 @@ public:
     Get the accepted socket, once the accept operation is complete.
     @return the accepted socket
   */
-  ::std::shared_ptr<StreamSocket> accepted_socket() {
+  ::std::shared_ptr<StreamSocket>& accepted_socket() {
     return accepted_socket_;
   }
 
@@ -76,7 +76,7 @@ public:
       operation is complete.
     @return the new peer's address
   */
-  ::std::shared_ptr<SocketAddress> peername() {
+  ::std::shared_ptr<SocketAddress>& peername() {
     return peername_;
   }
 
@@ -86,7 +86,7 @@ public:
     @return the buffer with data received from the new peer, or NULL
       if no buffer was passed to the constructor
   */
-  ::std::shared_ptr<Buffer> recv_buffer() {
+  ::std::shared_ptr<Buffer>& recv_buffer() {
     return recv_buffer_;
   }
 

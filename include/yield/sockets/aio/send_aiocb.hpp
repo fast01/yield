@@ -65,7 +65,7 @@ public:
     Get the buffer from which to send data.
     @return the buffer from which to send data
   */
-  Buffer& buffer() const {
+  const Buffer& buffer() const {
     return *buffer_;
   }
 
