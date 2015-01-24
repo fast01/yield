@@ -50,7 +50,7 @@ public:
     @param fd file descriptor from which to send data
     @param context optional context object
   */
-  SendfileAiocb(StreamSocket& socket_, fd_t fd, Object* context = NULL);
+  SendfileAiocb(::std::shared_ptr<Socket>& socket_, fd_t fd);
 
   /**
     Construct a SendfileAiocb, passing the same parameters as to sendfile.
@@ -61,53 +61,54 @@ public:
     @param context optional context object
   */
   SendfileAiocb(
-    StreamSocket& socket_,
+    ::std::shared_ptr<Socket> socket_,
     fd_t fd,
     off_t offset,
-    size_t nbytes,
-    Object* context = NULL
+    size_t nbytes
   );
 
-  ~SendfileAiocb();
+  virtual ~SendfileAiocb();
 
 public:
   /**
     Get the descriptor of the file from which data is sent.
     @return the descriptor of the file from which data is sent
   */
-  fd_t get_fd() {
-    return fd;
+  fd_t fd() {
+    return fd_;
   }
 
   /**
     Get the number of bytes to send from the file.
     @return the number of bytes to send from the file
   */
-  size_t get_nbytes() const {
-    return nbytes;
+  size_t nbytes() const {
+    return nbytes_;
   }
 
   /**
     Get the offset in the file from which to send data.
     @return the offset in the file from which to send data.
   */
-  off_t get_offset() const {
-    return offset;
+  off_t offset() const {
+    return offset_;
   }
 
   /**
     Get the socket in this sendfile operation.
     @return the socket in this sendfile operation
   */
-  StreamSocket& get_socket();
+  StreamSocket& socket() {
+    return static_cast<StreamSocket&>(Aiocb::socket());
+  }
 
 private:
   void init(fd_t fd);
 
 private:
-  fd_t fd;
-  size_t nbytes;
-  off_t offset;
+  fd_t fd_;
+  size_t nbytes_;
+  off_t offset_;
 };
 
 /**

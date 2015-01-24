@@ -49,37 +49,37 @@ public:
     @param context optional context object
   */
   RecvAiocb(
-    Socket& socket_,
-    YO_NEW_REF Buffer& buffer,
-    const Socket::MessageFlags& flags,
-    Object* context = NULL
-  ) : Aiocb(socket_, context),
-    buffer(buffer),
-    flags(flags)
+    ::std::shared_ptr<Socket> socket_,
+    ::std::shared_ptr<Buffer> buffer,
+    const Socket::MessageFlags& flags
+  ) : Aiocb(socket_),
+    buffer_(buffer),
+    flags_(flags)
   { }
 
-  ~RecvAiocb();
+  virtual ~RecvAiocb() {
+  }
 
 public:
   /**
     Get the buffer in which to receive data.
     @return the buffer in which to receive data
   */
-  Buffer& get_buffer() const {
-    return buffer;
+  ::std::shared_ptr<Buffer> buffer() const {
+    return buffer_;
   }
 
   /**
     Get the flags to pass to the recv method.
     @return the flags to pass to the recv method
   */
-  const Socket::MessageFlags& get_flags() const {
-    return flags;
+  const Socket::MessageFlags& flags() const {
+    return flags_;
   }
 
 private:
-  Buffer& buffer;
-  Socket::MessageFlags flags;
+  ::std::shared_ptr<Buffer> buffer_;
+  Socket::MessageFlags flags_;
 };
 
 /**

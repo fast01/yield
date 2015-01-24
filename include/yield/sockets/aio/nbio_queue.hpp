@@ -32,6 +32,7 @@
 
 #include "yield/event_queue.hpp"
 #include "yield/poll/fd_event_queue.hpp"
+#include "yield/queue/blocking_concurrent_queue.hpp"
 #include "yield/sockets/aio/aiocb.hpp"
 
 #include <map>
@@ -56,7 +57,7 @@ class SendfileAiocb;
   @see AioQueue
 */
 
-class NbioQueue : public EventQueue {
+class NbioQueue final : public EventQueue<Aiocb> {
 public:
   /**
     Construct an NbioQueue.
@@ -74,15 +75,10 @@ public:
   }
 
 public:
-  // yield::Object
-  NbioQueue& inc_ref() {
-    return Object::inc_ref(*this);
-  }
-
-public:
   // yield::EventQueue
-  bool enqueue(YO_NEW_REF Event&);
-  YO_NEW_REF Event* timeddequeue(const Time& timeout);
+  bool enqueue(::std::shared_ptr<Aiocb> aiocb) override;
+  ::std::shared_ptr<Aiocb> timeddequeue(const Time& timeout) override;
+  void wake() override;
 
 private:
   class AiocbState;
@@ -121,8 +117,9 @@ private:
   RetryStatus retry_sendfile(SendfileAiocb&, size_t& partial_send_len);
 
 private:
-  yield::poll::FdEventQueue fd_event_queue;
-  std::map<fd_t, SocketState*> socket_state;
+  ::yield::queue::BlockingConcurrentQueue<Aiocb> aiocb_queue;
+  ::yield::poll::FdEventQueue fd_event_queue;
+  ::std::map<fd_t, SocketState*> socket_state;
 };
 }
 }

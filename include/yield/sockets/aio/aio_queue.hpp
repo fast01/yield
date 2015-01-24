@@ -48,7 +48,7 @@ namespace aio {
     events through from producer to consumer.
 */
 #ifdef _WIN32
-class AioQueue : public EventQueue {
+class AioQueue final : public EventQueue<Aiocb> {
 public:
   /**
     Construct an AioQueue.
@@ -64,15 +64,10 @@ public:
   bool associate(socket_t socket_);
 
 public:
-  // yield::Object
-  AioQueue& inc_ref() {
-    return Object::inc_ref(*this);
-  }
-
-public:
   // yield::EventQueue
-  bool enqueue(YO_NEW_REF Event& event);
-  YO_NEW_REF Event* timeddequeue(const Time& timeout);
+  bool enqueue(::std::shared_ptr<Aiocb> aiocb) override;
+  ::std::shared_ptr<Aiocb> timeddequeue(const Time& timeout) override;
+  void wake() override;
 
 private:
   template <class AiocbType> void log_completion(AiocbType& aiocb);

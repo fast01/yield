@@ -58,21 +58,21 @@ public:
     Get the file descriptor associated with this FdEvent.
     @return the file descriptor associated with this FdEvent
   */
-  fd_t get_fd() const {
-    return fd;
+  fd_t fd() const {
+    return fd_;
   }
 
   /**
     Get the Type of this FdEvent.
     @return the Type of this FdEvent
   */
-  Type get_type() const {
-    return type;
+  Type type() const {
+    return type_;
   }
 
 private:
-  fd_t fd;
-  Type type;
+  fd_t fd_;
+  Type type_;
 };
 }
 }

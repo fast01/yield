@@ -54,40 +54,42 @@ public:
       established
   */
   ConnectAiocb(
-    StreamSocket& socket_,
-    SocketAddress& peername,
-    Object* context = NULL,
-    YO_NEW_REF Buffer* send_buffer = NULL
+    ::std::shared_ptr<StreamSocket> socket_,
+    ::std::shared_ptr<SocketAddress> peername,
+    ::std::shared_ptr<Buffer> send_buffer
   );
 
-  ~ConnectAiocb();
+  virtual ~ConnectAiocb() {
+  }
 
 public:
   /**
     Get the address of the peer to connect to.
     @return the address of the peer to connect to
   */
-  const SocketAddress& get_peername() const {
-    return peername;
+  const SocketAddress& peername() const {
+    return *peername_;
   }
 
   /**
     Get the buffer of data to send after the connection is established.
     @return the buffer of data to send after the connection is established
   */
-  Buffer* get_send_buffer() {
-    return send_buffer;
+  Buffer* send_buffer() {
+    return send_buffer_.get();
   }
 
   /**
     Get the socket in this connect operation.
     @return the socket in this connect operation
   */
-  StreamSocket& get_socket();
+  StreamSocket& socket() {
+    return static_cast<StreamSocket&>(Aiocb::socket());
+  }
 
 private:
-  SocketAddress& peername;
-  Buffer* send_buffer;
+  ::std::shared_ptr<SocketAddress> peername_;
+  ::std::shared_ptr<Buffer> send_buffer_;
 };
 
 /**

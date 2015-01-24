@@ -49,38 +49,38 @@ public:
     @param context optional context object
   */
   SendAiocb(
-    Socket& socket_,
-    YO_NEW_REF Buffer& buffer,
-    const Socket::MessageFlags& flags,
-    Object* context = NULL
-  ) : Aiocb(socket_, context),
-    buffer(buffer),
-    flags(flags) {
+    ::std::shared_ptr<Socket> socket_,
+    ::std::shared_ptr<Buffer> buffer,
+    const Socket::MessageFlags& flags
+  ) : Aiocb(socket_),
+    buffer_(buffer),
+    flags_(flags) {
   }
 
-  ~SendAiocb();
+  virtual ~SendAiocb() {
+  }
 
 public:
   /**
     Get the buffer from which to send data.
     @return the buffer from which to send data
   */
-  Buffer& get_buffer() const {
-    return buffer;
+  Buffer& buffer() const {
+    return *buffer_;
   }
 
   /**
     Get the flags to pass to the send method.
     @return the flags to pass to the send method
   */
-  const Socket::MessageFlags& get_flags() const {
-    return flags;
+  const Socket::MessageFlags& flags() const {
+    return flags_;
   }
 
 private:
-  Buffer& buffer;
-  Socket::MessageFlags flags;
-  SocketAddress* peername;
+  ::std::shared_ptr<Buffer> buffer_;
+  Socket::MessageFlags flags_;
+  SocketAddress* peername_;
 };
 
 /**

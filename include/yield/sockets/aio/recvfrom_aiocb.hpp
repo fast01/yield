@@ -49,55 +49,55 @@ public:
     @param context optional context object
   */
   RecvfromAiocb(
-    Socket& socket_,
-    YO_NEW_REF Buffer& buffer,
-    const Socket::MessageFlags& flags,
-    Object* context = NULL
-  ) : Aiocb(socket_, context),
-    buffer(buffer),
-    flags(flags)
+    ::std::shared_ptr<Socket> socket_,
+    ::std::shared_ptr<Buffer> buffer,
+    const Socket::MessageFlags& flags
+  ) : Aiocb(socket_),
+    buffer_(buffer),
+    flags_(flags)
   { }
 
-  ~RecvfromAiocb();
+  virtual ~RecvfromAiocb() {
+  }
 
 public:
   /**
     Get the buffer in which to receive data.
     @return the buffer in which to receive data
   */
-  Buffer& get_buffer() const {
-    return buffer;
+  ::std::shared_ptr<Buffer> buffer() const {
+    return buffer_;
   }
 
   /**
     Get the flags to pass to the recv method.
     @return the flags to pass to the recv method
   */
-  const Socket::MessageFlags& get_flags() const {
-    return flags;
+  const Socket::MessageFlags& flags() const {
+    return flags_;
   }
 
   /**
     Get the address of the peer who sent the data.
     @return the address of the peer who sent the data.
   */
-  SocketAddress& get_peername() {
-    return peername;
+  SocketAddress& peername() {
+    return peername_;
   }
 
   /**
     Get the length in bytes of peername.
     @return the length in bytes of peername
   */
-  socklen_t& get_peername_len() {
-    return peername_len;
+  socklen_t& peername_len() {
+    return peername_len_;
   }
 
 private:
-  Buffer& buffer;
-  Socket::MessageFlags flags;
-  SocketAddress peername;
-  socklen_t peername_len;
+  ::std::shared_ptr<Buffer> buffer_;
+  Socket::MessageFlags flags_;
+  SocketAddress peername_;
+  socklen_t peername_len_;
 };
 
 /**

@@ -42,12 +42,19 @@
 namespace yield {
 namespace sockets {
 namespace aio {
+using ::std::make_shared;
+using ::std::shared_ptr;
+using ::std::unique_ptr;
 using ::std::vector;
 
 static LPFN_ACCEPTEX lpfnAcceptEx = NULL;
 static LPFN_CONNECTEX lpfnConnectEx = NULL;
 static LPFN_GETACCEPTEXSOCKADDRS lpfnGetAcceptExSockaddrs = NULL;
 static LPFN_TRANSMITFILE lpfnTransmitFile = NULL;
+
+struct AiocbOVERLAPPED : public ::OVERLAPPED {
+  shared_ptr<Aiocb>* aiocb;
+};
 
 AioQueue::AioQueue() {
   hIoCompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
@@ -65,10 +72,18 @@ bool AioQueue::associate(socket_t socket_) {
          ) != INVALID_HANDLE_VALUE;
 }
 
-bool AioQueue::enqueue(YO_NEW_REF Event& event) {
-  switch (event.get_type_id()) {
-  case AcceptAiocb::TYPE_ID: {
-    AcceptAiocb& accept_aiocb = static_cast<AcceptAiocb&>(event);
+bool AioQueue::enqueue(shared_ptr<Aiocb> aiocb) {
+  LPOVERLAPPED lpOverlapped = new AiocbOVERLAPPED;
+  memset(lpOverlapped, 0, sizeof(AiocbOVERLAPPED));
+  static_cast<AiocbOVERLAPPED*>(lpOverlapped)->aiocb = &aiocb;
+  if (aiocb->offset() != 0) {
+    lpOverlapped->Offset = static_cast<uint32_t>(aiocb->offset());
+    lpOverlapped->OffsetHigh = static_cast<uint32_t>(aiocb->offset() >> 32);
+  }
+
+  switch (aiocb->type()) {
+  case Aiocb::Type::ACCEPT: {
+    AcceptAiocb& accept_aiocb = static_cast<AcceptAiocb&>(*aiocb);
 
     log_enqueue(accept_aiocb);
 
@@ -76,7 +91,7 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
       GUID GuidAcceptEx = WSAID_ACCEPTEX;
       DWORD dwBytes;
       WSAIoctl(
-        accept_aiocb.get_socket(),
+        accept_aiocb.socket(),
         SIO_GET_EXTENSION_FUNCTION_POINTER,
         &GuidAcceptEx,
         sizeof(GuidAcceptEx),
@@ -98,7 +113,7 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
       DWORD dwBytes;
       GUID GuidGetAcceptExSockAddrs = WSAID_GETACCEPTEXSOCKADDRS;
       WSAIoctl(
-        accept_aiocb.get_socket(),
+        accept_aiocb.socket(),
         SIO_GET_EXTENSION_FUNCTION_POINTER,
         &GuidGetAcceptExSockAddrs,
         sizeof(GuidGetAcceptExSockAddrs),
@@ -116,10 +131,10 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
       }
     }
 
-    StreamSocket* accepted_socket = accept_aiocb.get_socket().dup();
+    unique_ptr<StreamSocket> accepted_socket = accept_aiocb.socket().dup();
 
     if (accepted_socket != NULL) {
-      accept_aiocb.set_accepted_socket(*accepted_socket);
+      accept_aiocb.set_accepted_socket(make_shared<StreamSocket>(accepted_socket));
 
       DWORD dwBytesReceived;
       DWORD dwLocalAddressLength
@@ -127,7 +142,7 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
       DWORD dwReceiveDataLength;
       DWORD dwRemoteAddressLength = dwLocalAddressLength;
 
-      Buffer* recv_buffer = accept_aiocb.get_recv_buffer();
+      shared_ptr<Buffer> recv_buffer = accept_aiocb.recv_buffer();
       if (recv_buffer != NULL) {
         if (
           recv_buffer->get_next_buffer() == NULL
@@ -145,21 +160,21 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
           return false;
         }
       } else {
-        recv_buffer = new Buffer(dwLocalAddressLength + dwRemoteAddressLength);
+        recv_buffer = make_shared<Buffer>(dwLocalAddressLength + dwRemoteAddressLength);
         accept_aiocb.set_recv_buffer(recv_buffer);
         dwReceiveDataLength = 0;
       }
 
       if (
         lpfnAcceptEx(
-          accept_aiocb.get_socket(),
+          accept_aiocb.socket(),
           *accepted_socket,
           static_cast<char*>(*recv_buffer) + recv_buffer->size(),
           dwReceiveDataLength,
           dwLocalAddressLength,
           dwRemoteAddressLength,
           &dwBytesReceived,
-          accept_aiocb
+          lpOverlapped
         ) == TRUE
         ||
         WSAGetLastError() == WSA_IO_PENDING
@@ -175,8 +190,8 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
   }
   break;
 
-  case ConnectAiocb::TYPE_ID: {
-    ConnectAiocb& connect_aiocb = static_cast<ConnectAiocb&>(event);
+  case Aiocb::Type::CONNECT: {
+    ConnectAiocb& connect_aiocb = static_cast<ConnectAiocb&>(*aiocb);
 
     log_enqueue(connect_aiocb);
 
@@ -184,7 +199,7 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
       DWORD dwBytes;
       GUID GuidConnectEx = WSAID_CONNECTEX;
       WSAIoctl(
-        connect_aiocb.get_socket(),
+        connect_aiocb.socket(),
         SIO_GET_EXTENSION_FUNCTION_POINTER,
         &GuidConnectEx,
         sizeof(GuidConnectEx),
@@ -203,16 +218,16 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
     }
 
     const SocketAddress* peername
-    = connect_aiocb.get_peername().filter(
-        connect_aiocb.get_socket().get_domain()
+    = connect_aiocb.peername().filter(
+        connect_aiocb.socket().get_domain()
       );
 
     if (peername != NULL) {
       PVOID lpSendBuffer;
       DWORD dwSendDataLength;
-      if (connect_aiocb.get_send_buffer() != NULL) {
-        lpSendBuffer = *connect_aiocb.get_send_buffer();
-        dwSendDataLength = connect_aiocb.get_send_buffer()->size();
+      if (connect_aiocb.send_buffer() != NULL) {
+        lpSendBuffer = *connect_aiocb.send_buffer();
+        dwSendDataLength = connect_aiocb.send_buffer()->size();
       } else {
         lpSendBuffer = NULL;
         dwSendDataLength = 0;
@@ -222,13 +237,13 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
 
       if (
         lpfnConnectEx(
-          connect_aiocb.get_socket(),
+          connect_aiocb.socket(),
           *peername,
           peername->len(),
           lpSendBuffer,
           dwSendDataLength,
           &dwBytesSent,
-          connect_aiocb
+          lpOverlapped
         )
         ||
         WSAGetLastError() == WSA_IO_PENDING
@@ -244,24 +259,24 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
   }
   break;
 
-  case RecvAiocb::TYPE_ID: {
-    RecvAiocb& recv_aiocb = static_cast<RecvAiocb&>(event);
+  case Aiocb::Type::RECV: {
+    RecvAiocb& recv_aiocb = static_cast<RecvAiocb&>(*aiocb);
 
     log_enqueue(recv_aiocb);
 
-    DWORD dwFlags = static_cast<DWORD>(recv_aiocb.get_flags());
+    DWORD dwFlags = static_cast<DWORD>(recv_aiocb.flags());
 
-    if (recv_aiocb.get_buffer().get_next_buffer() == NULL) {
-      iovec wsabuf = recv_aiocb.get_buffer().as_read_iovec();
+    if (recv_aiocb.buffer()->get_next_buffer() == NULL) {
+      iovec wsabuf = recv_aiocb.buffer()->as_read_iovec();
 
       if (
         WSARecv(
-          recv_aiocb.get_socket(),
+          recv_aiocb.socket(),
           reinterpret_cast<WSABUF*>(&wsabuf),
           1,
           NULL,
           &dwFlags,
-          recv_aiocb,
+          lpOverlapped,
           NULL
         ) == 0
         ||
@@ -271,16 +286,16 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
       }
     } else { // Scatter I/O
       vector<iovec> wsabufs;
-      Buffers::as_read_iovecs(recv_aiocb.get_buffer(), wsabufs);
+      Buffers::as_read_iovecs(*recv_aiocb.buffer(), wsabufs);
 
       if (
         WSARecv(
-          recv_aiocb.get_socket(),
+          recv_aiocb.socket(),
           reinterpret_cast<WSABUF*>(&wsabufs[0]),
           wsabufs.size(),
           NULL,
           &dwFlags,
-          recv_aiocb,
+          lpOverlapped,
           NULL
         ) == 0
         ||
@@ -297,29 +312,29 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
   }
   break;
 
-  case RecvfromAiocb::TYPE_ID: {
-    RecvfromAiocb& recvfrom_aiocb = static_cast<RecvfromAiocb&>(event);
+  case Aiocb::Type::RECVFROM: {
+    RecvfromAiocb& recvfrom_aiocb = static_cast<RecvfromAiocb&>(*aiocb);
 
     log_enqueue(recvfrom_aiocb);
 
-    DWORD dwFlags = static_cast<DWORD>(recvfrom_aiocb.get_flags());
-    sockaddr* peername = recvfrom_aiocb.get_peername();
-    socklen_t& peername_len = recvfrom_aiocb.get_peername_len();
-    peername_len = SocketAddress::len(recvfrom_aiocb.get_socket().get_domain());
+    DWORD dwFlags = static_cast<DWORD>(recvfrom_aiocb.flags());
+    sockaddr* peername = recvfrom_aiocb.peername();
+    socklen_t& peername_len = recvfrom_aiocb.peername_len();
+    peername_len = SocketAddress::len(recvfrom_aiocb.socket().get_domain());
 
-    if (recvfrom_aiocb.get_buffer().get_next_buffer() == NULL) {
-      iovec wsabuf = recvfrom_aiocb.get_buffer().as_read_iovec();
+    if (recvfrom_aiocb.buffer()->get_next_buffer() == NULL) {
+      iovec wsabuf = recvfrom_aiocb.buffer()->as_read_iovec();
 
       if (
         WSARecvFrom(
-          recvfrom_aiocb.get_socket(),
+          recvfrom_aiocb.socket(),
           reinterpret_cast<WSABUF*>(&wsabuf),
           1,
           NULL,
           &dwFlags,
           peername,
           &peername_len,
-          recvfrom_aiocb,
+          lpOverlapped,
           NULL
         ) == 0
         ||
@@ -329,18 +344,18 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
       }
     } else { // Scatter I/O
       vector<iovec> wsabufs;
-      Buffers::as_read_iovecs(recvfrom_aiocb.get_buffer(), wsabufs);
+      Buffers::as_read_iovecs(*recvfrom_aiocb.buffer(), wsabufs);
 
       if (
         WSARecvFrom(
-          recvfrom_aiocb.get_socket(),
+          recvfrom_aiocb.socket(),
           reinterpret_cast<WSABUF*>(&wsabufs[0]),
           wsabufs.size(),
           NULL,
           &dwFlags,
           peername,
           &peername_len,
-          recvfrom_aiocb,
+          lpOverlapped,
           NULL
         ) == 0
         ||
@@ -357,22 +372,22 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
   }
   break;
 
-  case SendAiocb::TYPE_ID: {
-    SendAiocb& send_aiocb = static_cast<SendAiocb&>(event);
+  case Aiocb::Type::SEND: {
+    SendAiocb& send_aiocb = static_cast<SendAiocb&>(*aiocb);
 
     log_enqueue(send_aiocb);
 
-    if (send_aiocb.get_buffer().get_next_buffer() == NULL) {
-      iovec wsabuf = send_aiocb.get_buffer().as_write_iovec();
+    if (send_aiocb.buffer().get_next_buffer() == NULL) {
+      iovec wsabuf = send_aiocb.buffer().as_write_iovec();
 
       if (
         WSASend(
-          send_aiocb.get_socket(),
+          send_aiocb.socket(),
           reinterpret_cast<WSABUF*>(&wsabuf),
           1,
           NULL,
-          send_aiocb.get_flags(),
-          send_aiocb,
+          send_aiocb.flags(),
+          lpOverlapped,
           NULL
         ) == 0
         ||
@@ -382,16 +397,16 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
       }
     } else { // Gather I/O
       vector<iovec> wsabufs;
-      Buffers::as_write_iovecs(send_aiocb.get_buffer(), wsabufs);
+      Buffers::as_write_iovecs(send_aiocb.buffer(), wsabufs);
 
       if (
         WSASend(
-          send_aiocb.get_socket(),
+          send_aiocb.socket(),
           reinterpret_cast<WSABUF*>(&wsabufs[0]),
           wsabufs.size(),
           NULL,
-          send_aiocb.get_flags(),
-          send_aiocb,
+          send_aiocb.flags(),
+          lpOverlapped,
           NULL
         ) == 0
         ||
@@ -408,14 +423,14 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
   }
   break;
 
-  case SendfileAiocb::TYPE_ID: {
-    SendfileAiocb& sendfile_aiocb = static_cast<SendfileAiocb&>(event);
+  case Aiocb::Type::SENDFILE: {
+    SendfileAiocb& sendfile_aiocb = static_cast<SendfileAiocb&>(*aiocb);
 
     if (lpfnTransmitFile == NULL) {
       GUID GuidTransmitFile = WSAID_TRANSMITFILE;
       DWORD dwBytes;
       WSAIoctl(
-        sendfile_aiocb.get_socket(),
+        sendfile_aiocb.socket(),
         SIO_GET_EXTENSION_FUNCTION_POINTER,
         &GuidTransmitFile,
         sizeof(GuidTransmitFile),
@@ -435,11 +450,11 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
 
     if (
       lpfnTransmitFile(
-        sendfile_aiocb.get_socket(),
-        sendfile_aiocb.get_fd(),
-        sendfile_aiocb.get_nbytes(),
+        sendfile_aiocb.socket(),
+        sendfile_aiocb.fd(),
+        sendfile_aiocb.nbytes(),
         0,
-        sendfile_aiocb,
+        lpOverlapped,
         NULL,
         0
       )
@@ -455,22 +470,11 @@ bool AioQueue::enqueue(YO_NEW_REF Event& event) {
     return false;
   }
   break;
-
-  default: {
-    return PostQueuedCompletionStatus(
-             hIoCompletionPort,
-             0,
-             reinterpret_cast<ULONG_PTR>(&event),
-             NULL
-           )
-           == TRUE;
-  }
-  break;
   }
 }
 
 template <class AiocbType> void AioQueue::log_completion(AiocbType& aiocb) {
-  if (aiocb.get_return() >= 0) {
+  if (aiocb.return_() >= 0) {
     DLOG(DEBUG) << "completed " << aiocb;
   } else {
     log_error(aiocb);
@@ -485,7 +489,7 @@ template <class AiocbType> void AioQueue::log_error(AiocbType& aiocb) {
   LOG(ERROR) << "error on " << aiocb;
 }
 
-YO_NEW_REF Event* AioQueue::timeddequeue(const Time& timeout) {
+shared_ptr<Aiocb> AioQueue::timeddequeue(const Time& timeout) {
   DWORD dwBytesTransferred = 0;
   ULONG_PTR ulCompletionKey = 0;
   LPOVERLAPPED lpOverlapped = NULL;
@@ -499,122 +503,137 @@ YO_NEW_REF Event* AioQueue::timeddequeue(const Time& timeout) {
       static_cast<DWORD>(timeout.ms())
     );
 
-  if (lpOverlapped != NULL) {
-    Aiocb& aiocb = Aiocb::cast(*lpOverlapped);
-
-    if (bRet) {
-      aiocb.set_return(dwBytesTransferred);
-    } else {
-      aiocb.set_error(GetLastError());
-    }
-
-    switch (aiocb.get_type_id()) {
-    case AcceptAiocb::TYPE_ID: {
-      AcceptAiocb& accept_aiocb = static_cast<AcceptAiocb&>(aiocb);
-
-      if (accept_aiocb.get_error() == 0) {
-        // accept_aiocb.return does NOT include the size of the
-        // local and remote socket addresses.
-
-        StreamSocket& accepted_socket
-        = *accept_aiocb.get_accepted_socket();
-        Buffer& recv_buffer = *accept_aiocb.get_recv_buffer();
-
-        int optval = accept_aiocb.get_socket();
-        setsockopt(
-          accepted_socket,
-          SOL_SOCKET,
-          SO_UPDATE_ACCEPT_CONTEXT,
-          reinterpret_cast<char*>(&optval),
-          sizeof(optval)
-        );
-
-        DWORD dwLocalAddressLength
-        = SocketAddress::len(accepted_socket.get_domain()) + 16;
-        DWORD dwRemoteAddressLength = dwLocalAddressLength;
-        DWORD dwReceiveDataLength =
-          recv_buffer.capacity() - recv_buffer.size() -
-          (dwLocalAddressLength + dwRemoteAddressLength);
-
-        sockaddr* peername = NULL;
-        socklen_t peernamelen;
-        sockaddr* sockname;
-        socklen_t socknamelen;
-
-        lpfnGetAcceptExSockaddrs(
-          static_cast<char*>(recv_buffer) + recv_buffer.size(),
-          dwReceiveDataLength,
-          dwLocalAddressLength,
-          dwRemoteAddressLength,
-          &sockname,
-          &socknamelen,
-          &peername,
-          &peernamelen
-        );
-
-        if (peername != NULL) {
-          accept_aiocb.set_peername(
-            new SocketAddress(*peername, accepted_socket.get_domain())
-          );
-
-          if (accept_aiocb.get_return() > 0)
-            recv_buffer.put(NULL, accept_aiocb.get_return());
-        } else {
-          accept_aiocb.set_error(WSAGetLastError());
-        }
-      }
-
-      log_completion(accept_aiocb);
-    }
-    break;
-
-    case ConnectAiocb::TYPE_ID: {
-      log_completion(static_cast<ConnectAiocb&>(aiocb));
-    }
-    break;
-
-    case RecvAiocb::TYPE_ID: {
-      RecvAiocb& recv_aiocb = static_cast<RecvAiocb&>(aiocb);
-
-      if (recv_aiocb.get_return() > 0) {
-        Buffers::put(
-          recv_aiocb.get_buffer(),
-          NULL,
-          static_cast<size_t>(recv_aiocb.get_return())
-        );
-      }
-
-      log_completion(recv_aiocb);
-    }
-    break;
-
-    case RecvfromAiocb::TYPE_ID: {
-      RecvfromAiocb& recvfrom_aiocb = static_cast<RecvfromAiocb&>(aiocb);
-
-      if (recvfrom_aiocb.get_return() > 0) {
-        Buffers::put(
-          recvfrom_aiocb.get_buffer(),
-          NULL,
-          static_cast<size_t>(recvfrom_aiocb.get_return())
-        );
-      }
-
-      log_completion(recvfrom_aiocb);
-    }
-    break;
-
-    case SendAiocb::TYPE_ID: {
-      log_completion(static_cast<SendAiocb&>(aiocb));
-    }
-    break;
-    }
-
-    return &aiocb;
-  } else if (ulCompletionKey != 0) {
-    return reinterpret_cast<Event*>(ulCompletionKey);
-  } else {
+  if (lpOverlapped == NULL) {
     return NULL;
   }
+
+  shared_ptr<Aiocb> aiocb = *static_cast<AiocbOVERLAPPED*>(lpOverlapped)->aiocb;
+  delete lpOverlapped;
+
+  if (bRet) {
+    aiocb->set_return(dwBytesTransferred);
+  } else {
+    aiocb->set_error(GetLastError());
+  }
+
+  switch (aiocb->type()) {
+    case Aiocb::Type::ACCEPT: {
+    AcceptAiocb& accept_aiocb = static_cast<AcceptAiocb&>(*aiocb);
+
+    if (accept_aiocb.error() == 0) {
+      // accept_aiocb.return does NOT include the size of the
+      // local and remote socket addresses.
+
+      StreamSocket& accepted_socket
+      = *accept_aiocb.accepted_socket();
+      Buffer& recv_buffer = *accept_aiocb.recv_buffer();
+
+      int optval = accept_aiocb.socket();
+      setsockopt(
+        accepted_socket,
+        SOL_SOCKET,
+        SO_UPDATE_ACCEPT_CONTEXT,
+        reinterpret_cast<char*>(&optval),
+        sizeof(optval)
+      );
+
+      DWORD dwLocalAddressLength
+      = SocketAddress::len(accepted_socket.get_domain()) + 16;
+      DWORD dwRemoteAddressLength = dwLocalAddressLength;
+      DWORD dwReceiveDataLength =
+        recv_buffer.capacity() - recv_buffer.size() -
+        (dwLocalAddressLength + dwRemoteAddressLength);
+
+      sockaddr* peername = NULL;
+      socklen_t peernamelen;
+      sockaddr* sockname;
+      socklen_t socknamelen;
+
+      lpfnGetAcceptExSockaddrs(
+        static_cast<char*>(recv_buffer) + recv_buffer.size(),
+        dwReceiveDataLength,
+        dwLocalAddressLength,
+        dwRemoteAddressLength,
+        &sockname,
+        &socknamelen,
+        &peername,
+        &peernamelen
+      );
+
+      if (peername != NULL) {
+        accept_aiocb.set_peername(
+          make_shared<SocketAddress>(SocketAddress(*peername, accepted_socket.get_domain()))
+        );
+
+        if (accept_aiocb.return_() > 0)
+          recv_buffer.put(NULL, accept_aiocb.return_());
+      } else {
+        accept_aiocb.set_error(WSAGetLastError());
+      }
+    }
+
+    log_completion(accept_aiocb);
+  }
+  break;
+
+  case Aiocb::Type::CONNECT: {
+    log_completion(static_cast<ConnectAiocb&>(*aiocb));
+  }
+  break;
+
+  case Aiocb::Type::RECV: {
+    RecvAiocb& recv_aiocb = static_cast<RecvAiocb&>(*aiocb);
+
+    if (recv_aiocb.return_() > 0) {
+      Buffers::put(
+        *recv_aiocb.buffer(),
+        NULL,
+        static_cast<size_t>(recv_aiocb.return_())
+      );
+    }
+
+    log_completion(recv_aiocb);
+  }
+  break;
+
+  case Aiocb::Type::RECVFROM: {
+    RecvfromAiocb& recvfrom_aiocb = static_cast<RecvfromAiocb&>(*aiocb);
+
+    if (recvfrom_aiocb.return_() > 0) {
+      Buffers::put(
+        *recvfrom_aiocb.buffer(),
+        NULL,
+        static_cast<size_t>(recvfrom_aiocb.return_())
+      );
+    }
+
+    log_completion(recvfrom_aiocb);
+  }
+  break;
+
+  case Aiocb::Type::SEND: {
+    log_completion(static_cast<SendAiocb&>(*aiocb));
+  }
+  break;
+
+  case Aiocb::Type::SENDFILE: {
+    log_completion(static_cast<SendfileAiocb&>(*aiocb));
+  }
+  break;
+  }
+
+  return aiocb;
+}
+
+void AioQueue::wake() {
+  //return PostQueuedCompletionStatus(
+  //          hIoCompletionPort,
+  //          0,
+  //          reinterpret_cast<ULONG_PTR>(&event),
+  //          NULL
+  //        )
+  //        == TRUE;
+  ::PostQueuedCompletionStatus(hIoCompletionPort, 0, 0, NULL);
 }
 }
 }

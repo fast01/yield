@@ -44,26 +44,27 @@ namespace yield {
 namespace sockets {
 namespace aio {
 using ::std::map;
+using ::std::shared_ptr;
 using ::std::vector;
+using ::std::unique_ptr;
 using ::yield::poll::FdEvent;
 
 class NbioQueue::AiocbState {
 public:
-  AiocbState(YO_NEW_REF Aiocb& aiocb, ssize_t partial_send_len)
-    : aiocb(&aiocb),
-      partial_send_len(partial_send_len) {
-    next_aiocb_state = NULL;
+  AiocbState(shared_ptr<Aiocb> aiocb, ssize_t partial_send_len)
+    : aiocb_(aiocb),
+      partial_send_len_(partial_send_len) {
+    next_aiocb_state_ = NULL;
   }
 
   ~AiocbState() {
-    Aiocb::dec_ref(aiocb);
-    delete next_aiocb_state;
+    delete next_aiocb_state_;
   }
 
 public:
-  Aiocb* aiocb;
-  AiocbState* next_aiocb_state;
-  size_t partial_send_len;
+  shared_ptr<Aiocb> aiocb_;
+  AiocbState* next_aiocb_state_;
+  size_t partial_send_len_;
 };
 
 class NbioQueue::SocketState {
@@ -101,7 +102,7 @@ void NbioQueue::associate(Aiocb& aiocb, RetryStatus retry_status) {
   case RETRY_STATUS_WANT_RECV: {
     bool associate_ret =
       fd_event_queue.associate(
-        aiocb.get_socket(),
+        aiocb.socket(),
         FdEvent::TYPE_READ_READY
       );
     CHECK(associate_ret);
@@ -111,7 +112,7 @@ void NbioQueue::associate(Aiocb& aiocb, RetryStatus retry_status) {
   case RETRY_STATUS_WANT_SEND: {
     bool associate_ret =
       fd_event_queue.associate(
-        aiocb.get_socket(),
+        aiocb.socket(),
         FdEvent::TYPE_WRITE_READY
       );
     CHECK(associate_ret);
@@ -124,23 +125,25 @@ void NbioQueue::associate(Aiocb& aiocb, RetryStatus retry_status) {
   }
 }
 
-bool NbioQueue::enqueue(Event& event) {
-  return fd_event_queue.enqueue(event);
+bool NbioQueue::enqueue(shared_ptr<Aiocb> aiocb) {
+  bool ret = aiocb_queue.enqueue(aiocb);
+  fd_event_queue.wake();
+  return ret;
 }
 
 uint8_t NbioQueue::get_aiocb_priority(const Aiocb& aiocb) {
-  switch (aiocb.get_type_id()) {
-  case AcceptAiocb::TYPE_ID:
+  switch (aiocb.type()) {
+  case Aiocb::Type::ACCEPT:
     return 0;
-  case ConnectAiocb::TYPE_ID:
+  case Aiocb::Type::CONNECT:
     return 1;
-  case RecvAiocb::TYPE_ID:
+  case Aiocb::Type::RECV:
     return 3;
-  case RecvfromAiocb::TYPE_ID:
+  case Aiocb::Type::RECVFROM:
     return 3;
-  case SendAiocb::TYPE_ID:
+  case Aiocb::Type::SEND:
     return 2;
-  case SendfileAiocb::TYPE_ID:
+  case Aiocb::Type::SENDFILE:
     return 2;
   default:
     CHECK(false);
@@ -185,18 +188,18 @@ void NbioQueue::log_wouldblock(AiocbType& aiocb, RetryStatus retry_status) {
 }
 
 NbioQueue::RetryStatus NbioQueue::retry(Aiocb& aiocb, size_t& partial_send_len) {
-  switch (aiocb.get_type_id()) {
-  case AcceptAiocb::TYPE_ID:
+  switch (aiocb.type()) {
+  case Aiocb::Type::ACCEPT:
     return retry_accept(static_cast<AcceptAiocb&>(aiocb));
-  case ConnectAiocb::TYPE_ID:
+  case Aiocb::Type::CONNECT:
     return retry_connect(static_cast<ConnectAiocb&>(aiocb), partial_send_len);
-  case RecvAiocb::TYPE_ID:
+  case Aiocb::Type::RECV:
     return retry_recv(static_cast<RecvAiocb&>(aiocb));
-  case RecvfromAiocb::TYPE_ID:
+  case Aiocb::Type::RECVFROM:
     return retry_recvfrom(static_cast<RecvfromAiocb&>(aiocb));
-  case SendAiocb::TYPE_ID:
+  case Aiocb::Type::SEND:
     return retry_send(static_cast<SendAiocb&>(aiocb), partial_send_len);
-  case SendfileAiocb::TYPE_ID:
+  case Aiocb::Type::SENDFILE:
     return retry_sendfile(static_cast<SendfileAiocb&>(aiocb), partial_send_len);
   default:
     CHECK(false);
@@ -207,19 +210,19 @@ NbioQueue::RetryStatus NbioQueue::retry(Aiocb& aiocb, size_t& partial_send_len) 
 NbioQueue::RetryStatus NbioQueue::retry_accept(AcceptAiocb& accept_aiocb) {
   log_retry(accept_aiocb);
 
-  if (accept_aiocb.get_socket().set_blocking_mode(false)) {
-    auto_Object<SocketAddress> peername = new SocketAddress;
-    StreamSocket* accepted_socket
-    = accept_aiocb.get_socket().accept(*peername);
+  if (accept_aiocb.socket().set_blocking_mode(false)) {
+    shared_ptr<SocketAddress> peername(new SocketAddress);
+    shared_ptr<StreamSocket> accepted_socket
+    = accept_aiocb.socket().accept(*peername);
 
     if (accepted_socket != NULL) {
-      accept_aiocb.set_accepted_socket(*accepted_socket);
-      accept_aiocb.set_peername(&peername->inc_ref());
+      accept_aiocb.set_accepted_socket(accepted_socket);
+      accept_aiocb.set_peername(peername);
 
-      if (accept_aiocb.get_recv_buffer() != NULL) {
+      if (accept_aiocb.recv_buffer() != NULL) {
         if (accepted_socket->set_blocking_mode(false)) {
           ssize_t recv_ret =
-            accepted_socket->recv(*accept_aiocb.get_recv_buffer(), 0);
+            accepted_socket->recv(*accept_aiocb.recv_buffer(), 0);
           if (recv_ret > 0) {
             accept_aiocb.set_return(recv_ret);
           } else if (recv_ret == 0) {
@@ -235,7 +238,7 @@ NbioQueue::RetryStatus NbioQueue::retry_accept(AcceptAiocb& accept_aiocb) {
 
       log_completion(accept_aiocb);
       return RETRY_STATUS_COMPLETE;
-    } else if (accept_aiocb.get_socket().want_accept()) {
+    } else if (accept_aiocb.socket().want_accept()) {
       log_wouldblock(accept_aiocb, RETRY_STATUS_WANT_RECV);
       return RETRY_STATUS_WANT_RECV;
     }
@@ -253,12 +256,12 @@ NbioQueue::retry_connect(
 ) {
   log_retry(connect_aiocb);
 
-  if (connect_aiocb.get_socket().set_blocking_mode(false)) {
-    if (connect_aiocb.get_socket().connect(connect_aiocb.get_peername())) {
-      if (connect_aiocb.get_send_buffer() != NULL) {
+  if (connect_aiocb.socket().set_blocking_mode(false)) {
+    if (connect_aiocb.socket().connect(connect_aiocb.peername())) {
+      if (connect_aiocb.send_buffer() != NULL) {
         return retry_send(
                  connect_aiocb,
-                 *connect_aiocb.get_send_buffer(),
+                 *connect_aiocb.send_buffer(),
                  partial_send_len
                );
       } else {
@@ -266,7 +269,7 @@ NbioQueue::retry_connect(
         log_completion(connect_aiocb);
         return RETRY_STATUS_COMPLETE;
       }
-    } else if (connect_aiocb.get_socket().want_connect()) {
+    } else if (connect_aiocb.socket().want_connect()) {
       log_wouldblock(connect_aiocb, RETRY_STATUS_WANT_SEND);
       return RETRY_STATUS_WANT_SEND;
     }
@@ -280,21 +283,21 @@ NbioQueue::retry_connect(
 NbioQueue::RetryStatus NbioQueue::retry_recv(RecvAiocb& recv_aiocb) {
   log_retry(recv_aiocb);
 
-  if (recv_aiocb.get_socket().set_blocking_mode(false)) {
+  if (recv_aiocb.socket().set_blocking_mode(false)) {
     ssize_t recv_ret
-    = recv_aiocb.get_socket().recv(
-        recv_aiocb.get_buffer(),
-        recv_aiocb.get_flags()
+    = recv_aiocb.socket().recv(
+        *recv_aiocb.buffer(),
+        recv_aiocb.flags()
       );
 
     if (recv_ret >= 0) {
       recv_aiocb.set_return(recv_ret);
       log_completion(recv_aiocb);
       return RETRY_STATUS_COMPLETE;
-    } else if (recv_aiocb.get_socket().want_recv()) {
+    } else if (recv_aiocb.socket().want_recv()) {
       log_wouldblock(recv_aiocb, RETRY_STATUS_WANT_RECV);
       return RETRY_STATUS_WANT_RECV;
-    } else if (recv_aiocb.get_socket().want_send()) {
+    } else if (recv_aiocb.socket().want_send()) {
       log_wouldblock(recv_aiocb, RETRY_STATUS_WANT_SEND);
       return RETRY_STATUS_WANT_SEND;
     }
@@ -308,22 +311,22 @@ NbioQueue::RetryStatus NbioQueue::retry_recv(RecvAiocb& recv_aiocb) {
 NbioQueue::RetryStatus NbioQueue::retry_recvfrom(RecvfromAiocb& recvfrom_aiocb) {
   log_retry(recvfrom_aiocb);
 
-  if (recvfrom_aiocb.get_socket().set_blocking_mode(false)) {
+  if (recvfrom_aiocb.socket().set_blocking_mode(false)) {
     ssize_t recv_ret
-    = recvfrom_aiocb.get_socket().recvfrom(
-        recvfrom_aiocb.get_buffer(),
-        recvfrom_aiocb.get_flags(),
-        recvfrom_aiocb.get_peername()
+    = recvfrom_aiocb.socket().recvfrom(
+        *recvfrom_aiocb.buffer(),
+        recvfrom_aiocb.flags(),
+        recvfrom_aiocb.peername()
       );
 
     if (recv_ret >= 0) {
       recvfrom_aiocb.set_return(recv_ret);
       log_completion(recvfrom_aiocb);
       return RETRY_STATUS_COMPLETE;
-    } else if (recvfrom_aiocb.get_socket().want_recv()) {
+    } else if (recvfrom_aiocb.socket().want_recv()) {
       log_wouldblock(recvfrom_aiocb, RETRY_STATUS_WANT_RECV);
       return RETRY_STATUS_WANT_RECV;
-    } else if (recvfrom_aiocb.get_socket().want_send()) {
+    } else if (recvfrom_aiocb.socket().want_send()) {
       log_wouldblock(recvfrom_aiocb, RETRY_STATUS_WANT_SEND);
       return RETRY_STATUS_WANT_SEND;
     }
@@ -342,8 +345,8 @@ NbioQueue::retry_send(
 ) {
   log_retry(send_aiocb);
 
-  if (send_aiocb.get_socket().set_blocking_mode(false)) {
-    return retry_send(send_aiocb, send_aiocb.get_buffer(), partial_send_len);
+  if (send_aiocb.socket().set_blocking_mode(false)) {
+    return retry_send(send_aiocb, send_aiocb.buffer(), partial_send_len);
   } else {
     send_aiocb.set_error(Exception::get_last_error_code());
     log_error(send_aiocb);
@@ -362,7 +365,7 @@ NbioQueue::retry_send(
   if (buffer.get_next_buffer() == NULL) {
     complete_send_ret = buffer.size() - partial_send_len;
     send_ret
-    = aiocb.get_socket().send(
+    = aiocb.socket().send(
         static_cast<const char*>(buffer) + partial_send_len,
         buffer.size() - partial_send_len,
         0
@@ -371,7 +374,7 @@ NbioQueue::retry_send(
     vector<iovec> iov;
     complete_send_ret
     = Buffers::as_write_iovecs(buffer, partial_send_len, iov);
-    send_ret = aiocb.get_socket().sendmsg(&iov[0], iov.size(), 0);
+    send_ret = aiocb.socket().sendmsg(&iov[0], iov.size(), 0);
   }
 
   if (send_ret >= 0) {
@@ -385,10 +388,10 @@ NbioQueue::retry_send(
       log_partial_send(aiocb, partial_send_len);
       return RETRY_STATUS_WANT_SEND;
     }
-  } else if (aiocb.get_socket().want_send()) {
+  } else if (aiocb.socket().want_send()) {
     log_wouldblock(aiocb, RETRY_STATUS_WANT_SEND);
     return RETRY_STATUS_WANT_SEND;
-  } else if (aiocb.get_socket().want_recv()) {
+  } else if (aiocb.socket().want_recv()) {
     log_wouldblock(aiocb, RETRY_STATUS_WANT_RECV);
     return RETRY_STATUS_WANT_RECV;
   } else {
@@ -405,18 +408,18 @@ NbioQueue::retry_sendfile(
 ) {
   log_retry(sendfile_aiocb);
 
-  if (sendfile_aiocb.get_socket().set_blocking_mode(false)) {
+  if (sendfile_aiocb.socket().set_blocking_mode(false)) {
     ssize_t sendfile_ret
-    = sendfile_aiocb.get_socket().sendfile(
-        sendfile_aiocb.get_fd(),
-        sendfile_aiocb.get_offset() + partial_send_len,
-        sendfile_aiocb.get_nbytes() - partial_send_len
+    = sendfile_aiocb.socket().sendfile(
+        sendfile_aiocb.fd(),
+        sendfile_aiocb.offset() + partial_send_len,
+        sendfile_aiocb.nbytes() - partial_send_len
       );
 
     if (sendfile_ret >= 0) {
       partial_send_len += static_cast<size_t>(sendfile_ret);
 
-      if (partial_send_len == sendfile_aiocb.get_nbytes()) {
+      if (partial_send_len == sendfile_aiocb.nbytes()) {
         sendfile_aiocb.set_return(partial_send_len);
         log_completion(sendfile_aiocb);
         return RETRY_STATUS_COMPLETE;
@@ -424,10 +427,10 @@ NbioQueue::retry_sendfile(
         log_partial_send(sendfile_aiocb, partial_send_len);
         return RETRY_STATUS_WANT_SEND;
       }
-    } else if (sendfile_aiocb.get_socket().want_send()) {
+    } else if (sendfile_aiocb.socket().want_send()) {
       log_wouldblock(sendfile_aiocb, RETRY_STATUS_WANT_SEND);
       return RETRY_STATUS_WANT_SEND;
-    } else if (sendfile_aiocb.get_socket().want_recv()) {
+    } else if (sendfile_aiocb.socket().want_recv()) {
       log_wouldblock(sendfile_aiocb, RETRY_STATUS_WANT_RECV);
       return RETRY_STATUS_WANT_RECV;
     }
@@ -438,20 +441,16 @@ NbioQueue::retry_sendfile(
   return RETRY_STATUS_ERROR;
 }
 
-Event* NbioQueue::timeddequeue(const Time& timeout) {
+::std::shared_ptr<Aiocb> NbioQueue::timeddequeue(const Time& timeout) {
   Time timeout_remaining = timeout;
 
   for (;;) {
     Time start_time = Time::now();
 
-    Event* event = fd_event_queue.timeddequeue(timeout_remaining);
+    shared_ptr<FdEvent> fd_event = fd_event_queue.timeddequeue(timeout_remaining);
 
-    if (event != NULL) {
-      switch (event->get_type_id()) {
-      case FdEvent::TYPE_ID: {
-        FdEvent* fd_event = static_cast<FdEvent*>(event);
-        fd_t fd = fd_event->get_fd();
-        FdEvent::dec_ref(*fd_event);
+    if (fd_event != NULL) {
+        fd_t fd = fd_event->fd();
 
         map<fd_t, SocketState*>::iterator socket_state_i
         = this->socket_state.find(fd);
@@ -463,8 +462,8 @@ Event* NbioQueue::timeddequeue(const Time& timeout) {
         for (uint8_t aiocb_priority = 0; aiocb_priority < 4; ++aiocb_priority) {
           AiocbState* aiocb_state = socket_state->aiocb_state[aiocb_priority];
           if (aiocb_state != NULL) {
-            Aiocb* aiocb = aiocb_state->aiocb;
-            size_t& partial_send_len = aiocb_state->partial_send_len;
+            shared_ptr<Aiocb> aiocb = aiocb_state->aiocb_;
+            size_t& partial_send_len = aiocb_state->partial_send_len_;
             RetryStatus retry_status = retry(*aiocb, partial_send_len);
 
             if (
@@ -472,9 +471,9 @@ Event* NbioQueue::timeddequeue(const Time& timeout) {
               ||
               retry_status == RETRY_STATUS_ERROR
             ) {
-              aiocb_state->aiocb = NULL;
+              aiocb_state->aiocb_ = NULL;
 
-              if (aiocb_state->next_aiocb_state == NULL) {
+              if (aiocb_state->next_aiocb_state_ == NULL) {
                 socket_state->aiocb_state[aiocb_priority] = NULL;
 
                 if (socket_state->empty()) {
@@ -484,8 +483,8 @@ Event* NbioQueue::timeddequeue(const Time& timeout) {
                 }
               } else {
                 socket_state->aiocb_state[aiocb_priority]
-                = aiocb_state->next_aiocb_state;
-                aiocb_state->next_aiocb_state = NULL;
+                = aiocb_state->next_aiocb_state_;
+                aiocb_state->next_aiocb_state_ = NULL;
                 delete aiocb_state;
               }
 
@@ -504,95 +503,85 @@ Event* NbioQueue::timeddequeue(const Time& timeout) {
         bool associate_ret
         = fd_event_queue.associate(fd, want_fd_event_types);
         CHECK(associate_ret);
-      }
-      break;
+    }
 
-      case AcceptAiocb::TYPE_ID:
-      case ConnectAiocb::TYPE_ID:
-      case RecvAiocb::TYPE_ID:
-      case RecvfromAiocb::TYPE_ID:
-      case SendAiocb::TYPE_ID:
-      case SendfileAiocb::TYPE_ID: {
-        Aiocb* aiocb = static_cast<Aiocb*>(event);
+    shared_ptr<Aiocb> aiocb(aiocb_queue.trydequeue());
+    if (aiocb != NULL) {
+      map<fd_t, SocketState*>::iterator socket_state_i
+      = this->socket_state.find(aiocb->socket());
 
-        map<fd_t, SocketState*>::iterator socket_state_i
-        = this->socket_state.find(aiocb->get_socket());
+      if (socket_state_i == this->socket_state.end()) {
+        size_t partial_send_len = 0;
+        RetryStatus retry_status = retry(*aiocb, partial_send_len);
+        switch (retry_status) {
+        case RETRY_STATUS_COMPLETE:
+        case RETRY_STATUS_ERROR:
+          return aiocb;
+        default: {
+          AiocbState* aiocb_state = new AiocbState(aiocb, partial_send_len);
+          SocketState* socket_state = new SocketState();
+          uint8_t aiocb_priority = get_aiocb_priority(*aiocb);
+          socket_state->aiocb_state[aiocb_priority] = aiocb_state;
+          this->socket_state[aiocb->socket()] = socket_state;
+          associate(*aiocb, retry_status);
+        }
+        break;
+        }
+      } else {
+        SocketState* socket_state = socket_state_i->second;
 
-        if (socket_state_i == this->socket_state.end()) {
-          size_t partial_send_len = 0;
+        uint8_t aiocb_priority = get_aiocb_priority(*aiocb);
+
+        // Check if there's already an Aiocb with an equal or higher priority
+        // on this socket. If not, retry aiocb.
+        bool should_retry_aiocb = true;
+        for (
+          int8_t check_aiocb_priority = aiocb_priority;
+          check_aiocb_priority >= 0;
+          --check_aiocb_priority
+        ) {
+          if (socket_state->aiocb_state[check_aiocb_priority] != NULL) {
+            should_retry_aiocb = false;
+            break;
+          }
+        }
+
+        size_t partial_send_len = 0;
+        if (should_retry_aiocb) {
           RetryStatus retry_status = retry(*aiocb, partial_send_len);
           switch (retry_status) {
           case RETRY_STATUS_COMPLETE:
           case RETRY_STATUS_ERROR:
+            CHECK(!socket_state->empty());
             return aiocb;
-          default: {
-            AiocbState* aiocb_state = new AiocbState(*aiocb, partial_send_len);
-            SocketState* socket_state = new SocketState();
-            uint8_t aiocb_priority = get_aiocb_priority(*aiocb);
-            socket_state->aiocb_state[aiocb_priority] = aiocb_state;
-            this->socket_state[aiocb->get_socket()] = socket_state;
+          default:
             associate(*aiocb, retry_status);
-          }
-          break;
-          }
-        } else {
-          SocketState* socket_state = socket_state_i->second;
-
-          uint8_t aiocb_priority = get_aiocb_priority(*aiocb);
-
-          // Check if there's already an Aiocb with an equal or higher priority
-          // on this socket. If not, retry aiocb.
-          bool should_retry_aiocb = true;
-          for (
-            int8_t check_aiocb_priority = aiocb_priority;
-            check_aiocb_priority >= 0;
-            --check_aiocb_priority
-          ) {
-            if (socket_state->aiocb_state[check_aiocb_priority] != NULL) {
-              should_retry_aiocb = false;
-              break;
-            }
-          }
-
-          size_t partial_send_len = 0;
-          if (should_retry_aiocb) {
-            RetryStatus retry_status = retry(*aiocb, partial_send_len);
-            switch (retry_status) {
-            case RETRY_STATUS_COMPLETE:
-            case RETRY_STATUS_ERROR:
-              CHECK(!socket_state->empty());
-              return aiocb;
-            default:
-              associate(*aiocb, retry_status);
-              break;
-            }
-          }
-
-          AiocbState* aiocb_state = new AiocbState(*aiocb, partial_send_len);
-          if (socket_state->aiocb_state[aiocb_priority] == NULL) {
-            socket_state->aiocb_state[aiocb_priority] = aiocb_state;
-          } else {
-            AiocbState* last_aiocb_state
-            = socket_state->aiocb_state[aiocb_priority];
-            while (last_aiocb_state->next_aiocb_state != NULL) {
-              last_aiocb_state = last_aiocb_state->next_aiocb_state;
-            }
-            last_aiocb_state->next_aiocb_state = aiocb_state;
+            break;
           }
         }
-      }
-      break;
 
-      default:
-        return event;
+        AiocbState* aiocb_state = new AiocbState(aiocb, partial_send_len);
+        if (socket_state->aiocb_state[aiocb_priority] == NULL) {
+          socket_state->aiocb_state[aiocb_priority] = aiocb_state;
+        } else {
+          AiocbState* last_aiocb_state
+          = socket_state->aiocb_state[aiocb_priority];
+          while (last_aiocb_state->next_aiocb_state_ != NULL) {
+            last_aiocb_state = last_aiocb_state->next_aiocb_state_;
+          }
+          last_aiocb_state->next_aiocb_state_ = aiocb_state;
+        }
       }
-    } else if (timeout_remaining > static_cast<uint64_t>(0)) {
+    }
+
+    if (timeout_remaining > static_cast<uint64_t>(0)) {
       Time elapsed_time = Time::now() - start_time;
       if (timeout_remaining > elapsed_time) {
         timeout_remaining -= elapsed_time;
       } else {
         timeout_remaining = 0;
       }
+      continue;
     } else {
       return NULL;
     }

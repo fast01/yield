@@ -56,19 +56,19 @@ public:
       connection is accepted
   */
   AcceptAiocb(
-    StreamSocket& socket_,
-    ::std::unique_ptr<Buffer> recv_buffer
-  );
-
-  ~AcceptAiocb();
+    ::std::shared_ptr<StreamSocket> socket_,
+    ::std::shared_ptr<Buffer> recv_buffer
+  ) : Aiocb(socket_),
+      recv_buffer_(recv_buffer) {
+  }
 
 public:
   /**
     Get the accepted socket, once the accept operation is complete.
     @return the accepted socket
   */
-  StreamSocket* get_accepted_socket() {
-    return accepted_socket;
+  ::std::shared_ptr<StreamSocket> accepted_socket() {
+    return accepted_socket_;
   }
 
   /**
@@ -76,8 +76,8 @@ public:
       operation is complete.
     @return the new peer's address
   */
-  SocketAddress* get_peername() {
-    return peername;
+  ::std::shared_ptr<SocketAddress> peername() {
+    return peername_;
   }
 
   /**
@@ -86,14 +86,16 @@ public:
     @return the buffer with data received from the new peer, or NULL
       if no buffer was passed to the constructor
   */
-  Buffer* get_recv_buffer() {
-    return recv_buffer;
+  ::std::shared_ptr<Buffer> recv_buffer() {
+    return recv_buffer_;
   }
 
   /**
     Get the listen socket in this accept operation.
   */
-  StreamSocket& get_socket();
+  StreamSocket& socket() {
+    return static_cast<StreamSocket&>(Aiocb::socket());
+  }
 
 protected:
 #ifdef _WIN32
@@ -101,14 +103,22 @@ protected:
 #endif
   friend class NbioQueue;
 
-  void set_accepted_socket(YO_NEW_REF StreamSocket& accepted_socket);
-  void set_peername(YO_NEW_REF SocketAddress* peername);
-  void set_recv_buffer(YO_NEW_REF Buffer* recv_buffer);
+  void set_accepted_socket(::std::shared_ptr<StreamSocket> accepted_socket) {
+    this->accepted_socket_ = accepted_socket;
+  }
+
+  void set_peername(::std::shared_ptr<SocketAddress> peername) {
+    this->peername_ = peername;
+  }
+
+  void set_recv_buffer(::std::shared_ptr<Buffer> recv_buffer) {
+    this->recv_buffer_ = recv_buffer;
+  }
 
 private:
-  StreamSocket* accepted_socket;
-  SocketAddress* peername;
-  Buffer* recv_buffer;
+  ::std::shared_ptr<StreamSocket> accepted_socket_;
+  ::std::shared_ptr<SocketAddress> peername_;
+  ::std::shared_ptr<Buffer> recv_buffer_;
 };
 
 /**

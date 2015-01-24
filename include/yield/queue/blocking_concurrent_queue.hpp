@@ -41,16 +41,16 @@ namespace queue {
     block the caller indefinitely in either operation.
 */
 template <class ElementType>
-class BlockingConcurrentQueue : private std::queue<ElementType*> {
+class BlockingConcurrentQueue : private std::queue< ::std::shared_ptr<ElementType> > {
 public:
   /**
     Enqueue a new element.
     @param element the element to enqueue
     @return true if the enqueue was successful.
   */
-  bool enqueue(ElementType& element) {
+  bool enqueue(::std::shared_ptr<ElementType> element) {
     mutex.lock();
-    std::queue<ElementType*>::push(&element);
+    std::queue< ::std::shared_ptr<ElementType> >::push(element);
     mutex.unlock();
     return true;
   }
@@ -59,11 +59,11 @@ public:
     Try to dequeue an element.
     @return the dequeued element or NULL if the queue was empty
   */
-  ElementType* trydequeue() {
+  ::std::shared_ptr<ElementType> trydequeue() {
     mutex.lock();
-    if (!std::queue<ElementType*>::empty()) {
-      ElementType* element = std::queue<ElementType*>::front();
-      std::queue<ElementType*>::pop();
+    if (!std::queue< ::std::shared_ptr<ElementType> >::empty()) {
+      ::std::shared_ptr<ElementType> element = std::queue< ::std::shared_ptr<ElementType> >::front();
+      std::queue< ::std::shared_ptr<ElementType> >::pop();
       mutex.unlock();
       return element;
     } else {

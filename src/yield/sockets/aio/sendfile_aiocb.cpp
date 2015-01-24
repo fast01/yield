@@ -42,8 +42,11 @@
 namespace yield {
 namespace sockets {
 namespace aio {
-SendfileAiocb::SendfileAiocb(StreamSocket& socket_, fd_t fd, Object* context)
-  : Aiocb(socket_, context) {
+SendfileAiocb::SendfileAiocb(
+  ::std::shared_ptr<Socket>& socket_,
+  fd_t fd
+)
+  : Aiocb(socket_) {
   init(fd);
 
 #ifdef _WIN32
@@ -53,12 +56,12 @@ SendfileAiocb::SendfileAiocb(StreamSocket& socket_, fd_t fd, Object* context)
   = SetFilePointer(fd, 0, &lFilePointerHigh, FILE_CURRENT);
   if (uliFilePointer.LowPart != INVALID_SET_FILE_POINTER) {
     uliFilePointer.HighPart = lFilePointerHigh;
-    offset = static_cast<off_t>(uliFilePointer.QuadPart);
+    offset_ = static_cast<off_t>(uliFilePointer.QuadPart);
 
     ULARGE_INTEGER uliFileSize;
     uliFileSize.LowPart = GetFileSize(fd, &uliFileSize.HighPart);
     if (uliFileSize.LowPart != INVALID_FILE_SIZE) {
-      nbytes
+      nbytes_
       = static_cast<size_t>(uliFileSize.QuadPart - uliFilePointer.QuadPart);
     } else {
       throw Exception();
@@ -82,26 +85,21 @@ SendfileAiocb::SendfileAiocb(StreamSocket& socket_, fd_t fd, Object* context)
 }
 
 SendfileAiocb::SendfileAiocb(
-  StreamSocket& socket_,
+  ::std::shared_ptr<Socket> socket_,
   fd_t fd,
   off_t offset,
-  size_t nbytes,
-  Object* context
-) : Aiocb(socket_, offset, context),
-  nbytes(nbytes) {
+  size_t nbytes
+) : Aiocb(socket_, offset),
+  nbytes_(nbytes) {
   init(fd);
 }
 
 SendfileAiocb::~SendfileAiocb() {
 #ifdef _WIN32
-  CloseHandle(fd);
+  CloseHandle(fd_);
 #else
-  close(fd);
+  close(fd_);
 #endif
-}
-
-StreamSocket& SendfileAiocb::get_socket() {
-  return static_cast<StreamSocket&>(Aiocb::get_socket());
 }
 
 void SendfileAiocb::init(fd_t fd) {
@@ -111,7 +109,7 @@ void SendfileAiocb::init(fd_t fd) {
       GetCurrentProcess(),
       fd,
       GetCurrentProcess(),
-      &this->fd,
+      &this->fd_,
       0,
       FALSE,
       DUPLICATE_SAME_ACCESS
@@ -120,8 +118,8 @@ void SendfileAiocb::init(fd_t fd) {
     throw Exception();
   }
 #else
-  this->fd = dup(fd);
-  if (this->fd == -1) {
+  this->fd_ = dup(fd);
+  if (this->fd_ == -1) {
     throw Exception();
   }
 #endif
@@ -134,9 +132,9 @@ std::ostream& operator<<(std::ostream& os, const SendfileAiocb& sendfile_aiocb) 
      //", " <<
      //"fd=" << sendfile_aiocb.get_fd() <<
      //", " <<
-     "nbytes=" << sendfile_aiocb.get_nbytes() <<
+     "nbytes=" << sendfile_aiocb.nbytes() <<
      ", " <<
-     "offset=" << sendfile_aiocb.get_offset() <<
+     "offset=" << sendfile_aiocb.offset() <<
      ", " <<
      //"return=" << sendfile_aiocb.get_return() <<
      //"," <<

@@ -51,7 +51,7 @@ public:
   virtual bool dissociate(fd_t fd) = 0;
 
 public:
-  bool enqueue(shared_ptr<FdEvent> event) {
+  bool enqueue(shared_ptr<FdEvent> event) override {
     CHECK(false);
     return false;
   }
@@ -76,7 +76,7 @@ public:
 
 public:
   // yield::EventQueue
-  ::std::shared_ptr<FdEvent> timeddequeue(const Time& timeout) {
+  ::std::shared_ptr<FdEvent> timeddequeue(const Time& timeout) override {
     DWORD dwRet
     = WaitForMultipleObjectsEx(
         handles.size(),
@@ -100,7 +100,7 @@ public:
 
 public:
   // yield::poll::FdEventQueue::Impl
-  bool associate(fd_t fd, FdEvent::Type fd_event_types) {
+  bool associate(fd_t fd, FdEvent::Type fd_event_types) override {
     if (fd_event_types != 0) {
       if (handles.size() < MAXIMUM_WAIT_OBJECTS) {
         if (
@@ -132,7 +132,7 @@ public:
     }
   }
 
-  bool dissociate(fd_t fd) {
+  bool dissociate(fd_t fd) override {
     for (size_t fd_i = 1; fd_i < handles.size(); ++fd_i) {
       if (handles[fd_i] == fd) {
         fd_event_types.erase(fd_event_types.begin() + fd_i);
@@ -144,6 +144,10 @@ public:
     SetLastError(ERROR_INVALID_HANDLE);
 
     return false;
+  }
+
+  void wake() override {
+    SetEvent(handles[0]);
   }
 
 private:
@@ -158,12 +162,16 @@ public:
 
 public:
   // yield::poll::FdEventQueue::Impl
-  bool associate(fd_t fd, FdEvent::Type fd_event_types) {
+  bool associate(fd_t fd, FdEvent::Type fd_event_types) override {
     return associate(reinterpret_cast<socket_t>(fd), fd_event_types);
   }
 
-  bool dissociate(fd_t fd) {
+  bool dissociate(fd_t fd) override {
     return dissociate(reinterpret_cast<socket_t>(fd));
+  }
+
+  void wake() override {
+    send(wake_socket_pair[1], "m", 1, 0);
   }
 
 protected:

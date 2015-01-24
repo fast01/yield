@@ -52,11 +52,7 @@ public:
     @return a new reference to an Event.
   */
   virtual ::std::shared_ptr<EventT> dequeue() {
-    ::std::shared_ptr<EventT> event;
-    do {
-      event = timeddequeue(Time::FOREVER);
-    } while (event == NULL);
-    return event;
+    return timeddequeue(Time::FOREVER);
   }
 
   /**
@@ -87,11 +83,7 @@ public:
     return timeddequeue(0);
   }
 
-public:
-  // yield::Object
-  EventQueue& inc_ref() {
-    return Object::inc_ref(*this);
-  }
+  virtual void wake() = 0;
 
 public:
   // yield::EventHandler

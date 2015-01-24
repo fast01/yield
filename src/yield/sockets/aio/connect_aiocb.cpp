@@ -36,35 +36,25 @@ namespace yield {
 namespace sockets {
 namespace aio {
 ConnectAiocb::ConnectAiocb(
-  StreamSocket& socket_,
-  SocketAddress& peername,
-  Object* context,
-  YO_NEW_REF Buffer* send_buffer
-) : Aiocb(socket_, context),
-  peername(peername.inc_ref()),
-  send_buffer(send_buffer) {
+  ::std::shared_ptr<StreamSocket> socket_,
+  ::std::shared_ptr<SocketAddress> peername,
+  ::std::shared_ptr<Buffer> send_buffer
+) : Aiocb(socket_),
+  peername_(peername),
+  send_buffer_(send_buffer) {
   if (send_buffer != NULL) {
     CHECK_EQ(send_buffer->get_next_buffer(), NULL);
   }
 }
 
-ConnectAiocb::~ConnectAiocb() {
-  SocketAddress::dec_ref(peername);
-  Buffer::dec_ref(send_buffer);
-}
-
-StreamSocket& ConnectAiocb::get_socket() {
-  return static_cast<StreamSocket&>(Aiocb::get_socket());
-}
-
 std::ostream& operator<<(std::ostream& os, const ConnectAiocb& connect_aiocb) {
   os <<
      "ConnectAiocb(" <<
-     "error=" << connect_aiocb.get_error() <<
+     "error=" << connect_aiocb.error() <<
      ", " <<
-     "peername=" << connect_aiocb.get_peername() <<
+     "peername=" << connect_aiocb.peername() <<
      ", " <<
-     "return=" << connect_aiocb.get_return() <<
+     "return=" << connect_aiocb.return_() <<
      //", " <<
      //"send_buffer=" << connect_aiocb.get_send_buffer() <<
      //", " <<

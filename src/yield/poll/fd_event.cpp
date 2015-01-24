@@ -48,7 +48,7 @@ const FdEvent::Type FdEvent::TYPE_READ_READY = POLLIN;
 const FdEvent::Type FdEvent::TYPE_WRITE_READY = POLLOUT;
 #endif
 
-FdEvent::FdEvent(fd_t fd, Type type) : fd(fd), type(type) {
+FdEvent::FdEvent(fd_t fd, Type type) : fd_(fd), type_(type) {
   CHECK(
     type == TYPE_ERROR
     ||

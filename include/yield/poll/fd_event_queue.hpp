@@ -33,7 +33,6 @@
 #include "yield/exception.hpp"
 #include "yield/event_queue.hpp"
 #include "yield/poll/fd_event.hpp"
-#include "yield/queue/blocking_concurrent_queue.hpp"
 
 #ifndef _WIN32
 #include <sys/poll.h>
@@ -45,7 +44,7 @@ namespace poll {
   EventQueue for file descriptor events (<code>FdEvent</code>s).
   Implemented in terms of efficient poll() variants on different platforms.
 */
-class FdEventQueue : public EventQueue<FdEvent> {
+class FdEventQueue final : public EventQueue<FdEvent> {
 public:
   /**
     Construct an FdEventQueue, allocating any associated system resources.
@@ -78,11 +77,11 @@ public:
 
 public:
   // yield::EventQueue
-  bool enqueue(::std::shared_ptr<FdEvent> event);
-  ::std::shared_ptr<FdEvent> timeddequeue(const Time& timeout);
+  bool enqueue(::std::shared_ptr<FdEvent> event) override;
+  ::std::shared_ptr<FdEvent> timeddequeue(const Time& timeout) override;
+  void wake() override;
 
 private:
-  ::yield::queue::BlockingConcurrentQueue<Event> event_queue;
 #if defined(__linux__)
   int epfd, wake_fd;
 #elif defined(__MACH__) || defined(__FreeBSD__)

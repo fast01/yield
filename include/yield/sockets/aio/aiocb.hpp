@@ -32,11 +32,6 @@
 
 #include "yield/event.hpp"
 
-#ifdef _WIN32
-struct _OVERLAPPED;
-typedef struct _OVERLAPPED OVERLAPPED;
-#endif
-
 namespace yield {
 namespace sockets {
 class Socket;
@@ -52,20 +47,21 @@ class NbioQueue;
 */
 class Aiocb : public Event {
 public:
-  virtual ~Aiocb() {
-  }
+  class Type {
+  public:
+    enum Enum {
+      ACCEPT,
+      CONNECT,
+      RECV,
+      RECVFROM,
+      SEND,
+      SENDFILE
+    };
+  };
 
 public:
-#ifdef _WIN32
-  /**
-    Win32 only: cast an LPOVERLAPPED returned by
-      <code>GetQueuedCompletionStatus[Ex]</code> to an Aiocb.
-    @param lpOverlapped the LPOVERLAPPED returned by
-      <code>GetQueuedCompletionStatus[Ex]</code>
-    @return the Aiocb that wraps lpOverlapped
-  */
-  static Aiocb& cast(::OVERLAPPED& lpOverlapped);
-#endif
+  virtual ~Aiocb() {
+  }
 
 public:
   /**
@@ -76,8 +72,15 @@ public:
     @return the error code produced by the operation associated with this
       control block
   */
-  uint32_t get_error() const {
-    return error;
+  uint32_t error() const {
+    return error_;
+  }
+
+  /**
+   * Get the offset of the AIO operation associated with this control block.
+   */
+  off_t offset() const {
+    return offset_;
   }
 
   /**
@@ -87,29 +90,29 @@ public:
     @return the return value produced by the operation associated with this
       control block
   */
-  ssize_t get_return() const {
-    return return_;
+  ssize_t return_() const {
+    return return__;
   }
 
   /**
     Get the socket associated with this control block.
   */
-  Socket& get_socket() {
+  Socket& socket() {
     return *socket_;
   }
 
-public:
-#ifdef _WIN32
-  /**
-    Win32 only: cast to get a pointer to the underlying OVERLAPPED structure.
-    @return a pointer to the underlying OVERLAPPED structure
-  */
-  operator ::OVERLAPPED* ();
-#endif
+  virtual Type::Enum type() const = 0;
 
 protected:
-  Aiocb(::std::shared_ptr<Socket> socket_);
-  Aiocb(::std::shared_ptr<Socket> socket_, off_t offset);
+  Aiocb(::std::shared_ptr<Socket> socket_)
+    : socket_(socket_) {
+    init();
+  }
+
+  Aiocb(::std::shared_ptr<Socket> socket_, off_t offset)
+    : socket_(socket_), offset_(offset) {
+    init();
+  }
 
 protected:
 #ifdef _WIN32
@@ -118,35 +121,23 @@ protected:
   friend class NbioQueue;
 
   void set_error(uint32_t error) {
-    this->error = error;
+    this->error_ = error;
   }
 
   void set_return(ssize_t return_) {
-    this->return_ = return_;
+    this->return__ = return_;
   }
 
 private:
-#ifdef _WIN32
-  struct {
-    unsigned long* Internal;
-    unsigned long* InternalHigh;
-#pragma warning(push)
-#pragma warning(disable: 4201)
-    union {
-      struct {
-        unsigned long Offset;
-        unsigned long OffsetHigh;
-      };
-      void* Pointer;
-    };
-#pragma warning(pop)
-    void* hEvent;
-  } overlapped;
-  Aiocb* this_;
-#endif
+  void init() {
+    error_ = 0;
+    return__ = -1;
+  }
 
-  uint32_t error;
-  ssize_t return_;
+private:
+  uint32_t error_;
+  off_t offset_;
+  ssize_t return__;
   ::std::shared_ptr<Socket> socket_;
 };
 }
