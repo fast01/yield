@@ -41,14 +41,14 @@ TEST(FdEvent, constructors) {
 
 TEST(FdEvent, get_fd) {
   ASSERT_EQ(
-    FdEvent(static_cast<fd_t>(0), FdEvent::TYPE_READ_READY).get_fd(),
+    FdEvent(static_cast<fd_t>(0), FdEvent::TYPE_READ_READY).fd(),
     static_cast<fd_t>(0)
   );
 }
 
 TEST(FdEvent, get_type) {
   ASSERT_EQ(
-    FdEvent(static_cast<fd_t>(0), FdEvent::TYPE_READ_READY).get_type(),
+    FdEvent(static_cast<fd_t>(0), FdEvent::TYPE_READ_READY).type(),
     FdEvent::TYPE_READ_READY
   );
 }

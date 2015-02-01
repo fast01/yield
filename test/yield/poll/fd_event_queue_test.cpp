@@ -27,8 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "../event_queue_test.hpp"
-#include "yield/auto_object.hpp"
 #include "yield/exception.hpp"
 #include "yield/poll/fd_event.hpp"
 #include "yield/poll/fd_event_queue.hpp"
@@ -42,7 +40,7 @@
 
 namespace yield {
 namespace poll {
-INSTANTIATE_TYPED_TEST_CASE_P(FdEventQueue, EventQueueTest, FdEventQueue);
+using ::std::shared_ptr;
 
 class FdEventQueueTest : public ::testing::Test {
 public:
@@ -157,8 +155,8 @@ TEST_F(FdEventQueueTest, associate_zero) {
 
   signal_pipe();
 
-  Event* event = fd_event_queue.timeddequeue(0);
-  ASSERT_EQ(event, static_cast<Event*>(NULL));
+  shared_ptr<FdEvent> event = fd_event_queue.timeddequeue(0);
+  ASSERT_EQ(event.get(), static_cast<Event*>(NULL));
 }
 
 TEST(FdEventQueue, constructor) {
@@ -174,7 +172,7 @@ TEST_F(FdEventQueueTest, dequeue_FdEvent) {
 
   signal_pipe();
 
-  auto_Object<Event> event = fd_event_queue.dequeue();
+  fd_event_queue.dequeue();
 }
 
 TEST_F(FdEventQueueTest, dequeue_writable_FdEvent) {
@@ -184,10 +182,9 @@ TEST_F(FdEventQueueTest, dequeue_writable_FdEvent) {
     throw Exception();
   }
 
-  auto_Object<FdEvent> fd_event
-  = Object::cast<FdEvent>(fd_event_queue.dequeue());
-  ASSERT_EQ(fd_event->get_fd(), get_write_fd());
-  ASSERT_EQ(fd_event->get_type(), FdEvent::TYPE_WRITE_READY);
+  shared_ptr<FdEvent> fd_event = fd_event_queue.dequeue();
+  ASSERT_EQ(fd_event->fd(), get_write_fd());
+  ASSERT_EQ(fd_event->type(), FdEvent::TYPE_WRITE_READY);
 }
 
 TEST(FdEventQueue, destructor) {
@@ -207,8 +204,8 @@ TEST_F(FdEventQueueTest, dissociate) {
 
   signal_pipe();
 
-  Event* event = fd_event_queue.timeddequeue(0);
-  ASSERT_EQ(event, static_cast<Event*>(NULL));
+  shared_ptr<FdEvent> event = fd_event_queue.timeddequeue(0);
+  ASSERT_EQ(event.get(), static_cast<FdEvent*>(NULL));
 
   if (!fd_event_queue.associate(get_read_fd(), FdEvent::TYPE_READ_READY)) {
     throw Exception();  // associate after dissociate should succeed

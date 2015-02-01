@@ -28,10 +28,10 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "./event_queue_test.hpp"
-#include "yield/queue/synchronized_event_queue.hpp"
+#include "yield/stage/synchronized_event_queue.hpp"
 
 namespace yield {
-namespace queue {
+namespace stage {
 INSTANTIATE_TYPED_TEST_CASE_P(SynchronizedEventQueue, EventQueueTest, SynchronizedEventQueue<Event>);
 }
 }

@@ -39,31 +39,31 @@ namespace stage {
   An EventQueue implementation that wraps a SynchronizedQueue.
 */
 template <class EventT>
-class SynchronizedEventQueue : public EventQueue<EventT> {
+class SynchronizedEventQueue final : public EventQueue<EventT> {
 public:
   // yield::EventQueue
-  ::std::shared_ptr<EventT> dequeue() {
+  ::std::shared_ptr<EventT> dequeue() override {
     return synchronized_queue_.dequeue();
   }
 
-  bool enqueue(::std::shared_ptr<EventT> event) {
+  bool enqueue(::std::shared_ptr<EventT> event) override {
     return synchronized_queue_.enqueue(event);
   }
 
-  ::std::shared_ptr<EventT> timeddequeue(const Time& timeout) {
+  ::std::shared_ptr<EventT> timeddequeue(const Time& timeout) override {
     return synchronized_queue_.timeddequeue(timeout);
   }
 
-  ::std::shared_ptr<EventT> trydequeue() {
+  ::std::shared_ptr<EventT> trydequeue() override {
     return synchronized_queue_.trydequeue();
   }
 
-  void wake() {
+  void wake() override {
     return synchronized_queue_.wake();
   }
 
 private:
- ::yield::queueSynchronizedQueue<EventT> synchronized_queue_;
+ ::yield::queue::SynchronizedQueue<EventT> synchronized_queue_;
 };
 }
 }

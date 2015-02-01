@@ -45,7 +45,7 @@ template <class> class Watches;
   Used as a fallback implementation when more efficient means (such as
     ReadDirectoryChangesW on Win32 or inotify on Linux) are not available.
 */
-class ScanningFsEventQueue : public EventQueue {
+class ScanningFsEventQueue : public EventQueue<FsEvent> {
 public:
   /**
     Construct a ScanningFsEventQueue.

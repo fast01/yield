@@ -565,5 +565,9 @@ bool FdEventQueue::enqueue(shared_ptr<FdEvent> event) {
 shared_ptr<FdEvent> FdEventQueue::timeddequeue(const Time& timeout) {
   return pimpl->timeddequeue(timeout);
 }
+
+void FdEventQueue::wake() {
+  pimpl->wake();
+}
 }
 }
