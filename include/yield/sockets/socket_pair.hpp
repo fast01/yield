@@ -45,6 +45,7 @@ namespace sockets {
     to each other at full-duplex.
   Equivalent to socketpair(2) sockets on POSIX systems.
 */
+template <class SocketType>
 class SocketPair : public ChannelPair {
 public:
   /**

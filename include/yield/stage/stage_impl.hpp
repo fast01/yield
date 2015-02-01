@@ -33,12 +33,12 @@
 #include "yield/event_handler.hpp"
 #include "yield/event_queue.hpp"
 #include "yield/time.hpp"
-#include "yield/queue/synchronized_event_queue.hpp"
 #include "yield/stage/stage.hpp"
+#include "yield/stage/synchronized_event_queue.hpp"
 
 namespace yield {
 namespace stage {
-template <class EventT = Event>
+template <class EventT>
 class StageImpl : public EventHandler<EventT>, public Stage {
 public:
   Stage(YO_NEW_REF EventHandler<EventT>& event_handler)

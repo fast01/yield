@@ -38,7 +38,7 @@ namespace yield {
 /**
   Abstract base class for event handlers in the event-driven concurrency subsystem.
 */
-template <class EventT = Event>
+template <class EventT>
 class EventHandler {
 public:
   /**

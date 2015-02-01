@@ -1,4 +1,4 @@
-// yield/queue/synchronized_event_queue.hpp
+// yield/stage/synchronized_event_queue.hpp
 
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
@@ -27,14 +27,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_QUEUE_SYNCHRONIZED_EVENT_QUEUE_HPP_
-#define _YIELD_QUEUE_SYNCHRONIZED_EVENT_QUEUE_HPP_
+#ifndef _YIELD_STAGE_SYNCHRONIZED_EVENT_QUEUE_HPP_
+#define _YIELD_STAGE_SYNCHRONIZED_EVENT_QUEUE_HPP_
 
 #include "yield/event_queue.hpp"
 #include "yield/queue/synchronized_queue.hpp"
 
 namespace yield {
-namespace queue {
+namespace stage {
 /**
   An EventQueue implementation that wraps a SynchronizedQueue.
 */
@@ -63,7 +63,7 @@ public:
   }
 
 private:
-  SynchronizedQueue<EventT> synchronized_queue_;
+ ::yield::queueSynchronizedQueue<EventT> synchronized_queue_;
 };
 }
 }

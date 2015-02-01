@@ -30,15 +30,13 @@
 #ifndef _YIELD_STAGE_STAGE_SCHEDULER_HPP_
 #define _YIELD_STAGE_STAGE_SCHEDULER_HPP_
 
-#include "yield/object.hpp"
-
 #include <memory>
 
 namespace yield {
 namespace stage {
 class Stage;
 
-class StageScheduler : public Object {
+class StageScheduler {
 public:
   class ConcurrencyLevel {
   public:
