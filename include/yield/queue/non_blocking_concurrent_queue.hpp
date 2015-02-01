@@ -181,7 +181,10 @@ public:
         uintptr_t return_element = try_element;
         return_element &= POINTER_LOW_BITS;
         return_element <<= 1;
-        return *reinterpret_cast< ::std::shared_ptr<ElementType>* >(return_element);
+        ::std::shared_ptr<ElementType>* return_shared_ptr = reinterpret_cast< ::std::shared_ptr<ElementType>* >(return_element);
+        ::std::shared_ptr<ElementType> return_shared_ptr_copy(*return_shared_ptr);
+        delete return_shared_ptr;
+        return return_shared_ptr_copy;
       }
     }
   }

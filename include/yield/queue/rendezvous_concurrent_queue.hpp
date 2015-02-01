@@ -69,7 +69,10 @@ public:
     uintptr_t new_element = 0;
     if (this->element.compare_exchange_weak(old_element, new_element)) {
       if (old_element != NULL) {
-        return *reinterpret_cast< ::std::shared_ptr<ElementType>* >(old_element);
+        ::std::shared_ptr<ElementType>* old_element_shared_ptr = reinterpret_cast< ::std::shared_ptr<ElementType>* >(old_element);
+        ::std::shared_ptr<ElementType> old_element_shared_ptr_copy(*old_element_shared_ptr);
+        delete old_element_shared_ptr;
+        return old_element_shared_ptr_copy;
       } else {
         return NULL;
       }
