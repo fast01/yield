@@ -59,8 +59,8 @@ public:
     @param element the element to enqueue
     @return true if the enqueue was successful, false if the queue was full
   */
-  bool enqueue(ElementType& element) {
-    uintptr_t new_element = reinterpret_cast<uintptr_t>(&element);
+  bool enqueue(::std::shared_ptr<ElementType> element) {
+    uintptr_t new_element = reinterpret_cast<uintptr_t>(new ::std::shared_ptr<ElementType>(element));
     // CHECK(!(new_element & 1));
     new_element >>= 1;
     // CHECK(!(new_element & POINTER_HIGH_BIT));
@@ -131,7 +131,7 @@ public:
     Try to dequeue an element.
     @return the dequeued element or NULL if the queue was empty
   */
-  ElementType* trydequeue() {
+  ::std::shared_ptr<ElementType> trydequeue() {
     for (;;) {
       size_t head_element_i_copy = head_element_i.load();
       size_t try_element_i = (head_element_i_copy + 1) % (Length + 2);
@@ -181,7 +181,7 @@ public:
         uintptr_t return_element = try_element;
         return_element &= POINTER_LOW_BITS;
         return_element <<= 1;
-        return reinterpret_cast<ElementType*>(return_element);
+        return *reinterpret_cast< ::std::shared_ptr<ElementType>* >(return_element);
       }
     }
   }
@@ -192,8 +192,8 @@ private:
   const static uintptr_t POINTER_LOW_BITS = ~POINTER_HIGH_BIT;
 
 private:
-  std::atomic_uintptr_t elements[Length + 2];
-  std::atomic_size_t head_element_i, tail_element_i;
+  ::std::atomic_uintptr_t elements[Length + 2];
+  ::std::atomic_size_t head_element_i, tail_element_i;
 };
 }
 }

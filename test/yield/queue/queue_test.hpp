@@ -36,6 +36,9 @@
 
 namespace yield {
 namespace queue {
+using ::std::make_shared;
+using ::std::shared_ptr;
+
 template <class TypeParam>
 class QueueTest : public ::testing::Test {
 };
@@ -49,19 +52,19 @@ TYPED_TEST_P(QueueTest, create) {
 TYPED_TEST_P(QueueTest, dequeue) {
   TypeParam queue;
 
-  uint32_t in_value = 1;
+  shared_ptr<uint32_t> in_value = make_shared<uint32_t>(1);
   ASSERT_TRUE(queue.enqueue(in_value));
-  uint32_t* out_value = queue.trydequeue();
-  ASSERT_NE(out_value, static_cast<uint32_t*>(NULL));
-  ASSERT_EQ(*out_value, in_value);
+  shared_ptr<uint32_t> out_value = queue.trydequeue();
+  ASSERT_NE(out_value.get(), static_cast<uint32_t*>(NULL));
+  ASSERT_EQ(*out_value, *in_value);
   ASSERT_EQ(*out_value, 1);
-  ASSERT_EQ(queue.trydequeue(), static_cast<uint32_t*>(NULL));
+  ASSERT_EQ(queue.trydequeue().get(), static_cast<uint32_t*>(NULL));
 }
 
 TYPED_TEST_P(QueueTest, enqueue) {
   TypeParam queue;
 
-  uint32_t in_value = 1;
+  shared_ptr<uint32_t> in_value = make_shared<uint32_t>(1);
   ASSERT_TRUE(queue.enqueue(in_value));
 }
 

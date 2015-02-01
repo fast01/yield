@@ -33,6 +33,7 @@
 #include <yield/types.hpp>
 
 #include <atomic>
+#include <memory>
 
 namespace yield {
 namespace queue {
@@ -52,9 +53,9 @@ public:
     @param element the element to enqueue
     @return true if the enqueue was successful.
   */
-  bool enqueue(ElementType& element) {
+  bool enqueue(::std::shared_ptr<ElementType> element) {
     uintptr_t old_element = 0;
-    uintptr_t new_element = reinterpret_cast<uintptr_t>(&element);
+    uintptr_t new_element = reinterpret_cast<uintptr_t>(new ::std::shared_ptr<ElementType>(element));
     return this->element.compare_exchange_weak(old_element, new_element);
   }
 
@@ -63,11 +64,15 @@ public:
     Never blocks.
     @return the dequeued element or NULL if the queue was empty
   */
-  ElementType* trydequeue() {
+  ::std::shared_ptr<ElementType> trydequeue() {
     uintptr_t old_element = element.load();
     uintptr_t new_element = 0;
     if (this->element.compare_exchange_weak(old_element, new_element)) {
-      return reinterpret_cast<ElementType*>(old_element);
+      if (old_element != NULL) {
+        return *reinterpret_cast< ::std::shared_ptr<ElementType>* >(old_element);
+      } else {
+        return NULL;
+      }
     } else {
       return NULL;
     }

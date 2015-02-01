@@ -58,42 +58,18 @@ namespace queue {
       USENIX Association, Berkeley, CA, USA, 103-114.
 */
 template <class ElementType>
-class TlsConcurrentQueue : private BlockingConcurrentQueue<ElementType> {
-private:
-  class Stack : private std::stack<ElementType*> {
-  public:
-    ElementType* pop() {
-      if (!std::stack<ElementType*>::empty()) {
-        ElementType* element = std::stack<ElementType*>::top();
-        std::stack<ElementType*>::pop();
-        return element;
-      } else {
-        return NULL;
-      }
-    }
-
-    bool push(ElementType& element) {
-      std::stack<ElementType*>::push(&element);
-      return true;
-    }
-  };
-
+class TlsConcurrentQueue {
 public:
   TlsConcurrentQueue() {
-    tls_key = ::yield::thread::Thread::self()->key_create();
-    if (tls_key == static_cast<uintptr_t>(-1)) {
+    tls_key_ = ::yield::thread::Thread::self()->key_create();
+    if (tls_key_ == static_cast<uintptr_t>(-1)) {
       throw Exception();
     }
   }
 
   ~TlsConcurrentQueue() {
-    ::yield::thread::Thread::self()->key_delete(tls_key);
-
-    for (
-      typename ::std::vector<Stack*>::iterator stack_i = stacks.begin();
-      stack_i != stacks.end();
-      stack_i++
-    ) {
+    ::yield::thread::Thread::self()->key_delete(tls_key_);
+    for (auto stack_i = stacks_.begin(); stack_i != stacks_.end(); stack_i++) {
       delete *stack_i;
     }
   }
@@ -103,14 +79,14 @@ public:
     @param element the element to enqueue
     @return true if the enqueue was successful.
   */
-  bool enqueue(ElementType& element) {
-    Stack* stack = static_cast<Stack*>(::yield::thread::Thread::self()->getspecific(tls_key));
+  bool enqueue(::std::shared_ptr<ElementType> element) {
+    ::std::stack< ::std::shared_ptr<ElementType> >* stack = static_cast< ::std::stack< ::std::shared_ptr<ElementType> >*>(::yield::thread::Thread::self()->getspecific(tls_key_));
 
     if (stack != NULL) {
       stack->push(element);
       return true;
     } else {
-      return BlockingConcurrentQueue<ElementType>::enqueue(element);
+      return queue_.enqueue(element);
     }
   }
 
@@ -118,30 +94,31 @@ public:
     Try to dequeue an element.
     @return the dequeued element or NULL if the queue was empty
   */
-  ElementType* trydequeue() {
-    ElementType* element;
+  ::std::shared_ptr<ElementType> trydequeue() {
+    ::std::shared_ptr<ElementType> element;
 
-    Stack* stack = static_cast<Stack*>(::yield::thread::Thread::self()->getspecific(tls_key));
+    ::std::stack< ::std::shared_ptr<ElementType> >* stack = static_cast< ::std::stack< ::std::shared_ptr<ElementType> >*>(::yield::thread::Thread::self()->getspecific(tls_key_));
 
     if (stack != NULL) {
-      element = stack->pop();
+      if (!stack->empty()) {
+        element = stack->top();
+        stack->pop();
+        return element;
+      } else {
+        return queue_.trydequeue();
+      }
     } else {
-      stack = new Stack;
-      ::yield::thread::Thread::self()->setspecific(tls_key, stack);
-      stacks.push_back(stack);
-      element = stack->pop();
-    }
-
-    if (element != NULL) {
-      return element;
-    } else {
-      return BlockingConcurrentQueue<ElementType>::trydequeue();
+      stack = new ::std::stack< ::std::shared_ptr<ElementType> >;
+      ::yield::thread::Thread::self()->setspecific(tls_key_, stack);
+      stacks_.push_back(stack);
+      return queue_.trydequeue();
     }
   }
 
 private:
-  uintptr_t tls_key;
-  ::std::vector<Stack*> stacks;
+  uintptr_t tls_key_;
+  BlockingConcurrentQueue<ElementType> queue_;
+  ::std::vector< ::std::stack< ::std::shared_ptr<ElementType> >* > stacks_;
 };
 }
 }

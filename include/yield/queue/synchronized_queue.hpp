@@ -44,26 +44,26 @@ namespace queue {
     indefinitely in either operation.
 */
 template <class ElementType>
-class SynchronizedQueue : private std::queue<ElementType*> {
+class SynchronizedQueue {
 public:
   /**
     Dequeue an element.
     Always succeeds.
     @return the dequeued element
   */
-  ElementType& dequeue() {
-    cond.lock_mutex();
+  ::std::shared_ptr<ElementType> dequeue() {
+    cond_.lock_mutex();
 
-    while (std::queue<ElementType*>::empty()) {
-      cond.wait();
+    while (queue_.empty()) {
+      cond_.wait();
     }
 
-    ElementType* element = std::queue<ElementType*>::front();
-    std::queue<ElementType*>::pop();
+    ::std::shared_ptr<ElementType> element = queue_.front();
+    queue_.pop();
 
-    cond.unlock_mutex();
+    cond_.unlock_mutex();
 
-    return *element;
+    return element;
   }
 
   /**
@@ -71,11 +71,11 @@ public:
     @param element the element to enqueue
     @return true if the enqueue was successful.
   */
-  bool enqueue(ElementType& element) {
-    cond.lock_mutex();
-    std::queue<ElementType*>::push(&element);
-    cond.signal();
-    cond.unlock_mutex();
+  bool enqueue(::std::shared_ptr<ElementType> element) {
+    cond_.lock_mutex();
+    queue_.push(element);
+    cond_.signal();
+    cond_.unlock_mutex();
     return true;
   }
 
@@ -85,33 +85,33 @@ public:
     @return the dequeued element or NULL if queue was empty for the duration
       of the timeout
   */
-  ElementType* timeddequeue(const Time& timeout) {
+  ::std::shared_ptr<ElementType> timeddequeue(const Time& timeout) {
     Time timeout_left(timeout);
 
-    cond.lock_mutex();
+    cond_.lock_mutex();
 
-    if (!std::queue<ElementType*>::empty()) {
-      ElementType* element = std::queue<ElementType*>::front();
-      std::queue<ElementType*>::pop();
-      cond.unlock_mutex();
+    if (!queue_.empty()) {
+      ::std::shared_ptr<ElementType> element = queue_.front();
+      queue_.pop();
+      cond_.unlock_mutex();
       return element;
     } else {
       for (;;) {
         Time start_time = Time::now();
 
-        cond.timedwait(timeout_left);
+        cond_.timedwait(timeout_left);
 
-        if (!std::queue<ElementType*>::empty()) {
-          ElementType* element = std::queue<ElementType*>::front();
-          std::queue<ElementType*>::pop();
-          cond.unlock_mutex();
+        if (!queue_.empty()) {
+          ::std::shared_ptr<ElementType> element = queue_.front();
+          queue_.pop();
+          cond_.unlock_mutex();
           return element;
         } else {
           Time elapsed_time(Time::now() - start_time);
           if (elapsed_time < timeout_left) {
             timeout_left -= elapsed_time;
           } else {
-            cond.unlock_mutex();
+            cond_.unlock_mutex();
             return NULL;
           }
         }
@@ -124,23 +124,32 @@ public:
     Never blocks.
     @return the dequeue element or NULL if the queue was empty
   */
-  ElementType* trydequeue() {
-    if (cond.trylock_mutex()) {
-      if (!std::queue<ElementType*>::empty()) {
-        ElementType* element = std::queue<ElementType*>::front();
-        std::queue<ElementType*>::pop();
-        cond.unlock_mutex();
+  ::std::shared_ptr<ElementType> trydequeue() {
+    if (cond_.trylock_mutex()) {
+      if (!queue_.empty()) {
+        ::std::shared_ptr<ElementType> element = queue_.front();
+        queue_.pop();
+        cond_.unlock_mutex();
         return element;
       } else {
-        cond.unlock_mutex();
+        cond_.unlock_mutex();
       }
     }
 
     return NULL;
   }
 
+  /**
+    Interrupt a blocking dequeue.
+   */
+  void wake() {
+    enqueue(::std::shared_ptr<ElementType>());
+  }
+
 private:
-  yield::thread::ConditionVariable cond;
+  yield::thread::ConditionVariable cond_;
+  std::queue< ::std::shared_ptr<ElementType> > queue_;
+
 };
 }
 }

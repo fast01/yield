@@ -31,7 +31,6 @@
 #define _YIELD_FS_POLL_FS_EVENT_QUEUE_TEST_HPP_
 
 #include "../../event_queue_test.hpp"
-#include "yield/auto_object.hpp"
 #include "yield/date_time.hpp"
 #include "yield/exception.hpp"
 #include "yield/logging.hpp"

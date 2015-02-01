@@ -38,26 +38,32 @@ namespace queue {
 /**
   An EventQueue implementation that wraps a SynchronizedQueue.
 */
-class SynchronizedEventQueue
-  : public EventQueue,
-    private SynchronizedQueue<Event> {
+template <class EventT>
+class SynchronizedEventQueue : public EventQueue<EventT> {
 public:
   // yield::EventQueue
-  YO_NEW_REF Event& dequeue() {
-    return SynchronizedQueue<Event>::dequeue();
+  ::std::shared_ptr<EventT> dequeue() {
+    return synchronized_queue_.dequeue();
   }
 
-  bool enqueue(YO_NEW_REF Event& event) {
-    return SynchronizedQueue<Event>::enqueue(event);
+  bool enqueue(::std::shared_ptr<EventT> event) {
+    return synchronized_queue_.enqueue(event);
   }
 
-  YO_NEW_REF Event* timeddequeue(const Time& timeout) {
-    return SynchronizedQueue<Event>::timeddequeue(timeout);
+  ::std::shared_ptr<EventT> timeddequeue(const Time& timeout) {
+    return synchronized_queue_.timeddequeue(timeout);
   }
 
-  YO_NEW_REF Event* trydequeue() {
-    return SynchronizedQueue<Event>::trydequeue();
+  ::std::shared_ptr<EventT> trydequeue() {
+    return synchronized_queue_.trydequeue();
   }
+
+  void wake() {
+    return synchronized_queue_.wake();
+  }
+
+private:
+  SynchronizedQueue<EventT> synchronized_queue_;
 };
 }
 }

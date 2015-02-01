@@ -32,6 +32,9 @@
 
 namespace yield {
 namespace queue {
+using ::std::make_shared;
+using ::std::shared_ptr;
+
 typedef NonBlockingConcurrentQueue<uint32_t, 8> TestNonBlockingConcurrentQueue;
 INSTANTIATE_TYPED_TEST_CASE_P(NonBlockingConcurrentQueue, QueueTest, TestNonBlockingConcurrentQueue);
 
@@ -41,13 +44,13 @@ TEST(NonBlockingConcurrentQueue, full) {
   uint32_t in_values[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
 
   for (unsigned char i = 0; i < 8; i++) {
-    ASSERT_TRUE(queue.enqueue(in_values[i]));
+    ASSERT_TRUE(queue.enqueue(make_shared<uint32_t>(in_values[i])));
   }
 
-  ASSERT_FALSE(queue.enqueue(in_values[0]));
+  ASSERT_FALSE(queue.enqueue(make_shared<uint32_t>(in_values[0])));
 
   for (unsigned char i = 0; i < 8; i++) {
-    uint32_t* out_value = queue.trydequeue();
+    shared_ptr<uint32_t> out_value = queue.trydequeue();
     ASSERT_TRUE(*out_value == in_values[i]);
   }
 }
