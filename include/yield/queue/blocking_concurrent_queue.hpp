@@ -41,16 +41,16 @@ namespace queue {
     block the caller indefinitely in either operation.
 */
 template <class ElementType>
-class BlockingConcurrentQueue : private std::queue< ::std::shared_ptr<ElementType> > {
+class BlockingConcurrentQueue {
 public:
   /**
     Enqueue a new element.
     @param element the element to enqueue
     @return true if the enqueue was successful.
   */
-  bool enqueue(::std::shared_ptr<ElementType> element) {
+  bool enqueue(::std::unique_ptr<ElementType> element) {
     mutex.lock();
-    std::queue< ::std::shared_ptr<ElementType> >::push(element);
+    queue_.push(::std::move(element));
     mutex.unlock();
     return true;
   }
@@ -59,11 +59,11 @@ public:
     Try to dequeue an element.
     @return the dequeued element or NULL if the queue was empty
   */
-  ::std::shared_ptr<ElementType> trydequeue() {
+  ::std::unique_ptr<ElementType> trydequeue() {
     mutex.lock();
-    if (!std::queue< ::std::shared_ptr<ElementType> >::empty()) {
-      ::std::shared_ptr<ElementType> element = std::queue< ::std::shared_ptr<ElementType> >::front();
-      std::queue< ::std::shared_ptr<ElementType> >::pop();
+    if (!queue_.empty()) {
+      ::std::unique_ptr<ElementType> element(::std::move(queue_.front()));
+      queue_.pop();
       mutex.unlock();
       return element;
     } else {
@@ -73,7 +73,8 @@ public:
   }
 
 private:
-  yield::thread::Mutex mutex;
+  ::yield::thread::Mutex mutex;
+  ::std::queue< ::std::unique_ptr<ElementType> > queue_;
 };
 }
 }

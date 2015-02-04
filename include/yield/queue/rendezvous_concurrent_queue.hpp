@@ -53,9 +53,9 @@ public:
     @param element the element to enqueue
     @return true if the enqueue was successful.
   */
-  bool enqueue(::std::shared_ptr<ElementType> element) {
+  bool enqueue(::std::unique_ptr<ElementType> element) {
     uintptr_t old_element = 0;
-    uintptr_t new_element = reinterpret_cast<uintptr_t>(new ::std::shared_ptr<ElementType>(element));
+    uintptr_t new_element = reinterpret_cast<uintptr_t>(element.release());
     return this->element.compare_exchange_weak(old_element, new_element);
   }
 
@@ -64,18 +64,11 @@ public:
     Never blocks.
     @return the dequeued element or NULL if the queue was empty
   */
-  ::std::shared_ptr<ElementType> trydequeue() {
+  ::std::unique_ptr<ElementType> trydequeue() {
     uintptr_t old_element = element.load();
     uintptr_t new_element = 0;
     if (this->element.compare_exchange_weak(old_element, new_element)) {
-      if (old_element != NULL) {
-        ::std::shared_ptr<ElementType>* old_element_shared_ptr = reinterpret_cast< ::std::shared_ptr<ElementType>* >(old_element);
-        ::std::shared_ptr<ElementType> old_element_shared_ptr_copy(*old_element_shared_ptr);
-        delete old_element_shared_ptr;
-        return old_element_shared_ptr_copy;
-      } else {
-        return NULL;
-      }
+      return ::std::unique_ptr<ElementType>(reinterpret_cast<ElementType*>(old_element));
     } else {
       return NULL;
     }

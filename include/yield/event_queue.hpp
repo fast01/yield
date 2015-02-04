@@ -51,7 +51,7 @@ public:
     Blocking dequeue. Always returns a new reference to an Event.
     @return a new reference to an Event.
   */
-  virtual ::std::shared_ptr<EventT> dequeue() {
+  virtual ::std::unique_ptr<EventT> dequeue() {
     return timeddequeue(Time::FOREVER);
   }
 
@@ -62,7 +62,7 @@ public:
     @param event the new Event reference to enqueue
     @return true if the enqueue succeeded.
   */
-  virtual bool enqueue(::std::shared_ptr<EventT> event) = 0;
+  virtual bool enqueue(::std::unique_ptr<EventT> event) = 0;
 
   /**
     Timed dequeue.
@@ -71,7 +71,7 @@ public:
     @param timeout the time to wait for new Events
     @return a new reference to an Event or NULL
   */
-  virtual ::std::shared_ptr<EventT> timeddequeue(const Time& timeout) = 0;
+  virtual ::std::unique_ptr<EventT> timeddequeue(const Time& timeout) = 0;
 
   /**
     Non-blocking dequeue.
@@ -79,7 +79,7 @@ public:
     This method is guaranteed not to block.
     @return a new reference to an Event or NULL.
   */
-  virtual ::std::shared_ptr<EventT> trydequeue() {
+  virtual ::std::unique_ptr<EventT> trydequeue() {
     return timeddequeue(0);
   }
 
@@ -87,8 +87,8 @@ public:
 
 public:
   // yield::EventHandler
-  void handle(::std::shared_ptr<EventT> event) {
-    enqueue(event);
+  void handle(::std::unique_ptr<EventT> event) override {
+    enqueue(::std::move(event));
   }
 };
 }

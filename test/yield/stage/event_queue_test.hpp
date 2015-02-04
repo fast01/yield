@@ -35,8 +35,7 @@
 #include "gtest/gtest.h"
 
 namespace yield {
-using ::std::make_shared;
-using ::std::shared_ptr;
+using ::std::unique_ptr;
 
 template <class TypeParam>
 class EventQueueTest : public ::testing::Test {
@@ -45,45 +44,45 @@ class EventQueueTest : public ::testing::Test {
 TYPED_TEST_CASE_P(EventQueueTest);
 
 TYPED_TEST_P(EventQueueTest, dequeue) {
-  shared_ptr<Event> event = make_shared<Event>();
+  unique_ptr<Event> event = unique_ptr<Event>(new Event);
   TypeParam event_queue;
 
-  bool enqueue_ret = event_queue.enqueue(event);
+  bool enqueue_ret = event_queue.enqueue(::std::move(event));
   ASSERT_TRUE(enqueue_ret);
 
-  shared_ptr<Event> dequeued_event = event_queue.dequeue();
+  unique_ptr<Event> dequeued_event = event_queue.dequeue();
   ASSERT_EQ(event, dequeued_event);
 
-  ::std::shared_ptr<Event> null_event = static_cast<EventQueue<Event>&>(event_queue).trydequeue();
+  ::std::unique_ptr<Event> null_event = static_cast<EventQueue<Event>&>(event_queue).trydequeue();
   ASSERT_EQ(null_event.get(), static_cast<Event*>(NULL));
 }
 
 TYPED_TEST_P(EventQueueTest, timeddequeue) {
-  shared_ptr<Event> event = make_shared<Event>();
+  unique_ptr<Event> event = unique_ptr<Event>(new Event);
   TypeParam event_queue;
 
-  bool enqueue_ret = event_queue.enqueue(event);
+  bool enqueue_ret = event_queue.enqueue(::std::move(event));
   ASSERT_TRUE(enqueue_ret);
 
-  shared_ptr<Event> dequeued_event = event_queue.timeddequeue(1.0);
+  unique_ptr<Event> dequeued_event = event_queue.timeddequeue(1.0);
   ASSERT_EQ(event, dequeued_event);
 
-  ::std::shared_ptr<Event> null_event = event_queue.timeddequeue(1.0);
+  ::std::unique_ptr<Event> null_event = event_queue.timeddequeue(1.0);
   ASSERT_EQ(null_event.get(), static_cast<Event*>(NULL));
 }
 
 TYPED_TEST_P(EventQueueTest, trydequeue) {
-  shared_ptr<Event> event = make_shared<Event>();
+  unique_ptr<Event> event = unique_ptr<Event>(new Event);
   TypeParam event_queue;
 
-  bool enqueue_ret = event_queue.enqueue(event);
+  bool enqueue_ret = event_queue.enqueue(::std::move(event));
   ASSERT_TRUE(enqueue_ret);
 
-  shared_ptr<Event> dequeued_event
+  unique_ptr<Event> dequeued_event
   = static_cast<EventQueue<Event>&>(event_queue).trydequeue();
   ASSERT_EQ(event, dequeued_event);
 
-  ::std::shared_ptr<Event> null_event
+  ::std::unique_ptr<Event> null_event
   = static_cast<EventQueue<Event>&>(event_queue).trydequeue();
   ASSERT_EQ(null_event.get(), static_cast<Event*>(NULL));
 }

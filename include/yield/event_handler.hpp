@@ -53,7 +53,7 @@ public:
       processing code.
     @param event a new reference to an Event to handle
   */
-  virtual void handle(::std::shared_ptr<EventT> event) = 0;
+  virtual void handle(::std::unique_ptr<EventT> event) = 0;
 };
 }
 

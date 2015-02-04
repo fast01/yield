@@ -42,19 +42,19 @@ template <class EventT>
 class SynchronizedEventQueue final : public EventQueue<EventT> {
 public:
   // yield::EventQueue
-  ::std::shared_ptr<EventT> dequeue() override {
+  ::std::unique_ptr<EventT> dequeue() override {
     return synchronized_queue_.dequeue();
   }
 
-  bool enqueue(::std::shared_ptr<EventT> event) override {
-    return synchronized_queue_.enqueue(event);
+  bool enqueue(::std::unique_ptr<EventT> event) override {
+    return synchronized_queue_.enqueue(::std::move(event));
   }
 
-  ::std::shared_ptr<EventT> timeddequeue(const Time& timeout) override {
+  ::std::unique_ptr<EventT> timeddequeue(const Time& timeout) override {
     return synchronized_queue_.timeddequeue(timeout);
   }
 
-  ::std::shared_ptr<EventT> trydequeue() override {
+  ::std::unique_ptr<EventT> trydequeue() override {
     return synchronized_queue_.trydequeue();
   }
 

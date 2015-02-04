@@ -51,14 +51,14 @@ public:
     Always succeeds.
     @return the dequeued element
   */
-  ::std::shared_ptr<ElementType> dequeue() {
+  ::std::unique_ptr<ElementType> dequeue() {
     cond_.lock_mutex();
 
     while (queue_.empty()) {
       cond_.wait();
     }
 
-    ::std::shared_ptr<ElementType> element = queue_.front();
+    ::std::unique_ptr<ElementType> element(::std::move(queue_.front()));
     queue_.pop();
 
     cond_.unlock_mutex();
@@ -71,9 +71,9 @@ public:
     @param element the element to enqueue
     @return true if the enqueue was successful.
   */
-  bool enqueue(::std::shared_ptr<ElementType> element) {
+  bool enqueue(::std::unique_ptr<ElementType> element) {
     cond_.lock_mutex();
-    queue_.push(element);
+    queue_.push(::std::move(element));
     cond_.signal();
     cond_.unlock_mutex();
     return true;
@@ -85,13 +85,13 @@ public:
     @return the dequeued element or NULL if queue was empty for the duration
       of the timeout
   */
-  ::std::shared_ptr<ElementType> timeddequeue(const Time& timeout) {
+  ::std::unique_ptr<ElementType> timeddequeue(const Time& timeout) {
     Time timeout_left(timeout);
 
     cond_.lock_mutex();
 
     if (!queue_.empty()) {
-      ::std::shared_ptr<ElementType> element = queue_.front();
+      ::std::unique_ptr<ElementType> element(::std::move(queue_.front()));
       queue_.pop();
       cond_.unlock_mutex();
       return element;
@@ -102,7 +102,7 @@ public:
         cond_.timedwait(timeout_left);
 
         if (!queue_.empty()) {
-          ::std::shared_ptr<ElementType> element = queue_.front();
+          ::std::unique_ptr<ElementType> element(::std::move(queue_.front()));
           queue_.pop();
           cond_.unlock_mutex();
           return element;
@@ -124,10 +124,10 @@ public:
     Never blocks.
     @return the dequeue element or NULL if the queue was empty
   */
-  ::std::shared_ptr<ElementType> trydequeue() {
+  ::std::unique_ptr<ElementType> trydequeue() {
     if (cond_.trylock_mutex()) {
       if (!queue_.empty()) {
-        ::std::shared_ptr<ElementType> element = queue_.front();
+        ::std::unique_ptr<ElementType> element(::std::move(queue_.front()));
         queue_.pop();
         cond_.unlock_mutex();
         return element;
@@ -143,12 +143,12 @@ public:
     Interrupt a blocking dequeue.
    */
   void wake() {
-    enqueue(::std::shared_ptr<ElementType>());
+    enqueue(::std::unique_ptr<ElementType>());
   }
 
 private:
   yield::thread::ConditionVariable cond_;
-  std::queue< ::std::shared_ptr<ElementType> > queue_;
+  std::queue< ::std::unique_ptr<ElementType> > queue_;
 
 };
 }

@@ -79,14 +79,14 @@ public:
     @param element the element to enqueue
     @return true if the enqueue was successful.
   */
-  bool enqueue(::std::shared_ptr<ElementType> element) {
-    ::std::stack< ::std::shared_ptr<ElementType> >* stack = static_cast< ::std::stack< ::std::shared_ptr<ElementType> >*>(::yield::thread::Thread::self()->getspecific(tls_key_));
+  bool enqueue(::std::unique_ptr<ElementType> element) {
+    ::std::stack< ::std::unique_ptr<ElementType> >* stack = static_cast< ::std::stack< ::std::unique_ptr<ElementType> >*>(::yield::thread::Thread::self()->getspecific(tls_key_));
 
     if (stack != NULL) {
-      stack->push(element);
+      stack->push(::std::move(element));
       return true;
     } else {
-      return queue_.enqueue(element);
+      return queue_.enqueue(::std::move(element));
     }
   }
 
@@ -94,21 +94,21 @@ public:
     Try to dequeue an element.
     @return the dequeued element or NULL if the queue was empty
   */
-  ::std::shared_ptr<ElementType> trydequeue() {
-    ::std::shared_ptr<ElementType> element;
+  ::std::unique_ptr<ElementType> trydequeue() {
+    ::std::unique_ptr<ElementType> element;
 
-    ::std::stack< ::std::shared_ptr<ElementType> >* stack = static_cast< ::std::stack< ::std::shared_ptr<ElementType> >*>(::yield::thread::Thread::self()->getspecific(tls_key_));
+    ::std::stack< ::std::unique_ptr<ElementType> >* stack = static_cast< ::std::stack< ::std::unique_ptr<ElementType> >*>(::yield::thread::Thread::self()->getspecific(tls_key_));
 
     if (stack != NULL) {
       if (!stack->empty()) {
-        element = stack->top();
+        element = ::std::move(stack->top());
         stack->pop();
         return element;
       } else {
         return queue_.trydequeue();
       }
     } else {
-      stack = new ::std::stack< ::std::shared_ptr<ElementType> >;
+      stack = new ::std::stack< ::std::unique_ptr<ElementType> >;
       ::yield::thread::Thread::self()->setspecific(tls_key_, stack);
       stacks_.push_back(stack);
       return queue_.trydequeue();
@@ -118,7 +118,7 @@ public:
 private:
   uintptr_t tls_key_;
   BlockingConcurrentQueue<ElementType> queue_;
-  ::std::vector< ::std::stack< ::std::shared_ptr<ElementType> >* > stacks_;
+  ::std::vector< ::std::stack< ::std::unique_ptr<ElementType> >* > stacks_;
 };
 }
 }

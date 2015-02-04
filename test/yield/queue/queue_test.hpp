@@ -36,8 +36,8 @@
 
 namespace yield {
 namespace queue {
-using ::std::make_shared;
-using ::std::shared_ptr;
+using ::std::move;
+using ::std::unique_ptr;
 
 template <class TypeParam>
 class QueueTest : public ::testing::Test {
@@ -52,11 +52,10 @@ TYPED_TEST_P(QueueTest, create) {
 TYPED_TEST_P(QueueTest, dequeue) {
   TypeParam queue;
 
-  shared_ptr<uint32_t> in_value = make_shared<uint32_t>(1);
-  ASSERT_TRUE(queue.enqueue(in_value));
-  shared_ptr<uint32_t> out_value = queue.trydequeue();
+  unique_ptr<uint32_t> in_value(new uint32_t(1));
+  ASSERT_TRUE(queue.enqueue(move(in_value)));
+  unique_ptr<uint32_t> out_value = queue.trydequeue();
   ASSERT_NE(out_value.get(), static_cast<uint32_t*>(NULL));
-  ASSERT_EQ(*out_value, *in_value);
   ASSERT_EQ(*out_value, 1);
   ASSERT_EQ(queue.trydequeue().get(), static_cast<uint32_t*>(NULL));
 }
@@ -64,8 +63,8 @@ TYPED_TEST_P(QueueTest, dequeue) {
 TYPED_TEST_P(QueueTest, enqueue) {
   TypeParam queue;
 
-  shared_ptr<uint32_t> in_value = make_shared<uint32_t>(1);
-  ASSERT_TRUE(queue.enqueue(in_value));
+  unique_ptr<uint32_t> in_value(new uint32_t(1));
+  ASSERT_TRUE(queue.enqueue(move(in_value)));
 }
 
 REGISTER_TYPED_TEST_CASE_P(QueueTest, create, dequeue, enqueue);

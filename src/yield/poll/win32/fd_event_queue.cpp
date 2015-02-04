@@ -37,8 +37,7 @@
 
 namespace yield {
 namespace poll {
-using ::std::make_shared;
-using ::std::shared_ptr;
+using ::std::unique_ptr;
 using ::std::vector;
 
 class FdEventQueue::Impl : public EventQueue<FdEvent> {
@@ -51,7 +50,7 @@ public:
   virtual bool dissociate(fd_t fd) = 0;
 
 public:
-  bool enqueue(shared_ptr<FdEvent> event) override {
+  bool enqueue(unique_ptr<FdEvent> event) override {
     CHECK(false);
     return false;
   }
@@ -76,7 +75,7 @@ public:
 
 public:
   // yield::EventQueue
-  ::std::shared_ptr<FdEvent> timeddequeue(const Time& timeout) override {
+  ::std::unique_ptr<FdEvent> timeddequeue(const Time& timeout) override {
     DWORD dwRet
     = WaitForMultipleObjectsEx(
         handles.size(),
@@ -89,10 +88,10 @@ public:
     if (dwRet == WAIT_OBJECT_0) {
       return NULL;
     } else if (dwRet > WAIT_OBJECT_0 && dwRet < WAIT_OBJECT_0 + handles.size()) {
-      return ::std::make_shared<FdEvent>(
+      return ::std::unique_ptr<FdEvent>(new FdEvent(
                handles[dwRet - WAIT_OBJECT_0],
                fd_event_types[dwRet - WAIT_OBJECT_0]
-             );
+             ));
     } else {
       return NULL;
     }
@@ -277,7 +276,7 @@ public:
 
 public:
   // yield::EventQueue
-  ::std::shared_ptr<FdEvent> timeddequeue(const Time& timeout) {
+  ::std::unique_ptr<FdEvent> timeddequeue(const Time& timeout) override {
     // Scan pollfds once for outstanding revents from the last WSAPoll,
     // then call WSAPoll again if necessary.
     int ret = 0;
@@ -302,7 +301,7 @@ public:
               revents = pollfd_.revents;
             }
             pollfd_.revents = 0;
-            return ::std::make_shared<FdEvent>(fd, revents);
+            return ::std::unique_ptr<FdEvent>(new FdEvent(fd, revents));
           }
         }
       } while (++pollfd_i < pollfds.end());
@@ -319,7 +318,7 @@ public:
   }
 
   // yield::poll::SocketImpl
-  bool associate(socket_t socket_, uint16_t fd_event_types) {
+  bool associate(socket_t socket_, uint16_t fd_event_types) override {
     if (fd_event_types != 0) {
       for (
         vector<pollfd>::iterator pollfd_i = pollfds.begin();
@@ -343,7 +342,7 @@ public:
     }
   }
 
-  bool dissociate(socket_t socket_) {
+  bool dissociate(socket_t socket_) override {
     for (
       vector<pollfd>::iterator pollfd_i = pollfds.begin();
       pollfd_i != pollfds.end();
@@ -377,7 +376,7 @@ public:
 
 public:
   // yield::EventQueue
-  ::std::shared_ptr<FdEvent> timeddequeue(const Time& timeout) {
+  ::std::unique_ptr<FdEvent> timeddequeue(const Time& timeout) override {
     fd_set except_fd_set_copy, read_fd_set_copy, write_fd_set_copy;
 
     memcpy_s(
@@ -452,10 +451,10 @@ public:
             recv(wake_socket_pair[0], &m, 1, 0);
             return NULL;
           } else {
-            return ::std::make_shared<FdEvent>(
+            return ::std::unique_ptr<FdEvent>(new FdEvent(
                      reinterpret_cast<fd_t>(socket_),
                      fd_event_types
-                   );
+                   ));
           }
         }
 
@@ -558,11 +557,11 @@ bool FdEventQueue::dissociate(fd_t fd) {
   return pimpl->dissociate(fd);
 }
 
-bool FdEventQueue::enqueue(shared_ptr<FdEvent> event) {
-  return pimpl->enqueue(event);
+bool FdEventQueue::enqueue(unique_ptr<FdEvent> event) {
+  return pimpl->enqueue(::std::move(event));
 }
 
-shared_ptr<FdEvent> FdEventQueue::timeddequeue(const Time& timeout) {
+unique_ptr<FdEvent> FdEventQueue::timeddequeue(const Time& timeout) {
   return pimpl->timeddequeue(timeout);
 }
 

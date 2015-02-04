@@ -77,8 +77,8 @@ public:
 
 public:
   // yield::EventQueue
-  bool enqueue(::std::shared_ptr<FdEvent> event) override;
-  ::std::shared_ptr<FdEvent> timeddequeue(const Time& timeout) override;
+  bool enqueue(::std::unique_ptr<FdEvent> event) override;
+  ::std::unique_ptr<FdEvent> timeddequeue(const Time& timeout) override;
   void wake() override;
 
 private:
