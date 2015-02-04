@@ -56,7 +56,7 @@ public:
   */
   HttpResponse(
     uint16_t status_code,
-    YO_NEW_REF Buffer* body
+    ::std::shared_ptr<Buffer> body
   );
 
   /**
@@ -69,7 +69,7 @@ public:
   HttpResponse(
     uint8_t http_version,
     uint16_t status_code,
-    YO_NEW_REF Buffer* body
+    ::std::shared_ptr<Buffer> body
   );
 
   /**
@@ -103,13 +103,13 @@ protected:
   friend class HttpResponseParser;
 
   HttpResponse(
-    YO_NEW_REF Buffer* body,
+    ::std::shared_ptr<Buffer> body,
     uint8_t http_version,
     uint16_t status_code
   );
 
   HttpResponse(
-    YO_NEW_REF Buffer* body,
+    ::std::shared_ptr<Buffer> body,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version,

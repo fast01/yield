@@ -49,12 +49,9 @@ HttpFileRequestHandler::HttpFileRequestHandler(
   this->root_uri.get_path(root_uri_path);
 }
 
-void HttpFileRequestHandler::handle(YO_NEW_REF HttpRequest& event) {
-  CHECK_EQ(event.get_type_id(), HttpRequest::TYPE_ID);
-  HttpRequest& http_request = static_cast<HttpRequest&>(event);
-
+void HttpFileRequestHandler::handle(::std::unique_ptr<HttpRequest> http_request) {
   iovec http_request_uri_path;
-  http_request.uri().get_path(http_request_uri_path);
+  http_request->uri().get_path(http_request_uri_path);
 
   if (http_request_uri_path.iov_len > root_uri_path.iov_len) {
     if (

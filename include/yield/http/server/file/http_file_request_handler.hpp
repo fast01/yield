@@ -39,7 +39,7 @@ namespace yield {
 namespace http {
 namespace server {
 namespace file {
-class HttpFileRequestHandler : public EventHandler<> {
+class HttpFileRequestHandler : public EventHandler<HttpRequest> {
 public:
   HttpFileRequestHandler(
     const yield::fs::Path& root_directory_path,
@@ -48,7 +48,7 @@ public:
 
 public:
   // yield::EventHandler
-  void handle(YO_NEW_REF Event& event);
+  void handle(::std::unique_ptr<HttpRequest> event) override;
 
 private:
   yield::fs::Path root_directory_path;

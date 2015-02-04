@@ -1,6 +1,6 @@
 file(GLOB CPP *.cpp *.rl ../../../include/yield/http/*.hpp)
 find_package(RAGEL)
-if (RAGEL_DEFINED)
+if (RAGEL_FOUND)
 	RAGEL_TARGET(http_message_parser http_message_parser.rl http_message_parser.cpp)
 	RAGEL_TARGET(http_request_parser http_request_parser.rl http_request_parser.cpp)
 	RAGEL_TARGET(http_response_parser http_response_parser.rl http_response_parser.cpp)

@@ -39,17 +39,25 @@ namespace yield {
 class DateTime;
 
 namespace http {
-class HTTPBodyChunk;
-
 /**
   An RFC 2616-compliant HTTP message parser, the parent class of
     HttpRequestParser and HttpResponseParser.
 */
 class HttpMessageParser {
 protected:
-  HttpMessageParser(Buffer& buffer);
+  class ParseCallbacks {
+  public:
+    virtual void handle_http_message_body(::std::unique_ptr<Buffer>) = 0;
+    virtual void handle_http_message_body_chunk(::std::unique_ptr<HttpMessageBodyChunk>) = 0;
+    virtual void read(::std::unique_ptr<Buffer>) = 0;
+  };
+
+protected:
+  HttpMessageParser(::std::shared_ptr<Buffer> buffer);
   HttpMessageParser(const ::std::string& buffer); // For testing
-  virtual ~HttpMessageParser();
+
+  virtual ~HttpMessageParser() {
+  }
 
 protected:
   virtual ::std::unique_ptr<HttpMessageBodyChunk>
@@ -60,14 +68,14 @@ protected:
   }
 
 protected:
-  bool parse_body(size_t content_length, YO_NEW_REF Buffer*& body);
-  Object* parse_body_chunk();
+  bool parse_body(ParseCallbacks&, size_t content_length);
+  void parse_body_chunk(ParseCallbacks&);
 
 protected:
   bool parse_fields(uint16_t& fields_offset, size_t& content_length);
 
 protected:
-  Buffer& buffer;
+  ::std::shared_ptr<Buffer> buffer_;
   const char* eof;
   char* p, *ps;
 

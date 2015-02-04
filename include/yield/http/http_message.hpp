@@ -76,7 +76,7 @@ public:
     Get the body of this HTTP message.
     @return the body of this HTTP message, or NULL if no body is present
   */
-  Buffer* body_buffer() const {
+  const ::std::shared_ptr<Buffer>& body_buffer() const {
     return body_buffer_;
   }
 
@@ -84,7 +84,23 @@ public:
     Get the body of this HTTP message.
     @return the body of this HTTP message, or NULL if no body is present
   */
-  ::yield::fs::File* body_file() const {
+  ::std::shared_ptr<Buffer>& body_buffer() {
+    return body_buffer_;
+  }
+
+  /**
+    Get the body of this HTTP message.
+    @return the body of this HTTP message, or NULL if no body is present
+  */
+  ::std::shared_ptr< ::yield::fs::File >& body_file() {
+    return body_file_;
+  }
+
+  /**
+    Get the body of this HTTP message.
+    @return the body of this HTTP message, or NULL if no body is present
+  */
+  const ::std::shared_ptr< ::yield::fs::File >& body_file() const {
     return body_file_;
   }
 
@@ -184,8 +200,8 @@ public:
     Get the buffer underlying the HTTP message's header
       (request or response line, fields).
   */
-  Buffer& header() const {
-    return header_;
+  Buffer& header() {
+    return *header_;
   }
 
 public:
@@ -454,14 +470,14 @@ public:
 
 protected:
   HttpMessage(
-    YO_NEW_REF Buffer* body_buffer,
-    YO_NEW_REF ::yield::fs::File* body_file,
+    ::std::shared_ptr<Buffer> body_buffer,
+    ::std::shared_ptr< ::yield::fs::File > body_file,
     uint8_t http_version
   );
 
   HttpMessage(
-    YO_NEW_REF Buffer* body_buffer,
-    YO_NEW_REF ::yield::fs::File* body_file,
+    ::std::shared_ptr<Buffer> body_buffer,
+    ::std::shared_ptr< ::yield::fs::File > body_file,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version
@@ -475,10 +491,10 @@ protected:
   }
 
 private:
-  Buffer* body_buffer_;
-  ::yield::fs::File* body_file_;
+  ::std::shared_ptr<Buffer> body_buffer_;
+  ::std::shared_ptr< ::yield::fs::File > body_file_;
   uint16_t fields_offset_;
-  Buffer& header_;
+  Buffer* header_;
   uint8_t http_version_;
 };
 }

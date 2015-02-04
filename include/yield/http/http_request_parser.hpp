@@ -41,13 +41,20 @@ namespace http {
 */
 class HttpRequestParser : public HttpMessageParser {
 public:
+  class ParseCallbacks : public HttpMessageParser::ParseCallbacks {
+  public:
+    virtual void handle_http_request(::std::unique_ptr<HttpRequest>) = 0;
+    virtual void handle_error_http_response(::std::unique_ptr<HttpResponse>) = 0;    
+  };
+
+public:
   /**
     Construct an HttpRequestParser on the underlying buffer.
     References to buffer may be created for any objects (such as HttpRequest)
       produced by the parser.
     @param buffer buffer to parse
   */
-  HttpRequestParser(Buffer& buffer)
+  HttpRequestParser(::std::shared_ptr<Buffer> buffer)
     : HttpMessageParser(buffer)
   { }
 
@@ -74,12 +81,12 @@ public:
         with chunked Transfer-Encoding.
     - yield::http::HttpResponse: an error HTTP response, usually a 400
   */
-  YO_NEW_REF Object& parse();
+  void parse(ParseCallbacks&);
 
 protected:
-  virtual YO_NEW_REF HttpRequest&
+  ::std::unique_ptr<HttpRequest>
   create_http_request(
-    YO_NEW_REF Buffer* body,
+    ::std::shared_ptr<Buffer> body,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version,

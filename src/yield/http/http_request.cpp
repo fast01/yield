@@ -112,7 +112,7 @@ HttpRequest::Method::parse(
 }
 
 HttpRequest::HttpRequest(
-  YO_NEW_REF Buffer* body_buffer,
+  ::std::shared_ptr<Buffer> body_buffer,
   uint16_t fields_offset,
   Buffer& header,
   uint8_t http_version,
@@ -133,7 +133,7 @@ HttpRequest::HttpRequest(
 HttpRequest::HttpRequest(
   Method method,
   const yield::uri::Uri& uri,
-  YO_NEW_REF Buffer* body_buffer,
+  ::std::shared_ptr<Buffer> body_buffer,
   uint8_t http_version
 )
   : HttpMessage<HttpRequest>(body_buffer, NULL, http_version),
@@ -196,7 +196,7 @@ HttpRequest::HttpRequest(
 std::ostream& operator<<(std::ostream& os, const HttpRequest& http_request) {
   std::ostringstream body;
   if (http_request.body_buffer() != NULL) {
-    body << static_cast<Buffer*>(http_request.body_buffer());
+    body << http_request.body_buffer();
   } else if (http_request.body_file() != NULL) {
     body << "File";
   } else {

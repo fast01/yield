@@ -45,47 +45,42 @@
 
 namespace yield {
 namespace http {
-HttpMessageParser::HttpMessageParser(Buffer& buffer)
-  : buffer(buffer.inc_ref()) {
-  CHECK(!buffer.empty());
+HttpMessageParser::HttpMessageParser(::std::shared_ptr<Buffer> buffer)
+  : buffer_(buffer) {
+  CHECK(!buffer->empty());
 
-  ps = p = buffer;
-  eof = ps + buffer.size();
+  ps = p = *buffer_;
+  eof = ps + buffer_->size();
 }
 
-HttpMessageParser::HttpMessageParser(const string& buffer)
-  : buffer(Buffer::copy(buffer)) {
+HttpMessageParser::HttpMessageParser(const ::std::string& buffer)
+  : buffer_(Buffer::copy(buffer)) {
   CHECK(!buffer.empty());
 
-  ps = p = this->buffer;
-  eof = ps + this->buffer.size();
-}
-
-HttpMessageParser::~HttpMessageParser() {
-  Buffer::dec_ref(buffer);
+  ps = p = *buffer_;
+  eof = ps + buffer_->size();
 }
 
 bool
 HttpMessageParser::parse_body(
-  size_t content_length,
-  YO_NEW_REF Object*& body
+  ParseCallbacks& callbacks,
+  size_t content_length
 ) {
   if (
     content_length == 0
     ||
     content_length == HttpRequest::CONTENT_LENGTH_CHUNKED
  ) {
-    body = NULL;
     return true;
   } else if (static_cast<size_t>(eof - p) >= content_length) {
-    body = &Buffer::copy(p, content_length);
+    callbacks.handle_http_message_body(::std::unique_ptr<Buffer>(Buffer::copy(p, content_length)));
     p += content_length;
     return true;
   } else
     return false;
 }
 
-Object* HttpMessageParser::parse_body_chunk() {
+void HttpMessageParser::parse_body_chunk() {
   const char* chunk_data_p = NULL;
   size_t chunk_size = 0;
   const char* chunk_size_p = NULL;
@@ -114,15 +109,17 @@ Object* HttpMessageParser::parse_body_chunk() {
     if (chunk_size > 0) {
       // Cut off the chunk size + extension + CRLF before
       // the chunk data and the CRLF after
-      return &create_http_message_body_chunk(
-               &Buffer::copy(chunk_data_p, p - chunk_data_p - 2)
-             );
-    } else // Last chunk
-      return &create_http_message_body_chunk(NULL);
-  } else if (p == eof && chunk_size != 0)
-    return new Buffer(chunk_size + 2); // Assumes no trailers.
-  else
-    return NULL;
+      callbacks.handle_http_message_body_chunk(
+	    create_http_message_body_chunk(
+          ::std::shared_ptr<Buffer>(Buffer::copy(chunk_data_p, p - chunk_data_p - 2))
+        )
+	   );
+    } else { // Last chunk
+      callbacks.handle_http_message_body_chunk(create_http_message_body_chunk(NULL));
+	}
+  } else if (p == eof && chunk_size != 0) {
+    callbacks.read(::std::unique_ptr<Buffer>(new Buffer(chunk_size + 2))); // Assumes no trailers.
+  }
 }
 
 bool

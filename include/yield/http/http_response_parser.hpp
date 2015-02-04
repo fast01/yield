@@ -73,7 +73,7 @@ public:
       the previous Buffer that was passed to the constructor
     @return a parsed object
   */
-  YO_NEW_REF Object& parse();
+  Object& parse();
 
 protected:
   virtual HttpResponse&

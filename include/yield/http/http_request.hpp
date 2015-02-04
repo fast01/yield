@@ -194,7 +194,7 @@ public:
   HttpRequest(
     Method method,
     const yield::uri::Uri& uri,
-    YO_NEW_REF Buffer* body_buffer = NULL,
+    ::std::shared_ptr<Buffer> body_buffer = NULL,
     uint8_t http_version = HTTP_VERSION_DEFAULT
   );
 
@@ -224,7 +224,7 @@ protected:
   friend class HttpRequestParser;
 
   HttpRequest(
-    YO_NEW_REF Buffer* body_buffer,
+    ::std::shared_ptr<Buffer> body_buffer,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version,
