@@ -30,16 +30,14 @@
 #ifndef _YIELD_POLL_FD_EVENT_HPP_
 #define _YIELD_POLL_FD_EVENT_HPP_
 
-#include "yield/event.hpp"
 #include "yield/types.hpp"
 
 namespace yield {
 namespace poll {
 /**
-  Event subclass describing file descriptor events
-    (read and write readiness, errors).
+  File descriptor event (read and write readiness, errors)
 */
-class FdEvent : public Event {
+class FdEvent {
 public:
   typedef uint16_t Type;
   const static Type TYPE_ERROR;

@@ -30,17 +30,16 @@
 #ifndef _YIELD_FS_POLL_FS_EVENT_HPP_
 #define _YIELD_FS_POLL_FS_EVENT_HPP_
 
-#include "yield/event.hpp"
 #include "yield/fs/path.hpp"
 
 namespace yield {
 namespace fs {
 namespace poll {
 /**
-  Event subclass describing file system change events (directory or file
+  File system change events (directory or file
     add/modify/remove/rename).
 */
-class FsEvent  : public Event {
+class FsEvent {
 public:
   /**
     Type enum. An integer instead of a proper enum to allow

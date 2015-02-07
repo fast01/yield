@@ -32,8 +32,6 @@
 
 #include <memory>
 
-#include "yield/event.hpp"
-
 namespace yield {
 /**
   Abstract base class for event handlers in the event-driven concurrency subsystem.

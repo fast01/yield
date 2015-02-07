@@ -30,8 +30,6 @@
 #ifndef _YIELD_HTTP_HTTP_MESSAGE_HPP_
 #define _YIELD_HTTP_HTTP_MESSAGE_HPP_
 
-#include "yield/event.hpp"
-
 #include <string>
 #include <utility> // for std::pair
 #include <vector>
@@ -49,7 +47,7 @@ namespace http {
   An RFC 2616 HTTP message, the parent class of HttpRequest and HttpResponse.
 */
 template <class HttpMessageType>
-class HttpMessage : public Event {
+class HttpMessage {
 public:
   /**
     The default HTTP version to use for outgoing HTTP messages, as a single

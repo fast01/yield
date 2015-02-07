@@ -30,13 +30,12 @@
 #ifndef _YIELD_STAGE_TEST_EVENT_HANDLER_HPP_
 #define _YIELD_STAGE_TEST_EVENT_HANDLER_HPP_
 
-#include "yield/event.hpp"
+#include "./test_event.hpp"
 #include "yield/event_handler.hpp"
-
 
 namespace yield {
 namespace stage {
-class TestEventHandler : public EventHandler<> {
+class TestEventHandler : public EventHandler<TestEvent> {
 public:
   TestEventHandler() {
     seen_events_count = 0;
@@ -47,9 +46,8 @@ public:
   }
 
   // EventHandler
-  void handle(Event& event) {
+  void handle(::std::unique_ptr<TestEvent> event) {
     seen_events_count++;
-    Event::dec_ref(event);
   }
 
 private:

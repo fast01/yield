@@ -30,11 +30,9 @@
 #ifndef _YIELD_STAGE_TEST_EVENT_HPP_
 #define _YIELD_STAGE_TEST_EVENT_HPP_
 
-#include "yield/event.hpp"
-
 namespace yield {
 namespace stage {
-class TestEvent : public Event {
+class TestEvent {
 };
 }
 }

@@ -30,7 +30,6 @@
 #ifndef _YIELD_QUEUE_EVENT_QUEUE_TEST_HPP_
 #define _YIELD_QUEUE_EVENT_QUEUE_TEST_HPP_
 
-#include "yield/event.hpp"
 #include "yield/event_queue.hpp"
 #include "gtest/gtest.h"
 
@@ -41,50 +40,53 @@ template <class TypeParam>
 class EventQueueTest : public ::testing::Test {
 };
 
+class TestEvent {
+};
+
 TYPED_TEST_CASE_P(EventQueueTest);
 
 TYPED_TEST_P(EventQueueTest, dequeue) {
-  unique_ptr<Event> event = unique_ptr<Event>(new Event);
+  unique_ptr<TestEvent> event = unique_ptr<TestEvent>(new TestEvent);
   TypeParam event_queue;
 
   bool enqueue_ret = event_queue.enqueue(::std::move(event));
   ASSERT_TRUE(enqueue_ret);
 
-  unique_ptr<Event> dequeued_event = event_queue.dequeue();
+  unique_ptr<TestEvent> dequeued_event = event_queue.dequeue();
   ASSERT_EQ(event, dequeued_event);
 
-  ::std::unique_ptr<Event> null_event = static_cast<EventQueue<Event>&>(event_queue).trydequeue();
-  ASSERT_EQ(null_event.get(), static_cast<Event*>(NULL));
+  ::std::unique_ptr<TestEvent> null_event = static_cast<EventQueue<TestEvent>&>(event_queue).trydequeue();
+  ASSERT_EQ(null_event.get(), static_cast<TestEvent*>(NULL));
 }
 
 TYPED_TEST_P(EventQueueTest, timeddequeue) {
-  unique_ptr<Event> event = unique_ptr<Event>(new Event);
+  unique_ptr<TestEvent> event = unique_ptr<TestEvent>(new TestEvent);
   TypeParam event_queue;
 
   bool enqueue_ret = event_queue.enqueue(::std::move(event));
   ASSERT_TRUE(enqueue_ret);
 
-  unique_ptr<Event> dequeued_event = event_queue.timeddequeue(1.0);
+  unique_ptr<TestEvent> dequeued_event = event_queue.timeddequeue(1.0);
   ASSERT_EQ(event, dequeued_event);
 
-  ::std::unique_ptr<Event> null_event = event_queue.timeddequeue(1.0);
-  ASSERT_EQ(null_event.get(), static_cast<Event*>(NULL));
+  ::std::unique_ptr<TestEvent> null_event = event_queue.timeddequeue(1.0);
+  ASSERT_EQ(null_event.get(), static_cast<TestEvent*>(NULL));
 }
 
 TYPED_TEST_P(EventQueueTest, trydequeue) {
-  unique_ptr<Event> event = unique_ptr<Event>(new Event);
+  unique_ptr<TestEvent> event = unique_ptr<TestEvent>(new TestEvent);
   TypeParam event_queue;
 
   bool enqueue_ret = event_queue.enqueue(::std::move(event));
   ASSERT_TRUE(enqueue_ret);
 
-  unique_ptr<Event> dequeued_event
-  = static_cast<EventQueue<Event>&>(event_queue).trydequeue();
+  unique_ptr<TestEvent> dequeued_event
+  = static_cast<EventQueue<TestEvent>&>(event_queue).trydequeue();
   ASSERT_EQ(event, dequeued_event);
 
-  ::std::unique_ptr<Event> null_event
-  = static_cast<EventQueue<Event>&>(event_queue).trydequeue();
-  ASSERT_EQ(null_event.get(), static_cast<Event*>(NULL));
+  ::std::unique_ptr<TestEvent> null_event
+  = static_cast<EventQueue<TestEvent>&>(event_queue).trydequeue();
+  ASSERT_EQ(null_event.get(), static_cast<TestEvent*>(NULL));
 }
 
 REGISTER_TYPED_TEST_CASE_P(EventQueueTest, dequeue, timeddequeue, trydequeue);

@@ -31,7 +31,6 @@
 #define _YIELD_HTTP_HTTP_MESSAGE_BODY_CHUNK_HPP_
 
 #include "yield/buffer.hpp"
-#include "yield/event.hpp"
 
 namespace yield {
 namespace http {
@@ -40,7 +39,7 @@ namespace http {
   Used for sending streams of chunked bodies (incoming as well as outgoing)
     as separate Events from the HttpRequest or HttpResponse header.
 */
-class HttpMessageBodyChunk : public Event {
+class HttpMessageBodyChunk {
 public:
   /**
     Construct an HttpMessageBodyChunk with the given data.

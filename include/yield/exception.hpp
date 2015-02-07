@@ -33,14 +33,13 @@
 #include <exception>
 #include <string>
 
-#include "yield/event.hpp"
 #include "yield/types.hpp"
 
 namespace yield {
 /**
   Generic exceptions, also used in the event-driven concurrency subsystem.
 */
-class Exception : public Event, public std::exception {
+class Exception : public ::std::exception {
 public:
   /**
     Construct an Exception using get_last_error_code and

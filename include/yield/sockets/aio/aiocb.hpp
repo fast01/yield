@@ -30,8 +30,6 @@
 #ifndef _YIELD_SOCKETS_AIO_AIOCB_HPP_
 #define _YIELD_SOCKETS_AIO_AIOCB_HPP_
 
-#include "yield/event.hpp"
-
 namespace yield {
 namespace sockets {
 class Socket;
@@ -45,7 +43,7 @@ class NbioQueue;
 /**
   Asynchronous Input/Output Control Block (Aiocb) for sockets.
 */
-class Aiocb : public Event {
+class Aiocb {
 public:
   class Type {
   public:
