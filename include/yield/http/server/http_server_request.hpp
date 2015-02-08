@@ -27,10 +27,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_HTTP_SERVER_HTTP_REQUEST_HPP_
-#define _YIELD_HTTP_SERVER_HTTP_REQUEST_HPP_
+#ifndef _YIELD_HTTP_SERVER_HTTP_SERVER_REQUEST_HPP_
+#define _YIELD_HTTP_SERVER_HTTP_SERVER_REQUEST_HPP_
+
+#include <memory>
 
 #include "yield/http/http_request.hpp"
+#include "yield/http/server/http_server_connection.hpp"
+#include "yield/http/server/http_server_response.hpp"
 
 namespace yield {
 namespace http {
@@ -38,16 +42,15 @@ class HttpMessageBodyChunk;
 class HttpResponse;
 
 namespace server {
-class HttpConnection;
-class HttpRequestParser;
+class HttpServerRequestParser;
 
 /**
   A <code>yield::http::HttpRequest</code> that's bound to a server
-    <code>HttpConnection</code>.
+    <code>HttpServerConnection</code>.
   These <code>HttpRequest</code>s are usually created by
-    <code>HttpRequestQueue</code>.
+    <code>HttpServerRequestQueue</code>.
 */
-class HttpRequest : public ::yield::http::HttpRequest {
+class HttpServerRequest final : public ::yield::http::HttpRequest {
 public:
   /**
     Construct an HttpRequest that originates from the given server connection.
@@ -58,23 +61,24 @@ public:
     @param http_version the HTTP version as a single byte (0 or 1 for HTTP/1.0
       and HTTP/1.1, respectively)
   */
-  HttpRequest(
-    HttpConnection& connection,
+  HttpServerRequest(
+    ::std::shared_ptr<HttpServerConnection> connection,
     Method method,
     const yield::uri::Uri& uri,
-    YO_NEW_REF Buffer* body = NULL,
+    ::std::shared_ptr<Buffer> body = NULL,
     uint8_t http_version = HTTP_VERSION_DEFAULT
-  );
-
-  virtual ~HttpRequest();
+  ) : yield::http::HttpRequest(method, uri, body, http_version),
+    connection_(connection),
+    creation_date_time_(DateTime::now()) {
+  }
 
 public:
   /**
     Get the server connection from which this HTTP request originated.
     @return the server connection from which this HTTP request originated
   */
-  const HttpConnection& connection() const {
-    return connection_;
+  const HttpServerConnection& connection() const {
+    return *connection_;
   }
 
   /**
@@ -92,28 +96,26 @@ public:
     respond(HttpResponse&) or respond(status_code) must be called first.
     @param chunk response body chunk
   */
-  void respond(YO_NEW_REF ::yield::http::HttpResponse& response);
+  void respond(::std::unique_ptr<HttpServerResponse> response) {
+    connection_->handle(::std::move(response));
+  }
 
   /**
     Respond to the HTTP request with a chunked body.
     respond(HttpResponse&) or respond(status_code) must be called first.
     @param chunk response body chunk
   */
-  void respond(YO_NEW_REF ::yield::http::HttpMessageBodyChunk& chunk);
-
-  /**
-    Respond to the HTTP request.
-    Steals the reference to http_response, which should not be modified
-      after this method is called.
-    @param http_response HTTP response
-  */
-  void respond(YO_NEW_REF ::yield::http::server::HttpConnection& http_response);
+  void respond(::std::unique_ptr<HttpServerMessageBodyChunk> chunk) {
+    connection_->handle(::std::move(chunk));
+  }
 
   /**
     Respond to the HTTP request.
     @param status_code response status code e.g, 200
   */
-  void respond(uint16_t status_code);
+  void respond(uint16_t status_code) {
+    respond(status_code, ::std::shared_ptr<Buffer>());
+  }
 
   /**
     Respond to the HTTP request.
@@ -121,7 +123,7 @@ public:
     @param status_code response status code e.g., 200
     @param body response body
   */
-  void respond(uint16_t status_code, YO_NEW_REF Buffer* body);
+  void respond(uint16_t status_code, ::std::shared_ptr<Buffer> body);
 
   /**
     Respond to the HTTP request.
@@ -129,7 +131,9 @@ public:
     @param status_code response status code e.g., 200
     @param body response body
   */
-  void respond(uint16_t status_code, YO_NEW_REF Buffer& body);
+  void respond(uint16_t status_code, const char* body) {
+    respond(status_code, Buffer::copy(body));
+  }
 
   /**
     Respond to the HTTP request.
@@ -137,31 +141,35 @@ public:
     @param status_code response status code e.g., 200
     @param body response body
   */
-  void respond(uint16_t status_code, const char* body);
-
-  /**
-    Respond to the HTTP request.
-    This method should only be called once.
-    @param status_code response status code e.g., 200
-    @param body response body
-  */
-  void respond(uint16_t status_code, const Exception& body);
+  void respond(uint16_t status_code, const Exception& body) {
+    respond(status_code, Buffer::copy(body.get_error_message()));
+  }
 
 protected:
-  friend class HttpRequestParser;
+  friend class HttpServerRequestParser;
 
-  HttpRequest(
-    YO_NEW_REF Buffer* body,
-    HttpConnection& connection,
+  HttpServerRequest(
+    ::std::shared_ptr<Buffer> body,
+    ::std::shared_ptr<HttpServerConnection> connection,
     uint16_t fields_offset,
     Buffer& header,
     uint8_t http_version,
     Method method,
     const yield::uri::Uri& uri
-  );
+  ) : yield::http::HttpRequest(
+    body,
+    fields_offset,
+    header,
+    http_version,
+    method,
+    uri
+  ),
+  connection_(connection),
+  creation_date_time_(DateTime::now()) {
+  }
 
 private:
-  HttpConnection& connection_;
+  ::std::shared_ptr<HttpServerConnection> connection_;
   DateTime creation_date_time_;
 };
 }

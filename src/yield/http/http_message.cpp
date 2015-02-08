@@ -47,16 +47,18 @@
 
 namespace yield {
 namespace http {
+using ::std::make_shared;
+using ::std::shared_ptr;
 using ::yield::fs::File;
 
 template <class HttpMessageType>
 HttpMessage<HttpMessageType>::HttpMessage(
-  YO_NEW_REF Buffer* body_buffer,
-  YO_NEW_REF File* body_file,
+  shared_ptr<Buffer> body_buffer,
+  shared_ptr<File> body_file,
   uint8_t http_version
 ) : body_buffer_(body_buffer),
     body_file_(body_file),
-  header_(*new Buffer(Buffer::getpagesize(), Buffer::getpagesize())),
+  header_(make_shared<Buffer>(Buffer::getpagesize(), Buffer::getpagesize())),
   http_version_(http_version) {
   if (body_buffer != NULL) {
     CHECK_EQ(body_file, NULL);
@@ -67,15 +69,15 @@ HttpMessage<HttpMessageType>::HttpMessage(
 template <class HttpMessageType>
 HttpMessage<HttpMessageType>::
 HttpMessage(
-  YO_NEW_REF Buffer* body_buffer,
-  YO_NEW_REF File* body_file,
+  shared_ptr<Buffer> body_buffer,
+  shared_ptr<File> body_file,
   uint16_t fields_offset,
-  Buffer& header,
+  shared_ptr<Buffer> header,
   uint8_t http_version
 ) : body_buffer_(body_buffer),
     body_file_(body_file),
   fields_offset_(fields_offset),
-  header_(header.inc_ref()),
+  header_(header),
   http_version_(http_version) {
   if (body_buffer != NULL) {
     CHECK_EQ(body_file, NULL);
@@ -83,23 +85,16 @@ HttpMessage(
 }
 
 template <class HttpMessageType>
-HttpMessage<HttpMessageType>::~HttpMessage() {
-  Buffer::dec_ref(body_buffer_);
-  File::dec_ref(body_file_);
-  Buffer::dec_ref(header_);
-}
-
-template <class HttpMessageType>
 void HttpMessage<HttpMessageType>::finalize() {
-  header_.put("\r\n", 2);
+  header_->put("\r\n", 2);
 }
 
 template <class HttpMessageType>
 size_t HttpMessage<HttpMessageType>::get_content_length() const {
   size_t content_length = 0;
   HttpMessageParser::parse_content_length_field(
-    static_cast<const char*>(header_) + fields_offset_,
-    static_cast<const char*>(header_) + header_.size(),
+    static_cast<const char*>(*header_) + fields_offset_,
+    static_cast<const char*>(*header_) + header_->size(),
     content_length
   );
   return content_length;
@@ -126,8 +121,8 @@ HttpMessage<HttpMessageType>::get_field(
   name_iov.iov_base = const_cast<char*>(name);
   name_iov.iov_len = name_len;
   return HttpMessageParser::parse_field(
-           static_cast<const char*>(header_) + fields_offset_,
-           static_cast<const char*>(header_) + header_.size(),
+           static_cast<const char*>(*header_) + fields_offset_,
+           static_cast<const char*>(*header_) + header_->size(),
            name_iov,
            value
          );
@@ -139,26 +134,22 @@ HttpMessage<HttpMessageType>::get_fields(
   ::std::vector< std::pair<iovec, iovec> >& fields
 ) const {
   return HttpMessageParser::parse_fields(
-           static_cast<const char*>(header_) + fields_offset_,
-           static_cast<const char*>(header_) + header_.size(),
+           static_cast<const char*>(*header_) + fields_offset_,
+           static_cast<const char*>(*header_) + header_->size(),
            fields
          );
 }
 
 template <class HttpMessageType>
-void HttpMessage<HttpMessageType>::set_body(YO_NEW_REF Buffer* body_buffer) {
-  Buffer::dec_ref(this->body_buffer_);
-  File::dec_ref(this->body_file_);
-  this->body_buffer_ = body_buffer;
-  this->body_file_ = NULL;
+void HttpMessage<HttpMessageType>::set_body(shared_ptr<Buffer> body_buffer) {
+  body_buffer_.swap(body_buffer);
+  body_file_.reset();
 }
 
 template <class HttpMessageType>
-void HttpMessage<HttpMessageType>::set_body(YO_NEW_REF File* body_file) {
-  Buffer::dec_ref(this->body_buffer_);
-  File::dec_ref(this->body_file_);
-  this->body_buffer_ = NULL;
-  this->body_file_ = body_file;
+void HttpMessage<HttpMessageType>::set_body(shared_ptr<File> body_file) {
+  body_buffer_.reset();
+  body_file_.swap(body_file);
 }
 
 template <class HttpMessageType>
@@ -252,10 +243,10 @@ set_field(
   CHECK_GT(name_len, 0);
   CHECK_GT(value_len, 0);
 
-  header_.put(name, name_len);
-  header_.put(": ", 2);
-  header_.put(value, value_len);
-  header_.put("\r\n");
+  header_->put(name, name_len);
+  header_->put(": ", 2);
+  header_->put(value, value_len);
+  header_->put("\r\n");
 
   return static_cast<HttpMessageType&>(*this);
 }

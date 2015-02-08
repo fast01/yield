@@ -92,23 +92,17 @@ public:
     return return__;
   }
 
-  /**
-    Get the socket associated with this control block.
-  */
-  Socket& socket() {
-    return *socket_;
-  }
+  virtual Socket& socket() = 0;
 
   virtual Type::Enum type() const = 0;
 
 protected:
-  Aiocb(::std::shared_ptr<Socket> socket_)
-    : socket_(socket_) {
+  Aiocb() {
     init();
   }
 
-  Aiocb(::std::shared_ptr<Socket> socket_, off_t offset)
-    : socket_(socket_), offset_(offset) {
+  Aiocb(off_t offset)
+    : offset_(offset) {
     init();
   }
 
@@ -136,7 +130,6 @@ private:
   uint32_t error_;
   off_t offset_;
   ssize_t return__;
-  ::std::shared_ptr<Socket> socket_;
 };
 }
 }

@@ -31,75 +31,78 @@
 #define _YIELD_HTTP_SERVER_HTTP_CONNECTION_HPP_
 
 #include "yield/event_queue.hpp"
+#include "yield/sockets/aio/aio_queue.hpp"
 #include "yield/sockets/aio/accept_aiocb.hpp"
 #include "yield/sockets/aio/recv_aiocb.hpp"
 #include "yield/sockets/aio/send_aiocb.hpp"
 #include "yield/sockets/aio/sendfile_aiocb.hpp"
 #include "yield/sockets/tcp_socket.hpp"
-#include "yield/http/server/http_message_body_chunk.hpp"
-#include "yield/http/server/http_request.hpp"
-#include "yield/http/server/http_response.hpp"
+#include "yield/http/server/http_server_message_body_chunk.hpp"
+#include "yield/http/server/http_server_response.hpp"
 
 namespace yield {
 namespace http {
 namespace server {
+class HttpServerRequest;
+
 /**
   A server-side HTTP connection.
 */
-class HttpConnection : public Object {
+class HttpServerConnection final {
 public:
   enum State { STATE_CONNECTED, STATE_ERROR };
 
 public:
-  HttpConnection(
-    EventQueue& aio_queue,
-    EventHandler& http_request_handler,
-    yield::sockets::SocketAddress& peername,
-    yield::sockets::TcpSocket& socket_
-  );
-
-  ~HttpConnection();
-
-public:
-  EventHandler& get_http_request_handler() {
-    return http_request_handler;
+  HttpServerConnection(
+    ::std::shared_ptr< ::yield::sockets::aio::AioQueue > aio_queue,
+    ::std::shared_ptr< EventHandler<HttpServerRequest > > http_request_handler,
+    ::std::shared_ptr< ::yield::sockets::SocketAddress > peername,
+    ::std::shared_ptr< ::yield::sockets::TcpSocket > socket_
+  ) : aio_queue_(aio_queue),
+      http_request_handler_(http_request_handler),
+      peername_(peername),
+      socket_(socket_) {
+    state_ = STATE_CONNECTED;
   }
 
-  yield::sockets::SocketAddress& get_peername() const {
-    return peername;
+public:
+  EventHandler<HttpServerRequest>& http_request_handler() {
+    return *http_request_handler_;
+  }
+
+  ::yield::sockets::SocketAddress& peername() const {
+    return *peername_;
   }
 
   yield::sockets::TcpSocket& get_socket() const {
-    return socket_;
+    return *socket_;
   }
 
-  State get_state() const {
-    return state;
+  State state() const {
+    return state_;
   }
 
 public:
-  void handle(YO_NEW_REF ::yield::sockets::aio::AcceptAiocb& accept_aiocb);
-  void handle(YO_NEW_REF ::yield::http::HttpMessageBodyChunk& http_message_body_chunk);
-  void handle(YO_NEW_REF ::yield::http::HttpResponse& http_response);
-  void handle(YO_NEW_REF ::yield::sockets::aio::RecvAiocb& recv_aiocb);
-  void handle(YO_NEW_REF ::yield::sockets::aio::SendAiocb& send_aiocb);
-  void handle(YO_NEW_REF ::yield::sockets::aio::SendfileAiocb& sendfile_aiocb);
+  void handle(::std::unique_ptr< ::yield::sockets::aio::AcceptAiocb > accept_aiocb);
+  void handle(::std::unique_ptr< ::yield::http::HttpMessageBodyChunk > http_message_body_chunk);
+  void handle(::std::unique_ptr<HttpServerResponse> http_response);
+  void handle(::std::unique_ptr< ::yield::sockets::aio::RecvAiocb > recv_aiocb);
 
-public:
-  // yield::Object
-  HttpConnection& inc_ref() {
-    return Object::inc_ref(*this);
+  void handle(::std::unique_ptr< ::yield::sockets::aio::SendAiocb > send_aiocb) {
+  }
+
+  void handle(::std::unique_ptr< ::yield::sockets::aio::SendfileAiocb > sendfile_aiocb) {
   }
 
 private:
   void parse(Buffer& recv_buffer);
 
 private:
-  EventQueue& aio_queue;
-  EventHandler& http_request_handler;
-  yield::sockets::SocketAddress& peername;
-  yield::sockets::TcpSocket& socket_;
-  State state;
+  ::std::shared_ptr< ::yield::sockets::aio::AioQueue >  aio_queue_;
+  ::std::shared_ptr< EventHandler<HttpServerRequest> > http_request_handler_;
+  ::std::shared_ptr< ::yield::sockets::SocketAddress > peername_;
+  ::std::shared_ptr< ::yield::sockets::TcpSocket> socket_;
+  State state_;
 };
 }
 }

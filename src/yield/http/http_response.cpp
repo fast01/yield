@@ -35,78 +35,6 @@
 
 namespace yield {
 namespace http {
-HttpResponse::HttpResponse(
-  YO_NEW_REF Buffer* body,
-  uint16_t fields_offset,
-  Buffer& header,
-  uint8_t http_version,
-  uint16_t status_code
-)
-  : HttpMessage<HttpResponse>(
-    body,
-    NULL,
-    fields_offset,
-    header,
-    http_version
-  ),
-  status_code_(status_code)
-{ }
-
-HttpResponse::HttpResponse(
-  uint8_t http_version,
-  uint16_t status_code,
-  YO_NEW_REF Buffer* body
-) : HttpMessage<HttpResponse>(
-    body,
-    NULL,
-    http_version
-  ),
-  status_code_(status_code)
-{
-  init();
-}
-
-HttpResponse::HttpResponse(
-  YO_NEW_REF Buffer* body,
-  uint8_t http_version,
-  uint16_t status_code
-)
-  : HttpMessage<HttpResponse>(
-    body,
-    NULL,
-    http_version
-  ),
-  status_code_(status_code)
-{
-  init();
-}
-
-HttpResponse::HttpResponse(
-  uint16_t status_code
-)
-  : HttpMessage<HttpResponse>(NULL, NULL, HTTP_VERSION_DEFAULT),
-    status_code_(status_code) {
-  init();
-}
-
-HttpResponse::HttpResponse(
-  uint16_t status_code,
-  YO_NEW_REF Buffer* body
-)
-  : HttpMessage<HttpResponse>(body, NULL, HTTP_VERSION_DEFAULT),
-    status_code_(status_code) {
-  init();
-}
-
-HttpResponse::HttpResponse(
-  uint16_t status_code,
-  YO_NEW_REF ::yield::fs::File* body
-)
-  : HttpMessage<HttpResponse>(NULL, body, HTTP_VERSION_DEFAULT),
-    status_code_(status_code) {
-  init();
-}
-
 void HttpResponse::init() {
   const char* status_line;
   size_t status_line_len;
@@ -300,7 +228,7 @@ void HttpResponse::init() {
 std::ostream& operator<<(std::ostream& os, const HttpResponse& http_response) {
   std::ostringstream body;
   if (http_response.body_buffer() != NULL) {
-    body << static_cast<Buffer*>(http_response.body_buffer());
+    body << static_cast<Buffer*>(http_response.body_buffer().get());
   } else if (http_response.body_file() != NULL) {
     body << "File";
   } else {

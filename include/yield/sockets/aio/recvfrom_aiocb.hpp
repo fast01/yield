@@ -52,9 +52,10 @@ public:
     ::std::shared_ptr<Socket> socket_,
     ::std::shared_ptr<Buffer> buffer,
     const Socket::MessageFlags& flags
-  ) : Aiocb(socket_),
+  ) :
     buffer_(buffer),
-    flags_(flags)
+    flags_(flags),
+    socket_(socket_)
   { }
 
   virtual ~RecvfromAiocb() {
@@ -109,7 +110,14 @@ public:
     return peername_len_;
   }
 
-  Type::Enum type() const {
+  /**
+    Get the socket associated with this control block.
+  */
+  Socket& socket() override {
+    return *socket_;
+  }
+
+  Type::Enum type() const override {
     return Type::RECVFROM;
   }
 
@@ -118,6 +126,7 @@ private:
   Socket::MessageFlags flags_;
   SocketAddress peername_;
   socklen_t peername_len_;
+  ::std::shared_ptr<Socket> socket_;
 };
 
 /**

@@ -57,7 +57,10 @@ public:
   HttpResponse(
     uint16_t status_code,
     ::std::shared_ptr<Buffer> body
-  );
+  ) : HttpMessage<HttpResponse>(body, NULL, HTTP_VERSION_DEFAULT),
+      status_code_(status_code) {
+    init();
+  }
 
   /**
     Construct an HttpResponse from its constituent parts.
@@ -70,7 +73,14 @@ public:
     uint8_t http_version,
     uint16_t status_code,
     ::std::shared_ptr<Buffer> body
-  );
+  ) : HttpMessage<HttpResponse>(
+    body,
+    NULL,
+    http_version
+  ),
+  status_code_(status_code) {
+    init();
+  }
 
   /**
     Construct an HttpResponse from its constituent parts.
@@ -82,7 +92,11 @@ public:
   HttpResponse(
     uint16_t status_code,
     ::std::shared_ptr< ::yield::fs::File > body
-  );
+  ) 
+    : HttpMessage<HttpResponse>(NULL, body, HTTP_VERSION_DEFAULT),
+      status_code_(status_code) {
+    init();
+  }
 
   /**
     Empty virtual destructor.
@@ -106,15 +120,30 @@ protected:
     ::std::shared_ptr<Buffer> body,
     uint8_t http_version,
     uint16_t status_code
-  );
+  ) : HttpMessage<HttpResponse>(
+        body,
+        NULL,
+        http_version
+      ),
+      status_code_(status_code) {
+      init();
+    }
 
   HttpResponse(
     ::std::shared_ptr<Buffer> body,
     uint16_t fields_offset,
-    Buffer& header,
+    ::std::shared_ptr<Buffer> header,
     uint8_t http_version,
     uint16_t status_code
-  );
+  )  : HttpMessage<HttpResponse>(
+        body,
+        NULL,
+        fields_offset,
+        header,
+        http_version
+      ),
+      status_code_(status_code) {
+  }
 
 private:
   void init();

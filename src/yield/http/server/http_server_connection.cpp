@@ -27,63 +27,45 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "http_request_parser.hpp"
+#include "./http_server_request_parser.hpp"
 #include "yield/logging.hpp"
 #include "yield/fs/file.hpp"
-#include "yield/http/server/http_connection.hpp"
+#include "yield/http/server/http_server_connection.hpp"
 
 namespace yield {
 namespace http {
 namespace server {
-using yield::fs::File;
-using yield::sockets::SocketAddress;
-using yield::sockets::TcpSocket;
-using yield::sockets::aio::AcceptAiocb;
-using yield::sockets::aio::RecvAiocb;
-using yield::sockets::aio::SendAiocb;
-using yield::sockets::aio::SendfileAiocb;
+using ::std::make_shared;
+using ::std::shared_ptr;
+using ::std::unique_ptr;
+using ::yield::fs::File;
+using ::yield::sockets::SocketAddress;
+using ::yield::sockets::TcpSocket;
+using ::yield::sockets::aio::AcceptAiocb;
+using ::yield::sockets::aio::RecvAiocb;
+using ::yield::sockets::aio::SendAiocb;
+using ::yield::sockets::aio::SendfileAiocb;
 
-HttpConnection::HttpConnection(
-  EventQueue& aio_queue,
-  EventHandler& http_request_handler,
-  SocketAddress& peername,
-  TcpSocket& socket_
-) : aio_queue(aio_queue.inc_ref()),
-  http_request_handler(http_request_handler.inc_ref()),
-  peername(peername.inc_ref()),
-  socket_(static_cast<TcpSocket&>(socket_.inc_ref())) {
-  state = STATE_CONNECTED;
-}
-
-HttpConnection::~HttpConnection() {
-  EventQueue::dec_ref(aio_queue);
-  EventHandler::dec_ref(http_request_handler);
-  TcpSocket::dec_ref(socket_);
-}
-
-void HttpConnection::handle(YO_NEW_REF AcceptAiocb& accept_aiocb) {
+void HttpServerConnection::handle(unique_ptr<AcceptAiocb> accept_aiocb) {
   if (
-    accept_aiocb.get_recv_buffer() != NULL
+    accept_aiocb->recv_buffer() != NULL
     &&
-    accept_aiocb.get_return() > 0
+    accept_aiocb->return_() > 0
   ) {
-    parse(*accept_aiocb.get_recv_buffer());
+    parse(*accept_aiocb->recv_buffer());
   } else {
-    Buffer* recv_buffer
-    = new Buffer(Buffer::getpagesize(), Buffer::getpagesize());
-    RecvAiocb* recv_aiocb = new RecvAiocb(socket_, *recv_buffer, 0, this);
-    if (!aio_queue.enqueue(*recv_aiocb)) {
-      RecvAiocb::dec_ref(*recv_aiocb);
-      state = STATE_ERROR;
+    shared_ptr<Buffer> recv_buffer
+    = make_shared<Buffer>(Buffer::getpagesize(), Buffer::getpagesize());
+    unique_ptr<RecvAiocb> recv_aiocb(new RecvAiocb(socket_, *recv_buffer, 0, this));
+    if (!aio_queue_->enqueue(move(recv_aiocb))) {
+      state_ = STATE_ERROR;
     }
   }
-
-  AcceptAiocb::dec_ref(accept_aiocb);
 }
 
 void
-HttpConnection::handle(
-  YO_NEW_REF ::yield::http::HttpMessageBodyChunk& http_message_body_chunk
+HttpServerConnection::handle(
+  unique_ptr<::yield::http::HttpMessageBodyChunk> http_message_body_chunk
 ) {
   Buffer* send_buffer;
   if (http_message_body_chunk.data() != NULL) {
@@ -101,8 +83,8 @@ HttpConnection::handle(
 }
 
 void
-HttpConnection::handle(
-  YO_NEW_REF ::yield::http::HttpResponse& http_response
+HttpServerConnection::handle(
+  unique_ptr<HttpServerResponse> http_response
 ) {
   DLOG(DEBUG) << "sending " << http_response;
 
@@ -143,31 +125,27 @@ HttpConnection::handle(
 }
 
 void
-HttpConnection::handle(
-  YO_NEW_REF ::yield::sockets::aio::RecvAiocb& recv_aiocb
+HttpServerConnection::handle(
+  unique_ptr< ::yield::sockets::aio::RecvAiocb > recv_aiocb
 ) {
-  if (recv_aiocb.get_return() > 0) {
-    parse(recv_aiocb.get_buffer());
+  if (recv_aiocb->return_() > 0) {
+    parse(*recv_aiocb->buffer());
   }
-
-  ::yield::sockets::aio::RecvAiocb::dec_ref(recv_aiocb);
 }
 
 void
-HttpConnection::handle(
-  YO_NEW_REF ::yield::sockets::aio::SendAiocb& send_aiocb
+HttpServerConnection::handle(
+  unique_ptr< ::yield::sockets::aio::SendAiocb > send_aiocb
 ) {
-  SendAiocb::dec_ref(send_aiocb);
 }
 
 void
-HttpConnection::handle(
-  YO_NEW_REF ::yield::sockets::aio::SendfileAiocb& sendfile_aiocb
+HttpServerConnection::handle(
+  unique_ptr< ::yield::sockets::aio::SendfileAiocb > sendfile_aiocb
 ) {
-  ::yield::sockets::aio::SendfileAiocb::dec_ref(sendfile_aiocb);
 }
 
-void HttpConnection::parse(Buffer& recv_buffer) {
+void HttpServerConnection::parse(Buffer& recv_buffer) {
   CHECK(!recv_buffer.empty());
 
   HttpRequestParser http_request_parser(*this, recv_buffer);

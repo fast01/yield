@@ -43,10 +43,9 @@ namespace yield {
 namespace sockets {
 namespace aio {
 SendfileAiocb::SendfileAiocb(
-  ::std::shared_ptr<Socket>& socket_,
+  ::std::shared_ptr<StreamSocket> socket_,
   fd_t fd
-)
-  : Aiocb(socket_) {
+) : socket_(socket_) {
   init(fd);
 
 #ifdef _WIN32
@@ -85,12 +84,13 @@ SendfileAiocb::SendfileAiocb(
 }
 
 SendfileAiocb::SendfileAiocb(
-  ::std::shared_ptr<Socket> socket_,
+  ::std::shared_ptr<StreamSocket> socket_,
   fd_t fd,
   off_t offset,
   size_t nbytes
-) : Aiocb(socket_, offset),
-  nbytes_(nbytes) {
+) : Aiocb(offset),
+  nbytes_(nbytes),
+  socket_(socket_) {
   init(fd);
 }
 

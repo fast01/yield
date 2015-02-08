@@ -53,7 +53,7 @@ static LPFN_GETACCEPTEXSOCKADDRS lpfnGetAcceptExSockaddrs = NULL;
 static LPFN_TRANSMITFILE lpfnTransmitFile = NULL;
 
 struct AiocbOVERLAPPED : public ::OVERLAPPED {
-  shared_ptr<Aiocb>* aiocb;
+  unique_ptr<Aiocb> aiocb;
 };
 
 AioQueue::AioQueue() {
@@ -72,18 +72,19 @@ bool AioQueue::associate(socket_t socket_) {
          ) != INVALID_HANDLE_VALUE;
 }
 
-bool AioQueue::enqueue(shared_ptr<Aiocb> aiocb) {
+bool AioQueue::enqueue(unique_ptr<Aiocb> unique_aiocb) {
+  Aiocb& aiocb = *unique_aiocb;
   LPOVERLAPPED lpOverlapped = new AiocbOVERLAPPED;
   memset(lpOverlapped, 0, sizeof(AiocbOVERLAPPED));
-  static_cast<AiocbOVERLAPPED*>(lpOverlapped)->aiocb = &aiocb;
-  if (aiocb->offset() != 0) {
-    lpOverlapped->Offset = static_cast<uint32_t>(aiocb->offset());
-    lpOverlapped->OffsetHigh = static_cast<uint32_t>(aiocb->offset() >> 32);
+  static_cast<AiocbOVERLAPPED*>(lpOverlapped)->aiocb = move(unique_aiocb);
+  if (aiocb.offset() != 0) {
+    lpOverlapped->Offset = static_cast<uint32_t>(aiocb.offset());
+    lpOverlapped->OffsetHigh = static_cast<uint32_t>(aiocb.offset() >> 32);
   }
 
-  switch (aiocb->type()) {
+  switch (aiocb.type()) {
   case Aiocb::Type::ACCEPT: {
-    AcceptAiocb& accept_aiocb = static_cast<AcceptAiocb&>(*aiocb);
+    AcceptAiocb& accept_aiocb = static_cast<AcceptAiocb&>(aiocb);
 
     log_enqueue(accept_aiocb);
 
@@ -191,7 +192,7 @@ bool AioQueue::enqueue(shared_ptr<Aiocb> aiocb) {
   break;
 
   case Aiocb::Type::CONNECT: {
-    ConnectAiocb& connect_aiocb = static_cast<ConnectAiocb&>(*aiocb);
+    ConnectAiocb& connect_aiocb = static_cast<ConnectAiocb&>(aiocb);
 
     log_enqueue(connect_aiocb);
 
@@ -260,7 +261,7 @@ bool AioQueue::enqueue(shared_ptr<Aiocb> aiocb) {
   break;
 
   case Aiocb::Type::RECV: {
-    RecvAiocb& recv_aiocb = static_cast<RecvAiocb&>(*aiocb);
+    RecvAiocb& recv_aiocb = static_cast<RecvAiocb&>(aiocb);
 
     log_enqueue(recv_aiocb);
 
@@ -313,7 +314,7 @@ bool AioQueue::enqueue(shared_ptr<Aiocb> aiocb) {
   break;
 
   case Aiocb::Type::RECVFROM: {
-    RecvfromAiocb& recvfrom_aiocb = static_cast<RecvfromAiocb&>(*aiocb);
+    RecvfromAiocb& recvfrom_aiocb = static_cast<RecvfromAiocb&>(aiocb);
 
     log_enqueue(recvfrom_aiocb);
 
@@ -373,7 +374,7 @@ bool AioQueue::enqueue(shared_ptr<Aiocb> aiocb) {
   break;
 
   case Aiocb::Type::SEND: {
-    SendAiocb& send_aiocb = static_cast<SendAiocb&>(*aiocb);
+    SendAiocb& send_aiocb = static_cast<SendAiocb&>(aiocb);
 
     log_enqueue(send_aiocb);
 
@@ -424,7 +425,7 @@ bool AioQueue::enqueue(shared_ptr<Aiocb> aiocb) {
   break;
 
   case Aiocb::Type::SENDFILE: {
-    SendfileAiocb& sendfile_aiocb = static_cast<SendfileAiocb&>(*aiocb);
+    SendfileAiocb& sendfile_aiocb = static_cast<SendfileAiocb&>(aiocb);
 
     if (lpfnTransmitFile == NULL) {
       GUID GuidTransmitFile = WSAID_TRANSMITFILE;
@@ -489,7 +490,7 @@ template <class AiocbType> void AioQueue::log_error(AiocbType& aiocb) {
   LOG(ERROR) << "error on " << aiocb;
 }
 
-shared_ptr<Aiocb> AioQueue::timeddequeue(const Time& timeout) {
+unique_ptr<Aiocb> AioQueue::timeddequeue(const Time& timeout) {
   DWORD dwBytesTransferred = 0;
   ULONG_PTR ulCompletionKey = 0;
   LPOVERLAPPED lpOverlapped = NULL;
@@ -507,7 +508,7 @@ shared_ptr<Aiocb> AioQueue::timeddequeue(const Time& timeout) {
     return NULL;
   }
 
-  shared_ptr<Aiocb> aiocb = *static_cast<AiocbOVERLAPPED*>(lpOverlapped)->aiocb;
+  unique_ptr<Aiocb> aiocb = move(static_cast<AiocbOVERLAPPED*>(lpOverlapped)->aiocb);
   delete lpOverlapped;
 
   if (bRet) {

@@ -47,9 +47,8 @@ class HttpMessageParser {
 protected:
   class ParseCallbacks {
   public:
-    virtual void handle_http_message_body(::std::unique_ptr<Buffer>) = 0;
     virtual void handle_http_message_body_chunk(::std::unique_ptr<HttpMessageBodyChunk>) = 0;
-    virtual void read(::std::unique_ptr<Buffer>) = 0;
+    virtual void read(::std::shared_ptr<Buffer>) = 0;
   };
 
 protected:
@@ -68,8 +67,8 @@ protected:
   }
 
 protected:
-  bool parse_body(ParseCallbacks&, size_t content_length);
-  void parse_body_chunk(ParseCallbacks&);
+  bool parse_body(size_t content_length, ::std::shared_ptr<Buffer>& out_body);
+  void parse_body_chunks(ParseCallbacks&);
 
 protected:
   bool parse_fields(uint16_t& fields_offset, size_t& content_length);

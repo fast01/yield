@@ -83,17 +83,18 @@ public:
     Get the socket in this connect operation.
     @return the socket in this connect operation
   */
-  StreamSocket& socket() {
-    return static_cast<StreamSocket&>(Aiocb::socket());
+  StreamSocket& socket() override {
+    return *socket_;
   }
 
-  Type::Enum type() const {
+  Type::Enum type() const override {
     return Type::CONNECT;
   }
 
 private:
   ::std::shared_ptr<SocketAddress> peername_;
   ::std::shared_ptr<Buffer> send_buffer_;
+  ::std::shared_ptr<StreamSocket> socket_;
 };
 
 /**

@@ -95,7 +95,7 @@ public:
     Copy the contents of the buffer (data(), size()) into a new Buffer.
     @return the new <code>Buffer</code> copy
   */
-  ::std::unique_ptr<Buffer> copy() const {
+  ::std::shared_ptr<Buffer> copy() const {
     return copy(*this);
   }
 
@@ -105,7 +105,7 @@ public:
     @param data the data to copy
     @return the new <code>Buffer</code> copy
   */
-  static ::std::unique_ptr<Buffer> copy(const Buffer& data) {
+  static ::std::shared_ptr<Buffer> copy(const Buffer& data) {
     return copy(data, data.capacity());
   }
 
@@ -115,7 +115,7 @@ public:
     @param data the data to copy
     @return the new <code>Buffer</code> copy
   */
-  static ::std::unique_ptr<Buffer> copy(const ::std::string& data) {
+  static ::std::shared_ptr<Buffer> copy(const ::std::string& data) {
     return copy(data.data(), data.size());
   }
 
@@ -124,7 +124,7 @@ public:
     @param data the data to copy
     @return the new <code>Buffer</code> copy
   */
-  static ::std::unique_ptr<Buffer> copy(const char* data) {
+  static ::std::shared_ptr<Buffer> copy(const char* data) {
     return copy(data, strlen(data));
   }
 
@@ -134,7 +134,7 @@ public:
     @param size size of the data
     @return the new <code>Buffer</code> copy
   */
-  static ::std::unique_ptr<Buffer> copy(const void* data, size_t size) {
+  static ::std::shared_ptr<Buffer> copy(const void* data, size_t size) {
     return copy(size, data, size);
   }
 
@@ -146,7 +146,7 @@ public:
     @param size size of the data
     @return the new <code>Buffer</code> copy
   */
-  static ::std::unique_ptr<Buffer> copy(size_t capacity, const void* data, size_t size) {
+  static ::std::shared_ptr<Buffer> copy(size_t capacity, const void* data, size_t size) {
     return copy(ALIGNMENT_DEFAULT, capacity, data, size);
   }
 
@@ -159,7 +159,7 @@ public:
     @param size size of the data
     @return the new <code>Buffer</code> copy
   */
-  static ::std::unique_ptr<Buffer>
+  static ::std::shared_ptr<Buffer>
   copy(
     size_t alignment,
     size_t capacity,

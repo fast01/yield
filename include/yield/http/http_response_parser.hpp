@@ -40,13 +40,19 @@ namespace http {
 */
 class HttpResponseParser : public HttpMessageParser {
 public:
+  class ParseCallbacks : public HttpMessageParser::ParseCallbacks {
+  public:
+    virtual void handle_http_response(::std::unique_ptr<HttpResponse>) = 0;
+  };
+
+public:
   /**
     Construct an HttpResponseParser on the underlying buffer.
     References to buffer may be created for any objects (such as HttpResponse)
       produced by the parser.
     @param buffer buffer to parse
   */
-  HttpResponseParser(Buffer& buffer)
+  HttpResponseParser(::std::shared_ptr<Buffer> buffer)
     : HttpMessageParser(buffer)
   { }
 
@@ -62,44 +68,34 @@ public:
 public:
   /**
     Parse the next object from the buffer specified in the constructor.
-    The caller is responsible for checking the Object's get_type_id
-      and downcasting to the appropriate type.
-    Object may be of the following types, in order of probability:
-    - yield::http::HttpResponse or subclasses: an HTTP response, including its
-        body for responses with fixed Content-Length's.
-    - yield::http::HttpMessageBodyChunk: a chunk of body data, for responses
-        with chunked Transfer-Encoding.
-    - yield::Buffer: the next Buffer to read; may include the remainder of
-      the previous Buffer that was passed to the constructor
-    @return a parsed object
   */
-  Object& parse();
+  void parse(ParseCallbacks&);
 
 protected:
-  virtual HttpResponse&
+  virtual ::std::unique_ptr<HttpResponse>
   create_http_response(
-    YO_NEW_REF Buffer* body,
+    ::std::shared_ptr<Buffer> body,
     uint8_t http_version,
     uint16_t status_code
   ) {
-    return *new HttpResponse(body, http_version, status_code);
+    return ::std::unique_ptr<HttpResponse>(new HttpResponse(body, http_version, status_code));
   }
 
-  virtual HttpResponse&
+  virtual ::std::unique_ptr<HttpResponse>
   create_http_response(
-    YO_NEW_REF Buffer* body,
+    ::std::shared_ptr<Buffer> body,
     uint16_t fields_offset,
-    Buffer& header,
+    ::std::shared_ptr<Buffer> header,
     uint8_t http_version,
     uint16_t status_code
   ) {
-    return *new HttpResponse(
+    return ::std::unique_ptr<HttpResponse>(new HttpResponse(
              body,
              fields_offset,
              header,
              http_version,
              status_code
-           );
+           ));
   }
 
 protected:

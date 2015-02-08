@@ -45,7 +45,7 @@ public:
     Construct an HttpMessageBodyChunk with the given data.
     Steals the reference to data.
   */
-  HttpMessageBodyChunk(YO_NEW_REF Buffer* data)
+  HttpMessageBodyChunk(::std::shared_ptr<Buffer> data)
     : data_(data)
   { }
 
@@ -53,7 +53,6 @@ public:
     Destruct an HttpMessageBodyChunk, releasing its underlying buffer.
   */
   virtual ~HttpMessageBodyChunk() {
-    Buffer::dec_ref(data_);
   }
 
 public:
@@ -61,7 +60,7 @@ public:
     Get the chunk data.
     @return the chunk data
   */
-  Buffer* data() {
+  ::std::shared_ptr<Buffer>& data() {
     return data_;
   }
 
@@ -82,7 +81,7 @@ public:
   }
 
 private:
-  Buffer* data_;
+  ::std::shared_ptr<Buffer> data_;
 };
 }
 }

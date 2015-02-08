@@ -28,8 +28,8 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "yield/logging.hpp"
-#include "yield/http/server/http_connection.hpp"
-#include "yield/http/server/http_request_queue.hpp"
+#include "yield/http/server/http_server_connection.hpp"
+#include "yield/http/server/http_server_request_queue.hpp"
 #include "yield/sockets/tcp_socket.hpp"
 #include "yield/sockets/aio/accept_aiocb.hpp"
 #include "yield/sockets/aio/aio_queue.hpp"

@@ -1,5 +1,5 @@
 
-#line 1 "http_message_parser.rl"
+/* #line 1 "http_message_parser.rl" */
 // yield/http/http_message_parser.rl
 
 // Copyright (c) 2014 Minor Gordon
@@ -65,8 +65,8 @@ HttpMessageParser::HttpMessageParser(const ::std::string& buffer)
 
 bool
 HttpMessageParser::parse_body(
-  ParseCallbacks& callbacks,
-  size_t content_length
+  size_t content_length,
+  ::std::shared_ptr<Buffer>& out_body
 ) {
   if (
     content_length == 0
@@ -75,14 +75,14 @@ HttpMessageParser::parse_body(
  ) {
     return true;
   } else if (static_cast<size_t>(eof - p) >= content_length) {
-    callbacks.handle_http_message_body(::std::unique_ptr<Buffer>(Buffer::copy(p, content_length)));
+    out_body.swap(Buffer::copy(p, content_length));
     p += content_length;
     return true;
   } else
     return false;
 }
 
-void HttpMessageParser::parse_body_chunk() {
+void HttpMessageParser::parse_body_chunks(ParseCallbacks& callbacks) {
   const char* chunk_data_p = NULL;
   size_t chunk_size = 0;
   const char* chunk_size_p = NULL;
@@ -93,53 +93,82 @@ void HttpMessageParser::parse_body_chunk() {
   ps = p;
 
   
-#line 94 "http_message_parser.cpp"
+/* #line 94 "http_message_parser.cpp" */
 static const char _chunk_parser_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 1, 5, 1, 6, 1, 
-	8, 1, 9, 2, 0, 6, 2, 2, 
-	3, 2, 7, 5
+	8, 2, 0, 4, 2, 0, 6, 2, 
+	2, 3, 2, 6, 4, 2, 7, 5, 
+	3, 0, 6, 4
 };
 
 static const char _chunk_parser_cond_offsets[] = {
 	0, 0, 0, 0, 0, 1, 1, 1, 
-	1, 1, 1, 1, 2, 3, 4, 5, 
-	5, 6, 7, 7, 7, 8, 8, 8, 
-	8, 8, 8, 8, 8, 8, 8, 8, 
-	8, 8, 8, 8, 8, 8, 8, 8, 
-	8, 8, 8, 8, 8, 8, 8, 9, 
-	9
+	1, 2, 3, 4, 5, 5, 5, 5, 
+	5, 5, 5, 5, 5, 5, 5, 5, 
+	5, 5, 5, 5, 5, 5, 5, 5, 
+	5, 5, 5, 5, 5, 5, 5, 5, 
+	5, 5, 5, 5, 5, 6, 7, 7, 
+	8, 9, 10, 11, 11, 12, 13, 14, 
+	15, 16, 17, 18, 19, 20, 21, 21, 
+	22, 23, 24, 25, 26, 27, 28, 29, 
+	30, 31, 32, 33, 34, 34, 35, 36, 
+	37, 38, 39, 40, 40, 41, 42, 42, 
+	43
 };
 
 static const char _chunk_parser_cond_lengths[] = {
 	0, 0, 0, 0, 1, 0, 0, 0, 
-	0, 0, 0, 1, 1, 1, 1, 0, 
-	1, 1, 0, 0, 1, 0, 0, 0, 
+	1, 1, 1, 1, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 1, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 1, 1, 0, 1, 
+	1, 1, 1, 0, 1, 1, 1, 1, 
+	1, 1, 1, 1, 1, 1, 0, 1, 
+	1, 1, 1, 1, 1, 1, 1, 1, 
+	1, 1, 1, 1, 0, 1, 1, 1, 
+	1, 1, 1, 0, 1, 1, 0, 1, 
 	1
 };
 
 static const short _chunk_parser_cond_keys[] = {
 	0u, 255u, 0u, 255u, 0u, 255u, 0u, 255u, 
 	0u, 255u, 0u, 255u, 0u, 255u, 0u, 255u, 
-	0u, 255u, 0u, 255u, 0
+	0u, 255u, 0u, 255u, 0u, 255u, 0u, 255u, 
+	0u, 255u, 0u, 255u, 0u, 255u, 0u, 255u, 
+	0u, 255u, 0u, 255u, 0u, 255u, 0u, 255u, 
+	0u, 255u, 0u, 255u, 0u, 255u, 0u, 255u, 
+	0u, 255u, 0u, 255u, 0u, 255u, 0u, 255u, 
+	0u, 255u, 0u, 255u, 0u, 255u, 0u, 255u, 
+	0u, 255u, 0u, 255u, 0u, 255u, 0u, 255u, 
+	0u, 255u, 0u, 255u, 0u, 255u, 0u, 255u, 
+	0u, 255u, 0u, 255u, 0u, 255u, 0u, 255u, 
+	0
 };
 
 static const char _chunk_parser_cond_spaces[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0
 };
 
 static const short _chunk_parser_key_offsets[] = {
-	0, 0, 7, 15, 16, 54, 55, 70, 
-	75, 76, 91, 95, 99, 105, 145, 158, 
-	159, 165, 176, 184, 185, 189, 203, 220, 
-	235, 251, 272, 277, 279, 281, 288, 307, 
-	329, 347, 361, 378, 393, 409, 430, 435, 
-	437, 439, 446, 465, 487, 505, 505, 509, 
-	524
+	0, 0, 7, 15, 16, 54, 55, 63, 
+	64, 68, 72, 78, 102, 103, 118, 123, 
+	124, 139, 143, 166, 189, 203, 220, 235, 
+	251, 272, 277, 279, 281, 288, 307, 329, 
+	347, 361, 378, 393, 409, 430, 435, 437, 
+	439, 446, 465, 487, 505, 545, 558, 559, 
+	565, 621, 627, 683, 684, 708, 714, 752, 
+	794, 834, 874, 923, 938, 944, 954, 960, 
+	977, 994, 1041, 1092, 1137, 1175, 1217, 1257, 
+	1297, 1346, 1361, 1367, 1377, 1383, 1400, 1417, 
+	1464, 1515, 1560, 1571, 1578, 1602, 1656, 1678, 
+	1732
 };
 
 static const short _chunk_parser_trans_keys[] = {
@@ -149,24 +178,24 @@ static const short _chunk_parser_trans_keys[] = {
 	289u, 294u, 298u, 299u, 301u, 302u, 304u, 313u, 
 	321u, 346u, 350u, 378u, 512u, 544u, 545u, 550u, 
 	551u, 553u, 554u, 569u, 570u, 576u, 577u, 602u, 
-	603u, 605u, 606u, 638u, 639u, 767u, 10u, 58u, 
+	603u, 605u, 606u, 638u, 639u, 767u, 10u, 13u, 
+	59u, 48u, 57u, 65u, 70u, 97u, 102u, 10u, 
+	269u, 525u, 512u, 767u, 269u, 525u, 512u, 767u, 
+	266u, 269u, 522u, 525u, 512u, 767u, 269u, 315u, 
+	525u, 571u, 304u, 313u, 321u, 326u, 353u, 358u, 
+	512u, 559u, 560u, 569u, 570u, 576u, 577u, 582u, 
+	583u, 608u, 609u, 614u, 615u, 767u, 10u, 58u, 
 	124u, 126u, 33u, 38u, 42u, 43u, 45u, 46u, 
 	48u, 57u, 65u, 90u, 94u, 122u, 13u, 32u, 
 	127u, 0u, 31u, 10u, 13u, 124u, 126u, 33u, 
 	38u, 42u, 43u, 45u, 46u, 48u, 57u, 65u, 
-	90u, 94u, 122u, 13u, 127u, 0u, 31u, 269u, 
-	525u, 512u, 767u, 266u, 269u, 522u, 525u, 512u, 
-	767u, 269u, 314u, 380u, 382u, 525u, 556u, 559u, 
-	570u, 635u, 637u, 289u, 294u, 298u, 299u, 301u, 
-	302u, 304u, 313u, 321u, 346u, 350u, 378u, 512u, 
-	544u, 545u, 550u, 551u, 553u, 554u, 569u, 571u, 
-	576u, 577u, 602u, 603u, 605u, 606u, 638u, 639u, 
-	767u, 269u, 288u, 525u, 544u, 639u, 289u, 382u, 
-	384u, 511u, 512u, 543u, 545u, 767u, 10u, 266u, 
-	269u, 522u, 525u, 512u, 767u, 269u, 525u, 639u, 
-	288u, 382u, 384u, 511u, 512u, 543u, 544u, 767u, 
-	13u, 59u, 48u, 57u, 65u, 70u, 97u, 102u, 
-	10u, 269u, 525u, 512u, 767u, 124u, 126u, 33u, 
+	90u, 94u, 122u, 13u, 127u, 0u, 31u, 13u, 
+	58u, 59u, 124u, 126u, 33u, 38u, 42u, 43u, 
+	45u, 46u, 48u, 57u, 65u, 70u, 71u, 90u, 
+	94u, 96u, 97u, 102u, 103u, 122u, 13u, 58u, 
+	59u, 124u, 126u, 33u, 38u, 42u, 43u, 45u, 
+	46u, 48u, 57u, 65u, 70u, 71u, 90u, 94u, 
+	96u, 97u, 102u, 103u, 122u, 124u, 126u, 33u, 
 	38u, 42u, 43u, 45u, 46u, 48u, 57u, 65u, 
 	90u, 94u, 122u, 13u, 59u, 61u, 124u, 126u, 
 	33u, 38u, 42u, 43u, 45u, 46u, 48u, 57u, 
@@ -206,148 +235,419 @@ static const short _chunk_parser_trans_keys[] = {
 	46u, 48u, 57u, 65u, 90u, 94u, 122u, 92u, 
 	124u, 126u, 127u, 0u, 31u, 33u, 38u, 42u, 
 	43u, 45u, 46u, 48u, 57u, 65u, 90u, 94u, 
-	122u, 269u, 525u, 512u, 767u, 13u, 124u, 126u, 
-	33u, 38u, 42u, 43u, 45u, 46u, 48u, 57u, 
-	65u, 90u, 94u, 122u, 269u, 380u, 382u, 525u, 
+	122u, 269u, 314u, 380u, 382u, 525u, 556u, 559u, 
+	570u, 635u, 637u, 289u, 294u, 298u, 299u, 301u, 
+	302u, 304u, 313u, 321u, 346u, 350u, 378u, 512u, 
+	544u, 545u, 550u, 551u, 553u, 554u, 569u, 571u, 
+	576u, 577u, 602u, 603u, 605u, 606u, 638u, 639u, 
+	767u, 269u, 288u, 525u, 544u, 639u, 289u, 382u, 
+	384u, 511u, 512u, 543u, 545u, 767u, 10u, 266u, 
+	269u, 522u, 525u, 512u, 767u, 269u, 314u, 315u, 
+	380u, 382u, 525u, 556u, 559u, 570u, 571u, 635u, 
+	637u, 289u, 294u, 298u, 299u, 301u, 302u, 304u, 
+	313u, 321u, 326u, 327u, 346u, 350u, 352u, 353u, 
+	358u, 359u, 378u, 512u, 544u, 545u, 550u, 551u, 
+	553u, 554u, 558u, 560u, 569u, 572u, 576u, 577u, 
+	582u, 583u, 602u, 603u, 605u, 606u, 608u, 609u, 
+	614u, 615u, 638u, 639u, 767u, 266u, 269u, 522u, 
+	525u, 512u, 767u, 269u, 314u, 315u, 380u, 382u, 
+	525u, 556u, 559u, 570u, 571u, 635u, 637u, 289u, 
+	294u, 298u, 299u, 301u, 302u, 304u, 313u, 321u, 
+	326u, 327u, 346u, 350u, 352u, 353u, 358u, 359u, 
+	378u, 512u, 544u, 545u, 550u, 551u, 553u, 554u, 
+	558u, 560u, 569u, 572u, 576u, 577u, 582u, 583u, 
+	602u, 603u, 605u, 606u, 608u, 609u, 614u, 615u, 
+	638u, 639u, 767u, 10u, 269u, 315u, 525u, 571u, 
+	304u, 313u, 321u, 326u, 353u, 358u, 512u, 559u, 
+	560u, 569u, 570u, 576u, 577u, 582u, 583u, 608u, 
+	609u, 614u, 615u, 767u, 266u, 269u, 522u, 525u, 
+	512u, 767u, 269u, 380u, 382u, 525u, 556u, 559u, 
+	635u, 637u, 289u, 294u, 298u, 299u, 301u, 302u, 
+	304u, 313u, 321u, 346u, 350u, 378u, 512u, 544u, 
+	545u, 550u, 551u, 553u, 554u, 569u, 570u, 576u, 
+	577u, 602u, 603u, 605u, 606u, 638u, 639u, 767u, 
+	269u, 315u, 317u, 380u, 382u, 525u, 556u, 559u, 
+	571u, 573u, 635u, 637u, 289u, 294u, 298u, 299u, 
+	301u, 302u, 304u, 313u, 321u, 346u, 350u, 378u, 
+	512u, 544u, 545u, 550u, 551u, 553u, 554u, 569u, 
+	570u, 576u, 577u, 602u, 603u, 605u, 606u, 638u, 
+	639u, 767u, 269u, 290u, 380u, 382u, 525u, 546u, 
 	556u, 559u, 635u, 637u, 289u, 294u, 298u, 299u, 
 	301u, 302u, 304u, 313u, 321u, 346u, 350u, 378u, 
 	512u, 544u, 545u, 550u, 551u, 553u, 554u, 569u, 
 	570u, 576u, 577u, 602u, 603u, 605u, 606u, 638u, 
-	639u, 767u, 0
+	639u, 767u, 269u, 315u, 380u, 382u, 525u, 556u, 
+	559u, 571u, 635u, 637u, 289u, 294u, 298u, 299u, 
+	301u, 302u, 304u, 313u, 321u, 346u, 350u, 378u, 
+	512u, 544u, 545u, 550u, 551u, 553u, 554u, 569u, 
+	570u, 576u, 577u, 602u, 603u, 605u, 606u, 638u, 
+	639u, 767u, 269u, 288u, 290u, 300u, 303u, 315u, 
+	347u, 348u, 349u, 379u, 381u, 525u, 544u, 546u, 
+	556u, 559u, 571u, 603u, 604u, 605u, 635u, 637u, 
+	639u, 289u, 294u, 295u, 297u, 298u, 313u, 314u, 
+	320u, 321u, 382u, 384u, 511u, 512u, 543u, 545u, 
+	550u, 551u, 553u, 554u, 569u, 570u, 576u, 577u, 
+	638u, 640u, 767u, 269u, 290u, 348u, 525u, 546u, 
+	604u, 639u, 288u, 382u, 384u, 511u, 512u, 543u, 
+	544u, 767u, 269u, 315u, 525u, 571u, 512u, 767u, 
+	269u, 290u, 348u, 525u, 546u, 604u, 256u, 511u, 
+	512u, 767u, 10u, 34u, 92u, 127u, 0u, 31u, 
+	266u, 269u, 290u, 348u, 522u, 525u, 546u, 604u, 
+	639u, 288u, 382u, 384u, 511u, 512u, 543u, 544u, 
+	767u, 269u, 290u, 315u, 348u, 525u, 546u, 571u, 
+	604u, 639u, 288u, 382u, 384u, 511u, 512u, 543u, 
+	544u, 767u, 269u, 288u, 290u, 300u, 303u, 347u, 
+	348u, 349u, 379u, 381u, 525u, 544u, 546u, 556u, 
+	559u, 603u, 604u, 605u, 635u, 637u, 639u, 289u, 
+	294u, 295u, 297u, 298u, 313u, 314u, 320u, 321u, 
+	382u, 384u, 511u, 512u, 543u, 545u, 550u, 551u, 
+	553u, 554u, 569u, 570u, 576u, 577u, 638u, 640u, 
+	767u, 269u, 288u, 290u, 300u, 303u, 315u, 317u, 
+	347u, 348u, 349u, 379u, 381u, 525u, 544u, 546u, 
+	556u, 559u, 571u, 573u, 603u, 604u, 605u, 635u, 
+	637u, 639u, 289u, 294u, 295u, 297u, 298u, 313u, 
+	314u, 320u, 321u, 382u, 384u, 511u, 512u, 543u, 
+	545u, 550u, 551u, 553u, 554u, 569u, 570u, 576u, 
+	577u, 638u, 640u, 767u, 269u, 288u, 300u, 303u, 
+	347u, 348u, 349u, 379u, 381u, 525u, 544u, 556u, 
+	559u, 603u, 604u, 605u, 635u, 637u, 639u, 289u, 
+	294u, 295u, 297u, 298u, 313u, 314u, 320u, 321u, 
+	382u, 384u, 511u, 512u, 543u, 545u, 550u, 551u, 
+	553u, 554u, 569u, 570u, 576u, 577u, 638u, 640u, 
+	767u, 269u, 380u, 382u, 525u, 556u, 559u, 635u, 
+	637u, 289u, 294u, 298u, 299u, 301u, 302u, 304u, 
+	313u, 321u, 346u, 350u, 378u, 512u, 544u, 545u, 
+	550u, 551u, 553u, 554u, 569u, 570u, 576u, 577u, 
+	602u, 603u, 605u, 606u, 638u, 639u, 767u, 269u, 
+	315u, 317u, 380u, 382u, 525u, 556u, 559u, 571u, 
+	573u, 635u, 637u, 289u, 294u, 298u, 299u, 301u, 
+	302u, 304u, 313u, 321u, 346u, 350u, 378u, 512u, 
+	544u, 545u, 550u, 551u, 553u, 554u, 569u, 570u, 
+	576u, 577u, 602u, 603u, 605u, 606u, 638u, 639u, 
+	767u, 269u, 290u, 380u, 382u, 525u, 546u, 556u, 
+	559u, 635u, 637u, 289u, 294u, 298u, 299u, 301u, 
+	302u, 304u, 313u, 321u, 346u, 350u, 378u, 512u, 
+	544u, 545u, 550u, 551u, 553u, 554u, 569u, 570u, 
+	576u, 577u, 602u, 603u, 605u, 606u, 638u, 639u, 
+	767u, 269u, 315u, 380u, 382u, 525u, 556u, 559u, 
+	571u, 635u, 637u, 289u, 294u, 298u, 299u, 301u, 
+	302u, 304u, 313u, 321u, 346u, 350u, 378u, 512u, 
+	544u, 545u, 550u, 551u, 553u, 554u, 569u, 570u, 
+	576u, 577u, 602u, 603u, 605u, 606u, 638u, 639u, 
+	767u, 269u, 288u, 290u, 300u, 303u, 315u, 347u, 
+	348u, 349u, 379u, 381u, 525u, 544u, 546u, 556u, 
+	559u, 571u, 603u, 604u, 605u, 635u, 637u, 639u, 
+	289u, 294u, 295u, 297u, 298u, 313u, 314u, 320u, 
+	321u, 382u, 384u, 511u, 512u, 543u, 545u, 550u, 
+	551u, 553u, 554u, 569u, 570u, 576u, 577u, 638u, 
+	640u, 767u, 269u, 290u, 348u, 525u, 546u, 604u, 
+	639u, 288u, 382u, 384u, 511u, 512u, 543u, 544u, 
+	767u, 269u, 315u, 525u, 571u, 512u, 767u, 269u, 
+	290u, 348u, 525u, 546u, 604u, 256u, 511u, 512u, 
+	767u, 10u, 34u, 92u, 127u, 0u, 31u, 266u, 
+	269u, 290u, 348u, 522u, 525u, 546u, 604u, 639u, 
+	288u, 382u, 384u, 511u, 512u, 543u, 544u, 767u, 
+	269u, 290u, 315u, 348u, 525u, 546u, 571u, 604u, 
+	639u, 288u, 382u, 384u, 511u, 512u, 543u, 544u, 
+	767u, 269u, 288u, 290u, 300u, 303u, 347u, 348u, 
+	349u, 379u, 381u, 525u, 544u, 546u, 556u, 559u, 
+	603u, 604u, 605u, 635u, 637u, 639u, 289u, 294u, 
+	295u, 297u, 298u, 313u, 314u, 320u, 321u, 382u, 
+	384u, 511u, 512u, 543u, 545u, 550u, 551u, 553u, 
+	554u, 569u, 570u, 576u, 577u, 638u, 640u, 767u, 
+	269u, 288u, 290u, 300u, 303u, 315u, 317u, 347u, 
+	348u, 349u, 379u, 381u, 525u, 544u, 546u, 556u, 
+	559u, 571u, 573u, 603u, 604u, 605u, 635u, 637u, 
+	639u, 289u, 294u, 295u, 297u, 298u, 313u, 314u, 
+	320u, 321u, 382u, 384u, 511u, 512u, 543u, 545u, 
+	550u, 551u, 553u, 554u, 569u, 570u, 576u, 577u, 
+	638u, 640u, 767u, 269u, 288u, 300u, 303u, 347u, 
+	348u, 349u, 379u, 381u, 525u, 544u, 556u, 559u, 
+	603u, 604u, 605u, 635u, 637u, 639u, 289u, 294u, 
+	295u, 297u, 298u, 313u, 314u, 320u, 321u, 382u, 
+	384u, 511u, 512u, 543u, 545u, 550u, 551u, 553u, 
+	554u, 569u, 570u, 576u, 577u, 638u, 640u, 767u, 
+	269u, 525u, 639u, 288u, 382u, 384u, 511u, 512u, 
+	543u, 544u, 767u, 48u, 49u, 57u, 65u, 70u, 
+	97u, 102u, 269u, 304u, 525u, 560u, 305u, 313u, 
+	321u, 326u, 353u, 358u, 512u, 559u, 561u, 569u, 
+	570u, 576u, 577u, 582u, 583u, 608u, 609u, 614u, 
+	615u, 767u, 269u, 304u, 380u, 382u, 525u, 556u, 
+	559u, 560u, 635u, 637u, 289u, 294u, 298u, 299u, 
+	301u, 302u, 305u, 313u, 321u, 326u, 327u, 346u, 
+	350u, 352u, 353u, 358u, 359u, 378u, 512u, 544u, 
+	545u, 550u, 551u, 553u, 554u, 558u, 561u, 569u, 
+	570u, 576u, 577u, 582u, 583u, 602u, 603u, 605u, 
+	606u, 608u, 609u, 614u, 615u, 638u, 639u, 767u, 
+	13u, 48u, 124u, 126u, 33u, 38u, 42u, 43u, 
+	45u, 46u, 49u, 57u, 65u, 70u, 71u, 90u, 
+	94u, 96u, 97u, 102u, 103u, 122u, 269u, 304u, 
+	380u, 382u, 525u, 556u, 559u, 560u, 635u, 637u, 
+	289u, 294u, 298u, 299u, 301u, 302u, 305u, 313u, 
+	321u, 326u, 327u, 346u, 350u, 352u, 353u, 358u, 
+	359u, 378u, 512u, 544u, 545u, 550u, 551u, 553u, 
+	554u, 558u, 561u, 569u, 570u, 576u, 577u, 582u, 
+	583u, 602u, 603u, 605u, 606u, 608u, 609u, 614u, 
+	615u, 638u, 639u, 767u, 269u, 304u, 525u, 560u, 
+	305u, 313u, 321u, 326u, 353u, 358u, 512u, 559u, 
+	561u, 569u, 570u, 576u, 577u, 582u, 583u, 608u, 
+	609u, 614u, 615u, 767u, 0
 };
 
 static const char _chunk_parser_single_lengths[] = {
-	0, 1, 2, 1, 8, 1, 3, 3, 
-	1, 3, 2, 2, 4, 10, 5, 1, 
-	4, 3, 2, 1, 2, 2, 5, 3, 
-	4, 7, 3, 2, 2, 5, 5, 8, 
-	4, 2, 5, 3, 4, 7, 3, 2, 
-	2, 5, 5, 8, 4, 0, 2, 3, 
-	8
+	0, 1, 2, 1, 8, 1, 2, 1, 
+	2, 2, 4, 4, 1, 3, 3, 1, 
+	3, 2, 5, 5, 2, 5, 3, 4, 
+	7, 3, 2, 2, 5, 5, 8, 4, 
+	2, 5, 3, 4, 7, 3, 2, 2, 
+	5, 5, 8, 4, 10, 5, 1, 4, 
+	12, 4, 12, 1, 4, 4, 8, 12, 
+	10, 10, 23, 7, 4, 6, 4, 9, 
+	9, 21, 25, 19, 8, 12, 10, 10, 
+	23, 7, 4, 6, 4, 9, 9, 21, 
+	25, 19, 3, 1, 4, 10, 4, 10, 
+	4
 };
 
 static const char _chunk_parser_range_lengths[] = {
-	0, 3, 3, 0, 15, 0, 6, 1, 
-	0, 6, 1, 1, 1, 15, 4, 0, 
-	1, 4, 3, 0, 1, 6, 6, 6, 
-	6, 7, 1, 0, 0, 1, 7, 7, 
-	7, 6, 6, 6, 6, 7, 1, 0, 
-	0, 1, 7, 7, 7, 0, 1, 6, 
-	15
+	0, 3, 3, 0, 15, 0, 3, 0, 
+	1, 1, 1, 10, 0, 6, 1, 0, 
+	6, 1, 9, 9, 6, 6, 6, 6, 
+	7, 1, 0, 0, 1, 7, 7, 7, 
+	6, 6, 6, 6, 7, 1, 0, 0, 
+	1, 7, 7, 7, 15, 4, 0, 1, 
+	22, 1, 22, 0, 10, 1, 15, 15, 
+	15, 15, 13, 4, 1, 2, 1, 4, 
+	4, 13, 13, 13, 15, 15, 15, 15, 
+	13, 4, 1, 2, 1, 4, 4, 13, 
+	13, 13, 4, 3, 10, 22, 9, 22, 
+	10
 };
 
 static const short _chunk_parser_index_offsets[] = {
-	0, 0, 5, 11, 13, 37, 39, 49, 
-	54, 56, 66, 70, 74, 80, 106, 116, 
-	118, 124, 132, 138, 140, 144, 153, 165, 
-	175, 186, 201, 206, 209, 212, 219, 232, 
-	248, 260, 269, 281, 291, 302, 317, 322, 
-	325, 328, 335, 348, 364, 376, 377, 381, 
-	391
+	0, 0, 5, 11, 13, 37, 39, 45, 
+	47, 51, 55, 61, 76, 78, 88, 93, 
+	95, 105, 109, 124, 139, 148, 160, 170, 
+	181, 196, 201, 204, 207, 214, 227, 243, 
+	255, 264, 276, 286, 297, 312, 317, 320, 
+	323, 330, 343, 359, 371, 397, 407, 409, 
+	415, 450, 456, 491, 493, 508, 514, 538, 
+	566, 592, 618, 655, 667, 673, 682, 688, 
+	702, 716, 751, 790, 823, 847, 875, 901, 
+	927, 964, 976, 982, 991, 997, 1011, 1025, 
+	1060, 1099, 1132, 1140, 1145, 1160, 1193, 1207, 
+	1240
 };
 
 static const char _chunk_parser_indicies[] = {
-	1, 2, 2, 2, 0, 3, 5, 4, 
-	4, 4, 0, 6, 0, 7, 8, 8, 
+	0, 2, 2, 2, 1, 3, 5, 4, 
+	4, 4, 1, 6, 1, 7, 8, 8, 
 	10, 9, 9, 9, 9, 8, 8, 8, 
 	8, 8, 8, 9, 11, 9, 11, 9, 
-	11, 9, 11, 9, 0, 12, 0, 14, 
-	13, 13, 13, 13, 13, 13, 13, 13, 
-	0, 15, 16, 0, 0, 17, 18, 0, 
-	19, 8, 8, 8, 8, 8, 8, 8, 
-	8, 0, 20, 0, 0, 21, 19, 23, 
-	22, 0, 12, 19, 24, 23, 22, 0, 
-	19, 14, 13, 13, 23, 22, 22, 26, 
-	22, 22, 13, 13, 13, 13, 13, 13, 
-	22, 25, 22, 25, 22, 25, 22, 25, 
-	22, 0, 27, 16, 28, 29, 22, 17, 
-	17, 22, 30, 0, 31, 0, 31, 19, 
-	32, 23, 22, 0, 33, 34, 22, 21, 
-	21, 22, 35, 0, 36, 37, 4, 4, 
-	4, 0, 38, 0, 7, 10, 9, 0, 
-	39, 39, 39, 39, 39, 39, 39, 39, 
-	0, 40, 41, 42, 39, 39, 39, 39, 
-	39, 39, 39, 39, 0, 44, 43, 43, 
-	43, 43, 43, 43, 43, 43, 0, 40, 
-	41, 43, 43, 43, 43, 43, 43, 43, 
-	43, 0, 40, 43, 46, 47, 44, 44, 
-	0, 0, 44, 44, 44, 44, 44, 44, 
-	45, 48, 47, 0, 0, 45, 40, 41, 
-	0, 49, 47, 45, 40, 48, 46, 47, 
-	0, 0, 45, 39, 47, 50, 50, 0, 
-	0, 50, 50, 50, 50, 50, 50, 45, 
-	40, 39, 46, 51, 47, 50, 50, 0, 
-	0, 50, 50, 50, 50, 50, 50, 45, 
-	47, 44, 44, 0, 0, 44, 44, 44, 
-	44, 44, 44, 45, 52, 52, 52, 52, 
-	52, 52, 52, 52, 0, 53, 54, 55, 
-	52, 52, 52, 52, 52, 52, 52, 52, 
-	0, 57, 56, 56, 56, 56, 56, 56, 
-	56, 56, 0, 53, 54, 56, 56, 56, 
-	56, 56, 56, 56, 56, 0, 53, 56, 
-	59, 60, 57, 57, 0, 0, 57, 57, 
-	57, 57, 57, 57, 58, 61, 60, 0, 
-	0, 58, 53, 54, 0, 62, 60, 58, 
-	53, 61, 59, 60, 0, 0, 58, 52, 
-	60, 63, 63, 0, 0, 63, 63, 63, 
-	63, 63, 63, 58, 53, 52, 59, 64, 
-	60, 63, 63, 0, 0, 63, 63, 63, 
-	63, 63, 63, 58, 60, 57, 57, 0, 
-	0, 57, 57, 57, 57, 57, 57, 58, 
-	0, 19, 23, 22, 0, 19, 8, 8, 
-	8, 8, 8, 8, 8, 8, 0, 19, 
-	8, 8, 23, 22, 22, 22, 22, 8, 
-	8, 8, 8, 8, 8, 22, 65, 22, 
-	65, 22, 65, 22, 65, 22, 0, 0
+	11, 9, 11, 9, 1, 12, 1, 13, 
+	14, 4, 4, 4, 1, 15, 1, 7, 
+	10, 9, 1, 16, 18, 17, 1, 12, 
+	16, 19, 18, 17, 1, 20, 5, 21, 
+	23, 4, 4, 4, 17, 22, 17, 22, 
+	17, 22, 17, 1, 24, 1, 26, 25, 
+	25, 25, 25, 25, 25, 25, 25, 1, 
+	27, 28, 1, 1, 29, 30, 1, 16, 
+	8, 8, 8, 8, 8, 8, 8, 8, 
+	1, 31, 1, 1, 32, 3, 26, 5, 
+	25, 25, 25, 25, 25, 33, 33, 25, 
+	25, 33, 25, 1, 13, 26, 14, 25, 
+	25, 25, 25, 25, 33, 33, 25, 25, 
+	33, 25, 1, 34, 34, 34, 34, 34, 
+	34, 34, 34, 1, 35, 36, 37, 34, 
+	34, 34, 34, 34, 34, 34, 34, 1, 
+	39, 38, 38, 38, 38, 38, 38, 38, 
+	38, 1, 35, 36, 38, 38, 38, 38, 
+	38, 38, 38, 38, 1, 35, 38, 41, 
+	42, 39, 39, 1, 1, 39, 39, 39, 
+	39, 39, 39, 40, 43, 42, 1, 1, 
+	40, 35, 36, 1, 44, 42, 40, 35, 
+	43, 41, 42, 1, 1, 40, 34, 42, 
+	45, 45, 1, 1, 45, 45, 45, 45, 
+	45, 45, 40, 35, 34, 41, 46, 42, 
+	45, 45, 1, 1, 45, 45, 45, 45, 
+	45, 45, 40, 42, 39, 39, 1, 1, 
+	39, 39, 39, 39, 39, 39, 40, 47, 
+	47, 47, 47, 47, 47, 47, 47, 1, 
+	48, 49, 50, 47, 47, 47, 47, 47, 
+	47, 47, 47, 1, 52, 51, 51, 51, 
+	51, 51, 51, 51, 51, 1, 48, 49, 
+	51, 51, 51, 51, 51, 51, 51, 51, 
+	1, 48, 51, 54, 55, 52, 52, 1, 
+	1, 52, 52, 52, 52, 52, 52, 53, 
+	56, 55, 1, 1, 53, 48, 49, 1, 
+	57, 55, 53, 48, 56, 54, 55, 1, 
+	1, 53, 47, 55, 58, 58, 1, 1, 
+	58, 58, 58, 58, 58, 58, 53, 48, 
+	47, 54, 59, 55, 58, 58, 1, 1, 
+	58, 58, 58, 58, 58, 58, 53, 55, 
+	52, 52, 1, 1, 52, 52, 52, 52, 
+	52, 52, 53, 16, 26, 25, 25, 18, 
+	17, 17, 61, 17, 17, 25, 25, 25, 
+	25, 25, 25, 17, 60, 17, 60, 17, 
+	60, 17, 60, 17, 1, 62, 28, 63, 
+	64, 17, 29, 29, 17, 65, 1, 66, 
+	1, 66, 16, 67, 18, 17, 1, 20, 
+	26, 5, 25, 25, 21, 17, 17, 61, 
+	23, 17, 17, 25, 25, 25, 33, 33, 
+	25, 25, 33, 25, 17, 60, 17, 60, 
+	68, 17, 68, 60, 17, 60, 68, 60, 
+	17, 1, 24, 16, 24, 18, 17, 1, 
+	69, 26, 14, 25, 25, 70, 17, 17, 
+	61, 71, 17, 17, 25, 25, 25, 33, 
+	33, 25, 25, 33, 25, 17, 60, 17, 
+	60, 68, 17, 68, 60, 17, 60, 68, 
+	60, 17, 1, 72, 1, 69, 14, 70, 
+	71, 4, 4, 4, 17, 22, 17, 22, 
+	17, 22, 17, 1, 72, 16, 72, 18, 
+	17, 1, 16, 34, 34, 18, 17, 17, 
+	17, 17, 34, 34, 34, 34, 34, 34, 
+	17, 73, 17, 73, 17, 73, 17, 73, 
+	17, 1, 74, 36, 37, 34, 34, 75, 
+	17, 17, 76, 77, 17, 17, 34, 34, 
+	34, 34, 34, 34, 17, 73, 17, 73, 
+	17, 73, 17, 73, 17, 1, 16, 39, 
+	38, 38, 18, 79, 17, 17, 17, 17, 
+	38, 38, 38, 38, 38, 38, 17, 78, 
+	17, 78, 17, 78, 17, 78, 17, 1, 
+	74, 36, 38, 38, 75, 17, 17, 76, 
+	17, 17, 38, 38, 38, 38, 38, 38, 
+	17, 78, 17, 78, 17, 78, 17, 78, 
+	17, 1, 74, 40, 38, 40, 40, 41, 
+	40, 42, 40, 40, 40, 75, 80, 78, 
+	80, 80, 81, 80, 82, 80, 80, 80, 
+	17, 39, 40, 39, 40, 39, 40, 17, 
+	79, 80, 79, 80, 79, 80, 1, 16, 
+	43, 42, 18, 83, 82, 17, 40, 40, 
+	17, 80, 1, 74, 36, 75, 76, 17, 
+	1, 84, 44, 42, 85, 86, 82, 40, 
+	80, 1, 12, 43, 42, 1, 1, 40, 
+	12, 16, 43, 42, 19, 18, 83, 82, 
+	17, 40, 40, 17, 80, 1, 74, 43, 
+	41, 42, 75, 83, 81, 82, 17, 40, 
+	40, 17, 80, 1, 16, 40, 34, 40, 
+	40, 40, 42, 40, 40, 40, 18, 80, 
+	73, 80, 80, 80, 82, 80, 80, 80, 
+	17, 45, 40, 45, 40, 45, 40, 17, 
+	87, 80, 87, 80, 87, 80, 1, 74, 
+	40, 34, 40, 40, 41, 46, 40, 42, 
+	40, 40, 40, 75, 80, 73, 80, 80, 
+	81, 88, 80, 82, 80, 80, 80, 17, 
+	45, 40, 45, 40, 45, 40, 17, 87, 
+	80, 87, 80, 87, 80, 1, 16, 40, 
+	40, 40, 40, 42, 40, 40, 40, 18, 
+	80, 80, 80, 80, 82, 80, 80, 80, 
+	17, 39, 40, 39, 40, 39, 40, 17, 
+	79, 80, 79, 80, 79, 80, 1, 16, 
+	47, 47, 18, 17, 17, 17, 17, 47, 
+	47, 47, 47, 47, 47, 17, 89, 17, 
+	89, 17, 89, 17, 89, 17, 1, 90, 
+	49, 50, 47, 47, 91, 17, 17, 92, 
+	93, 17, 17, 47, 47, 47, 47, 47, 
+	47, 17, 89, 17, 89, 17, 89, 17, 
+	89, 17, 1, 16, 52, 51, 51, 18, 
+	95, 17, 17, 17, 17, 51, 51, 51, 
+	51, 51, 51, 17, 94, 17, 94, 17, 
+	94, 17, 94, 17, 1, 90, 49, 51, 
+	51, 91, 17, 17, 92, 17, 17, 51, 
+	51, 51, 51, 51, 51, 17, 94, 17, 
+	94, 17, 94, 17, 94, 17, 1, 90, 
+	53, 51, 53, 53, 54, 53, 55, 53, 
+	53, 53, 91, 96, 94, 96, 96, 97, 
+	96, 98, 96, 96, 96, 17, 52, 53, 
+	52, 53, 52, 53, 17, 95, 96, 95, 
+	96, 95, 96, 1, 16, 56, 55, 18, 
+	99, 98, 17, 53, 53, 17, 96, 1, 
+	90, 49, 91, 92, 17, 1, 100, 57, 
+	55, 101, 102, 98, 53, 96, 1, 12, 
+	56, 55, 1, 1, 53, 12, 16, 56, 
+	55, 19, 18, 99, 98, 17, 53, 53, 
+	17, 96, 1, 90, 56, 54, 55, 91, 
+	99, 97, 98, 17, 53, 53, 17, 96, 
+	1, 16, 53, 47, 53, 53, 53, 55, 
+	53, 53, 53, 18, 96, 89, 96, 96, 
+	96, 98, 96, 96, 96, 17, 58, 53, 
+	58, 53, 58, 53, 17, 103, 96, 103, 
+	96, 103, 96, 1, 90, 53, 47, 53, 
+	53, 54, 59, 53, 55, 53, 53, 53, 
+	91, 96, 89, 96, 96, 97, 104, 96, 
+	98, 96, 96, 96, 17, 58, 53, 58, 
+	53, 58, 53, 17, 103, 96, 103, 96, 
+	103, 96, 1, 16, 53, 53, 53, 53, 
+	55, 53, 53, 53, 18, 96, 96, 96, 
+	96, 98, 96, 96, 96, 17, 52, 53, 
+	52, 53, 52, 53, 17, 95, 96, 95, 
+	96, 95, 96, 1, 105, 106, 17, 32, 
+	32, 17, 107, 1, 0, 2, 2, 2, 
+	1, 16, 0, 18, 108, 2, 2, 2, 
+	17, 109, 17, 109, 17, 109, 17, 1, 
+	7, 110, 8, 8, 10, 9, 9, 112, 
+	9, 9, 8, 8, 8, 111, 111, 8, 
+	8, 111, 8, 9, 11, 9, 11, 113, 
+	9, 113, 11, 9, 11, 113, 11, 9, 
+	1, 16, 110, 8, 8, 8, 8, 8, 
+	111, 111, 8, 8, 111, 8, 1, 16, 
+	110, 8, 8, 18, 17, 17, 115, 17, 
+	17, 8, 8, 8, 111, 111, 8, 8, 
+	111, 8, 17, 114, 17, 114, 116, 17, 
+	116, 114, 17, 114, 116, 114, 17, 1, 
+	7, 0, 10, 117, 2, 2, 2, 9, 
+	118, 9, 118, 9, 118, 9, 1, 0
 };
 
 static const char _chunk_parser_trans_targs[] = {
-	0, 2, 18, 3, 18, 33, 4, 5, 
-	6, 11, 12, 13, 45, 6, 7, 8, 
-	7, 10, 9, 5, 8, 10, 11, 12, 
-	46, 13, 14, 15, 16, 14, 17, 47, 
-	48, 15, 16, 17, 19, 21, 20, 22, 
-	19, 21, 23, 24, 25, 26, 30, 28, 
-	27, 29, 31, 32, 34, 3, 33, 35, 
-	36, 37, 38, 42, 40, 39, 41, 43, 
-	44, 13
+	2, 0, 6, 3, 6, 32, 4, 5, 
+	13, 9, 10, 44, 83, 7, 20, 8, 
+	5, 9, 10, 84, 12, 49, 52, 68, 
+	85, 13, 14, 15, 14, 17, 16, 15, 
+	17, 19, 21, 7, 20, 22, 23, 24, 
+	25, 29, 27, 26, 28, 30, 31, 33, 
+	3, 32, 34, 35, 36, 37, 41, 39, 
+	38, 40, 42, 43, 44, 45, 46, 47, 
+	45, 82, 86, 87, 50, 51, 53, 54, 
+	88, 55, 51, 53, 54, 56, 57, 58, 
+	59, 65, 61, 60, 62, 63, 64, 66, 
+	67, 69, 12, 49, 68, 70, 71, 72, 
+	73, 79, 75, 74, 76, 77, 78, 80, 
+	81, 46, 47, 82, 11, 52, 18, 19, 
+	48, 50, 44, 48, 50, 11, 52
 };
 
 static const char _chunk_parser_trans_actions[] = {
-	17, 9, 9, 25, 0, 25, 0, 13, 
-	1, 13, 13, 19, 15, 0, 3, 22, 
-	5, 5, 0, 0, 7, 0, 0, 0, 
-	15, 0, 3, 22, 22, 5, 5, 15, 
-	15, 7, 7, 0, 11, 11, 0, 0, 
+	9, 0, 9, 29, 0, 29, 0, 13, 
+	1, 13, 13, 20, 15, 11, 11, 0, 
+	0, 0, 0, 15, 29, 29, 0, 29, 
+	15, 0, 3, 23, 5, 5, 0, 7, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 1
-};
-
-static const char _chunk_parser_eof_actions[] = {
-	0, 17, 17, 17, 17, 17, 17, 17, 
-	17, 17, 17, 17, 17, 17, 17, 17, 
-	17, 17, 17, 17, 17, 17, 17, 17, 
-	17, 17, 17, 17, 17, 17, 17, 17, 
-	17, 17, 17, 17, 17, 17, 17, 17, 
-	17, 17, 17, 17, 17, 0, 0, 0, 
-	0
+	0, 0, 0, 0, 0, 3, 23, 23, 
+	5, 5, 15, 15, 0, 11, 11, 11, 
+	15, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 7, 7, 0, 9, 9, 17, 17, 
+	32, 32, 1, 17, 17, 26, 26
 };
 
 static const int chunk_parser_start = 1;
-static const int chunk_parser_first_final = 45;
+static const int chunk_parser_first_final = 83;
 static const int chunk_parser_error = 0;
 
 static const int chunk_parser_en_main = 1;
 
 
-#line 341 "http_message_parser.cpp"
+/* #line 641 "http_message_parser.cpp" */
 	{
 	cs = chunk_parser_start;
 	}
 
-#line 344 "http_message_parser.cpp"
+/* #line 644 "http_message_parser.cpp" */
 	{
 	int _klen;
 	unsigned int _trans;
@@ -380,7 +680,7 @@ _resume:
 	case 0: {
 		_widec = (short)(256u + ((*p) - 0u));
 		if ( 
-#line 100 "rfc2616.rl"
+/* #line 100 "rfc2616.rl" */
  seen_chunk_size++ < chunk_size  ) _widec += 256;
 		break;
 	}
@@ -452,27 +752,27 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_name.iov_base = p; }
 	break;
 	case 1:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_name.iov_len = p - static_cast<char*>(field_name.iov_base); }
 	break;
 	case 2:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_value.iov_base = p; }
 	break;
 	case 3:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_value.iov_len = p - static_cast<char*>(field_value.iov_base); }
 	break;
 	case 4:
-#line 84 "rfc2616.rl"
+/* #line 84 "rfc2616.rl" */
 	{ chunk_size_p = p; }
 	break;
 	case 5:
-#line 86 "rfc2616.rl"
+/* #line 86 "rfc2616.rl" */
 	{
                  char* chunk_size_pe = p;
                  chunk_size
@@ -482,22 +782,29 @@ _match:
                }
 	break;
 	case 6:
-#line 101 "rfc2616.rl"
+/* #line 101 "rfc2616.rl" */
 	{ chunk_data_p = p; }
 	break;
 	case 7:
-#line 107 "rfc2616.rl"
+/* #line 107 "rfc2616.rl" */
 	{ chunk_size = 0; }
 	break;
 	case 8:
-#line 100 "http_message_parser.rl"
-	{ {p++; goto _out; } }
+/* #line 99 "http_message_parser.rl" */
+	{
+    if (chunk_size > 0) {
+      // Cut off the chunk size + extension + CRLF before
+      // the chunk data and the CRLF after
+      callbacks.handle_http_message_body_chunk(
+	    create_http_message_body_chunk(Buffer::copy(chunk_data_p, p - chunk_data_p - 2))
+	   );
+    } else { // Last chunk
+      callbacks.handle_http_message_body_chunk(create_http_message_body_chunk(NULL));
+      return;
+	}
+    }
 	break;
-	case 9:
-#line 101 "http_message_parser.rl"
-	{ return NULL; }
-	break;
-#line 482 "http_message_parser.cpp"
+/* #line 790 "http_message_parser.cpp" */
 		}
 	}
 
@@ -506,41 +813,15 @@ _again:
 		goto _out;
 	p += 1;
 	goto _resume;
-	if ( p == eof )
-	{
-	const char *__acts = _chunk_parser_actions + _chunk_parser_eof_actions[cs];
-	unsigned int __nacts = (unsigned int) *__acts++;
-	while ( __nacts-- > 0 ) {
-		switch ( *__acts++ ) {
-	case 9:
-#line 101 "http_message_parser.rl"
-	{ return NULL; }
-	break;
-#line 499 "http_message_parser.cpp"
-		}
-	}
-	}
-
 	_out: {}
 	}
 
-#line 106 "http_message_parser.rl"
+/* #line 116 "http_message_parser.rl" */
 
 
-  if (cs != chunk_parser_error) {
-    if (chunk_size > 0) {
-      // Cut off the chunk size + extension + CRLF before
-      // the chunk data and the CRLF after
-      callbacks.handle_http_message_body_chunk(
-	    create_http_message_body_chunk(
-          ::std::shared_ptr<Buffer>(Buffer::copy(chunk_data_p, p - chunk_data_p - 2))
-        )
-	   );
-    } else { // Last chunk
-      callbacks.handle_http_message_body_chunk(create_http_message_body_chunk(NULL));
-	}
-  } else if (p == eof && chunk_size != 0) {
-    callbacks.read(::std::unique_ptr<Buffer>(new Buffer(chunk_size + 2))); // Assumes no trailers.
+  CHECK(cs == chunk_parser_error);
+  if (p == eof && chunk_size != 0) {
+    callbacks.read(::std::make_shared<Buffer>(chunk_size + 2)); // Assumes no trailers.
   }
 }
 
@@ -558,7 +839,7 @@ HttpMessageParser::parse_content_length_field(
   // Don't look for the trailing CRLF before the body,
   // since it may not be present yet.
   
-#line 537 "http_message_parser.cpp"
+/* #line 821 "http_message_parser.cpp" */
 static const char _content_length_field_parser_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 2, 2, 3
@@ -612,12 +893,12 @@ static const int content_length_field_parser_error = 0;
 static const int content_length_field_parser_en_main = 5;
 
 
-#line 589 "http_message_parser.cpp"
+/* #line 873 "http_message_parser.cpp" */
 	{
 	cs = content_length_field_parser_start;
 	}
 
-#line 592 "http_message_parser.cpp"
+/* #line 876 "http_message_parser.cpp" */
 	{
 	int _klen;
 	unsigned int _trans;
@@ -692,23 +973,23 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_name.iov_base = p; }
 	break;
 	case 1:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_name.iov_len = p - static_cast<char*>(field_name.iov_base); }
 	break;
 	case 2:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_value.iov_base = p; }
 	break;
 	case 3:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_value.iov_len = p - static_cast<char*>(field_value.iov_base); }
 	break;
 	case 4:
-#line 145 "http_message_parser.rl"
+/* #line 144 "http_message_parser.rl" */
 	{
         if (
           parse_content_length_field(
@@ -720,7 +1001,7 @@ _match:
           return true;
       }
 	break;
-#line 689 "http_message_parser.cpp"
+/* #line 973 "http_message_parser.cpp" */
 		}
 	}
 
@@ -733,7 +1014,7 @@ _again:
 	_out: {}
 	}
 
-#line 160 "http_message_parser.rl"
+/* #line 159 "http_message_parser.rl" */
 
 
   return false;
@@ -791,7 +1072,7 @@ DateTime HttpMessageParser::parse_date(const char* ps, const char* pe) {
   int day = 0, month = 0, year = 0;
 
   
-#line 756 "http_message_parser.cpp"
+/* #line 1040 "http_message_parser.cpp" */
 static const char _date_parser_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 1, 5, 1, 6, 1, 
@@ -1017,12 +1298,12 @@ static const int date_parser_error = 0;
 static const int date_parser_en_main = 1;
 
 
-#line 980 "http_message_parser.cpp"
+/* #line 1264 "http_message_parser.cpp" */
 	{
 	cs = date_parser_start;
 	}
 
-#line 983 "http_message_parser.cpp"
+/* #line 1267 "http_message_parser.cpp" */
 	{
 	int _klen;
 	unsigned int _trans;
@@ -1097,27 +1378,27 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-#line 35 "rfc2616.rl"
+/* #line 35 "rfc2616.rl" */
 	{ hour = atoi(p); }
 	break;
 	case 1:
-#line 36 "rfc2616.rl"
+/* #line 36 "rfc2616.rl" */
 	{ minute = atoi(p); }
 	break;
 	case 2:
-#line 37 "rfc2616.rl"
+/* #line 37 "rfc2616.rl" */
 	{ second = atoi(p); }
 	break;
 	case 3:
-#line 39 "rfc2616.rl"
+/* #line 39 "rfc2616.rl" */
 	{ day = atoi(p); }
 	break;
 	case 4:
-#line 40 "rfc2616.rl"
+/* #line 40 "rfc2616.rl" */
 	{ day = atoi(p); }
 	break;
 	case 5:
-#line 47 "rfc2616.rl"
+/* #line 47 "rfc2616.rl" */
 	{
             switch (*(p - 1))
             {
@@ -1151,18 +1432,18 @@ _match:
           }
 	break;
 	case 6:
-#line 78 "rfc2616.rl"
+/* #line 78 "rfc2616.rl" */
 	{ year = atoi(p); year += (year < 50 ? 2000 : 1900); }
 	break;
 	case 7:
-#line 79 "rfc2616.rl"
+/* #line 79 "rfc2616.rl" */
 	{ year = atoi(p); }
 	break;
 	case 8:
-#line 223 "http_message_parser.rl"
+/* #line 222 "http_message_parser.rl" */
 	{ return DateTime::INVALID_DATE_TIME; }
 	break;
-#line 1113 "http_message_parser.cpp"
+/* #line 1397 "http_message_parser.cpp" */
 		}
 	}
 
@@ -1179,10 +1460,10 @@ _again:
 	while ( __nacts-- > 0 ) {
 		switch ( *__acts++ ) {
 	case 8:
-#line 223 "http_message_parser.rl"
+/* #line 222 "http_message_parser.rl" */
 	{ return DateTime::INVALID_DATE_TIME; }
 	break;
-#line 1131 "http_message_parser.cpp"
+/* #line 1415 "http_message_parser.cpp" */
 		}
 	}
 	}
@@ -1190,7 +1471,7 @@ _again:
 	_out: {}
 	}
 
-#line 228 "http_message_parser.rl"
+/* #line 227 "http_message_parser.rl" */
 
 
   if (cs != date_parser_error) {
@@ -1216,7 +1497,7 @@ HttpMessageParser::parse_field(
   // Don't look for the trailing CRLF before the body,
   // since it may not be present yet.
   
-#line 1161 "http_message_parser.cpp"
+/* #line 1445 "http_message_parser.cpp" */
 static const char _field_parser_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 2, 2, 3
@@ -1270,12 +1551,12 @@ static const int field_parser_error = 0;
 static const int field_parser_en_main = 5;
 
 
-#line 1213 "http_message_parser.cpp"
+/* #line 1497 "http_message_parser.cpp" */
 	{
 	cs = field_parser_start;
 	}
 
-#line 1216 "http_message_parser.cpp"
+/* #line 1500 "http_message_parser.cpp" */
 	{
 	int _klen;
 	unsigned int _trans;
@@ -1350,23 +1631,23 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_name.iov_base = p; }
 	break;
 	case 1:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_name.iov_len = p - static_cast<char*>(field_name.iov_base); }
 	break;
 	case 2:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_value.iov_base = p; }
 	break;
 	case 3:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_value.iov_len = p - static_cast<char*>(field_value.iov_base); }
 	break;
 	case 4:
-#line 259 "http_message_parser.rl"
+/* #line 258 "http_message_parser.rl" */
 	{
         if (
           field_name.iov_len == in_field_name.iov_len
@@ -1382,7 +1663,7 @@ _match:
         }
       }
 	break;
-#line 1317 "http_message_parser.cpp"
+/* #line 1601 "http_message_parser.cpp" */
 		}
 	}
 
@@ -1395,7 +1676,7 @@ _again:
 	_out: {}
 	}
 
-#line 278 "http_message_parser.rl"
+/* #line 277 "http_message_parser.rl" */
 
 
   return false;
@@ -1405,7 +1686,7 @@ void
 HttpMessageParser::parse_fields(
   const char* ps,
   const char* pe,
-  vector< std::pair<iovec, iovec> >& fields
+  ::std::vector< std::pair<iovec, iovec> >& fields
 ) {
   int cs;
   char* p = const_cast<char*>(ps);
@@ -1415,7 +1696,7 @@ HttpMessageParser::parse_fields(
   // Don't look for the trailing CRLF before the body,
   // since it may not be present yet.
   
-#line 1346 "http_message_parser.cpp"
+/* #line 1630 "http_message_parser.cpp" */
 static const char _static_fields_parser_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 2, 2, 3
@@ -1469,12 +1750,12 @@ static const int static_fields_parser_error = 0;
 static const int static_fields_parser_en_main = 5;
 
 
-#line 1398 "http_message_parser.cpp"
+/* #line 1682 "http_message_parser.cpp" */
 	{
 	cs = static_fields_parser_start;
 	}
 
-#line 1401 "http_message_parser.cpp"
+/* #line 1685 "http_message_parser.cpp" */
 	{
 	int _klen;
 	unsigned int _trans;
@@ -1549,26 +1830,26 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_name.iov_base = p; }
 	break;
 	case 1:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_name.iov_len = p - static_cast<char*>(field_name.iov_base); }
 	break;
 	case 2:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_value.iov_base = p; }
 	break;
 	case 3:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_value.iov_len = p - static_cast<char*>(field_value.iov_base); }
 	break;
 	case 4:
-#line 303 "http_message_parser.rl"
+/* #line 302 "http_message_parser.rl" */
 	{ fields.push_back(std::make_pair(field_name, field_value)); }
 	break;
-#line 1489 "http_message_parser.cpp"
+/* #line 1773 "http_message_parser.cpp" */
 		}
 	}
 
@@ -1581,7 +1862,7 @@ _again:
 	_out: {}
 	}
 
-#line 309 "http_message_parser.rl"
+/* #line 308 "http_message_parser.rl" */
 
 }
 
@@ -1598,7 +1879,7 @@ HttpMessageParser::parse_fields(
   iovec field_name = {0, 0}, field_value = {0, 0};
 
   
-#line 1515 "http_message_parser.cpp"
+/* #line 1799 "http_message_parser.cpp" */
 static const char _fields_parser_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 1, 5, 1, 6, 2, 
@@ -1667,12 +1948,12 @@ static const int fields_parser_error = 0;
 static const int fields_parser_en_main = 1;
 
 
-#line 1582 "http_message_parser.cpp"
+/* #line 1866 "http_message_parser.cpp" */
 	{
 	cs = fields_parser_start;
 	}
 
-#line 1585 "http_message_parser.cpp"
+/* #line 1869 "http_message_parser.cpp" */
 	{
 	int _klen;
 	unsigned int _trans;
@@ -1745,23 +2026,23 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_name.iov_base = p; }
 	break;
 	case 1:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_name.iov_len = p - static_cast<char*>(field_name.iov_base); }
 	break;
 	case 2:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_value.iov_base = p; }
 	break;
 	case 3:
-#line 83 "rfc2616.rl"
+/* #line 83 "rfc2616.rl" */
 	{ field_value.iov_len = p - static_cast<char*>(field_value.iov_base); }
 	break;
 	case 4:
-#line 331 "http_message_parser.rl"
+/* #line 330 "http_message_parser.rl" */
 	{
         parse_content_length_field(
           field_name,
@@ -1771,14 +2052,14 @@ _match:
       }
 	break;
 	case 5:
-#line 339 "http_message_parser.rl"
+/* #line 338 "http_message_parser.rl" */
 	{ {p++; goto _out; } }
 	break;
 	case 6:
-#line 340 "http_message_parser.rl"
+/* #line 339 "http_message_parser.rl" */
 	{ return false; }
 	break;
-#line 1683 "http_message_parser.cpp"
+/* #line 1967 "http_message_parser.cpp" */
 		}
 	}
 
@@ -1794,10 +2075,10 @@ _again:
 	while ( __nacts-- > 0 ) {
 		switch ( *__acts++ ) {
 	case 6:
-#line 340 "http_message_parser.rl"
+/* #line 339 "http_message_parser.rl" */
 	{ return false; }
 	break;
-#line 1700 "http_message_parser.cpp"
+/* #line 1984 "http_message_parser.cpp" */
 		}
 	}
 	}
@@ -1805,7 +2086,7 @@ _again:
 	_out: {}
 	}
 
-#line 345 "http_message_parser.rl"
+/* #line 344 "http_message_parser.rl" */
 
 
   return cs != fields_parser_error;

@@ -63,8 +63,8 @@ HttpMessageParser::HttpMessageParser(const ::std::string& buffer)
 
 bool
 HttpMessageParser::parse_body(
-  ParseCallbacks& callbacks,
-  size_t content_length
+  size_t content_length,
+  ::std::shared_ptr<Buffer>& out_body
 ) {
   if (
     content_length == 0
@@ -73,14 +73,14 @@ HttpMessageParser::parse_body(
  ) {
     return true;
   } else if (static_cast<size_t>(eof - p) >= content_length) {
-    callbacks.handle_http_message_body(::std::unique_ptr<Buffer>(Buffer::copy(p, content_length)));
+    out_body.swap(Buffer::copy(p, content_length));
     p += content_length;
     return true;
   } else
     return false;
 }
 
-void HttpMessageParser::parse_body_chunk() {
+void HttpMessageParser::parse_body_chunks(ParseCallbacks& callbacks) {
   const char* chunk_data_p = NULL;
   size_t chunk_size = 0;
   const char* chunk_size_p = NULL;
@@ -96,29 +96,28 @@ void HttpMessageParser::parse_body_chunk() {
 
     include rfc2616 "rfc2616.rl";
 
-    main := chunk
-            @{ fbreak; }
-            $err{ return NULL; };
+    main := (chunk @ {
+    if (chunk_size > 0) {
+      // Cut off the chunk size + extension + CRLF before
+      // the chunk data and the CRLF after
+      callbacks.handle_http_message_body_chunk(
+	    create_http_message_body_chunk(Buffer::copy(chunk_data_p, p - chunk_data_p - 2))
+	   );
+    } else { // Last chunk
+      callbacks.handle_http_message_body_chunk(create_http_message_body_chunk(NULL));
+      return;
+	}
+    }
+	)+;
 
     write data;
     write init;
     write exec noend;
   }%%
 
-  if (cs != chunk_parser_error) {
-    if (chunk_size > 0) {
-      // Cut off the chunk size + extension + CRLF before
-      // the chunk data and the CRLF after
-      callbacks.handle_http_message_body_chunk(
-	    create_http_message_body_chunk(
-          ::std::shared_ptr<Buffer>(Buffer::copy(chunk_data_p, p - chunk_data_p - 2))
-        )
-	   );
-    } else { // Last chunk
-      callbacks.handle_http_message_body_chunk(create_http_message_body_chunk(NULL));
-	}
-  } else if (p == eof && chunk_size != 0) {
-    callbacks.read(::std::unique_ptr<Buffer>(new Buffer(chunk_size + 2))); // Assumes no trailers.
+  CHECK(cs == chunk_parser_error);
+  if (p == eof && chunk_size != 0) {
+    callbacks.read(::std::make_shared<Buffer>(chunk_size + 2)); // Assumes no trailers.
   }
 }
 
@@ -284,7 +283,7 @@ void
 HttpMessageParser::parse_fields(
   const char* ps,
   const char* pe,
-  vector< std::pair<iovec, iovec> >& fields
+  ::std::vector< std::pair<iovec, iovec> >& fields
 ) {
   int cs;
   char* p = const_cast<char*>(ps);

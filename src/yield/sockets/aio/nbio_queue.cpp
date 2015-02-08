@@ -44,15 +44,16 @@ namespace yield {
 namespace sockets {
 namespace aio {
 using ::std::map;
+using ::std::move;
 using ::std::shared_ptr;
-using ::std::vector;
 using ::std::unique_ptr;
+using ::std::vector;
 using ::yield::poll::FdEvent;
 
 class NbioQueue::AiocbState {
 public:
-  AiocbState(shared_ptr<Aiocb> aiocb, ssize_t partial_send_len)
-    : aiocb_(aiocb),
+  AiocbState(unique_ptr<Aiocb> aiocb, ssize_t partial_send_len)
+    : aiocb_(move(aiocb)),
       partial_send_len_(partial_send_len) {
     next_aiocb_state_ = NULL;
   }
@@ -62,7 +63,7 @@ public:
   }
 
 public:
-  shared_ptr<Aiocb> aiocb_;
+  unique_ptr<Aiocb> aiocb_;
   AiocbState* next_aiocb_state_;
   size_t partial_send_len_;
 };
@@ -125,8 +126,8 @@ void NbioQueue::associate(Aiocb& aiocb, RetryStatus retry_status) {
   }
 }
 
-bool NbioQueue::enqueue(shared_ptr<Aiocb> aiocb) {
-  bool ret = aiocb_queue.enqueue(aiocb);
+bool NbioQueue::enqueue(unique_ptr<Aiocb> aiocb) {
+  bool ret = aiocb_queue.enqueue(move(aiocb));
   fd_event_queue.wake();
   return ret;
 }
@@ -441,7 +442,7 @@ NbioQueue::retry_sendfile(
   return RETRY_STATUS_ERROR;
 }
 
-::std::shared_ptr<Aiocb> NbioQueue::timeddequeue(const Time& timeout) {
+::std::unique_ptr<Aiocb> NbioQueue::timeddequeue(const Time& timeout) {
   Time timeout_remaining = timeout;
 
   for (;;) {
@@ -462,16 +463,16 @@ NbioQueue::retry_sendfile(
         for (uint8_t aiocb_priority = 0; aiocb_priority < 4; ++aiocb_priority) {
           AiocbState* aiocb_state = socket_state->aiocb_state[aiocb_priority];
           if (aiocb_state != NULL) {
-            shared_ptr<Aiocb> aiocb = aiocb_state->aiocb_;
+            Aiocb& aiocb = *aiocb_state->aiocb_;
             size_t& partial_send_len = aiocb_state->partial_send_len_;
-            RetryStatus retry_status = retry(*aiocb, partial_send_len);
+            RetryStatus retry_status = retry(aiocb, partial_send_len);
 
             if (
               retry_status == RETRY_STATUS_COMPLETE
               ||
               retry_status == RETRY_STATUS_ERROR
             ) {
-              aiocb_state->aiocb_ = NULL;
+              unique_ptr<Aiocb> ret = move(aiocb_state->aiocb_);
 
               if (aiocb_state->next_aiocb_state_ == NULL) {
                 socket_state->aiocb_state[aiocb_priority] = NULL;
@@ -488,7 +489,7 @@ NbioQueue::retry_sendfile(
                 delete aiocb_state;
               }
 
-              return aiocb;
+              return ret;
             } else if (retry_status == RETRY_STATUS_WANT_RECV) {
               want_fd_event_types |= FdEvent::TYPE_READ_READY;
               break;
@@ -505,7 +506,7 @@ NbioQueue::retry_sendfile(
         CHECK(associate_ret);
     }
 
-    shared_ptr<Aiocb> aiocb(aiocb_queue.trydequeue());
+    unique_ptr<Aiocb> aiocb(aiocb_queue.trydequeue());
     if (aiocb != NULL) {
       map<fd_t, SocketState*>::iterator socket_state_i
       = this->socket_state.find(aiocb->socket());
@@ -518,7 +519,7 @@ NbioQueue::retry_sendfile(
         case RETRY_STATUS_ERROR:
           return aiocb;
         default: {
-          AiocbState* aiocb_state = new AiocbState(aiocb, partial_send_len);
+          AiocbState* aiocb_state = new AiocbState(move(aiocb), partial_send_len);
           SocketState* socket_state = new SocketState();
           uint8_t aiocb_priority = get_aiocb_priority(*aiocb);
           socket_state->aiocb_state[aiocb_priority] = aiocb_state;
@@ -560,7 +561,7 @@ NbioQueue::retry_sendfile(
           }
         }
 
-        AiocbState* aiocb_state = new AiocbState(aiocb, partial_send_len);
+        AiocbState* aiocb_state = new AiocbState(move(aiocb), partial_send_len);
         if (socket_state->aiocb_state[aiocb_priority] == NULL) {
           socket_state->aiocb_state[aiocb_priority] = aiocb_state;
         } else {

@@ -27,15 +27,15 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_HTTP_SERVER_HTTP_RESPONSE_HPP_
-#define _YIELD_HTTP_SERVER_HTTP_RESPONSE_HPP_
+#ifndef _YIELD_HTTP_SERVER_HTTP_SERVER_RESPONSE_HPP_
+#define _YIELD_HTTP_SERVER_HTTP_SERVER_RESPONSE_HPP_
 
 #include "yield/http/http_response.hpp"
 
 namespace yield {
 namespace http {
 namespace server {
-typedef ::yield::http::HttpResponse HttpResponse;
+typedef ::yield::http::HttpResponse HttpServerResponse;
 }
 }
 }

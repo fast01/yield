@@ -33,6 +33,7 @@
 #include <ostream>
 
 #include "yield/sockets/aio/aiocb.hpp"
+#include "yield/sockets/stream_socket.hpp"
 
 namespace yield {
 class Buffer;
@@ -40,7 +41,6 @@ class Buffer;
 namespace sockets {
 class Socket;
 class SocketAddress;
-class StreamSocket;
 
 namespace aio {
 /**
@@ -58,8 +58,8 @@ public:
   AcceptAiocb(
     ::std::shared_ptr<StreamSocket> socket_,
     ::std::shared_ptr<Buffer> recv_buffer
-  ) : Aiocb(socket_),
-      recv_buffer_(recv_buffer) {
+  ) : recv_buffer_(recv_buffer),
+      socket_(socket_) {
   }
 
 public:
@@ -93,11 +93,11 @@ public:
   /**
     Get the listen socket in this accept operation.
   */
-  StreamSocket& socket() {
-    return static_cast<StreamSocket&>(Aiocb::socket());
+  StreamSocket& socket() override {
+    return *socket_;
   }
 
-  Type::Enum type() const {
+  Type::Enum type() const override {
     return Type::ACCEPT;
   }
 
@@ -123,6 +123,7 @@ private:
   ::std::shared_ptr<StreamSocket> accepted_socket_;
   ::std::shared_ptr<SocketAddress> peername_;
   ::std::shared_ptr<Buffer> recv_buffer_;
+  ::std::shared_ptr<StreamSocket> socket_;
 };
 
 /**

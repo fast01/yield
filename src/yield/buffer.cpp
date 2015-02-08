@@ -93,17 +93,17 @@ iovec Buffer::as_write_iovec() const {
   return write_iovec;
 }
 
-::std::unique_ptr<Buffer>
+::std::shared_ptr<Buffer>
 Buffer::copy(
   size_t alignment,
   size_t capacity,
   const void* data,
   size_t size
 ) {
-  Buffer* buffer = new Buffer(alignment, capacity);
+  ::std::shared_ptr<Buffer> buffer = ::std::make_shared<Buffer>(alignment, capacity);
   memcpy_s(*buffer, buffer->capacity(), data, size);
   buffer->size_ = size;
-  return ::std::unique_ptr<Buffer>(buffer);
+  return buffer;
 }
 
 size_t Buffer::getpagesize() {

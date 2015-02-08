@@ -46,7 +46,7 @@ namespace yield {
 namespace http {
 using yield::uri::Uri;
 
-Object& HttpRequestParser::parse() {
+void HttpRequestParser::parse(ParseCallbacks& callbacks) {
   if (p < eof) {
     ps = p;
 
@@ -73,7 +73,7 @@ Object& HttpRequestParser::parse() {
       )
     ) {
       Uri uri(
-        buffer,
+        buffer_,
         uri_fragment,
         uri_host,
         uri_path,
@@ -86,18 +86,19 @@ Object& HttpRequestParser::parse() {
       uint16_t fields_offset;
       size_t content_length;
       if (parse_fields(fields_offset, content_length)) {
-        Object* body;
+	    ::std::shared_ptr<Buffer> body;
         if (parse_body(content_length, body)) {
-          return create_http_request(
+          callbacks.handle_http_request(create_http_request(
                    body,
                    fields_offset,
-                   buffer,
+                   buffer_,
                    http_version,
                    method,
                    uri
-                );
+                ));
+				return;
         } else {
-          Buffer& next_buffer
+          ::std::shared_ptr<Buffer> next_buffer
           = Buffer::copy(
               Buffer::getpagesize(),
               p - ps + content_length,
@@ -105,17 +106,17 @@ Object& HttpRequestParser::parse() {
               eof - ps
             );
           ps = p;
-          return next_buffer;
+		  callbacks.read(next_buffer);
+		  return;
         }
       }
     } else { // cs == request_line_parser_error
-      Object* object = parse_body_chunk();
-      if (object != NULL)
-        return *object;
+      parse_body_chunks(callbacks);
+	  return;
     }
 
     if (p == eof) { // EOF parsing
-      Buffer& next_buffer
+      ::std::shared_ptr<Buffer> next_buffer
       = Buffer::copy(
           Buffer::getpagesize(),
           eof - ps + Buffer::getpagesize(),
@@ -123,15 +124,17 @@ Object& HttpRequestParser::parse() {
           eof - ps
         );
       p = ps;
-      return next_buffer;
+	  callbacks.read(next_buffer);
     } else { // Error parsing
-      HttpResponse& http_response
-        = create_http_response(400, NULL, http_version);
-      http_response.set_field("Content-Length", 14, "0", 1);
-      return http_response;
+      ::std::unique_ptr<HttpResponse> http_response
+        = ::std::move(create_http_response(NULL, 400, http_version));
+      http_response->set_field("Content-Length", 14, "0", 1);
+	  callbacks.handle_error_http_response(::std::move(http_response));
     }
-  } else // p == eof
-    return *new Buffer(Buffer::getpagesize(), Buffer::getpagesize());
+  } else { // p == eof
+    ::std::shared_ptr<Buffer> next_buffer = ::std::make_shared<Buffer>(Buffer::getpagesize(), Buffer::getpagesize());
+	callbacks.read(next_buffer);
+  }
 }
 
 bool HttpRequestParser::parse_request_line(

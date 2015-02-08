@@ -30,9 +30,13 @@
 #ifndef _YIELD_HTTP_HTTP_MESSAGE_HPP_
 #define _YIELD_HTTP_HTTP_MESSAGE_HPP_
 
+#include <cstdint>
+#include <memory>
 #include <string>
 #include <utility> // for std::pair
 #include <vector>
+
+#include "yield/types.hpp"
 
 namespace yield {
 class Buffer;
@@ -477,11 +481,12 @@ protected:
     ::std::shared_ptr<Buffer> body_buffer,
     ::std::shared_ptr< ::yield::fs::File > body_file,
     uint16_t fields_offset,
-    Buffer& header,
+    ::std::shared_ptr<Buffer> header,
     uint8_t http_version
   );
 
-  virtual ~HttpMessage();
+  virtual ~HttpMessage() {
+  }
 
 protected:
   void set_fields_offset(uint16_t fields_offset) {
@@ -492,7 +497,7 @@ private:
   ::std::shared_ptr<Buffer> body_buffer_;
   ::std::shared_ptr< ::yield::fs::File > body_file_;
   uint16_t fields_offset_;
-  Buffer* header_;
+  ::std::shared_ptr<Buffer> header_;
   uint8_t http_version_;
 };
 }

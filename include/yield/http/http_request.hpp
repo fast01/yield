@@ -226,7 +226,7 @@ protected:
   HttpRequest(
     ::std::shared_ptr<Buffer> body_buffer,
     uint16_t fields_offset,
-    Buffer& header,
+    ::std::shared_ptr<Buffer> header,
     uint8_t http_version,
     Method method,
     const yield::uri::Uri& uri

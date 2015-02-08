@@ -52,9 +52,9 @@ public:
     ::std::shared_ptr<Socket> socket_,
     ::std::shared_ptr<Buffer> buffer,
     const Socket::MessageFlags& flags
-  ) : Aiocb(socket_),
-    buffer_(buffer),
-    flags_(flags) {
+  ) : buffer_(buffer),
+    flags_(flags),
+    socket_(socket_) {
   }
 
   virtual ~SendAiocb() {
@@ -77,7 +77,14 @@ public:
     return flags_;
   }
 
-  Type::Enum type() const {
+  /**
+    Get the socket associated with this control block.
+  */
+  Socket& socket() override {
+    return *socket_;
+  }
+
+  Type::Enum type() const override {
     return Type::SEND;
   }
 
@@ -85,6 +92,7 @@ private:
   ::std::shared_ptr<Buffer> buffer_;
   Socket::MessageFlags flags_;
   SocketAddress* peername_;
+  ::std::shared_ptr<Socket> socket_;
 };
 
 /**

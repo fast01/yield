@@ -50,7 +50,7 @@ public:
     @param fd file descriptor from which to send data
     @param context optional context object
   */
-  SendfileAiocb(::std::shared_ptr<Socket>& socket_, fd_t fd);
+  SendfileAiocb(::std::shared_ptr<StreamSocket> socket_, fd_t fd);
 
   /**
     Construct a SendfileAiocb, passing the same parameters as to sendfile.
@@ -61,7 +61,7 @@ public:
     @param context optional context object
   */
   SendfileAiocb(
-    ::std::shared_ptr<Socket> socket_,
+    ::std::shared_ptr<StreamSocket> socket_,
     fd_t fd,
     off_t offset,
     size_t nbytes
@@ -98,11 +98,11 @@ public:
     Get the socket in this sendfile operation.
     @return the socket in this sendfile operation
   */
-  StreamSocket& socket() {
-    return static_cast<StreamSocket&>(Aiocb::socket());
+  StreamSocket& socket() override {
+    return *socket_;
   }
 
-  Type::Enum type() const {
+  Type::Enum type() const override {
     return Type::SENDFILE;
   }
 
@@ -113,6 +113,7 @@ private:
   fd_t fd_;
   size_t nbytes_;
   off_t offset_;
+  ::std::shared_ptr<StreamSocket> socket_;
 };
 
 /**

@@ -28,89 +28,22 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "yield/http/http_response.hpp"
-#include "yield/http/server/http_connection.hpp"
-#include "yield/http/server/http_request.hpp"
+#include "yield/http/server/http_server_connection.hpp"
+#include "yield/http/server/http_server_request.hpp"
+#include "yield/http/server/http_server_response.hpp"
 #include "yield/sockets/socket_address.hpp"
 
 namespace yield {
 namespace http {
 namespace server {
-HttpRequest::HttpRequest(
-  HttpConnection& connection,
-  Method method,
-  const yield::uri::Uri& uri,
-  YO_NEW_REF Buffer* body,
-  uint8_t http_version
-) : yield::http::HttpRequest(method, uri, body, http_version),
-    connection_(connection_.inc_ref()),
-    creation_date_time_(DateTime::now()) {
-}
-
-HttpRequest::HttpRequest(
-  YO_NEW_REF Buffer* body,
-  HttpConnection& connection,
-  uint16_t fields_offset,
-  Buffer& header,
-  uint8_t http_version,
-  Method method,
-  const yield::uri::Uri& uri
-)
-  : yield::http::HttpRequest(
-    body,
-    fields_offset,
-    header,
-    http_version,
-    method,
-    uri
-  ),
-  connection_(connection.inc_ref()),
-  creation_date_time_(DateTime::now()) {
-}
-
-HttpRequest::~HttpRequest() {
-  HttpConnection::dec_ref(connection_);
-}
-
-void
-HttpRequest::respond(
-  YO_NEW_REF ::yield::http::HttpResponse& http_response
-) {
-  connection_.handle(http_response);
-}
-
-void
-HttpRequest::respond(
-  ::yield::http::HttpMessageBodyChunk& http_message_body_chunk
-) {
-  connection_.handle(http_message_body_chunk);
-}
-
-void HttpRequest::respond(uint16_t status_code) {
-  respond(status_code, static_cast<Buffer*>(NULL));
-}
-
-void HttpRequest::respond(uint16_t status_code, YO_NEW_REF Buffer* body) {
-  HttpResponse* http_response = new HttpResponse(http_version(), status_code, body);
+void HttpServerRequest::respond(uint16_t status_code, ::std::shared_ptr<Buffer> body) {
+  ::std::unique_ptr<HttpServerResponse> http_response(new HttpResponse(http_version(), status_code, body);
   if (body != NULL) {
     http_response->set_field("Content-Length", 14, body->size());
   } else {
     http_response->set_field("Content-Length", 14, "0", 1);
   }
-  respond(*http_response);
-}
-
-void HttpRequest::respond(uint16_t status_code, YO_NEW_REF Buffer& body) {
-  HttpResponse* http_response = new HttpResponse(http_version(), status_code, &body);
-  http_response->set_field("Content-Length", 14, body.size());
-  respond(*http_response);
-}
-
-void HttpRequest::respond(uint16_t status_code, const char* body) {
-  respond(status_code, Buffer::copy(body));
-}
-
-void HttpRequest::respond(uint16_t status_code, const Exception& body) {
-  respond(status_code, Buffer::copy(body.get_error_message()));
+  respond(::std::move(http_response));
 }
 }
 }

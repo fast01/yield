@@ -39,9 +39,9 @@ ConnectAiocb::ConnectAiocb(
   ::std::shared_ptr<StreamSocket> socket_,
   ::std::shared_ptr<SocketAddress> peername,
   ::std::shared_ptr<Buffer> send_buffer
-) : Aiocb(socket_),
-  peername_(peername),
-  send_buffer_(send_buffer) {
+) : peername_(peername),
+  send_buffer_(send_buffer),
+  socket_(socket_) {
   if (send_buffer != NULL) {
     CHECK_EQ(send_buffer->get_next_buffer(), NULL);
   }

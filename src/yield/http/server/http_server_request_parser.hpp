@@ -27,10 +27,13 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_HTTP_SERVER_HTTP_REQUEST_PARSER_HPP_
-#define _YIELD_HTTP_SERVER_HTTP_REQUEST_PARSER_HPP_
+#ifndef _YIELD_HTTP_SERVER_HTTP_SERVER_REQUEST_PARSER_HPP_
+#define _YIELD_HTTP_SERVER_HTTP_SERVER_REQUEST_PARSER_HPP_
 
 #include "yield/http/http_request_parser.hpp"
+#include "yield/http/server/http_server_connection.hpp"
+#include "yield/http/server/http_server_request.hpp"
+#include "yield/http/server/http_server_message_body_chunk.hpp"
 
 namespace yield {
 namespace sockets {
@@ -39,33 +42,45 @@ class SocketAddress;
 
 namespace http {
 namespace server {
-class HttpConnection;
-
-class HttpRequestParser : public ::yield::http::HttpRequestParser {
+class HttpServerRequestParser : public ::yield::http::HttpRequestParser {
 public:
-  HttpRequestParser(HttpConnection& connection, Buffer& data);
-  ~HttpRequestParser();
+  HttpServerRequestParser(::std::shared_ptr<HttpServerConnection> connection, ::std::shared_ptr<Buffer> data)
+    : HttpRequestParser(data),
+      connection_(connection) {
+  }
 
 protected:
   // yield::http::HttpMessageParser
-  virtual YO_NEW_REF yield::http::HttpMessageBodyChunk&
+  virtual ::std::unique_ptr<HttpMessageBodyChunk>
   create_http_message_body_chunk(
-    YO_NEW_REF Buffer* data
-  );
+    ::std::shared_ptr<Buffer> data
+  ) override {
+    return ::std::unique_ptr<HttpMessageBodyChunk>(new HttpServerMessageBodyChunk(connection_, data));
+  }
 
   // yield::http::HttpRequestParser
-  virtual YO_NEW_REF yield::http::HttpRequest&
+  ::std::unique_ptr<HttpRequest>
   create_http_request(
-    YO_NEW_REF Buffer* body,
+    ::std::shared_ptr<Buffer> body,
     uint16_t fields_offset,
-    Buffer& header,
+    ::std::shared_ptr<Buffer> header,
     uint8_t http_version,
     HttpRequest::Method method,
     const yield::uri::Uri& uri
-  );
+  ) override {
+  return ::std::unique_ptr<HttpRequest>(new HttpServerRequest(
+           body,
+           connection_,
+           fields_offset,
+           header,
+           http_version,
+           method,
+           uri
+         ));
+  }
 
 private:
-  HttpConnection& connection_;
+  ::std::shared_ptr<HttpServerConnection> connection_;
 };
 }
 }

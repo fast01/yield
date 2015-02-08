@@ -70,46 +70,36 @@ public:
 public:
   /**
     Parse the next object from the buffer specified in the constructor.
-    The caller is responsible for checking the Object's get_type_id
-      and downcasting to the appropriate type.
-    Object may be of the following types:
-    - yield::http::HttpRequest or subclasses: an HTTP request, including its
-        body for requests with fixed Content-Length's.
-    - yield::Buffer: the next Buffer to read; may include the remainder of
-      the previous Buffer that was passed to the constructor
-    - yield::http::HttpMessageBodyChunk: a chunk of body data, for requests
-        with chunked Transfer-Encoding.
-    - yield::http::HttpResponse: an error HTTP response, usually a 400
   */
   void parse(ParseCallbacks&);
 
 protected:
-  ::std::unique_ptr<HttpRequest>
+  virtual ::std::unique_ptr<HttpRequest>
   create_http_request(
     ::std::shared_ptr<Buffer> body,
     uint16_t fields_offset,
-    Buffer& header,
+    ::std::shared_ptr<Buffer> header,
     uint8_t http_version,
     HttpRequest::Method method,
     const yield::uri::Uri& uri
   ) {
-    return *new HttpRequest(
+    return ::std::unique_ptr<HttpRequest>(new HttpRequest(
              body,
              fields_offset,
              header,
              http_version,
              method,
              uri
-           );
+           ));
   }
 
-  virtual HttpResponse&
+  virtual ::std::unique_ptr<HttpResponse>
   create_http_response(
-    YO_NEW_REF Buffer* body,
+    ::std::shared_ptr<Buffer> body,
     uint8_t http_version,
     uint16_t status_code
   ) {
-    return *new HttpResponse(body, http_version, status_code);
+    return ::std::unique_ptr<HttpResponse>(new HttpResponse(body, http_version, status_code));
   }
 
 protected:

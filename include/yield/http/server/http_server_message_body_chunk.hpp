@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_HTTP_SERVER_HTTP_MESSAGE_BODY_CHUNK_HPP_
-#define _YIELD_HTTP_SERVER_HTTP_MESSAGE_BODY_CHUNK_HPP_
+#ifndef _YIELD_HTTP_SERVER_HTTP_SERVER_MESSAGE_BODY_CHUNK_HPP_
+#define _YIELD_HTTP_SERVER_HTTP_SERVER_MESSAGE_BODY_CHUNK_HPP_
 
 #include "yield/http/http_message_body_chunk.hpp"
 
@@ -39,7 +39,7 @@ class SocketAddress;
 
 namespace http {
 namespace server {
-class HttpConnection;
+class HttpServerConnection;
 
 /**
   A <code>yield::http::HttpMessageBodyChunk</code> that's bound to a server
@@ -49,7 +49,7 @@ class HttpConnection;
     response <code>HTTPMessageBodyChunks</code> can be the normal
       <code>yield::http::HttpMessageBodyChunk</code>s.
 */
-class HttpMessageBodyChunk : public ::yield::http::HttpMessageBodyChunk {
+class HttpServerMessageBodyChunk final : public ::yield::http::HttpMessageBodyChunk {
 public:
   /**
     Construct an HttpMessageBodyChunk that originates from the given
@@ -57,20 +57,22 @@ public:
     @param connection the server connection
     @param data the chunk data
   */
-  HttpMessageBodyChunk(HttpConnection& connection, YO_NEW_REF Buffer* data);
-  virtual ~HttpMessageBodyChunk();
+  HttpServerMessageBodyChunk(::std::shared_ptr<HttpServerConnection> connection, ::std::shared_ptr<Buffer> data)
+    : ::yield::http::HttpMessageBodyChunk(data),
+      connection_(connection) {
+  }
 
 public:
   /**
     Get the server connection from which this chunk originated.
     @return the server connection from which this chunk originated
   */
-  const HttpConnection& connection() const {
-    return connection_;
+  const HttpServerConnection& connection() const {
+    return *connection_;
   }
 
 private:
-  HttpConnection& connection_;
+  ::std::shared_ptr<HttpServerConnection> connection_;
 };
 }
 }
