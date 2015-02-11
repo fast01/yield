@@ -32,6 +32,8 @@
 
 #include <atomic>
 
+#include "yield/queue/concurrent_queue.hpp"
+
 namespace yield {
 namespace queue {
 /**
@@ -41,8 +43,8 @@ namespace queue {
   Adapted from Michael, M. M. and Scott, M. L. 1996. Simple, fast, and practical
     non-blocking and blocking concurrent queue algorithms.
 */
-template <class ElementType, size_t Length>
-class NonBlockingConcurrentQueue {
+template <class ElementT, size_t Length>
+class NonBlockingConcurrentQueue : public ConcurrentQueue<ElementT> {
 public:
   NonBlockingConcurrentQueue() {
     elements[0] = 1; // Sentinel element
@@ -54,84 +56,7 @@ public:
     tail_element_i = 1;
   }
 
-  /**
-    Enqueue a new element.
-    @param element the element to enqueue
-    @return true if the enqueue was successful, false if the queue was full
-  */
-  bool enqueue(::std::unique_ptr<ElementType> element) {
-    uintptr_t new_element = reinterpret_cast<uintptr_t>(element.release());
-    // CHECK(!(new_element & 1));
-    new_element >>= 1;
-    // CHECK(!(new_element & POINTER_HIGH_BIT));
-
-    for (;;) {
-      size_t tail_element_i_copy = tail_element_i.load(); // te
-      size_t last_try_element_i = tail_element_i_copy; // ate
-      uintptr_t try_element = elements[last_try_element_i].load();
-      size_t try_element_i = (last_try_element_i + 1) % (Length + 2); // temp
-
-      while (try_element != 0 && try_element != 1) {
-        if (tail_element_i_copy != tail_element_i) {
-          break;
-        }
-        if (try_element_i == head_element_i) {
-          break;
-        }
-        try_element = elements[try_element_i];
-        last_try_element_i = try_element_i;
-        try_element_i = (try_element_i + 1) % (Length + 2);
-      }
-
-      if (tail_element_i_copy != tail_element_i) {
-        continue;
-      }
-
-      if (try_element_i == head_element_i) {
-        last_try_element_i = try_element_i;
-        try_element_i = (try_element_i + 1) % (Length + 2);
-        try_element = elements[try_element_i];
-
-        if (try_element != 0 && try_element != 1) {
-          return false;  // Queue is full
-        }
-
-        size_t old_head_element_i = last_try_element_i;
-        size_t new_head_element_i = try_element_i;
-        head_element_i.compare_exchange_weak(old_head_element_i, new_head_element_i);
-
-        continue;
-      }
-
-      if (tail_element_i_copy != tail_element_i) {
-        continue;
-      }
-
-      uintptr_t old_element = try_element;
-      if (
-        elements[last_try_element_i].compare_exchange_weak(
-          old_element,
-          try_element == 1
-            ? (new_element | POINTER_HIGH_BIT)
-            : new_element
-          )
-      ) {
-        if (try_element_i % 2 == 0) {
-          size_t old_tail_element_i = tail_element_i_copy;
-          size_t new_tail_element_i = try_element_i;
-          tail_element_i.compare_exchange_weak(old_tail_element_i, new_tail_element_i);
-        }
-
-        return true;
-      }
-    }
-  }
-
-  /**
-    Try to dequeue an element.
-    @return the dequeued element or NULL if the queue was empty
-  */
-  ::std::unique_ptr<ElementType> trydequeue() {
+  ::std::unique_ptr<ElementT> trydequeue() override {
     for (;;) {
       size_t head_element_i_copy = head_element_i.load();
       size_t try_element_i = (head_element_i_copy + 1) % (Length + 2);
@@ -164,12 +89,12 @@ public:
         continue;
       }
 
-      uintptr_t new_element = static_cast<uintptr_t>((try_element & POINTER_HIGH_BIT) ? 1 : 0);
+      uintptr_t new_element_uintptr = static_cast<uintptr_t>((try_element & POINTER_HIGH_BIT) ? 1 : 0);
       uintptr_t old_element = try_element;
       if (
         elements[try_element_i].compare_exchange_weak(
           old_element,
-          new_element
+          new_element_uintptr
         )
       ) {
         if (try_element_i % 2 == 0) {
@@ -181,7 +106,78 @@ public:
         uintptr_t return_element = try_element;
         return_element &= POINTER_LOW_BITS;
         return_element <<= 1;
-        return ::std::unique_ptr<ElementType>(reinterpret_cast<ElementType*>(return_element));
+        return ::std::unique_ptr<ElementT>(reinterpret_cast<ElementT*>(return_element));
+      }
+    }
+  }
+
+  ::std::unique_ptr<ElementT> tryenqueue(::std::unique_ptr<ElementT> element) override {
+    ElementT* new_element = element.release();
+    uintptr_t new_element_uintptr = reinterpret_cast<uintptr_t>(new_element);
+    // CHECK(!(new_element_uintptr & 1));
+    new_element_uintptr >>= 1;
+    // CHECK(!(new_element_uintptr & POINTER_HIGH_BIT));
+
+    for (;;) {
+      size_t tail_element_i_copy = tail_element_i.load(); // te
+      size_t last_try_element_i = tail_element_i_copy; // ate
+      uintptr_t try_element = elements[last_try_element_i].load();
+      size_t try_element_i = (last_try_element_i + 1) % (Length + 2); // temp
+
+      while (try_element != 0 && try_element != 1) {
+        if (tail_element_i_copy != tail_element_i) {
+          break;
+        }
+        if (try_element_i == head_element_i) {
+          break;
+        }
+        try_element = elements[try_element_i];
+        last_try_element_i = try_element_i;
+        try_element_i = (try_element_i + 1) % (Length + 2);
+      }
+
+      if (tail_element_i_copy != tail_element_i) {
+        continue;
+      }
+
+      if (try_element_i == head_element_i) {
+        last_try_element_i = try_element_i;
+        try_element_i = (try_element_i + 1) % (Length + 2);
+        try_element = elements[try_element_i];
+
+        if (try_element != 0 && try_element != 1) {
+          // Queue is full.
+          // The element parameter above was .released() into new_element_uintptr.
+          return ::std::unique_ptr<ElementT>(reinterpret_cast<ElementT*>(new_element));
+        }
+
+        size_t old_head_element_i = last_try_element_i;
+        size_t new_head_element_i = try_element_i;
+        head_element_i.compare_exchange_weak(old_head_element_i, new_head_element_i);
+
+        continue;
+      }
+
+      if (tail_element_i_copy != tail_element_i) {
+        continue;
+      }
+
+      uintptr_t old_element = try_element;
+      if (
+        elements[last_try_element_i].compare_exchange_weak(
+          old_element,
+          try_element == 1
+            ? (new_element_uintptr | POINTER_HIGH_BIT)
+            : new_element_uintptr
+          )
+      ) {
+        if (try_element_i % 2 == 0) {
+          size_t old_tail_element_i = tail_element_i_copy;
+          size_t new_tail_element_i = try_element_i;
+          tail_element_i.compare_exchange_weak(old_tail_element_i, new_tail_element_i);
+        }
+
+        return NULL;
       }
     }
   }

@@ -1,4 +1,4 @@
-// queue_test.hpp
+// yield/queue/concurrent_queue.hpp
 
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
@@ -27,47 +27,27 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_QUEUE_QUEUE_TEST_HPP_
-#define _YIELD_QUEUE_QUEUE_TEST_HPP_
-
-#include "yield/logging.hpp"
-#include "yield/types.hpp"
-#include "gtest/gtest.h"
+#ifndef _YIELD_QUEUE_CONCURRENT_QUEUE_HPP_
+#define _YIELD_QUEUE_CONCURRENT_QUEUE_HPP_
 
 namespace yield {
 namespace queue {
-using ::std::move;
-using ::std::unique_ptr;
+template <class ElementT>
+class ConcurrentQueue {
+public:
+  /**
+    Try to dequeue an element.
+    @return the dequeued element or NULL if the queue was empty
+  */
+  virtual ::std::unique_ptr<ElementT> trydequeue() = 0;
 
-template <class TypeParam>
-class QueueTest : public ::testing::Test {
+  /**
+    Try to enqueue an element.
+    @param element the element to enqueue
+    @return NULL if the enqueue was successful, the element if it failed because the queue was full
+  */
+  virtual ::std::unique_ptr<ElementT> tryenqueue(::std::unique_ptr<ElementT> element) = 0;
 };
-
-TYPED_TEST_CASE_P(QueueTest);
-
-TYPED_TEST_P(QueueTest, create) {
-  new TypeParam();
-}
-
-TYPED_TEST_P(QueueTest, trydequeue) {
-  TypeParam queue;
-
-  unique_ptr<uint32_t> in_value(new uint32_t(1));
-  ASSERT_EQ(queue.tryenqueue(move(in_value)).get(), static_cast<uint32_t*>(NULL));
-  unique_ptr<uint32_t> out_value = queue.trydequeue();
-  ASSERT_NE(out_value.get(), static_cast<uint32_t*>(NULL));
-  ASSERT_EQ(*out_value, 1);
-  ASSERT_EQ(queue.trydequeue().get(), static_cast<uint32_t*>(NULL));
-}
-
-TYPED_TEST_P(QueueTest, tryenqueue) {
-  TypeParam queue;
-
-  unique_ptr<uint32_t> in_value(new uint32_t(1));
-  ASSERT_EQ(queue.tryenqueue(move(in_value)).get(), static_cast<uint32_t*>(NULL));
-}
-
-REGISTER_TYPED_TEST_CASE_P(QueueTest, create, trydequeue, tryenqueue);
 }
 }
 

@@ -43,7 +43,7 @@ namespace queue {
   The queue can handle multiple concurrent enqueues and dequeues but may block the caller
     indefinitely in either operation.
 */
-template <class ElementType>
+template <class ElementT>
 class SynchronizedQueue {
 public:
   /**
@@ -51,14 +51,14 @@ public:
     Always succeeds.
     @return the dequeued element
   */
-  ::std::unique_ptr<ElementType> dequeue() {
+  ::std::unique_ptr<ElementT> dequeue() {
     cond_.lock_mutex();
 
     while (queue_.empty()) {
       cond_.wait();
     }
 
-    ::std::unique_ptr<ElementType> element(::std::move(queue_.front()));
+    ::std::unique_ptr<ElementT> element(::std::move(queue_.front()));
     queue_.pop();
 
     cond_.unlock_mutex();
@@ -67,31 +67,18 @@ public:
   }
 
   /**
-    Enqueue a new element.
-    @param element the element to enqueue
-    @return true if the enqueue was successful.
-  */
-  bool enqueue(::std::unique_ptr<ElementType> element) {
-    cond_.lock_mutex();
-    queue_.push(::std::move(element));
-    cond_.signal();
-    cond_.unlock_mutex();
-    return true;
-  }
-
-  /**
     Dequeue an element, blocking until a timeout if the queue is empty.
     @param timeout time to block on an empty queue
     @return the dequeued element or NULL if queue was empty for the duration
       of the timeout
   */
-  ::std::unique_ptr<ElementType> timeddequeue(const Time& timeout) {
+  ::std::unique_ptr<ElementT> timeddequeue(const Time& timeout) {
     Time timeout_left(timeout);
 
     cond_.lock_mutex();
 
     if (!queue_.empty()) {
-      ::std::unique_ptr<ElementType> element(::std::move(queue_.front()));
+      ::std::unique_ptr<ElementT> element(::std::move(queue_.front()));
       queue_.pop();
       cond_.unlock_mutex();
       return element;
@@ -102,7 +89,7 @@ public:
         cond_.timedwait(timeout_left);
 
         if (!queue_.empty()) {
-          ::std::unique_ptr<ElementType> element(::std::move(queue_.front()));
+          ::std::unique_ptr<ElementT> element(::std::move(queue_.front()));
           queue_.pop();
           cond_.unlock_mutex();
           return element;
@@ -124,10 +111,10 @@ public:
     Never blocks.
     @return the dequeue element or NULL if the queue was empty
   */
-  ::std::unique_ptr<ElementType> trydequeue() {
+  ::std::unique_ptr<ElementT> trydequeue() {
     if (cond_.trylock_mutex()) {
       if (!queue_.empty()) {
-        ::std::unique_ptr<ElementType> element(::std::move(queue_.front()));
+        ::std::unique_ptr<ElementT> element(::std::move(queue_.front()));
         queue_.pop();
         cond_.unlock_mutex();
         return element;
@@ -140,16 +127,28 @@ public:
   }
 
   /**
+    Enqueue a new element.
+    @param element the element to enqueue
+    @return NULL if the enqueue was successful, otherwise the element
+  */
+  ::std::unique_ptr<ElementT> tryenqueue(::std::unique_ptr<ElementT> element) {
+    cond_.lock_mutex();
+    queue_.push(::std::move(element));
+    cond_.signal();
+    cond_.unlock_mutex();
+    return NULL;
+  }
+
+  /**
     Interrupt a blocking dequeue.
    */
   void wake() {
-    enqueue(::std::unique_ptr<ElementType>());
+    enqueue(::std::unique_ptr<ElementT>());
   }
 
 private:
   yield::thread::ConditionVariable cond_;
-  std::queue< ::std::unique_ptr<ElementType> > queue_;
-
+  std::queue< ::std::unique_ptr<ElementT> > queue_;
 };
 }
 }

@@ -32,6 +32,7 @@
 
 namespace yield {
 namespace queue {
+using ::std::move;
 using ::std::unique_ptr;
 
 typedef NonBlockingConcurrentQueue<uint32_t, 8> TestNonBlockingConcurrentQueue;
@@ -43,14 +44,19 @@ TEST(NonBlockingConcurrentQueue, full) {
   uint32_t in_values[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
 
   for (unsigned char i = 0; i < 8; i++) {
-    ASSERT_TRUE(queue.enqueue(unique_ptr<uint32_t>(new uint32_t(in_values[i]))));
+    unique_ptr<uint32_t> in(new uint32_t(in_values[i]));
+    unique_ptr<uint32_t> out = queue.tryenqueue(move(in));
+    ASSERT_EQ(out.get(), static_cast<uint32_t*>(NULL));
   }
 
-  ASSERT_FALSE(queue.enqueue(unique_ptr<uint32_t>(new uint32_t(in_values[0]))));
+  // Full case
+  unique_ptr<uint32_t> in(new uint32_t(in_values[0]));
+  unique_ptr<uint32_t> out = queue.tryenqueue(move(in));
+  ASSERT_EQ(in_values[0], *out);
 
   for (unsigned char i = 0; i < 8; i++) {
     unique_ptr<uint32_t> out_value(::std::move(queue.trydequeue()));
-    ASSERT_TRUE(*out_value == in_values[i]);
+    ASSERT_EQ(*out_value, in_values[i]);
   }
 }
 }

@@ -30,6 +30,7 @@
 #ifndef _YIELD_QUEUE_BLOCKING_CONCURRENT_QUEUE_HPP_
 #define _YIELD_QUEUE_BLOCKING_CONCURRENT_QUEUE_HPP_
 
+#include "yield/queue/concurrent_queue.hpp"
 #include "yield/thread/mutex.hpp"
 
 #include <queue>
@@ -40,41 +41,29 @@ namespace queue {
   A queue that can handle multiple concurrent enqueues and dequeues but may
     block the caller indefinitely in either operation.
 */
-template <class ElementType>
-class BlockingConcurrentQueue {
+template <class ElementT>
+class BlockingConcurrentQueue : public ConcurrentQueue<ElementT> {
 public:
-  /**
-    Enqueue a new element.
-    @param element the element to enqueue
-    @return true if the enqueue was successful.
-  */
-  bool enqueue(::std::unique_ptr<ElementType> element) {
-    mutex.lock();
-    queue_.push(::std::move(element));
-    mutex.unlock();
-    return true;
-  }
-
-  /**
-    Try to dequeue an element.
-    @return the dequeued element or NULL if the queue was empty
-  */
-  ::std::unique_ptr<ElementType> trydequeue() {
-    mutex.lock();
+  ::std::unique_ptr<ElementT> trydequeue() override {
+    ::yield::thread::Mutex::Holder mutex_holder(mutex_);
     if (!queue_.empty()) {
-      ::std::unique_ptr<ElementType> element(::std::move(queue_.front()));
+      ::std::unique_ptr<ElementT> element(::std::move(queue_.front()));
       queue_.pop();
-      mutex.unlock();
       return element;
     } else {
-      mutex.unlock();
       return NULL;
     }
   }
 
+  ::std::unique_ptr<ElementT> tryenqueue(::std::unique_ptr<ElementT> element) override {
+    ::yield::thread::Mutex::Holder mutex_holder(mutex_);
+    queue_.push(::std::move(element));
+    return NULL;
+  }
+
 private:
-  ::yield::thread::Mutex mutex;
-  ::std::queue< ::std::unique_ptr<ElementType> > queue_;
+  ::yield::thread::Mutex mutex_;
+  ::std::queue< ::std::unique_ptr<ElementT> > queue_;
 };
 }
 }

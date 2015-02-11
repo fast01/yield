@@ -57,8 +57,8 @@ namespace queue {
       Carla Schlatter Ellis (Ed.).
       USENIX Association, Berkeley, CA, USA, 103-114.
 */
-template <class ElementType>
-class TlsConcurrentQueue {
+template <class ElementT>
+class TlsConcurrentQueue : public ConcurrentQueue<ElementT> {
 public:
   TlsConcurrentQueue() {
     tls_key_ = ::yield::thread::Thread::self()->key_create();
@@ -74,30 +74,10 @@ public:
     }
   }
 
-  /**
-    Enqueue a new element.
-    @param element the element to enqueue
-    @return true if the enqueue was successful.
-  */
-  bool enqueue(::std::unique_ptr<ElementType> element) {
-    ::std::stack< ::std::unique_ptr<ElementType> >* stack = static_cast< ::std::stack< ::std::unique_ptr<ElementType> >*>(::yield::thread::Thread::self()->getspecific(tls_key_));
+  ::std::unique_ptr<ElementT> trydequeue() override {
+    ::std::unique_ptr<ElementT> element;
 
-    if (stack != NULL) {
-      stack->push(::std::move(element));
-      return true;
-    } else {
-      return queue_.enqueue(::std::move(element));
-    }
-  }
-
-  /**
-    Try to dequeue an element.
-    @return the dequeued element or NULL if the queue was empty
-  */
-  ::std::unique_ptr<ElementType> trydequeue() {
-    ::std::unique_ptr<ElementType> element;
-
-    ::std::stack< ::std::unique_ptr<ElementType> >* stack = static_cast< ::std::stack< ::std::unique_ptr<ElementType> >*>(::yield::thread::Thread::self()->getspecific(tls_key_));
+    ::std::stack< ::std::unique_ptr<ElementT> >* stack = static_cast< ::std::stack< ::std::unique_ptr<ElementT> >*>(::yield::thread::Thread::self()->getspecific(tls_key_));
 
     if (stack != NULL) {
       if (!stack->empty()) {
@@ -108,17 +88,28 @@ public:
         return queue_.trydequeue();
       }
     } else {
-      stack = new ::std::stack< ::std::unique_ptr<ElementType> >;
+      stack = new ::std::stack< ::std::unique_ptr<ElementT> >;
       ::yield::thread::Thread::self()->setspecific(tls_key_, stack);
       stacks_.push_back(stack);
       return queue_.trydequeue();
     }
   }
 
+  ::std::unique_ptr<ElementT> tryenqueue(::std::unique_ptr<ElementT> element) override {
+    ::std::stack< ::std::unique_ptr<ElementT> >* stack = static_cast< ::std::stack< ::std::unique_ptr<ElementT> >*>(::yield::thread::Thread::self()->getspecific(tls_key_));
+
+    if (stack != NULL) {
+      stack->push(::std::move(element));
+      return NULL;
+    } else {
+      return queue_.tryenqueue(::std::move(element));
+    }
+  }
+
 private:
   uintptr_t tls_key_;
-  BlockingConcurrentQueue<ElementType> queue_;
-  ::std::vector< ::std::stack< ::std::unique_ptr<ElementType> >* > stacks_;
+  BlockingConcurrentQueue<ElementT> queue_;
+  ::std::vector< ::std::stack< ::std::unique_ptr<ElementT> >* > stacks_;
 };
 }
 }

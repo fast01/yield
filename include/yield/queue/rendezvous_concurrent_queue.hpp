@@ -30,7 +30,7 @@
 #ifndef _YIELD_QUEUE_RENDEZVOUS_CONCURRENT_QUEUE_HPP_
 #define _YIELD_QUEUE_RENDEZVOUS_CONCURRENT_QUEUE_HPP_
 
-#include <yield/types.hpp>
+#include "yield/queue/concurrent_queue.hpp"
 
 #include <atomic>
 #include <memory>
@@ -41,36 +41,30 @@ namespace queue {
   A queue that can store only a single element, aka a rendezvous.
   Queue operations are atomic operations on a pointer to the element.
 */
-template <class ElementType>
-class RendezvousConcurrentQueue {
+template <class ElementT>
+class RendezvousConcurrentQueue : public ConcurrentQueue<ElementT> {
 public:
   RendezvousConcurrentQueue() {
     element = 0;
   }
 
-  /**
-    Enqueue a new element.
-    @param element the element to enqueue
-    @return true if the enqueue was successful.
-  */
-  bool enqueue(::std::unique_ptr<ElementType> element) {
-    uintptr_t old_element = 0;
-    uintptr_t new_element = reinterpret_cast<uintptr_t>(element.release());
-    return this->element.compare_exchange_weak(old_element, new_element);
-  }
-
-  /**
-    Try to dequeue an element.
-    Never blocks.
-    @return the dequeued element or NULL if the queue was empty
-  */
-  ::std::unique_ptr<ElementType> trydequeue() {
+  ::std::unique_ptr<ElementT> trydequeue() override {
     uintptr_t old_element = element.load();
     uintptr_t new_element = 0;
     if (this->element.compare_exchange_weak(old_element, new_element)) {
-      return ::std::unique_ptr<ElementType>(reinterpret_cast<ElementType*>(old_element));
+      return ::std::unique_ptr<ElementT>(reinterpret_cast<ElementT*>(old_element));
     } else {
       return NULL;
+    }
+  }
+
+  ::std::unique_ptr<ElementT> tryenqueue(::std::unique_ptr<ElementT> element) override {
+    uintptr_t new_element = reinterpret_cast<uintptr_t>(element.release());
+    uintptr_t old_element = 0;
+    if (this->element.compare_exchange_weak(old_element, new_element)) {
+      return NULL;
+    } else {
+      return ::std::unique_ptr<ElementT>(reinterpret_cast<ElementT*>(new_element));
     }
   }
 
