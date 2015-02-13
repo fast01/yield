@@ -37,7 +37,7 @@ StageScheduler::ConcurrencyLevel::DEFAULT(1);
 
 const StageScheduler::ConcurrencyLevel
 StageScheduler::ConcurrencyLevel::PER_PROCESSOR(
-  yield::thread::ProcessorSet::get_online_logical_processor_count()
+  ::yield::thread::ProcessorSet::get_online_logical_processor_count()
 );
 }
 }

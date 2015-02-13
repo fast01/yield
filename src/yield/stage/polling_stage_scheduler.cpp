@@ -32,68 +32,59 @@
 
 namespace yield {
 namespace stage {
+using ::std::move;
+using ::std::unique_ptr;
 using ::std::vector;
 using ::yield::thread::Thread;
 
 PollingStageScheduler::~PollingStageScheduler() {
   for (
-    vector<Thread*>::iterator thread_i = threads.begin();
+    auto thread_i = threads.begin();
     thread_i != threads.end();
     ++thread_i
   ) {
-    static_cast<StagePoller*>((*thread_i)->get_runnable())
-    ->stop();
+    static_cast<StagePoller&>((*thread_i)->runnable()).stop();
     (*thread_i)->join();
-    delete *thread_i;
   }
 }
 
 void
 PollingStageScheduler::schedule(
-  Stage& stage,
+  unique_ptr<Stage> stage,
   ConcurrencyLevel concurrency_level
 ) {
   for (uint16_t thread_i = 0; thread_i < concurrency_level; thread_i++) {
     if (thread_i < threads.size()) {
-      Thread* thread = threads[thread_i % threads.size()];
-      StagePoller* stage_poller
-      = static_cast<StagePoller*>(thread->get_runnable());
-      stage_poller->schedule(stage);
+      Thread* thread = threads[thread_i % threads.size()].get();
+      StagePoller& stage_poller
+      = static_cast<StagePoller&>(thread->runnable());
+      stage_poller.schedule(move(stage));
     } else {
-      threads.push_back(new Thread(createStagePoller(stage)));
+      threads.push_back(unique_ptr<Thread>(new Thread(move(create_stage_poller(move(stage))))));
     }
   }
 }
 
 
-PollingStageScheduler::StagePoller::StagePoller(Stage& first_stage) {
-  stages.push_back(&first_stage);
+PollingStageScheduler::StagePoller::StagePoller(unique_ptr<Stage> first_stage) {
+  stages_.push_back(::std::move(first_stage));
 }
 
-PollingStageScheduler::StagePoller::~StagePoller() {
-  //for (
-  //  vector<Stage*>::iterator stage_i = stages.begin();
-  //  stage_i != stages.end();
-  //  ++stage_i
-  //) {
-  //  Stage::dec_ref(**stage_i);
-  //}
-}
-
-vector<Stage*>& PollingStageScheduler::StagePoller::get_stages() {
-  Stage* new_stage = this->new_stage.trydequeue();
+vector< unique_ptr<Stage> >& PollingStageScheduler::StagePoller::stages() {
+  unique_ptr<Stage> new_stage = this->new_stage_.trydequeue();
   while (new_stage != NULL) {
-    stages.push_back(reinterpret_cast<Stage*>(new_stage));
-    new_stage = this->new_stage.trydequeue();
+    stages_.push_back(move(new_stage));
+    new_stage = this->new_stage_.trydequeue();
   }
-
-  return stages;
+  return stages_;
 }
 
-void PollingStageScheduler::StagePoller::schedule(Stage& stage) {
-  //stage.inc_ref();
-  while (!new_stage.enqueue(stage)) {
-    ;
+void PollingStageScheduler::StagePoller::schedule(unique_ptr<Stage> stage) {
+  for (;;) {
+    stage = new_stage_.tryenqueue(move(stage));
+    if (stage == NULL) {
+      break;
+    }
   }
 }
 }

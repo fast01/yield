@@ -36,55 +36,58 @@
 
 namespace yield {
 namespace stage {
+using ::std::make_shared;
+using ::std::shared_ptr;
+using ::std::unique_ptr;
 using ::std::vector;
+using ::yield::thread::Runnable;
 using ::yield::thread::Thread;
 
-class SedaStageScheduler::SedaStage : public ::yield::thread::Runnable {
+class SedaStageScheduler::SedaStage : public Runnable {
 public:
-  SedaStage(Stage& stage)
-    : stage(stage),
-      visit_timeout(5) {
-    should_run = true;
+  SedaStage(shared_ptr<Stage> stage)
+    : stage_(stage),
+      visit_timeout_(5) {
+    should_run_ = true;
   }
 
   void stop() {
-    should_run = false;
+    should_run_ = false;
   }
 
   // yield::thread::Runnable
   void run() {
-    while (should_run) {
-      stage.visit(visit_timeout);
+    while (should_run_) {
+      stage_->visit(visit_timeout_);
     }
   }
 
 private:
-  bool should_run;
-  Stage& stage;
-  Time visit_timeout;
+  bool should_run_;
+  shared_ptr<Stage> stage_;
+  Time visit_timeout_;
 };
 
 
 SedaStageScheduler::~SedaStageScheduler() {
   for (
-    vector<Thread*>::iterator thread_i = threads.begin();
+    auto thread_i = threads.begin();
     thread_i != threads.end();
     ++thread_i
   ) {
-    static_cast<SedaStage*>((*thread_i)->get_runnable())->stop();
+    static_cast<SedaStage&>((*thread_i)->runnable()).stop();
     (*thread_i)->join();
-    Thread::dec_ref(**thread_i);
   }
 }
 
 void
 SedaStageScheduler::schedule(
-  YO_NEW_REF Stage& stage,
+  unique_ptr<Stage> stage,
   ConcurrencyLevel concurrency_level
 ) {
-  auto_Object<SedaStage> seda_stage = new SedaStage(stage);
+  shared_ptr<Stage> stage_shared(stage.release());
   for (int16_t thread_i = 0; thread_i < concurrency_level; thread_i++) {
-    threads.push_back(new Thread(seda_stage->inc_ref()));
+    threads.push_back(unique_ptr<Thread>(new Thread(unique_ptr<Runnable>(new SedaStage(stage_shared)))));
   }
 }
 }

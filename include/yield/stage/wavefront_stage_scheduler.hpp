@@ -35,13 +35,13 @@
 
 namespace yield {
 namespace stage {
-class WavefrontStageScheduler : public PollingStageScheduler {
+class WavefrontStageScheduler final : public PollingStageScheduler {
 private:
   class StagePoller;
 
 private:
   // PollingStageScheduler
-  PollingStageScheduler::StagePoller& createStagePoller(Stage&);
+  ::std::unique_ptr<PollingStageScheduler::StagePoller> create_stage_poller(::std::unique_ptr<Stage> first_stage) override;
 };
 }
 }

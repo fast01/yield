@@ -35,18 +35,19 @@
 
 namespace yield {
 namespace stage {
-class SedaStageScheduler : public StageScheduler {
+class SedaStageScheduler final : public StageScheduler {
 public:
-  ~SedaStageScheduler();
+  virtual ~SedaStageScheduler();
 
+public:
   // StageScheduler
-  void schedule(Stage&, ConcurrencyLevel);
+  void schedule(::std::unique_ptr<Stage>, ConcurrencyLevel) override;
 
 private:
   class SedaStage;
 
 private:
-  ::std::vector< ::yield::thread::Thread*> threads;
+  ::std::vector< ::std::unique_ptr< ::yield::thread::Thread > > threads;
 };
 }
 }

@@ -44,39 +44,43 @@ public:
   virtual ~PollingStageScheduler();
 
   // StageScheduler
-  void schedule(Stage&, ConcurrencyLevel);
+  void schedule(::std::unique_ptr<Stage>, ConcurrencyLevel) override;
 
 protected:
   class StagePoller : public ::yield::thread::Runnable {
   public:
-    virtual ~StagePoller();
+    virtual ~StagePoller() {
+    }
 
-    void schedule(Stage&);
+  public:
+    void schedule(::std::unique_ptr<Stage>);
+
     void stop() {
-      _should_run = false;
+      should_run_ = false;
     }
 
   protected:
-    StagePoller(Stage&);
+    StagePoller(::std::unique_ptr<Stage>);
 
-    ::std::vector<Stage*>& get_stages();
+    ::std::vector< ::std::unique_ptr<Stage> >& stages();
+
     inline bool should_run() const {
-      return _should_run;
+      return should_run_;
     }
 
   private:
-    ::yield::queue::RendezvousConcurrentQueue<Stage> new_stage;
-    bool _should_run;
-    ::std::vector<Stage*> stages;
+    ::yield::queue::RendezvousConcurrentQueue<Stage> new_stage_;
+    bool should_run_;
+    ::std::vector< ::std::unique_ptr<Stage> > stages_;
   };
 
 protected:
   PollingStageScheduler() { }
 
-  virtual YO_NEW_REF StagePoller& createStagePoller(Stage&) = 0;
+  virtual ::std::unique_ptr<StagePoller> create_stage_poller( ::std::unique_ptr<Stage> ) = 0;
 
 private:
-  ::std::vector< ::yield::thread::Thread*> threads;
+  ::std::vector< ::std::unique_ptr< ::yield::thread::Thread > > threads;
 };
 }
 }
