@@ -37,7 +37,9 @@ namespace yield {
 namespace fs {
 namespace poll {
 namespace win32 {
-YO_NEW_REF FsEvent*
+using ::std::unique_ptr;
+
+unique_ptr<FsEvent>
 FileWatch::parse(
   const FILE_NOTIFY_INFORMATION& file_notify_info
 ) {
@@ -48,9 +50,9 @@ FileWatch::parse(
     file_notify_info.FileName,
     file_notify_info.FileNameLength / sizeof(wchar_t)
   );
-  Path path = directory_path / name;
+  Path path = directory_path_ / name;
 
-  if (path == this->get_path()) {
+  if (path == this->path()) {
     switch (file_notify_info.Action) {
     case FILE_ACTION_MODIFIED: {
       fs_event_type = FsEvent::TYPE_FILE_MODIFY;
@@ -63,8 +65,8 @@ FileWatch::parse(
     break;
 
     case FILE_ACTION_RENAMED_OLD_NAME: {
-      CHECK(old_name.empty());
-      old_name = name;
+      CHECK(old_name_.empty());
+      old_name_ = name;
       return NULL;
     }
     break;
@@ -75,21 +77,21 @@ FileWatch::parse(
     }
 
     if (want_fs_event_type(fs_event_type)) {
-      FsEvent* fs_event = new FsEvent(get_path(), fs_event_type);
+      unique_ptr<FsEvent> fs_event(new FsEvent(this->path(), fs_event_type));
       log_fs_event(*fs_event);
       return fs_event;
     } else {
       return NULL;
     }
   } else if (
-    !old_name.empty()
+    !old_name_.empty()
     &&
     file_notify_info.Action == FILE_ACTION_RENAMED_NEW_NAME
   ) {
-    CHECK_EQ(directory_path / old_name, get_path());
+    CHECK_EQ(directory_path_ / old_name_, this->path());
     fs_event_type = FsEvent::TYPE_FILE_RENAME;
     if (want_fs_event_type(fs_event_type)) {
-      FsEvent* fs_event = new FsEvent(get_path(), path, fs_event_type);
+      unique_ptr<FsEvent> fs_event(new FsEvent(this->path(), path, fs_event_type));
       log_fs_event(*fs_event);
       return fs_event;
     } else {

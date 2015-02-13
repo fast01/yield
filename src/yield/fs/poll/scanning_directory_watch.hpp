@@ -37,29 +37,27 @@
 namespace yield {
 namespace fs {
 namespace poll {
-class ScanningDirectoryWatch : public ScanningWatch {
+class ScanningDirectoryWatch final : public ScanningWatch {
 public:
   ScanningDirectoryWatch(
     FsEvent::Type fs_event_types,
     const Path& path
   );
 
-  virtual ~ScanningDirectoryWatch();
-
 public:
   // yield::fs::poll::ScanningWatch
-  void scan(EventHandler& fs_event_handler) {
-    scan(fs_event_handler, get_fs_event_types());
+  void scan(EventHandler<FsEvent>& fs_event_handler) {
+    scan(fs_event_handler, fs_event_types());
   }
 
 protected:
-  void scan(EventHandler& fs_event_handler, FsEvent::Type fs_event_types);
+  void scan(EventHandler<FsEvent>& fs_event_handler, FsEvent::Type fs_event_types);
 
 private:
-  YO_NEW_REF Stat* stat(Directory::Entry&);
+  ::std::unique_ptr<Stat> stat(Directory::Entry&);
 
 private:
-  std::map<Path, Stat*>* dentries;
+  ::std::unique_ptr< ::std::map< Path, ::std::shared_ptr<Stat> > > dentries_;
 };
 }
 }

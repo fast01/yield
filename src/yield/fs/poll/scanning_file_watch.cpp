@@ -36,32 +36,28 @@
 namespace yield {
 namespace fs {
 namespace poll {
+using ::std::unique_ptr;
+
 ScanningFileWatch::ScanningFileWatch(
   FsEvent::Type fs_event_types,
   const Path& path
 ) : ScanningWatch(fs_event_types, path) {
-  stbuf = FileSystem().stat(get_path());
+  stbuf = FileSystem().stat(this->path());
   if (stbuf == NULL) {
     throw Exception();
   }
 }
 
-ScanningFileWatch::~ScanningFileWatch() {
-  delete stbuf;
-}
-
-void ScanningFileWatch::scan(EventHandler& fs_event_handler) {
-  Stat* new_stbuf = FileSystem().stat(get_path());
-  Stat* old_stbuf = stbuf;
+void ScanningFileWatch::scan(EventHandler<FsEvent>& fs_event_handler) {
+  unique_ptr<Stat> new_stbuf = FileSystem().stat(path());
+  unique_ptr<Stat> old_stbuf(stbuf.release());
   CHECK_NE(old_stbuf, NULL);
-  stbuf = NULL;
 
   FsEvent::Type fs_event_type;
   if (new_stbuf != NULL) { // File exists
     if (type(*new_stbuf) == type(*old_stbuf)) { // File has not changed type
       if (equals(*new_stbuf, *old_stbuf)) {
-        delete old_stbuf;
-        stbuf = new_stbuf;
+        stbuf.reset(new_stbuf.release());
         return;
       } else {
         fs_event_type = FsEvent::TYPE_FILE_MODIFY;
@@ -74,13 +70,12 @@ void ScanningFileWatch::scan(EventHandler& fs_event_handler) {
   }
 
   if (want_fs_event_type(fs_event_type)) {
-    FsEvent* fs_event = new FsEvent(get_path(), fs_event_type);
+    unique_ptr<FsEvent> fs_event(new FsEvent(path(), fs_event_type));
     log_fs_event(*fs_event);
-    fs_event_handler.handle(*fs_event);
+    fs_event_handler.handle(move(fs_event));
   }
 
-  delete old_stbuf;
-  stbuf = new_stbuf;
+  stbuf.reset(new_stbuf.release());
 }
 }
 }

@@ -40,63 +40,53 @@ namespace yield {
 namespace fs {
 namespace poll {
 template <class WatchType>
-class Watches : private std::map<Path, WatchType*> {
+class Watches final {
 public:
-  typedef typename std::map<Path, WatchType*>::const_iterator const_iterator;
+  typedef typename std::map<Path, ::std::shared_ptr<WatchType> >::const_iterator const_iterator;
 
 public:
-  ~Watches() {
-    for (
-      typename std::map<Path, WatchType*>::iterator watch_i
-      = std::map<Path, WatchType*>::begin();
-      watch_i != std::map<Path, WatchType*>::end();
-      ++watch_i
-    ) {
-      delete watch_i->second;
-    }
-  }
-
   const_iterator begin() const {
-    return std::map<Path, WatchType*>::begin();
+    return map_.begin();
   }
 
   bool empty() const {
-    return std::map<Path, WatchType*>::empty();
+    return map_.empty();
   }
 
   const_iterator end() const {
-    return std::map<Path, WatchType*>::end();
+    return map_.end();
   }
 
-  WatchType* erase(const Path& path) {
-    typename std::map<Path, WatchType*>::iterator watch_i
-    = std::map<Path, WatchType*>::find(path);
-    if (watch_i != std::map<Path, WatchType*>::end()) {
-      WatchType* watch = watch_i->second;
-      std::map<Path, WatchType*>::erase(watch_i);
+  ::std::shared_ptr<WatchType> erase(const Path& path) {
+    auto watch_i = map_.find(path);
+    if (watch_i != map_.end()) {
+      ::std::shared_ptr<WatchType> watch = ::std::move(watch_i->second);
+      map_.erase(watch_i);
       return watch;
     } else {
       return NULL;
     }
   }
 
-  WatchType* find(const Path& path) const {
-    typename std::map<Path, WatchType*>::const_iterator watch_i
-    = std::map<Path, WatchType*>::find(path);
-    if (watch_i != std::map<Path, WatchType*>::end()) {
+  ::std::shared_ptr<WatchType> find(const Path& path) const {
+    auto watch_i = map_.find(path);
+    if (watch_i != map_.end()) {
       return watch_i->second;
     } else {
       return NULL;
     }
   }
 
-  void insert(const Path& path, YO_NEW_REF WatchType& watch) {
-    if (std::map<Path, WatchType*>::find(path) == end()) {
-      std::map<Path, WatchType*>::insert(std::make_pair(path, &watch));
+  void insert(const Path& path, ::std::shared_ptr<WatchType> watch) {
+    if (map_.find(path) == map_.end()) {
+      map_.insert(::std::make_pair(path, watch));
     } else {
       CHECK(false);
     }
   }
+
+private:
+  std::map<Path, ::std::shared_ptr<WatchType> > map_;
 };
 }
 }

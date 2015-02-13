@@ -46,16 +46,8 @@ public:
     return synchronized_queue_.dequeue();
   }
 
-  void enqueue(::std::unique_ptr<EventT> event) override {
-    synchronized_queue_.enqueue(::std::move(event));
-  }
-
   ::std::unique_ptr<EventT> timeddequeue(const Time& timeout) override {
     return synchronized_queue_.timeddequeue(timeout);
-  }
-
-  ::std::unique_ptr<EventT> timedenqueue(::std::unique_ptr<EventT> event, const Time& timeout) override {
-    return synchronized_queue_.timedenqueue(::std::move(event), timeout);
   }
 
   ::std::unique_ptr<EventT> trydequeue() override {

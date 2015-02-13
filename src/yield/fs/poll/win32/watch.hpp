@@ -56,31 +56,31 @@ public:
   bool is_closed() const;
 
 public:
-  char* get_buffer() {
-    return &buffer[0];
+  char* buffer() {
+    return &buffer_[0];
   }
 
-  size_t get_buffer_length() const {
-    return sizeof(buffer);
+  size_t buffer_length() const {
+    return sizeof(buffer_);
   }
 
-  Directory& get_directory() {
-    return *directory;
+  Directory& directory() {
+    return *directory_;
   }
 
-  unsigned long get_notify_filter() const {
-    return notify_filter;
+  unsigned long notify_filter() const {
+    return notify_filter_;
   }
 
 public:
   operator ::OVERLAPPED* ();
 
 public:
-  virtual YO_NEW_REF FsEvent* parse(const FILE_NOTIFY_INFORMATION&) = 0;
+  virtual ::std::unique_ptr<FsEvent> parse(const FILE_NOTIFY_INFORMATION&) = 0;
 
 protected:
   Watch(
-    YO_NEW_REF Directory& directory,
+    ::std::shared_ptr<Directory> directory,
     FsEvent::Type fs_event_types,
     const Path& path
   );
@@ -89,9 +89,9 @@ protected:
   void log_read(const FILE_NOTIFY_INFORMATION&);
 
 private:
-  char buffer[(12 + 260 * sizeof(wchar_t)) * 16];
-  Directory* directory;
-  unsigned long notify_filter;
+  char buffer_[(12 + 260 * sizeof(wchar_t)) * 16];
+  ::std::shared_ptr<Directory> directory_;
+  unsigned long notify_filter_;
 
   struct {
     unsigned long* Internal;
@@ -107,7 +107,7 @@ private:
     };
 #pragma warning(pop)
     void* hEvent;
-  } overlapped;
+  } overlapped_;
   Watch* this_;
 };
 }

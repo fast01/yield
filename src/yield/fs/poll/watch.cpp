@@ -33,17 +33,12 @@
 namespace yield {
 namespace fs {
 namespace poll {
-Watch::Watch(FsEvent::Type fs_event_types, const Path& path)
-  : fs_event_types(fs_event_types),
-    path(path) {
-}
-
 Watch::Watch(const Watch&) {
   CHECK(false);
 }
 
 void Watch::log_fs_event(const FsEvent& fs_event) const {
-  FsEvent::Type fs_event_types = get_fs_event_types();
+  FsEvent::Type fs_event_types = this->fs_event_types();
   std::string fs_event_types_str;
   if (fs_event_types == FsEvent::TYPE_ALL) {
     fs_event_types_str = "TYPE_ALL";
@@ -102,7 +97,7 @@ void Watch::log_fs_event(const FsEvent& fs_event) const {
                                       "yield::fs::poll::Watch("
                                       "fs_event_types=" << fs_event_types_str <<
                                       ", " <<
-                                      "path=" << get_path() <<
+                                      "path=" << path() <<
                                       ")" <<
                                       ": read " << fs_event;
 }

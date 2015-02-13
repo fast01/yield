@@ -35,17 +35,16 @@
 namespace yield {
 namespace fs {
 namespace poll {
-class ScanningFileWatch : public ScanningWatch {
+class ScanningFileWatch final : public ScanningWatch {
 public:
   ScanningFileWatch(FsEvent::Type fs_event_types, const Path& path);
-  virtual ~ScanningFileWatch();
 
 public:
   // yield::fs::poll::ScanningWatch
-  void scan(EventHandler& fs_event_handler);
+  void scan(EventHandler<FsEvent>& fs_event_handler);
 
 private:
-  Stat* stbuf;
+  ::std::unique_ptr<Stat> stbuf;
 };
 }
 }

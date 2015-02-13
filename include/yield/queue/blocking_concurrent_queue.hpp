@@ -42,7 +42,7 @@ namespace queue {
     block the caller indefinitely in either operation.
 */
 template <class ElementT>
-class BlockingConcurrentQueue : public ConcurrentQueue<ElementT> {
+class BlockingConcurrentQueue final : public ConcurrentQueue<ElementT> {
 public:
   ::std::unique_ptr<ElementT> trydequeue() override {
     ::yield::thread::Mutex::Holder mutex_holder(mutex_);

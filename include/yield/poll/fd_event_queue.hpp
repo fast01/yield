@@ -77,8 +77,8 @@ public:
 
 public:
   // yield::EventQueue
-  bool enqueue(::std::unique_ptr<FdEvent> event) override;
   ::std::unique_ptr<FdEvent> timeddequeue(const Time& timeout) override;
+  ::std::unique_ptr<FdEvent> tryenqueue(::std::unique_ptr<FdEvent> event) override;
   void wake() override;
 
 private:

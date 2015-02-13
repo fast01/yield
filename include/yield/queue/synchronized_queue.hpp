@@ -143,7 +143,7 @@ public:
     Interrupt a blocking dequeue.
    */
   void wake() {
-    enqueue(::std::unique_ptr<ElementT>());
+    tryenqueue(::std::unique_ptr<ElementT>());
   }
 
 private:

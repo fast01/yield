@@ -38,17 +38,21 @@ namespace yield {
 namespace fs {
 namespace poll {
 namespace win32 {
+using ::std::move;
+using ::std::shared_ptr;
+using ::std::unique_ptr;
+
 Watch::Watch(
-  YO_NEW_REF Directory& directory,
+  shared_ptr<Directory> directory,
   FsEvent::Type fs_event_types,
   const Path& path
 ) : yield::fs::poll::Watch(fs_event_types, path),
-  directory(&directory) {
-  static_assert(sizeof(overlapped) == sizeof(::OVERLAPPED), "");
-  memset(&overlapped, 0, sizeof(overlapped));
+  directory_(move(directory)) {
+  static_assert(sizeof(overlapped_) == sizeof(::OVERLAPPED), "");
+  memset(&overlapped_, 0, sizeof(overlapped_));
   this_ = this;
 
-  notify_filter = 0;
+  notify_filter_ = 0;
 
   if (
     fs_event_types & FsEvent::TYPE_DIRECTORY_ADD
@@ -57,7 +61,7 @@ Watch::Watch(
     ||
     fs_event_types & FsEvent::TYPE_DIRECTORY_RENAME
   ) {
-    notify_filter |= FILE_NOTIFY_CHANGE_DIR_NAME;
+    notify_filter_ |= FILE_NOTIFY_CHANGE_DIR_NAME;
   }
 
   if (
@@ -65,7 +69,7 @@ Watch::Watch(
     ||
     fs_event_types & FsEvent::TYPE_FILE_MODIFY
   ) {
-    notify_filter |= FILE_NOTIFY_CHANGE_ATTRIBUTES |
+    notify_filter_ |= FILE_NOTIFY_CHANGE_ATTRIBUTES |
                      FILE_NOTIFY_CHANGE_CREATION |
                      FILE_NOTIFY_CHANGE_LAST_ACCESS |
                      FILE_NOTIFY_CHANGE_LAST_WRITE |
@@ -79,7 +83,7 @@ Watch::Watch(
     ||
     fs_event_types & FsEvent::TYPE_FILE_RENAME
   ) {
-    notify_filter |= FILE_NOTIFY_CHANGE_FILE_NAME;
+    notify_filter_ |= FILE_NOTIFY_CHANGE_FILE_NAME;
   }
 }
 
@@ -101,22 +105,21 @@ Watch& Watch::cast(::OVERLAPPED& lpOverlapped) {
 }
 
 void Watch::close() {
-  if (directory != NULL) {
-    CancelIoEx(*directory, *this);
-    directory->close();
-    Directory::dec_ref(*directory);
-    directory = NULL;
+  if (directory_ != NULL) {
+    CancelIoEx(*directory_, *this);
+    directory_->close();
+    directory_.reset();
   }
 }
 
 bool Watch::is_closed() const {
-  return directory == NULL;
+  return directory_ == NULL;
 }
 
 void Watch::log_read(const FILE_NOTIFY_INFORMATION& file_notify_info) {
   DLOG(DEBUG) <<
       "yield::fs::poll::win32::Watch(" <<
-      "path=" << get_path() <<
+      "path=" << path() <<
       ")" <<
       ": read FILE_NOTIFY_INFORMATION(" <<
       "Action=" << file_notify_info.Action <<
@@ -130,7 +133,7 @@ void Watch::log_read(const FILE_NOTIFY_INFORMATION& file_notify_info) {
 }
 
 Watch::operator ::OVERLAPPED* () {
-  return reinterpret_cast<::OVERLAPPED*>(&overlapped);
+  return reinterpret_cast< ::OVERLAPPED* >(&overlapped_);
 }
 }
 }

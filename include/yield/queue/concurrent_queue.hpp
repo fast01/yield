@@ -30,10 +30,16 @@
 #ifndef _YIELD_QUEUE_CONCURRENT_QUEUE_HPP_
 #define _YIELD_QUEUE_CONCURRENT_QUEUE_HPP_
 
+#include <memory>
+
 namespace yield {
 namespace queue {
 template <class ElementT>
 class ConcurrentQueue {
+public:
+  virtual ~ConcurrentQueue() {
+  }
+
 public:
   /**
     Try to dequeue an element.

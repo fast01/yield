@@ -38,17 +38,17 @@ namespace yield {
 namespace fs {
 namespace poll {
 namespace win32 {
-class DirectoryWatch : public Watch {
+class DirectoryWatch final : public Watch {
 public:
   DirectoryWatch(
-    YO_NEW_REF Directory& directory,
+    ::std::shared_ptr<Directory> directory,
     FsEvent::Type fs_event_types,
     const Path& path
   );
 
 public:
   // yield::fs::poll::win32::Watch
-  YO_NEW_REF FsEvent* parse(const FILE_NOTIFY_INFORMATION&);
+  ::std::unique_ptr<FsEvent> parse(const FILE_NOTIFY_INFORMATION&) override;
 
 private:
   ::std::stack<Path> old_paths;

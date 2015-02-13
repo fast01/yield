@@ -30,8 +30,9 @@
 #ifndef _YIELD_FS_POLL_SCANNING_FS_EVENT_QUEUE_HPP_
 #define _YIELD_FS_POLL_SCANNING_FS_EVENT_QUEUE_HPP_
 
+#include "yield/event_queue.hpp"
 #include "yield/fs/poll/fs_event.hpp"
-#include "yield/queue/synchronized_event_queue.hpp"
+#include "yield/stage/synchronized_event_queue.hpp"
 
 namespace yield {
 namespace fs {
@@ -45,14 +46,12 @@ template <class> class Watches;
   Used as a fallback implementation when more efficient means (such as
     ReadDirectoryChangesW on Win32 or inotify on Linux) are not available.
 */
-class ScanningFsEventQueue : public EventQueue<FsEvent> {
+class ScanningFsEventQueue final : public EventQueue<FsEvent> {
 public:
   /**
     Construct a ScanningFsEventQueue.
   */
   ScanningFsEventQueue();
-
-  ~ScanningFsEventQueue();
 
 public:
   /**
@@ -77,12 +76,12 @@ public:
 
 public:
   // yield::EventQueue
-  bool enqueue(YO_NEW_REF Event& event);
-  YO_NEW_REF Event* timeddequeue(const Time& timeout);
+  ::std::unique_ptr<FsEvent> timeddequeue(const Time& timeout) override;
+  ::std::unique_ptr<FsEvent> tryenqueue(::std::unique_ptr<FsEvent> event) override;
 
 private:
-  ::yield::queue::SynchronizedEventQueue event_queue;
-  Watches<ScanningWatch>* watches;
+  ::yield::stage::SynchronizedEventQueue<FsEvent> event_queue_;
+  ::std::unique_ptr< Watches<ScanningWatch> > watches_;
 };
 }
 }

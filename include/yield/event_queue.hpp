@@ -48,47 +48,44 @@ public:
   virtual ~EventQueue() { }
 
   /**
-    Blocking dequeue. Always returns a new reference to an Event.
-    @return a new reference to an Event.
+    Dequeue an event, blocking indefinitely until one becomes available or wake() is called.
+    @return an event if one is available, NULL if wake() was called before that
   */
   virtual ::std::unique_ptr<EventT> dequeue() {
     return timeddequeue(Time::FOREVER);
   }
 
   /**
-    Enqueue a new reference to an Event.
-    Will almost always return true. The exceptions are when a memory queue is full
-      and when special enqueues (e.g., AIO) fail at the system call level.
-    @param event the new Event reference to enqueue
-    @return true if the enqueue succeeded.
-  */
-  virtual bool enqueue(::std::unique_ptr<EventT> event) = 0;
-
-  /**
-    Timed dequeue.
-    Blocks for the specified timeout or until an Event is available.
-    If the timeout expires and the queue is still empty, returns NULL.
-    @param timeout the time to wait for new Events
-    @return a new reference to an Event or NULL
+    Dequeue an event, blocking until one becomes available, the timeout expires, or wake() is called.
+    @param timeout the time to wait for new events
+    @return an event if one is available within the timeout, otherwise NULL
   */
   virtual ::std::unique_ptr<EventT> timeddequeue(const Time& timeout) = 0;
 
   /**
-    Non-blocking dequeue.
-    Returns a new reference to an Event or NULL if the queue is empty.
-    This method is guaranteed not to block.
-    @return a new reference to an Event or NULL.
+    Dequeue an event, non-blocking.
+    @return an event if one is available immediately, otherwise NULL
   */
   virtual ::std::unique_ptr<EventT> trydequeue() {
     return timeddequeue(0);
   }
 
+  /**
+    Enqueue an event, non-blocking.
+    @param event the event to enqueue
+    @return NULL if the enqueue succeeded, otherwise the event
+  */
+  virtual ::std::unique_ptr<EventT> tryenqueue(::std::unique_ptr<EventT> event) = 0;
+
+  /**
+    Interrupt a blocking enqueue or dequeue.
+   */
   virtual void wake() = 0;
 
-public:
-  // yield::EventHandler
-  void handle(::std::unique_ptr<EventT> event) override {
-    enqueue(::std::move(event));
+private:
+  // EventHandler
+  void handle(::std::unique_ptr<EventT> event) {
+    tryenqueue(::std::move(event));
   }
 };
 }

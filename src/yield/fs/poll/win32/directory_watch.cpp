@@ -37,27 +37,27 @@ namespace yield {
 namespace fs {
 namespace poll {
 namespace win32 {
+using ::std::shared_ptr;
+using ::std::unique_ptr;
 using ::std::vector;
 
 DirectoryWatch::DirectoryWatch(
-  YO_NEW_REF Directory& directory,
+  shared_ptr<Directory> directory,
   FsEvent::Type fs_event_types,
   const Path& path
 ) : Watch(directory, fs_event_types, path) {
-  Directory::Entry* dirent = directory.read();
+  unique_ptr<Directory::Entry> dirent = directory->read();
   if (dirent != NULL) {
     do {
       if (dirent->ISDIR() && !dirent->is_hidden() && !dirent->is_special()) {
         subdirectory_names.push_back(dirent->get_name());
       }
-    } while (directory.read(*dirent));
-
-    Directory::Entry::dec_ref(*dirent);
-    directory.rewind();
+    } while (directory->read(*dirent));
+    directory->rewind();
   }
 }
 
-YO_NEW_REF FsEvent*
+unique_ptr<FsEvent>
 DirectoryWatch::parse(
   const FILE_NOTIFY_INFORMATION& file_notify_info
 ) {
@@ -68,7 +68,7 @@ DirectoryWatch::parse(
     file_notify_info.FileName,
     file_notify_info.FileNameLength / sizeof(wchar_t)
   );
-  Path path = this->get_path() / name;
+  Path path = this->path() / name;
 
   switch (file_notify_info.Action) {
   case FILE_ACTION_ADDED: {
@@ -119,7 +119,7 @@ DirectoryWatch::parse(
     }
 
     if (want_fs_event_type(fs_event_type)) {
-      FsEvent* fs_event = new FsEvent(old_paths.top(), path, fs_event_type);
+      unique_ptr<FsEvent> fs_event(new FsEvent(old_paths.top(), path, fs_event_type));
       log_fs_event(*fs_event);
       old_paths.pop();
       return fs_event;
@@ -155,7 +155,7 @@ DirectoryWatch::parse(
   }
 
   if (want_fs_event_type(fs_event_type)) {
-    FsEvent* fs_event = new FsEvent(path, fs_event_type);
+    unique_ptr<FsEvent> fs_event(new FsEvent(path, fs_event_type));
     log_fs_event(*fs_event);
     return fs_event;
   } else {

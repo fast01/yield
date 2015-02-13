@@ -40,30 +40,27 @@
 namespace yield {
 namespace fs {
 namespace poll {
+using ::std::make_shared;
+using ::std::shared_ptr;
+using ::std::unique_ptr;
 using win32::DirectoryWatch;
 using win32::FileWatch;
 
 FsEventQueue::FsEventQueue() {
-  hIoCompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-  if (hIoCompletionPort != INVALID_HANDLE_VALUE) {
-    watches = new Watches<win32::Watch>;
-  } else {
-    watches = NULL;
+  hIoCompletionPort_ = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+  if (hIoCompletionPort_ == INVALID_HANDLE_VALUE) {
     throw Exception();
   }
-}
-
-FsEventQueue::~FsEventQueue() {
-  delete watches;
+  watches_.reset(new Watches<win32::Watch>);
 }
 
 bool FsEventQueue::associate(const Path& path, FsEvent::Type fs_event_types) {
-  Watch* watch = watches->find(path);
+  shared_ptr<Watch> watch = watches_->find(path);
   if (watch != NULL) {
-    if (watch->get_fs_event_types() == fs_event_types) {
+    if (watch->fs_event_types() == fs_event_types) {
       return true;
     } else {
-      delete watches->erase(path);
+      watches_->erase(path);
     }
   }
 
@@ -74,23 +71,23 @@ bool FsEventQueue::associate(const Path& path, FsEvent::Type fs_event_types) {
     directory_path = path.split().first;
   }
 
-  Directory* directory = FileSystem().opendir(directory_path);
+  shared_ptr<Directory> directory = FileSystem().opendir(directory_path);
   if (directory != NULL) {
     if (
       CreateIoCompletionPort(
         *directory,
-        hIoCompletionPort,
+        hIoCompletionPort_,
         0,
         0
       ) != INVALID_HANDLE_VALUE
     ) {
-      win32::Watch* watch;
+      shared_ptr<win32::Watch> watch;
       if (path == directory_path) {
-        watch = new DirectoryWatch(*directory, fs_event_types, path);
+        watch = make_shared<DirectoryWatch>(directory, fs_event_types, path);
       } else {
         watch
-        = new FileWatch(
-          *directory,
+        = make_shared<FileWatch>(
+          directory,
           directory_path,
           path,
           fs_event_types
@@ -101,20 +98,19 @@ bool FsEventQueue::associate(const Path& path, FsEvent::Type fs_event_types) {
       if (
         ReadDirectoryChangesW(
           *directory,
-          watch->get_buffer(),
-          watch->get_buffer_length(),
+          watch->buffer(),
+          watch->buffer_length(),
           FALSE,
-          watch->get_notify_filter(),
+          watch->notify_filter(),
           &dwBytesRead,
           *watch,
           NULL
         )
       ) {
         CHECK_EQ(dwBytesRead, 0);
-        watches->insert(path, *watch);
+        watches_->insert(path, watch);
         return true;
       } else {
-        delete watch;
         return false;
       }
     } else {
@@ -126,7 +122,7 @@ bool FsEventQueue::associate(const Path& path, FsEvent::Type fs_event_types) {
 }
 
 bool FsEventQueue::dissociate(const Path& path) {
-  win32::Watch* watch = watches->erase(path);
+  shared_ptr<win32::Watch> watch = watches_->erase(path);
   if (watch != NULL) {
     watch->close();
     return true;
@@ -135,24 +131,31 @@ bool FsEventQueue::dissociate(const Path& path) {
   }
 }
 
-bool FsEventQueue::enqueue(YO_NEW_REF FsEvent& event) {
-  return PostQueuedCompletionStatus(
-           hIoCompletionPort,
-           0,
-           reinterpret_cast<ULONG_PTR>(&event),
-           NULL
-         )
-         == TRUE;
+unique_ptr<FsEvent> FsEventQueue::tryenqueue(unique_ptr<FsEvent> event) {
+  CHECK(false);
+  return NULL;
+  //return PostQueuedCompletionStatus(
+  //         hIoCompletionPort,
+  //         0,
+  //         reinterpret_cast<ULONG_PTR>(&event),
+  //         NULL
+  //       )
+  //       == TRUE;
 }
 
-YO_NEW_REF FsEvent* FsEventQueue::timeddequeue(const Time& timeout) {
+unique_ptr<FsEvent> FsEventQueue::timeddequeue(const Time& timeout) {
+  unique_ptr<FsEvent> event = event_queue_.trydequeue();
+  if (event != NULL) {
+    return event;
+  }
+
   DWORD dwBytesTransferred = 0;
   ULONG_PTR ulCompletionKey = 0;
   LPOVERLAPPED lpOverlapped = NULL;
 
   BOOL bRet
   = GetQueuedCompletionStatus(
-      hIoCompletionPort,
+      hIoCompletionPort_,
       &dwBytesTransferred,
       &ulCompletionKey,
       &lpOverlapped,
@@ -161,52 +164,50 @@ YO_NEW_REF FsEvent* FsEventQueue::timeddequeue(const Time& timeout) {
 
   if (lpOverlapped != NULL) {
     win32::Watch& watch = win32::Watch::cast(*lpOverlapped);
-    if (!watch.is_closed()) {
-      CHECK_EQ(bRet, TRUE);
-      CHECK_GT(dwBytesTransferred, 0);
-
-      DWORD dwReadUntilBufferOffset = 0;
-      for (;;) {
-        const FILE_NOTIFY_INFORMATION* file_notify_info
-        = reinterpret_cast<const FILE_NOTIFY_INFORMATION*>(
-            &watch.get_buffer()[dwReadUntilBufferOffset]
-          );
-
-        FsEvent* fs_event = watch.parse(*file_notify_info);
-        if (fs_event != NULL) {
-          enqueue(*fs_event);
-        }
-
-        if (file_notify_info->NextEntryOffset > 0) {
-          dwReadUntilBufferOffset += file_notify_info->NextEntryOffset;
-        } else {
-          break;
-        }
-      }
-
-      DWORD dwBytesRead;
-      //BOOL bRet =
-      ReadDirectoryChangesW(
-        watch.get_directory(),
-        watch.get_buffer(),
-        watch.get_buffer_length(),
-        FALSE,
-        watch.get_notify_filter(),
-        &dwBytesRead,
-        watch,
-        NULL
-      );
-
-      return trydequeue();
-    } else {
-      delete &watch;
+    if (watch.is_closed()) {
       return NULL;
     }
-  } else if (ulCompletionKey != 0) {
-    return reinterpret_cast<FsEvent*>(ulCompletionKey);
-  } else {
-    return NULL;
+    CHECK_EQ(bRet, TRUE);
+    CHECK_GT(dwBytesTransferred, 0);
+
+    DWORD dwReadUntilBufferOffset = 0;
+    for (;;) {
+      const FILE_NOTIFY_INFORMATION* file_notify_info
+      = reinterpret_cast<const FILE_NOTIFY_INFORMATION*>(
+          &watch.buffer()[dwReadUntilBufferOffset]
+        );
+
+      unique_ptr<FsEvent> fs_event = watch.parse(*file_notify_info);
+      if (fs_event != NULL) {
+        event_queue_.tryenqueue(move(fs_event));
+      }
+
+      if (file_notify_info->NextEntryOffset > 0) {
+        dwReadUntilBufferOffset += file_notify_info->NextEntryOffset;
+      } else {
+        break;
+      }
+    }
+
+    DWORD dwBytesRead;
+    //BOOL bRet =
+    ReadDirectoryChangesW(
+      watch.directory(),
+      watch.buffer(),
+      watch.buffer_length(),
+      FALSE,
+      watch.notify_filter(),
+      &dwBytesRead,
+      watch,
+      NULL
+    );
+
+    return trydequeue();
+  //} else if (ulCompletionKey != 0) {
+  //  return reinterpret_cast<FsEvent*>(ulCompletionKey);
   }
+
+  return NULL;
 }
 }
 }

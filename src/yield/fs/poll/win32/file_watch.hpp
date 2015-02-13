@@ -30,7 +30,9 @@
 #ifndef _YIELD_FS_POLL_WIN32_FILE_WATCH_HPP_
 #define _YIELD_FS_POLL_WIN32_FILE_WATCH_HPP_
 
-#include "watch.hpp"
+#include <memory>
+
+#include "./watch.hpp"
 
 namespace yield {
 namespace fs {
@@ -39,21 +41,21 @@ namespace win32 {
 class FileWatch : public Watch {
 public:
   FileWatch(
-    YO_NEW_REF Directory& directory,
+    ::std::shared_ptr<Directory> directory,
     const Path& directory_path,
     const Path& file_path,
     FsEvent::Type fs_event_types
   ) : Watch(directory, fs_event_types, file_path),
-    directory_path(directory_path) {
+    directory_path_(directory_path) {
   }
 
 public:
   // yield::fs::poll::win32::Watch
-  YO_NEW_REF FsEvent* parse(const FILE_NOTIFY_INFORMATION&);
+  ::std::unique_ptr<FsEvent> parse(const FILE_NOTIFY_INFORMATION&) override;
 
 private:
-  Path directory_path;
-  Path old_name;
+  Path directory_path_;
+  Path old_name_;
 };
 }
 }

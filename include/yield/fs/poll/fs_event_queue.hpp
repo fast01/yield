@@ -61,17 +61,12 @@ template <class> class Watches;
 /**
   EventQueue for file system change events (<code>FsEvent</code>s).
 */
-class FsEventQueue : public EventQueue<FsEvent> {
+class FsEventQueue final : public EventQueue<FsEvent> {
 public:
   /**
     Construct an FsEventQueue, allocating any system resources as necessary.
   */
   FsEventQueue();
-
-  /**
-    Destroy an FdEventQueue, deallocating any associated system resources.
-  */
-  ~FsEventQueue();
 
 public:
   /**
@@ -96,21 +91,21 @@ public:
 
 public:
   // yield::EventQueue
-  bool enqueue(YO_NEW_REF FsEvent& event);
-  YO_NEW_REF FsEvent* timeddequeue(const Time& timeout);
+  ::std::unique_ptr<FsEvent> timeddequeue(const Time& timeout) override;
+  ::std::unique_ptr<FsEvent> tryenqueue(::std::unique_ptr<FsEvent> event) override;
+  void wake() override;
 
 private:
+  ::yield::queue::BlockingConcurrentQueue<FsEvent> event_queue_;
 #if defined(__FreeBSD__) || defined(__MACH__)
-  ::yield::queue::BlockingConcurrentQueue<Event> event_queue;
-  int kq, wake_pipe[2];
-  Watches<bsd::Watch>* watches;
+  int kq_, wake_pipe_[2];
+  ::std::unique_ptr< Watches<bsd::Watch> > watches_;
 #elif defined(__linux__)
-  ::yield::queue::BlockingConcurrentQueue<Event> event_queue;
-  int epoll_fd, event_fd, inotify_fd;
-  linux::Watches* watches;
+  int epoll_fd_, event_fd_, inotify_fd_;
+  ::std::unique_ptr<linux::Watches> watches_;
 #elif defined(_WIN32)
-  fd_t hIoCompletionPort;
-  Watches<win32::Watch>* watches;
+  fd_t hIoCompletionPort_;
+  ::std::unique_ptr< Watches<win32::Watch> > watches_;
 #endif
 };
 #else

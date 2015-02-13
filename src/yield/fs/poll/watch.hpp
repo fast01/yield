@@ -42,28 +42,31 @@ public:
   }
 
 public:
-  FsEvent::Type get_fs_event_types() const {
-    return fs_event_types;
+  FsEvent::Type fs_event_types() const {
+    return fs_event_types_;
   }
 
-  const Path& get_path() const {
-    return path;
+  const Path& path() const {
+    return path_;
   }
 
 protected:
-  Watch(FsEvent::Type fs_event_types, const Path& path);
+  Watch(FsEvent::Type fs_event_types, const Path& path)
+    : fs_event_types_(fs_event_types), path_(path) {
+  }
+
   Watch(const Watch&);
 
 protected:
   bool want_fs_event_type(FsEvent::Type fs_event_type) {
-    return (fs_event_types & fs_event_type) == fs_event_type;
+    return (fs_event_types_ & fs_event_type) == fs_event_type;
   }
 
   void log_fs_event(const FsEvent& fs_event) const;
 
 private:
-  FsEvent::Type fs_event_types;
-  Path path;
+  FsEvent::Type fs_event_types_;
+  Path path_;
 };
 }
 }

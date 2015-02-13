@@ -68,15 +68,6 @@ public:
   */
   bool cancel();
 
-//public:
-//  /**
-//    Get the Runnable associated with this thread.
-//    @return the Runnable associated with this thread
-//  */
-//  Runnable* get_runnable() const {
-//    return runnable;
-//  }
-
 public:
   /**
     Get a value from the caller's thread-local storage.
@@ -115,6 +106,15 @@ public:
     @return true if the delete succeeded
   */
   static bool key_delete(uintptr_t key);
+
+public:
+  /**
+    Get the Runnable associated with this thread.
+    @return the Runnable associated with this thread
+  */
+  Runnable& runnable() {
+    return *runnable_;
+  }
 
 public:
   /**

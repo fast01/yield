@@ -80,11 +80,8 @@ vector< unique_ptr<Stage> >& PollingStageScheduler::StagePoller::stages() {
 }
 
 void PollingStageScheduler::StagePoller::schedule(unique_ptr<Stage> stage) {
-  for (;;) {
+  while (stage != NULL) {
     stage = new_stage_.tryenqueue(move(stage));
-    if (stage == NULL) {
-      break;
-    }
   }
 }
 }
