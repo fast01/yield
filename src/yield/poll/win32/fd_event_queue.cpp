@@ -50,9 +50,9 @@ public:
   virtual bool dissociate(fd_t fd) = 0;
 
 public:
-  bool enqueue(unique_ptr<FdEvent> event) override {
+  unique_ptr<FdEvent> tryenqueue(unique_ptr<FdEvent> event) override {
     CHECK(false);
-    return false;
+    return NULL;
   }
 };
 
@@ -557,8 +557,8 @@ bool FdEventQueue::dissociate(fd_t fd) {
   return pimpl->dissociate(fd);
 }
 
-bool FdEventQueue::enqueue(unique_ptr<FdEvent> event) {
-  return pimpl->enqueue(::std::move(event));
+unique_ptr<FdEvent> FdEventQueue::tryenqueue(unique_ptr<FdEvent> event) {
+  return pimpl->tryenqueue(::std::move(event));
 }
 
 unique_ptr<FdEvent> FdEventQueue::timeddequeue(const Time& timeout) {
