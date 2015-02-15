@@ -34,6 +34,14 @@ namespace yield {
 namespace http {
 namespace server {
 class HttpServerResponse : public ::yield::http::HttpResponse {
+public:
+  HttpServerResponse(
+    uint16_t status_code,
+    ::std::shared_ptr< ::yield::fs::File > body
+  ) 
+    : HttpResponse(status_code, body) {
+  }
+
 private:
   friend class HttpServerRequest;
 

@@ -27,75 +27,73 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "../../event_queue_test.hpp"
-#include "yield/auto_object.hpp"
 #include "yield/logging.hpp"
 #include "yield/fs/file.hpp"
 #include "yield/fs/file_system.hpp"
 #include "yield/fs/stat.hpp"
 #include "yield/http/http_response.hpp"
-#include "yield/http/server/http_request.hpp"
-#include "yield/http/server/http_request_queue.hpp"
+#include "yield/http/server/http_server_request.hpp"
+#include "yield/http/server/http_server_event_queue.hpp"
 #include "gtest/gtest.h"
 
 namespace yield {
 namespace http {
 namespace server {
-class TestHttpRequestQueue : public HttpRequestQueue<> {
+using ::std::move;
+using ::std::shared_ptr;
+using ::std::unique_ptr;
+using ::yield::fs::File;
+using ::yield::fs::FileSystem;
+using ::yield::fs::Stat;
+
+class TestHttpServerEventQueue : public HttpServerEventQueue {
 public:
-  TestHttpRequestQueue()
-    : HttpRequestQueue<>(8000) {
+  TestHttpServerEventQueue()
+    : HttpServerEventQueue(8000) {
   }
 };
 
-INSTANTIATE_TYPED_TEST_CASE_P(HttpRequestQueue, EventQueueTest, TestHttpRequestQueue);
-
-class HttpRequestQueueTest : public ::testing::Test {
+class HttpServerEventQueueTest : public ::testing::Test {
 protected:
-  void handle(HttpRequest& http_request) {
-    if (http_request.uri().get_path() == "/") {
-      http_request.respond(200, "Hello world");
-    } else if (http_request.uri().get_path() == "/drop") {
+  void handle(unique_ptr<HttpServerRequest> http_request) {
+    if (http_request->uri().get_path() == "/") {
+      http_request->respond(200, "Hello world");
+    } else if (http_request->uri().get_path() == "/drop") {
       ;
-    } else if (http_request.uri().get_path() == "/sendfile") {
-      yield::fs::File* file
+    } else if (http_request->uri().get_path() == "/sendfile") {
+      unique_ptr<File> file
 #ifdef _WIN32
-      = yield::fs::FileSystem().open("yield.http.server.Makefile");
+       = FileSystem().open("yield.http.server.Makefile");
 #else
-      = yield::fs::FileSystem().open("Makefile");
+      = FileSystem().open("Makefile");
 #endif
       if (file != NULL) {
-        yield::fs::Stat* stbuf = file->stat();
+        unique_ptr<Stat> stbuf = file->stat();
         if (stbuf != NULL) {
-          HttpResponse* http_response = new HttpResponse(200, file);
+          unique_ptr<HttpServerResponse> http_response(new HttpServerResponse(200, shared_ptr<File>(move(file))));
           http_response->set_field(
             "Content-Length",
             static_cast<size_t>(stbuf->get_size())
           );
-          yield::fs::Stat::dec_ref(*stbuf);
-          http_request.respond(*http_response);
+          http_request->respond(move(http_response));
         } else {
-          yield::fs::File::dec_ref(*file);
-          http_request.respond(404);
+          http_request->respond(404);
         }
       } else {
-        http_request.respond(404);
+        http_request->respond(404);
       }
     } else {
-      http_request.respond(404);
+      http_request->respond(404);
     }
-
-    HttpRequest::dec_ref(http_request);
   }
 };
 
-TEST_F(HttpRequestQueueTest, dequeue) {
-  TestHttpRequestQueue http_request_queue;
+TEST_F(HttpServerEventQueueTest, dequeue) {
+  TestHttpServerEventQueue http_request_queue;
   for (;;) {
-    HttpRequest* http_request
-    = Object::cast<HttpRequest>(http_request_queue.timeddequeue(30.0));
+    unique_ptr<HttpServerEvent> http_request = http_request_queue.timeddequeue(30.0);
     if (http_request != NULL) {
-      handle(*http_request);
+      handle(unique_ptr<HttpServerRequest>(static_cast<HttpServerRequest*>(http_request.release())));
     } else {
       break;
     }
