@@ -31,6 +31,8 @@
 #include "yield/logging.hpp"
 #include "yield/fs/file.hpp"
 #include "yield/http/server/http_server_connection.hpp"
+#include "yield/sockets/aio/send_aiocb.hpp"
+#include "yield/sockets/aio/sendfile_aiocb.hpp"
 
 namespace yield {
 namespace http {

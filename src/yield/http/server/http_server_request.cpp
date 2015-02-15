@@ -37,7 +37,7 @@ namespace yield {
 namespace http {
 namespace server {
 void HttpServerRequest::respond(uint16_t status_code, ::std::shared_ptr<Buffer> body) {
-  ::std::unique_ptr<HttpServerResponse> http_response(new HttpServerResponse(http_version(), status_code, body));
+  ::std::unique_ptr<HttpServerResponse> http_response(new HttpServerResponse(body, http_version(), status_code));
   if (body != NULL) {
     http_response->set_field("Content-Length", 14, body->size());
   } else {

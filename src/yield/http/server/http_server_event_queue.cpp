@@ -25,13 +25,13 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "yield/http/server/http_server_event_queue.hpp"
+
 #include "yield/logging.hpp"
 #include "yield/http/server/http_server_connection.hpp"
-#include "yield/http/server/http_server_event_queue.hpp"
 #include "yield/sockets/tcp_socket.hpp"
 #include "yield/sockets/aio/accept_aiocb.hpp"
-#include "yield/sockets/aio/aio_queue.hpp"
-#include "yield/sockets/aio/nbio_queue.hpp"
+#include "yield/sockets/aio/socket_aio_queue.hpp"
 
 namespace yield {
 namespace http {
@@ -45,32 +45,27 @@ using ::yield::sockets::Socket;
 using ::yield::sockets::SocketAddress;
 using ::yield::sockets::StreamSocket;
 using ::yield::sockets::TcpSocket;
-using ::yield::sockets::aio::Aiocb;
 using ::yield::sockets::aio::AcceptAiocb;
-using ::yield::sockets::aio::AioQueue;
+using ::yield::sockets::aio::SocketAioQueue;
 using ::yield::sockets::aio::RecvAiocb;
-using ::yield::sockets::aio::SendAiocb;
-using ::yield::sockets::aio::SendfileAiocb;
+using ::yield::sockets::aio::SocketAiocb;
 
-template <class AioQueueType>
-HttpServerEventQueue<AioQueueType>::HttpServerEventQueue(
+HttpServerEventQueue::HttpServerEventQueue(
   const SocketAddress& sockname
-) throw(Exception) : aio_queue_(new AioQueueType()),
-  socket_(new TcpSocket(sockname.get_family())) {
+) throw(Exception) : aio_queue_(SocketAioQueue::create()),
+  socket_(make_shared<TcpSocket>(sockname.get_family())) {
   init(sockname);
 }
 
-template <class AioQueueType>
-HttpServerEventQueue<AioQueueType>::HttpServerEventQueue(
+HttpServerEventQueue::HttpServerEventQueue(
   ::std::unique_ptr<TcpSocket> socket_,
   const SocketAddress& sockname
-) throw(Exception) : aio_queue_(new AioQueueType()),
+) throw(Exception) : aio_queue_(SocketAioQueue::create()),
   socket_(socket_.release()) {
   init(sockname);
 }
 
-template <class AioQueueType>
-HttpServerEventQueue<AioQueueType>::~HttpServerEventQueue() {
+HttpServerEventQueue::~HttpServerEventQueue() {
   for (auto connection_i = connections_.begin(); connection_i != connections_.end(); ++connection_i) {
     StreamSocket& socket_ = (*connection_i)->socket();
     socket_.set_blocking_mode(true);
@@ -82,13 +77,7 @@ HttpServerEventQueue<AioQueueType>::~HttpServerEventQueue() {
   socket_->close();
 }
 
-template <class AioQueueType>
-unique_ptr<HttpServerEvent> HttpServerEventQueue<AioQueueType>::tryenqueue(unique_ptr<HttpServerEvent> event) {
-  return event_queue_->tryenqueue(move(event));
-}
-
-template <class AioQueueType>
-void HttpServerEventQueue<AioQueueType>::handle(unique_ptr<AcceptAiocb> accept_aiocb) {
+void HttpServerEventQueue::handle(unique_ptr<AcceptAiocb> accept_aiocb) {
   if (accept_aiocb->return_() >= 0) {
     if (aio_queue_->associate(*accept_aiocb->accepted_socket())) {
       HttpServerConnection* connection
@@ -116,9 +105,9 @@ void HttpServerEventQueue<AioQueueType>::handle(unique_ptr<AcceptAiocb> accept_a
   aio_queue_->tryenqueue(move(next_accept_aiocb));
 }
 
-template <class AioQueueType>
+
 template <class AiocbType>
-void HttpServerEventQueue<AioQueueType>::handle(unique_ptr<AiocbType> aiocb) {
+void HttpServerEventQueue::handle(unique_ptr<AiocbType> aiocb) {
   
 
   HttpServerConnection& connection = *static_cast<HttpServerConnection*>(aiocb.get_context());
@@ -143,9 +132,9 @@ void HttpServerEventQueue<AioQueueType>::handle(unique_ptr<AiocbType> aiocb) {
   }
 }
 
-template <class AioQueueType>
+
 void
-HttpServerEventQueue<AioQueueType>::init(
+HttpServerEventQueue::init(
   const SocketAddress& sockname
 ) throw(Exception) {
   event_queue_ = make_shared< ::yield::stage::SynchronizedEventQueue<HttpServerEvent> >();
@@ -169,27 +158,27 @@ HttpServerEventQueue<AioQueueType>::init(
   aio_queue_->tryenqueue(move(accept_aiocb));
 }
 
-template <class AioQueueType>
-unique_ptr<HttpServerEvent> HttpServerEventQueue<AioQueueType>::timeddequeue(const Time& timeout) {
+
+unique_ptr<HttpServerEvent> HttpServerEventQueue::timeddequeue(const Time& timeout) {
   Time timeout_remaining(timeout);
   for (;;) {
     Time start_time = Time::now();
 
-    unique_ptr<Aiocb> aiocb = aio_queue_->timeddequeue(timeout_remaining);
+    unique_ptr<SocketAiocb> aiocb = aio_queue_->timeddequeue(timeout_remaining);
     if (aiocb != NULL) {
       switch (aiocb->type()) {
-      case Aiocb::Type::ACCEPT:
+      case SocketAiocb::Type::ACCEPT:
         handle(unique_ptr<AcceptAiocb>(static_cast<AcceptAiocb*>(aiocb.release())));
         break;
 
-      case Aiocb::Type::RECV:
+      case SocketAiocb::Type::RECV:
         handle(unique_ptr<RecvAiocb>(static_cast<RecvAiocb*>(aiocb.release())));
         break;
 
-      case Aiocb::Type::SEND:
+      case SocketAiocb::Type::SEND:
         break;
 
-      case Aiocb::Type::SENDFILE:
+      case SocketAiocb::Type::SENDFILE:
         break;
 
       default:
@@ -209,10 +198,9 @@ unique_ptr<HttpServerEvent> HttpServerEventQueue<AioQueueType>::timeddequeue(con
   }
 }
 
-#ifdef _WIN32
-template class HttpServerEventQueue<yield::sockets::aio::AioQueue>;
-#endif
-template class HttpServerEventQueue<yield::sockets::aio::NbioQueue>;
+unique_ptr<HttpServerEvent> HttpServerEventQueue::tryenqueue(unique_ptr<HttpServerEvent> event) {
+  return event_queue_->tryenqueue(move(event));
+}
 }
 }
 }

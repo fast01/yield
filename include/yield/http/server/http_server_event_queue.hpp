@@ -33,21 +33,23 @@
 #include "yield/exception.hpp"
 #include "yield/http/server/http_server_event.hpp"
 #include "yield/sockets/socket_address.hpp"
-#include "yield/sockets/aio/aio_queue.hpp"
+#include "yield/sockets/aio/socket_aio_queue.hpp"
 #include "yield/stage/synchronized_event_queue.hpp"
 
 namespace yield {
 namespace sockets {
 namespace aio {
 class AcceptAiocb;
+class RecvAiocb;
 }
 class SocketAddress;
+class StreamSocket;
 class TcpSocket;
 }
 
 namespace http {
 namespace server {
-class HttpConnection;
+class HttpServerConnection;
 
 /**
   An EventQueue that acts as an HTTP server: listening to an (interface, port),
@@ -58,7 +60,6 @@ class HttpConnection;
   HttpServerEventQueue::dequeue or its variants must be called repeatedly and frequently
     in order for the server to make progress.
 */
-template <class AioQueueType = yield::sockets::aio::AioQueue>
 class HttpServerEventQueue : public EventQueue<HttpServerEvent> {
 public:
   /**
@@ -96,7 +97,7 @@ private:
   void init(const yield::sockets::SocketAddress& sockname) throw(Exception);
 
 private:
-  ::std::shared_ptr< EventQueue< ::yield::sockets::aio::Aiocb > > aio_queue_;
+  ::std::shared_ptr< ::yield::sockets::aio::SocketAioQueue > aio_queue_;
   ::std::vector< ::std::shared_ptr<HttpServerConnection> > connections_;
   ::std::shared_ptr< ::yield::stage::SynchronizedEventQueue<HttpServerEvent> > event_queue_;
   ::std::shared_ptr< ::yield::sockets::StreamSocket > socket_;

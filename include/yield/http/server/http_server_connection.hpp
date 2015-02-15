@@ -31,7 +31,7 @@
 #define _YIELD_HTTP_SERVER_HTTP_CONNECTION_HPP_
 
 #include "yield/event_queue.hpp"
-#include "yield/sockets/aio/aio_queue.hpp"
+#include "yield/sockets/aio/socket_aio_queue.hpp"
 #include "yield/sockets/aio/accept_aiocb.hpp"
 #include "yield/sockets/aio/recv_aiocb.hpp"
 #include "yield/sockets/tcp_socket.hpp"
@@ -72,7 +72,7 @@ public:
   void handle(::std::unique_ptr<HttpServerResponse> http_response);
 
 private:
-  template <class> friend class HttpServerEventQueue;
+  friend class HttpServerEventQueue;
 
 private:
   class ParseCallbacks;
@@ -93,7 +93,7 @@ private:
 
 private:
   HttpServerConnection(
-    ::std::shared_ptr< EventQueue< ::yield::sockets::aio::Aiocb > > aio_queue,
+    ::std::shared_ptr< EventQueue< ::yield::sockets::aio::SocketAiocb > > aio_queue,
     ::std::shared_ptr< EventHandler<HttpServerEvent > > event_handler,
     ::std::shared_ptr< ::yield::sockets::SocketAddress > peername,
     ::std::shared_ptr< ::yield::sockets::StreamSocket > socket_
@@ -110,7 +110,7 @@ private:
   void parse(::std::shared_ptr<Buffer> recv_buffer);
 
 private:
-  ::std::shared_ptr< EventQueue< ::yield::sockets::aio::Aiocb > >  aio_queue_;
+  ::std::shared_ptr< EventQueue< ::yield::sockets::aio::SocketAiocb > >  aio_queue_;
   ::std::shared_ptr< EventHandler<HttpServerEvent> > event_handler_;
   ::std::shared_ptr< ::yield::sockets::SocketAddress > peername_;
   ::std::shared_ptr< ::yield::sockets::StreamSocket > socket_;
