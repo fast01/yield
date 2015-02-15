@@ -43,7 +43,7 @@ class StageImpl : public EventHandler<EventT>, public Stage {
 public:
   StageImpl(::std::unique_ptr< EventHandler<EventT>> event_handler)
     : event_handler_(::std::move(event_handler)),
-      event_queue_(new ::yield::stage::SynchronizedEventQueue) {
+      event_queue_(new ::yield::stage::SynchronizedEventQueue<EventT>) {
     init();
   }
 
@@ -59,6 +59,14 @@ public:
 public:
   double arrival_rate_s() const {
     return arrival_rate_s_;
+  }
+
+  EventHandler<EventT>& event_handler() {
+    return *event_handler_;
+  }
+
+  EventQueue<EventT>& event_queue() {
+    return *event_queue_;
   }
 
   double rho() const {
@@ -128,6 +136,7 @@ private:
       LOG(ERROR) << "event queue full, stopping.";
       return NULL;
     }*/
+    return NULL;
   }
 
   void init() {

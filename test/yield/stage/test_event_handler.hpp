@@ -46,7 +46,7 @@ public:
   }
 
   // EventHandler
-  void handle(::std::unique_ptr<TestEvent> event) {
+  void handle(::std::unique_ptr<TestEvent> event) override {
     seen_events_count++;
   }
 

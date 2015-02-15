@@ -29,27 +29,27 @@
 
 #include "./test_event.hpp"
 #include "./test_event_handler.hpp"
-#include "yield/stage/stage.hpp"
+#include "yield/stage/stage_impl.hpp"
 #include "gtest/gtest.h"
 
 namespace yield {
 namespace stage {
+using ::std::unique_ptr;
+
 TEST(Stage, constructor) {
-  auto_Object<Stage> stage = new Stage(*new TestEventHandler);
+  StageImpl<TestEvent>(unique_ptr<TestEventHandler>(new TestEventHandler));
 }
 
 TEST(Stage, handle) {
-  auto_Object<Stage> stage = new Stage(*new TestEventHandler);
-  stage->handle(*new TestEvent);
+  StageImpl<TestEvent>(unique_ptr<TestEventHandler>(new TestEventHandler)).handle(unique_ptr<TestEvent>(new TestEvent));
 }
 
 TEST(Stage, visit) {
-  TestEventHandler* event_handler = new TestEventHandler;
-  auto_Object<Stage> stage = new Stage(*event_handler);
-  stage->handle(*new TestEvent);
+  unique_ptr< StageImpl<TestEvent> > stage(new StageImpl<TestEvent>(unique_ptr<TestEventHandler>(new TestEventHandler)));
+  stage->handle(unique_ptr<TestEvent>(new TestEvent));
   bool visit_ret = stage->visit(Time::FOREVER);
   ASSERT_TRUE(visit_ret);
-  ASSERT_EQ(event_handler->get_seen_events_count(), 1);
+  ASSERT_EQ(static_cast<TestEventHandler&>(stage->event_handler()).get_seen_events_count(), 1);
 }
 }
 }

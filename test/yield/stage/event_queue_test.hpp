@@ -34,6 +34,7 @@
 #include "gtest/gtest.h"
 
 namespace yield {
+using ::std::move;
 using ::std::unique_ptr;
 
 template <class TypeParam>
@@ -49,8 +50,8 @@ TYPED_TEST_P(EventQueueTest, dequeue) {
   unique_ptr<TestEvent> event = unique_ptr<TestEvent>(new TestEvent);
   TypeParam event_queue;
 
-  bool enqueue_ret = event_queue.enqueue(::std::move(event));
-  ASSERT_TRUE(enqueue_ret);
+  unique_ptr<TestEvent> enqueue_ret = event_queue.tryenqueue(move(event));
+  ASSERT_EQ(enqueue_ret.get(), static_cast<TestEvent*>(NULL));
 
   unique_ptr<TestEvent> dequeued_event = event_queue.dequeue();
   ASSERT_EQ(event, dequeued_event);
@@ -63,8 +64,8 @@ TYPED_TEST_P(EventQueueTest, timeddequeue) {
   unique_ptr<TestEvent> event = unique_ptr<TestEvent>(new TestEvent);
   TypeParam event_queue;
 
-  bool enqueue_ret = event_queue.enqueue(::std::move(event));
-  ASSERT_TRUE(enqueue_ret);
+  unique_ptr<TestEvent> enqueue_ret = event_queue.tryenqueue(move(event));
+  ASSERT_EQ(enqueue_ret.get(), static_cast<TestEvent*>(NULL));
 
   unique_ptr<TestEvent> dequeued_event = event_queue.timeddequeue(1.0);
   ASSERT_EQ(event, dequeued_event);
@@ -77,8 +78,8 @@ TYPED_TEST_P(EventQueueTest, trydequeue) {
   unique_ptr<TestEvent> event = unique_ptr<TestEvent>(new TestEvent);
   TypeParam event_queue;
 
-  bool enqueue_ret = event_queue.enqueue(::std::move(event));
-  ASSERT_TRUE(enqueue_ret);
+  unique_ptr<TestEvent> enqueue_ret = event_queue.tryenqueue(move(event));
+  ASSERT_EQ(enqueue_ret.get(), static_cast<TestEvent*>(NULL));
 
   unique_ptr<TestEvent> dequeued_event
   = static_cast<EventQueue<TestEvent>&>(event_queue).trydequeue();

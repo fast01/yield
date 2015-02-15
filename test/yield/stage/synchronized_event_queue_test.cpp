@@ -32,6 +32,6 @@
 
 namespace yield {
 namespace stage {
-INSTANTIATE_TYPED_TEST_CASE_P(SynchronizedEventQueue, EventQueueTest, SynchronizedEventQueue<Event>);
+INSTANTIATE_TYPED_TEST_CASE_P(SynchronizedEventQueue, EventQueueTest, SynchronizedEventQueue<TestEvent>);
 }
 }

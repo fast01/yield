@@ -32,7 +32,6 @@
 
 #include "test_event.hpp"
 #include "test_event_handler.hpp"
-#include "yield/auto_object.hpp"
 #include "yield/stage/stage.hpp"
 #include "yield/stage/stage_scheduler.hpp"
 #include "yield/thread/thread.hpp"
