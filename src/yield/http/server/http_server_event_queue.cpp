@@ -105,33 +105,27 @@ void HttpServerEventQueue::handle(unique_ptr<AcceptAiocb> accept_aiocb) {
   aio_queue_->tryenqueue(move(next_accept_aiocb));
 }
 
+void HttpServerEventQueue::handle(unique_ptr<RecvAiocb> recv_aiocb) {
+  unique_ptr<HttpServerConnection::RecvAiocb> recv_aiocb_downcast(static_cast<HttpServerConnection::RecvAiocb*>(recv_aiocb.release()));  
+  shared_ptr<HttpServerConnection> connection = recv_aiocb_downcast->connection();
+  if (recv_aiocb_downcast->connection()->state() == HttpServerConnection::STATE_CONNECTED) {
+    connection->handle(move(recv_aiocb_downcast));
 
-template <class AiocbType>
-void HttpServerEventQueue::handle(unique_ptr<AiocbType> aiocb) {
-  
-
-  HttpServerConnection& connection = *static_cast<HttpServerConnection*>(aiocb.get_context());
-  if (connection.get_state() == HttpServerConnection::STATE_CONNECTED) {
-    connection.handle(aiocb);
-
-    if (connection.get_state() == HttpServerConnection::STATE_ERROR) {
+    if (connection->state() == HttpServerConnection::STATE_ERROR) {
       for (
-        vector<HttpServerConnection*>::iterator connection_i = connections.begin();
-        connection_i != connections.end();
+        auto connection_i = connections_.begin(),
+             connections_end = connections_.end();
+        connection_i != connections_end;
         ++connection_i
       ) {
-        if (*connection_i == &connection) {
-          connections.erase(connection_i);
-          connection.get_socket().close();
-          HttpServerConnection::dec_ref(connection);
+        if (*connection_i == connection) {
+          connections_.erase(connection_i);
+          connection->socket().close();
         }
       }
     }
-  } else {
-    AiocbType::dec_ref(aiocb);
   }
 }
-
 
 void
 HttpServerEventQueue::init(
@@ -158,11 +152,15 @@ HttpServerEventQueue::init(
   aio_queue_->tryenqueue(move(accept_aiocb));
 }
 
-
 unique_ptr<HttpServerEvent> HttpServerEventQueue::timeddequeue(const Time& timeout) {
   Time timeout_remaining(timeout);
   for (;;) {
     Time start_time = Time::now();
+
+    unique_ptr<HttpServerEvent> event = event_queue_->trydequeue();
+    if (event != NULL) {
+      return event;
+    }
 
     unique_ptr<SocketAiocb> aiocb = aio_queue_->timeddequeue(timeout_remaining);
     if (aiocb != NULL) {
@@ -199,7 +197,15 @@ unique_ptr<HttpServerEvent> HttpServerEventQueue::timeddequeue(const Time& timeo
 }
 
 unique_ptr<HttpServerEvent> HttpServerEventQueue::tryenqueue(unique_ptr<HttpServerEvent> event) {
-  return event_queue_->tryenqueue(move(event));
+  unique_ptr<HttpServerEvent> ret = event_queue_->tryenqueue(move(event));
+  if (ret == NULL) {
+    aio_queue_->wake();
+  }
+  return ret;
+}
+
+void HttpServerEventQueue::wake() {
+  aio_queue_->wake();
 }
 }
 }

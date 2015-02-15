@@ -27,9 +27,10 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/logging.hpp"
-#include "yield/http/server/http_request.hpp"
 #include "yield/http/server/ygi/ygi_request.hpp"
+
+#include "yield/logging.hpp"
+#include "yield/http/server/http_server_request.hpp"
 #include "yield/http/server/ygi/ygi_request_handler.hpp"
 
 namespace yield {
@@ -40,11 +41,9 @@ YgiRequestHandler::YgiRequestHandler(ygi_request_handler_t ygi_request_handler)
   : ygi_request_handler(ygi_request_handler) {
 }
 
-void YgiRequestHandler::handle(YO_NEW_REF Event& event) {
-  CHECK_EQ(event.get_type_id(), HttpRequest::TYPE_ID);
-  HttpRequest& http_request = static_cast<HttpRequest&>(event);
-
-  YgiRequest ygi_request(http_request);
+void YgiRequestHandler::handle(::std::unique_ptr<HttpServerEvent> event) {
+  CHECK_EQ(event->type(), HttpServerEvent::Type::REQUEST);
+  YgiRequest ygi_request(::std::unique_ptr<HttpServerRequest>(static_cast<HttpServerRequest*>(event.release())));
   ygi_request_handler(&ygi_request);
 }
 }

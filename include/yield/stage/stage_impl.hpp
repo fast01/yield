@@ -32,7 +32,6 @@
 
 #include "yield/event_handler.hpp"
 #include "yield/event_queue.hpp"
-#include "yield/logging.hpp"
 #include "yield/time.hpp"
 #include "yield/stage/stage.hpp"
 #include "yield/stage/synchronized_event_queue.hpp"
@@ -125,10 +124,10 @@ private:
 
     if (event_queue_->tryenqueue(::std::move(event)) == NULL) {
       return NULL;
-    } else {
+    }/* else {
       LOG(ERROR) << "event queue full, stopping.";
       return NULL;
-    }
+    }*/
   }
 
   void init() {

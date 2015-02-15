@@ -87,6 +87,11 @@ private:
         connection_(connection) {
     }
 
+  public:
+    ::std::shared_ptr<HttpServerConnection>& connection() {
+      return connection_;
+    }
+
   private:
     ::std::shared_ptr<HttpServerConnection> connection_;
   };

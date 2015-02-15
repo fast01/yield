@@ -36,7 +36,7 @@ namespace http {
 namespace server {
 namespace ygi {
 TEST(YgiServer, constructor) {
-  YgiServer<>(8080, test_ygi_request_handler);
+  YgiServer(8080, test_ygi_request_handler);
 }
 
 //TEST(YgiServer, visit) {

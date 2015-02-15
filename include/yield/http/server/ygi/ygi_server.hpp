@@ -39,15 +39,14 @@ namespace yield {
 namespace http {
 namespace server {
 namespace ygi {
-template <class AioQueueType = yield::sockets::aio::AioQueue>
-class YgiServer : public HttpServer<AioQueueType> {
+class YgiServer : public HttpServer {
 public:
   YgiServer(
     const yield::sockets::SocketAddress& sockname,
     ygi_request_handler_t ygi_request_handler
   )
-    : HttpServer<AioQueueType>(
-      *new YgiRequestHandler(ygi_request_handler),
+    : HttpServer(
+      ::std::unique_ptr< EventHandler<HttpServerEvent> >(new YgiRequestHandler(ygi_request_handler)),
       sockname
     ) {
   }

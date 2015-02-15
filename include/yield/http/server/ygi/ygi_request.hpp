@@ -30,7 +30,7 @@
 #ifndef _YIELD_HTTP_SERVER_YGI_YGI_REQUEST_HPP_
 #define _YIELD_HTTP_SERVER_YGI_YGI_REQUEST_HPP_
 
-#include "yield/http/server/http_request.hpp"
+#include "yield/http/server/http_server_request.hpp"
 
 #include <ygi.h>
 
@@ -38,9 +38,9 @@ namespace yield {
 namespace http {
 namespace server {
 namespace ygi {
-class YgiRequest : public ygi_request_t {
+class YgiRequest final : public ygi_request_t {
 public:
-  YgiRequest(HttpRequest& http_request);
+  YgiRequest(::std::unique_ptr<HttpServerRequest> http_request);
 
 public:
   // RFC 3875 meta-variables
@@ -165,7 +165,7 @@ private:
   ygi_response_t* static_respond(uint16_t status_code);
 
 private:
-  HttpRequest& http_request_;
+  ::std::unique_ptr<HttpServerRequest> http_request_;
   ::std::string remote_addr_;
   ::std::string remote_host_;
   iovec server_protocol_;

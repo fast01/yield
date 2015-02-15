@@ -30,21 +30,22 @@
 #ifndef _YIELD_HTTP_SERVER_YGI_YGI_REQUEST_HANDLER_HPP_
 #define _YIELD_HTTP_SERVER_YGI_YGI_REQUEST_HANDLER_HPP_
 
-#include "yield/event_handler.hpp"
-
 #include <ygi.h>
+
+#include "yield/event_handler.hpp"
+#include "yield/http/server/http_server_event.hpp"
 
 namespace yield {
 namespace http {
 namespace server {
 namespace ygi {
-class YgiRequestHandler : public EventHandler<> {
+class YgiRequestHandler final : public EventHandler<HttpServerEvent> {
 public:
   YgiRequestHandler(ygi_request_handler_t ygi_request_handler);
 
 public:
   // yield::EventHandler
-  void handle(YO_NEW_REF Event& event);
+  void handle(::std::unique_ptr<HttpServerEvent>) override;
 
 private:
   ygi_request_handler_t ygi_request_handler;

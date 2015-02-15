@@ -27,10 +27,17 @@
 
 #include "yield/sockets/aio/socket_aio_queue.hpp"
 #include "yield/logging.hpp"
-#include "yield/sockets/aio/socket_nbio_queue.hpp"
+#include "yield/sockets/aio/accept_aiocb.hpp"
+#include "yield/sockets/aio/connect_aiocb.hpp"
+#include "yield/sockets/aio/recv_aiocb.hpp"
+#include "yield/sockets/aio/recvfrom_aiocb.hpp"
+#include "yield/sockets/aio/send_aiocb.hpp"
+#include "yield/sockets/aio/sendfile_aiocb.hpp"
 
 #ifdef _WIN32
 #include "win32/win32_socket_aio_queue.hpp"
+#else
+#include "yield/sockets/aio/socket_nbio_queue.hpp"
 #endif
 
 namespace yield {
@@ -61,6 +68,25 @@ template <class AiocbType> void SocketAioQueue::log_enqueue(AiocbType& aiocb) {
 template <class AiocbType> void SocketAioQueue::log_error(AiocbType& aiocb) {
   LOG(ERROR) << "error on " << aiocb;
 }
+
+template void SocketAioQueue::log_completion(AcceptAiocb&);
+template void SocketAioQueue::log_completion(ConnectAiocb&);
+template void SocketAioQueue::log_completion(RecvAiocb&);
+template void SocketAioQueue::log_completion(RecvfromAiocb&);
+template void SocketAioQueue::log_completion(SendAiocb&);
+template void SocketAioQueue::log_completion(SendfileAiocb&);
+template void SocketAioQueue::log_enqueue(AcceptAiocb&);
+template void SocketAioQueue::log_enqueue(ConnectAiocb&);
+template void SocketAioQueue::log_enqueue(RecvAiocb&);
+template void SocketAioQueue::log_enqueue(RecvfromAiocb&);
+template void SocketAioQueue::log_enqueue(SendAiocb&);
+template void SocketAioQueue::log_enqueue(SendfileAiocb&);
+template void SocketAioQueue::log_error(AcceptAiocb&);
+template void SocketAioQueue::log_error(ConnectAiocb&);
+template void SocketAioQueue::log_error(RecvAiocb&);
+template void SocketAioQueue::log_error(RecvfromAiocb&);
+template void SocketAioQueue::log_error(SendAiocb&);
+template void SocketAioQueue::log_error(SendfileAiocb&);
 }
 }
 }

@@ -27,8 +27,9 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/http/server/http_connection.hpp"
 #include "yield/http/server/ygi/ygi_request.hpp"
+
+#include "yield/http/server/http_server_connection.hpp"
 
 #include <yield/logging.hpp>
 
@@ -38,8 +39,8 @@ namespace server {
 namespace ygi {
 using ::yield::sockets::SocketAddress;
 
-YgiRequest::YgiRequest(HttpRequest& http_request)
-  : http_request_(http_request) {
+YgiRequest::YgiRequest(::std::unique_ptr<HttpServerRequest> http_request)
+  : http_request_(::std::move(http_request)) {
   ygi_request_t::AUTH_TYPE = static_AUTH_TYPE;
   ygi_request_t::CONTENT_LENGTH = static_CONTENT_LENGTH;
   ygi_request_t::CONTENT_TYPE = static_CONTENT_TYPE;
@@ -63,12 +64,12 @@ YgiRequest::YgiRequest(HttpRequest& http_request)
   ygi_request_t::SERVER_PROTOCOL = static_SERVER_PROTOCOL;
   ygi_request_t::SERVER_SOFTWARE = static_SERVER_SOFTWARE;
 
-  http_request_.connection().get_peername().getnameinfo(remote_addr_, NULL, SocketAddress::GETNAMEINFO_FLAG_NUMERICHOST | SocketAddress::GETNAMEINFO_FLAG_NUMERICSERV);
-  http_request_.connection().get_peername().getnameinfo(remote_host_, NULL, SocketAddress::GETNAMEINFO_FLAG_NAMEREQD | SocketAddress::GETNAMEINFO_FLAG_NUMERICSERV);
+  http_request_->connection().peername().getnameinfo(remote_addr_, NULL, SocketAddress::GETNAMEINFO_FLAG_NUMERICHOST | SocketAddress::GETNAMEINFO_FLAG_NUMERICSERV);
+  http_request_->connection().peername().getnameinfo(remote_host_, NULL, SocketAddress::GETNAMEINFO_FLAG_NAMEREQD | SocketAddress::GETNAMEINFO_FLAG_NUMERICSERV);
 
-  if (http_request_.http_version() == 0) {
+  if (http_request_->http_version() == 0) {
     server_protocol_.iov_base = const_cast<char*>("HTTP/1.0");
-  } else if (http_request.http_version() == 1) {
+  } else if (http_request_->http_version() == 1) {
     server_protocol_.iov_base = const_cast<char*>("HTTP/1.1");
   } else {
     CHECK(false);
@@ -82,12 +83,12 @@ iovec YgiRequest::AUTH_TYPE() const {
 }
 
 size_t YgiRequest::CONTENT_LENGTH() const {
-  return http_request_.get_content_length();
+  return http_request_->get_content_length();
 }
 
 iovec YgiRequest::CONTENT_TYPE() const {
   iovec field_value = { 0, 0 };
-  http_request_.get_field("Content-Type", field_value);
+  http_request_->get_field("Content-Type", field_value);
   return field_value;
 }
 
@@ -105,25 +106,25 @@ iovec YgiRequest::GATEWAY_INTERFACE() const {
 
 iovec YgiRequest::HTTP_(const char* field_name) const {
   iovec field_value = { 0, 0 };
-  http_request_.get_field(field_name, field_value);
+  http_request_->get_field(field_name, field_value);
   return field_value;
 }
 
 iovec YgiRequest::HTTP_REFERER() const {
   iovec field_value = { 0, 0 };
-  http_request_.get_field("Referer", field_value);
+  http_request_->get_field("Referer", field_value);
   return field_value;
 }
 
 iovec YgiRequest::HTTP_USER_AGENT() const {
   iovec field_value = { 0, 0 };
-  http_request_.get_field("User-Agent", field_value);
+  http_request_->get_field("User-Agent", field_value);
   return field_value;
 }
 
 iovec YgiRequest::PATH_INFO() const {
   iovec path_info = { 0, 0 };
-  http_request_.uri().get_path(path_info);
+  http_request_->uri().get_path(path_info);
   return path_info;
 }
 
@@ -133,7 +134,7 @@ iovec YgiRequest::PATH_TRANSLATED() const {
 
 iovec YgiRequest::QUERY_STRING() const {
   iovec query_string = { 0, 0 };
-  http_request_.uri().get_query(query_string);
+  http_request_->uri().get_query(query_string);
   return query_string;
 }
 
@@ -164,13 +165,13 @@ iovec YgiRequest::REMOTE_USER() const {
 iovec YgiRequest::REQUEST_METHOD() const  {
   iovec request_method;
   request_method.iov_base
-  = const_cast<char*>(http_request_.method().get_name());
-  request_method.iov_len = http_request_.method().get_name_len();
+  = const_cast<char*>(http_request_->method().get_name());
+  request_method.iov_len = http_request_->method().get_name_len();
   return request_method;
 }
 
 ygi_response_t* YgiRequest::respond(uint16_t status_code) {
-  http_request_.respond(status_code);
+  http_request_->respond(status_code);
   return NULL;
 }
 
@@ -181,13 +182,13 @@ iovec YgiRequest::SCRIPT_NAME() const  {
 
 iovec YgiRequest::SERVER_NAME() const {
   iovec field_value = { 0, 0 };
-  CHECK(http_request_.get_field("Host", field_value));
+  CHECK(http_request_->get_field("Host", field_value));
   return field_value;
 }
 
 uint16_t YgiRequest::SERVER_PORT() const {
-  if (http_request_.uri().has_port()) {
-    return http_request_.uri().get_port();
+  if (http_request_->uri().has_port()) {
+    return http_request_->uri().get_port();
   } else {
     return 80;
   }
