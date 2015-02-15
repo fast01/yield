@@ -37,22 +37,22 @@ INSTANTIATE_TYPED_TEST_CASE_P(DatagramSocket, SocketTest, DatagramSocketPair);
 
 TEST(DatagramSocket, recvfrom) {
   DatagramSocketPair sockets;
-  sockets.first().write("m", 1);
+  sockets.first()->write("m", 1);
   char m;
   SocketAddress peername;
-  ssize_t recvfrom_ret = sockets.second().recvfrom(&m, 1, 0, peername);
+  ssize_t recvfrom_ret = sockets.second()->recvfrom(&m, 1, 0, peername);
   if (recvfrom_ret == -1) {
     throw Exception();
   }
   ASSERT_EQ(recvfrom_ret, 1);
   ASSERT_EQ(m, 'm');
-  ASSERT_EQ(peername, *sockets.first().getsockname());
-  ASSERT_EQ(peername, *sockets.second().getpeername());
+  ASSERT_EQ(peername, *sockets.first()->getsockname());
+  ASSERT_EQ(peername, *sockets.second()->getpeername());
 }
 
 TEST(DatagramSocket, recvmsg) {
   DatagramSocketPair sockets;
-  sockets.first().write("mn", 2);
+  sockets.first()->write("mn", 2);
   char m, n;
   iovec iov[2];
   iov[0].iov_base = &m;
@@ -60,15 +60,15 @@ TEST(DatagramSocket, recvmsg) {
   iov[1].iov_base = &n;
   iov[1].iov_len = 1;
   SocketAddress peername;
-  ssize_t recvmsg_ret = sockets.second().recvmsg(iov, 2, 0, peername);
+  ssize_t recvmsg_ret = sockets.second()->recvmsg(iov, 2, 0, peername);
   if (recvmsg_ret == -1) {
     throw Exception();
   }
   ASSERT_EQ(recvmsg_ret, 2);
   ASSERT_EQ(m, 'm');
   ASSERT_EQ(n, 'n');
-  ASSERT_EQ(peername, *sockets.first().getsockname());
-  ASSERT_EQ(peername, *sockets.second().getpeername());
+  ASSERT_EQ(peername, *sockets.first()->getsockname());
+  ASSERT_EQ(peername, *sockets.second()->getpeername());
 }
 
 TEST(DatagramSocket, sendmsg) {
@@ -79,13 +79,13 @@ TEST(DatagramSocket, sendmsg) {
   iov[1].iov_base = const_cast<char*>("n");
   iov[1].iov_len = 1;
   ssize_t sendmsg_ret =
-    sockets.first().sendmsg(iov, 2, 0, *sockets.second().getsockname());
+    sockets.first()->sendmsg(iov, 2, 0, *sockets.second()->getsockname());
   if (sendmsg_ret == -1) {
     throw Exception();
   }
   ASSERT_EQ(sendmsg_ret, 2);
   char mn[2];
-  ssize_t read_ret = sockets.second().read(mn, 2);
+  ssize_t read_ret = sockets.second()->read(mn, 2);
   ASSERT_EQ(read_ret, 2);
   ASSERT_EQ(mn[0], 'm');
   ASSERT_EQ(mn[1], 'n');
@@ -94,13 +94,13 @@ TEST(DatagramSocket, sendmsg) {
 TEST(DatagramSocket, sendto) {
   DatagramSocketPair sockets;
   ssize_t sendto_ret
-  = sockets.first().sendto("m", 1, 0, *sockets.second().getsockname());
+  = sockets.first()->sendto("m", 1, 0, *sockets.second()->getsockname());
   if (sendto_ret == -1) {
     throw Exception();
   }
   ASSERT_EQ(sendto_ret, 1);
   char m;
-  ssize_t read_ret = sockets.second().read(&m, 1);
+  ssize_t read_ret = sockets.second()->read(&m, 1);
   ASSERT_EQ(read_ret, 1);
   ASSERT_EQ(m, 'm');
 }

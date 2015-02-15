@@ -58,7 +58,7 @@ TEST(StreamSocket, accept) {
 }
 
 TEST(StreamSocket, dup) {
-  unique_ptr<StreamSocket> socket_ = StreamSocketPair().first().dup();
+  unique_ptr<StreamSocket> socket_ = StreamSocketPair().first()->dup();
 }
 
 TEST(StreamSocket, getsockname_exception) {
@@ -92,7 +92,7 @@ TEST(StreamSocket, listen) {
 }
 
 TEST(StreamSocket, setsockopt_KEEPALIVE) {
-  if (!StreamSocketPair().first().setsockopt(StreamSocket::Option::KEEPALIVE, true)) {
+  if (!StreamSocketPair().first()->setsockopt(StreamSocket::Option::KEEPALIVE, true)) {
     throw Exception();
   }
 }
@@ -127,11 +127,11 @@ TEST_F(StreamSocketSendFileTest, sendfile) {
   size_t size = static_cast<size_t>(stbuf->get_size());
 
   StreamSocketPair stream_sockets;
-  ssize_t sendfile_ret = stream_sockets.first().sendfile(*file, 0, size);
+  ssize_t sendfile_ret = stream_sockets.first()->sendfile(*file, 0, size);
   ASSERT_EQ(sendfile_ret, stbuf->get_size());
 
   Buffer buffer(Buffer::getpagesize());
-  ssize_t read_ret = stream_sockets.second().read(buffer);
+  ssize_t read_ret = stream_sockets.second()->read(buffer);
   ASSERT_EQ(read_ret, static_cast<ssize_t>(size));
 
   file->close();
@@ -140,15 +140,15 @@ TEST_F(StreamSocketSendFileTest, sendfile) {
 TEST(StreamSocket, setsockopt_LINGER) {
   StreamSocketPair stream_sockets;
 
-  if (!stream_sockets.first().setsockopt(StreamSocket::Option::LINGER, 1)) {
+  if (!stream_sockets.first()->setsockopt(StreamSocket::Option::LINGER, 1)) {
     throw Exception();
   }
 
-  if (!stream_sockets.first().setsockopt(StreamSocket::Option::LINGER, 30)) {
+  if (!stream_sockets.first()->setsockopt(StreamSocket::Option::LINGER, 30)) {
     throw Exception();
   }
 
-  if (!stream_sockets.first().setsockopt(StreamSocket::Option::LINGER, false)) {
+  if (!stream_sockets.first()->setsockopt(StreamSocket::Option::LINGER, false)) {
     throw Exception();
   }
 }
@@ -156,14 +156,14 @@ TEST(StreamSocket, setsockopt_LINGER) {
 TEST(StreamSocket, shutdown) {
   StreamSocketPair stream_sockets;
 
-  if (!stream_sockets.first().shutdown(true, false)) {
+  if (!stream_sockets.first()->shutdown(true, false)) {
     throw Exception();
   }
-  if (!stream_sockets.first().shutdown(false, true)) {
+  if (!stream_sockets.first()->shutdown(false, true)) {
     throw Exception();
   }
 
-  if (!stream_sockets.second().shutdown(true, true)) {
+  if (!stream_sockets.second()->shutdown(true, true)) {
     throw Exception();
   }
 }

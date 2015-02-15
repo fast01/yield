@@ -70,11 +70,11 @@ TYPED_TEST_P(SocketTest, gethostname) {
 }
 
 TYPED_TEST_P(SocketTest, getpeername) {
-  TypeParam().first().getpeername();
+  TypeParam().first()->getpeername();
 }
 
 TYPED_TEST_P(SocketTest, getsockname) {
-  TypeParam().first().getsockname();
+  TypeParam().first()->getsockname();
 }
 
 TYPED_TEST_P(SocketTest, MessageFlags) {
@@ -86,15 +86,15 @@ TYPED_TEST_P(SocketTest, MessageFlags) {
 TYPED_TEST_P(SocketTest, set_blocking_mode) {
   TypeParam sockets;
 
-  if (!sockets.first().set_blocking_mode(true)) {
+  if (!sockets.first()->set_blocking_mode(true)) {
     throw Exception();
   }
 
-  if (!sockets.first().set_blocking_mode(false)) {
+  if (!sockets.first()->set_blocking_mode(false)) {
     throw Exception();
   }
 
-  if (!sockets.first().set_blocking_mode(true)) {
+  if (!sockets.first()->set_blocking_mode(true)) {
     throw Exception();
   }
 }
@@ -120,13 +120,13 @@ TYPED_TEST_P(SocketTest, set_blocking_mode) {
 
 TYPED_TEST_P(SocketTest, want_recv) {
   TypeParam sockets;
-  if (!sockets.first().set_blocking_mode(false)) {
+  if (!sockets.first()->set_blocking_mode(false)) {
     throw Exception();
   }
   ::std::unique_ptr<Buffer> buffer(new Buffer(1));
-  ssize_t recv_ret = sockets.first().recv(*buffer, 0);
+  ssize_t recv_ret = sockets.first()->recv(*buffer, 0);
   ASSERT_EQ(recv_ret, -1);
-  ASSERT_TRUE(sockets.first().want_recv());
+  ASSERT_TRUE(sockets.first()->want_recv());
 }
 
 REGISTER_TYPED_TEST_CASE_P(SocketTest, getfqdn, gethostname, getpeername, getsockname, MessageFlags, set_blocking_mode, want_recv);

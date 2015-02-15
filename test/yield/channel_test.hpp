@@ -203,14 +203,14 @@ TYPED_TEST_P(ChannelTest, write) {
 }
 
 TYPED_TEST_P(ChannelTest, write_Buffer) {
-  unique_ptr<Buffer> test_buffer = Buffer::copy(this->get_test_string());
+  shared_ptr<Buffer> test_buffer = Buffer::copy(this->get_test_string());
   this->check_write(this->get_write_channel().write(*test_buffer));
 
   this->read();
 }
 
 TYPED_TEST_P(ChannelTest, write_Buffers) {
-  unique_ptr<Buffer> test_buffer = Buffer::copy(this->get_test_string());
+  shared_ptr<Buffer> test_buffer = Buffer::copy(this->get_test_string());
   test_buffer->set_next_buffer(::std::shared_ptr<Buffer>(new Buffer(1)));
   this->check_write(this->get_write_channel().write(*test_buffer));
 
