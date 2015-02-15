@@ -202,8 +202,8 @@ public:
     Get the buffer underlying the HTTP message's header
       (request or response line, fields).
   */
-  Buffer& header() {
-    return *header_;
+  ::std::shared_ptr<Buffer>& header() {
+    return header_;
   }
 
 public:

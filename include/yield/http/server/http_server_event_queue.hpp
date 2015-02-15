@@ -1,5 +1,3 @@
-// yield/http/server/http_request_queue.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 
@@ -27,14 +25,16 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_HTTP_SERVER_HTTP_REQUEST_QUEUE_HPP_
-#define _YIELD_HTTP_SERVER_HTTP_REQUEST_QUEUE_HPP_
+#ifndef _YIELD_HTTP_SERVER_HTTP_SERVER_EVENT_QUEUE_HPP_
+#define _YIELD_HTTP_SERVER_HTTP_SERVER_EVENT_QUEUE_HPP_
 
 #include <vector>
 
 #include "yield/exception.hpp"
+#include "yield/http/server/http_server_event.hpp"
 #include "yield/sockets/socket_address.hpp"
 #include "yield/sockets/aio/aio_queue.hpp"
+#include "yield/stage/synchronized_event_queue.hpp"
 
 namespace yield {
 namespace sockets {
@@ -54,53 +54,52 @@ class HttpConnection;
     accepting connections, reading request data from connections, parsing HTTP
     requests, serializing HTTP responses, writing response data to connections.
 
-  HttpRequestQueue is "passive" in that it relies on the caller to drive it.
-  HttpRequestQueue::dequeue or its variants must be called repeatedly and frequently
+  HttpServerEventQueue is "passive" in that it relies on the caller to drive it.
+  HttpServerEventQueue::dequeue or its variants must be called repeatedly and frequently
     in order for the server to make progress.
 */
 template <class AioQueueType = yield::sockets::aio::AioQueue>
-class HttpRequestQueue : public EventQueue {
+class HttpServerEventQueue : public EventQueue<HttpServerEvent> {
 public:
   /**
-    Construct an HttpRequestQueue that listens for connections on the given
+    Construct an HttpServerEventQueue that listens for connections on the given
       socket address.
     @param sockname address to listen to
   */
-  HttpRequestQueue(
+  HttpServerEventQueue(
     const yield::sockets::SocketAddress& sockname
   ) throw(Exception);
 
   /**
-    Construct an HttpRequestQueue around an extant TCP socket, which will
+    Construct an HttpServerEventQueue around an extant TCP socket, which will
       then be bound and listen to the given socket address.
     @param socket_ server socket to use
     @param sockname address to bind and listen to
   */
-  HttpRequestQueue(
-    YO_NEW_REF yield::sockets::TcpSocket& socket_,
+  HttpServerEventQueue(
+    ::std::unique_ptr<yield::sockets::TcpSocket> socket_,
     const yield::sockets::SocketAddress& sockname
   ) throw(Exception);
 
-  ~HttpRequestQueue();
+  ~HttpServerEventQueue();
 
 public:
   // yield::EventQueue
-  YO_NEW_REF Event& dequeue() {
-    return EventQueue::dequeue();
-  }
-
-  bool enqueue(YO_NEW_REF Event&);
-  YO_NEW_REF Event* timeddequeue(const Time& timeout);
+  ::std::unique_ptr<HttpServerEvent> timeddequeue(const Time& timeout) override;
+  ::std::unique_ptr<HttpServerEvent> tryenqueue(::std::unique_ptr<HttpServerEvent>) override;
+  void wake() override;
 
 private:
-  void handle(YO_NEW_REF yield::sockets::aio::AcceptAiocb& accept_aiocb);
-  template <class AiocbType> void handle(YO_NEW_REF AiocbType& aiocb);
+  void handle(::std::unique_ptr< ::yield::sockets::aio::AcceptAiocb > accept_aiocb);
+  void handle(::std::unique_ptr< ::yield::sockets::aio::RecvAiocb > recv_aiocb);
+  template <class AiocbType> void handle(::std::unique_ptr<AiocbType> aiocb);
   void init(const yield::sockets::SocketAddress& sockname) throw(Exception);
 
 private:
-  AioQueueType& aio_queue;
-  ::std::vector<HttpConnection*> connections;
-  yield::sockets::TcpSocket& socket_;
+  ::std::shared_ptr< EventQueue< ::yield::sockets::aio::Aiocb > > aio_queue_;
+  ::std::vector< ::std::shared_ptr<HttpServerConnection> > connections_;
+  ::std::shared_ptr< ::yield::stage::SynchronizedEventQueue<HttpServerEvent> > event_queue_;
+  ::std::shared_ptr< ::yield::sockets::StreamSocket > socket_;
 };
 }
 }

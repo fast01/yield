@@ -1,5 +1,3 @@
-// yield/http/server/http_response.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 
@@ -31,11 +29,24 @@
 #define _YIELD_HTTP_SERVER_HTTP_SERVER_RESPONSE_HPP_
 
 #include "yield/http/http_response.hpp"
+#include "yield/http/server/http_server_event.hpp"
 
 namespace yield {
 namespace http {
 namespace server {
-typedef ::yield::http::HttpResponse HttpServerResponse;
+class HttpServerResponse : public ::yield::http::HttpResponse, public HttpServerEvent {
+public:
+  Type type() const override {
+    return Type::RESPONSE;
+  }
+
+private:
+  friend class HttpServerRequest;
+
+  HttpServerResponse(::std::shared_ptr<Buffer> body, uint8_t http_version, uint16_t status_code)
+    : ::yield::http::HttpResponse(body, http_version, status_code) {
+  }
+};
 }
 }
 }

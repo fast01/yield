@@ -25,61 +25,25 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_HTTP_SERVER_HTTP_SERVER_MESSAGE_BODY_CHUNK_HPP_
-#define _YIELD_HTTP_SERVER_HTTP_SERVER_MESSAGE_BODY_CHUNK_HPP_
-
-#include "yield/http/http_message_body_chunk.hpp"
-#include "yield/http/server/http_server_event.hpp"
+#ifndef _YIELD_HTTP_SERVER_HTTP_SERVER_EVENT_HPP_
+#define _YIELD_HTTP_SERVER_HTTP_SERVER_EVENT_HPP_
 
 namespace yield {
-namespace sockets {
-class SocketAddress;
-}
-
 namespace http {
 namespace server {
-class HttpServerConnection;
-
-/**
-  A <code>yield::http::HttpMessageBodyChunk</code> that's bound to a server
-    <code>HttpConnection</code>.
-  These <code>HttpMessageBodyChunk</code>s are usually created by
-    <code>HttpRequestQueue</code> as part of a request;
-    response <code>HTTPMessageBodyChunks</code> can be the normal
-      <code>yield::http::HttpMessageBodyChunk</code>s.
-*/
-class HttpServerMessageBodyChunk final : public ::yield::http::HttpMessageBodyChunk, public HttpServerEvent {
+class HttpServerEvent {
 public:
-  /**
-    Construct an HttpMessageBodyChunk that originates from the given
-      server connection.
-    @param connection the server connection
-    @param data the chunk data
-  */
-  HttpServerMessageBodyChunk(::std::shared_ptr<HttpServerConnection> connection, ::std::shared_ptr<Buffer> data)
-    : ::yield::http::HttpMessageBodyChunk(data),
-      connection_(connection) {
-  }
+  enum class Type {
+    MESSAGE_BODY_CHUNK,
+    REQUEST,
+    RESPONSE
+  };
 
 public:
-  /**
-    Get the server connection from which this chunk originated.
-    @return the server connection from which this chunk originated
-  */
-  const HttpServerConnection& connection() const {
-    return *connection_;
-  }
-
-public:
-  Type type() const override {
-    return Type::MESSAGE_BODY_CHUNK;
-  }
-
-private:
-  ::std::shared_ptr<HttpServerConnection> connection_;
+  virtual Type type() const = 0;
 };
 }
 }
 }
 
-#endif
+#endif 

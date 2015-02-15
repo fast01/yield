@@ -1,5 +1,3 @@
-// yield/http/server/http_request.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 
@@ -33,6 +31,7 @@
 #include <memory>
 
 #include "yield/http/http_request.hpp"
+#include "yield/http/server/http_server_event.hpp"
 #include "yield/http/server/http_server_connection.hpp"
 #include "yield/http/server/http_server_response.hpp"
 
@@ -50,7 +49,7 @@ class HttpServerRequestParser;
   These <code>HttpRequest</code>s are usually created by
     <code>HttpServerRequestQueue</code>.
 */
-class HttpServerRequest final : public ::yield::http::HttpRequest {
+class HttpServerRequest final : public ::yield::http::HttpRequest, public HttpServerEvent {
 public:
   /**
     Construct an HttpRequest that originates from the given server connection.
@@ -145,6 +144,11 @@ public:
     respond(status_code, Buffer::copy(body.get_error_message()));
   }
 
+public:
+  Type type() const override {
+    return Type::REQUEST;
+  }
+
 protected:
   friend class HttpServerRequestParser;
 
@@ -152,7 +156,7 @@ protected:
     ::std::shared_ptr<Buffer> body,
     ::std::shared_ptr<HttpServerConnection> connection,
     uint16_t fields_offset,
-    Buffer& header,
+    ::std::shared_ptr<Buffer> header,
     uint8_t http_version,
     Method method,
     const yield::uri::Uri& uri

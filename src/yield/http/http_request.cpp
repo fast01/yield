@@ -139,21 +139,21 @@ HttpRequest::HttpRequest(
   : HttpMessage<HttpRequest>(body_buffer, NULL, http_version),
     method_(method),
     uri_(uri) {
-  header().put(method.get_name(), method.get_name_len());
+  header()->put(method.get_name(), method.get_name_len());
 
-  header().put(' ');
+  header()->put(' ');
 
   iovec uri_path;
   uri.get_path(uri_path);
-  header().put(uri_path);
+  header()->put(uri_path);
 
   if (http_version == 0) {
-    header().put(" HTTP/1.0\r\n", 11);
+    header()->put(" HTTP/1.0\r\n", 11);
   } else {
-    header().put(" HTTP/1.1\r\n", 11);
+    header()->put(" HTTP/1.1\r\n", 11);
   }
 
-  set_fields_offset(static_cast<uint16_t>(header().size()));
+  set_fields_offset(static_cast<uint16_t>(header()->size()));
 
   if (uri.has_host()) {
     iovec uri_host;
