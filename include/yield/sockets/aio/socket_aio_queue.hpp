@@ -1,5 +1,3 @@
-// yield/sockets/aio/send_aiocb.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 
@@ -27,81 +25,47 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_SOCKETS_AIO_SEND_AIOCB_HPP_
-#define _YIELD_SOCKETS_AIO_SEND_AIOCB_HPP_
+#ifndef _YIELD_SOCKETS_AIO_SOCKET_AIO_QUEUE_HPP_
+#define _YIELD_SOCKETS_AIO_SOCKET_AIO_QUEUE_HPP_
 
+#include "yield/event_queue.hpp"
 #include "yield/sockets/aio/socket_aiocb.hpp"
-#include "yield/sockets/socket.hpp"
 
 namespace yield {
 namespace sockets {
 namespace aio {
 /**
-  AIO control block for send operations on sockets.
+  Queue for asynchronous input/output (AIO) operations on sockets.
+  The queue is similar to Win32 I/O completion ports or Linux io_submit AIO:
+    AIO operations are described by AIO control blocks (Aiocbs), enqueued
+    to the AIO queue, and dequeued on completion.
+  The AioQueue also serves as a general thread-safe EventQueue, passing non-SocketAiocb
+    events through from producer to consumer.
 */
-class SendAiocb : public SocketAiocb {
+class SocketAioQueue : public EventQueue<SocketAiocb> {
 public:
-  /**
-    Construct a SendAiocb, passing the same parameters as to send.
-    @param socket_ socket to send data on
-    @param buffer buffer to send data from
-    @param flags flags to pass to the send method
-    @param context optional context object
-  */
-  SendAiocb(
-    ::std::shared_ptr<Socket> socket_,
-    ::std::shared_ptr<Buffer> buffer,
-    const Socket::MessageFlags& flags
-  ) : buffer_(buffer),
-    flags_(flags),
-    socket_(socket_) {
-  }
-
-  virtual ~SendAiocb() {
+  virtual ~SocketAioQueue() {
   }
 
 public:
   /**
-    Get the buffer from which to send data.
-    @return the buffer from which to send data
+    Associate a socket with this AioQueue.
+    On Win32 it is necessary to call this method once per socket before
+      enqueueing an AIO operation/AIO operation on the socket.
   */
-  const Buffer& buffer() const {
-    return *buffer_;
-  }
+  virtual bool associate(socket_t socket_) = 0;
 
+public:
   /**
-    Get the flags to pass to the send method.
-    @return the flags to pass to the send method
+    Create a platform-specific SocketAioQueue implementation.
   */
-  const Socket::MessageFlags& flags() const {
-    return flags_;
-  }
+  static ::std::unique_ptr<SocketAioQueue> create();
 
-  /**
-    Get the socket associated with this control block.
-  */
-  Socket& socket() override {
-    return *socket_;
-  }
-
-  Type::Enum type() const override {
-    return Type::SEND;
-  }
-
-private:
-  ::std::shared_ptr<Buffer> buffer_;
-  Socket::MessageFlags flags_;
-  SocketAddress* peername_;
-  ::std::shared_ptr<Socket> socket_;
+protected:
+  template <class AiocbType> void log_completion(AiocbType& aiocb);
+  template <class AiocbType> void log_enqueue(AiocbType& aiocb);
+  template <class AiocbType> void log_error(AiocbType& aiocb);
 };
-
-/**
-  Print a string representation of a SendAiocb to a std::ostream.
-  @param os std::ostream to print to
-  @param send_aiocb SendAiocb to print
-  @return os
-*/
-std::ostream& operator<<(std::ostream& os, const SendAiocb& send_aiocb);
 }
 }
 }

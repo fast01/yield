@@ -30,7 +30,7 @@
 #ifndef _YIELD_SOCKETS_AIO_CONNECT_AIOCB_HPP_
 #define _YIELD_SOCKETS_AIO_CONNECT_AIOCB_HPP_
 
-#include "yield/sockets/aio/aiocb.hpp"
+#include "yield/sockets/aio/socket_aiocb.hpp"
 
 namespace yield {
 class Buffer;
@@ -42,7 +42,7 @@ namespace aio {
 /**
   AIO control block for connect operations on sockets.
 */
-class ConnectAiocb : public Aiocb {
+class ConnectAiocb : public SocketAiocb {
 public:
   /**
     Construct a ConnectAiocb with an optional buffer for sending data

@@ -31,7 +31,7 @@
 #define _YIELD_SOCKETS_AIO_RECVFROM_AIOCB_HPP_
 
 #include "yield/sockets/socket.hpp"
-#include "yield/sockets/aio/aiocb.hpp"
+#include "yield/sockets/aio/socket_aiocb.hpp"
 
 namespace yield {
 namespace sockets {
@@ -39,7 +39,7 @@ namespace aio {
 /**
   AIO control block for receive operations on sockets.
 */
-class RecvfromAiocb : public Aiocb {
+class RecvfromAiocb : public SocketAiocb {
 public:
   /**
     Construct a RecvAiocb, passing the same parameters as to recv.

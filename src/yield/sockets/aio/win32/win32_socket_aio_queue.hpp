@@ -1,5 +1,3 @@
-// yield/sockets/aio/aio_queue.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 
@@ -27,60 +25,34 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_SOCKETS_AIO_AIO_QUEUE_HPP_
-#define _YIELD_SOCKETS_AIO_AIO_QUEUE_HPP_
+#ifndef _YIELD_SOCKETS_AIO_WIN32_SOCKET_AIO_QUEUE_HPP_
+#define _YIELD_SOCKETS_AIO_WIN32_SOCKET_AIO_QUEUE_HPP_
 
-#ifdef _WIN32
-#include "yield/event_queue.hpp"
-#include "yield/sockets/aio/aiocb.hpp"
-#else
-#include "yield/sockets/aio/nbio_queue.hpp"
-#endif
+#include "yield/sockets/aio/socket_aio_queue.hpp"
 
 namespace yield {
 namespace sockets {
 namespace aio {
-/**
-  Queue for asynchronous input/output (AIO) operations on sockets.
-  The queue is similar to Win32 I/O completion ports or Linux io_submit AIO:
-    AIO operations are described by AIO control blocks (Aiocbs), enqueued
-    to the AIO queue, and dequeued on completion.
-  The AioQueue also serves as a general thread-safe EventQueue, passing non-Aiocb
-    events through from producer to consumer.
-*/
-#ifdef _WIN32
-class AioQueue final : public EventQueue<Aiocb> {
+namespace win32 {
+class Win32SocketAioQueue final : public SocketAioQueue {
 public:
-  /**
-    Construct an AioQueue.
-  */
-  AioQueue();
+  Win32SocketAioQueue();
+  ~Win32SocketAioQueue();
 
 public:
-  /**
-    Associate a socket with this AioQueue.
-    On Win32 it is necessary to call this method once per socket before
-      enqueueing an AIO operation/AIO operation on the socket.
-  */
-  bool associate(socket_t socket_);
+  // SocketAioQueue
+  bool associate(socket_t socket_) override;
 
 public:
   // yield::EventQueue
-  ::std::unique_ptr<Aiocb> timeddequeue(const Time& timeout) override;
-  ::std::unique_ptr<Aiocb> tryenqueue(::std::unique_ptr<Aiocb> aiocb) override;
+  ::std::unique_ptr<SocketAiocb> timeddequeue(const Time& timeout) override;
+  ::std::unique_ptr<SocketAiocb> tryenqueue(::std::unique_ptr<SocketAiocb> aiocb) override;
   void wake() override;
-
-private:
-  template <class AiocbType> void log_completion(AiocbType& aiocb);
-  template <class AiocbType> void log_enqueue(AiocbType& aiocb);
-  template <class AiocbType> void log_error(AiocbType& aiocb);
 
 private:
   fd_t hIoCompletionPort;
 };
-#else
-typedef NbioQueue AioQueue;
-#endif
+}
 }
 }
 }

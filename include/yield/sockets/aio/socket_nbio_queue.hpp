@@ -27,17 +27,20 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_SOCKETS_AIO_NBIO_QUEUE_HPP_
-#define _YIELD_SOCKETS_AIO_NBIO_QUEUE_HPP_
+#ifndef _YIELD_SOCKETS_AIO_SOCKET_NBIO_QUEUE_HPP_
+#define _YIELD_SOCKETS_AIO_SOCKET_NBIO_QUEUE_HPP_
 
 #include "yield/event_queue.hpp"
 #include "yield/poll/fd_event_queue.hpp"
 #include "yield/queue/blocking_concurrent_queue.hpp"
-#include "yield/sockets/aio/aiocb.hpp"
+#include "yield/sockets/aio/socket_aiocb.hpp"
+#include "yield/sockets/aio/socket_aio_queue.hpp"
 
 #include <map>
 
 namespace yield {
+class Buffer;
+
 namespace sockets {
 namespace aio {
 class AcceptAiocb;
@@ -50,24 +53,24 @@ class SendfileAiocb;
 /**
   Queue for asynchronous input/output (AIO) operations on sockets,
     implemented in terms of non-blocking I/O.
-  The NbioQueue presents the same interface and emulates the semantics of
+  The SocketNbioQueue presents the same interface and emulates the semantics of
     AioQueue for platforms that do not natively support socket AIO (e.g., all
-    platforms besides Win32). Even on Win32 the NbioQueue is needed for socket
+    platforms besides Win32). Even on Win32 the SocketNbioQueue is needed for socket
     types that only support blocking or non-blocking I/O, like SSL sockets.
   @see AioQueue
 */
 
-class NbioQueue final : public EventQueue<Aiocb> {
+class SocketNbioQueue final : public SocketAioQueue {
 public:
   /**
-    Construct an NbioQueue.
+    Construct a SocketNbioQueue.
   */
-  NbioQueue();
+  SocketNbioQueue();
 
 public:
   /**
     Associate a socket with this AioQueue.
-    This is a no-op in the NbioQueue, intended only to conform to the interface
+    This is a no-op in the SocketNbioQueue, intended only to conform to the interface
       of the AioQueue on Win32.
   */
   bool associate(socket_t) {
@@ -76,8 +79,8 @@ public:
 
 public:
   // yield::EventQueue
-  ::std::unique_ptr<Aiocb> timeddequeue(const Time& timeout) override;
-  ::std::unique_ptr<Aiocb> tryenqueue(::std::unique_ptr<Aiocb> aiocb) override;
+  ::std::unique_ptr<SocketAiocb> timeddequeue(const Time& timeout) override;
+  ::std::unique_ptr<SocketAiocb> tryenqueue(::std::unique_ptr<SocketAiocb> aiocb) override;
   void wake() override;
 
 private:
@@ -93,7 +96,7 @@ private:
   class SocketState;
 
 private:
-  void associate(Aiocb& aiocb, RetryStatus retry_status);
+  void associate(SocketAiocb& aiocb, RetryStatus retry_status);
 
 private:
   template <class AiocbType> void log_completion(AiocbType&);
@@ -103,10 +106,10 @@ private:
   template <class AiocbType> void log_wouldblock(AiocbType&, RetryStatus);
 
 private:
-  static uint8_t get_aiocb_priority(const Aiocb& aiocb);
+  static uint8_t get_aiocb_priority(const SocketAiocb& aiocb);
 
 private:
-  RetryStatus retry(Aiocb&, size_t& partial_send_len);
+  RetryStatus retry(SocketAiocb&, size_t& partial_send_len);
   RetryStatus retry_accept(AcceptAiocb&);
   RetryStatus retry_connect(ConnectAiocb&, size_t& partial_send_len);
   RetryStatus retry_recv(RecvAiocb&);
@@ -117,7 +120,7 @@ private:
   RetryStatus retry_sendfile(SendfileAiocb&, size_t& partial_send_len);
 
 private:
-  ::yield::queue::BlockingConcurrentQueue<Aiocb> aiocb_queue;
+  ::yield::queue::BlockingConcurrentQueue<SocketAiocb> aiocb_queue;
   ::yield::poll::FdEventQueue fd_event_queue;
   ::std::map<fd_t, SocketState*> socket_state;
 };

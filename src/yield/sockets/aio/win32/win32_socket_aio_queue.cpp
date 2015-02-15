@@ -27,6 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "./win32_socket_aio_queue.hpp"
 #include "../../win32/winsock.hpp"
 #include "yield/buffer.hpp"
 #include "yield/logging.hpp"
@@ -37,11 +38,11 @@
 #include "yield/sockets/aio/recvfrom_aiocb.hpp"
 #include "yield/sockets/aio/send_aiocb.hpp"
 #include "yield/sockets/aio/sendfile_aiocb.hpp"
-#include "yield/sockets/aio/aio_queue.hpp"
 
 namespace yield {
 namespace sockets {
 namespace aio {
+namespace win32 {
 using ::std::make_shared;
 using ::std::shared_ptr;
 using ::std::unique_ptr;
@@ -52,14 +53,18 @@ static LPFN_CONNECTEX lpfnConnectEx = NULL;
 static LPFN_GETACCEPTEXSOCKADDRS lpfnGetAcceptExSockaddrs = NULL;
 static LPFN_TRANSMITFILE lpfnTransmitFile = NULL;
 
-AioQueue::AioQueue() {
+Win32SocketAioQueue::Win32SocketAioQueue() {
   hIoCompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
   if (hIoCompletionPort == INVALID_HANDLE_VALUE) {
     throw Exception();
   }
 }
 
-bool AioQueue::associate(socket_t socket_) {
+Win32SocketAioQueue::~Win32SocketAioQueue() {
+  ::CloseHandle(hIoCompletionPort);
+}
+
+bool Win32SocketAioQueue::associate(socket_t socket_) {
   return CreateIoCompletionPort(
            reinterpret_cast<fd_t>(socket_),
            hIoCompletionPort,
@@ -68,23 +73,7 @@ bool AioQueue::associate(socket_t socket_) {
          ) != INVALID_HANDLE_VALUE;
 }
 
-template <class AiocbType> void AioQueue::log_completion(AiocbType& aiocb) {
-  if (aiocb.return_() >= 0) {
-    DLOG(DEBUG) << "completed " << aiocb;
-  } else {
-    log_error(aiocb);
-  }
-}
-
-template <class AiocbType> void AioQueue::log_enqueue(AiocbType& aiocb) {
-  DLOG(DEBUG) << "enqueuing " << aiocb;
-}
-
-template <class AiocbType> void AioQueue::log_error(AiocbType& aiocb) {
-  LOG(ERROR) << "error on " << aiocb;
-}
-
-unique_ptr<Aiocb> AioQueue::timeddequeue(const Time& timeout) {
+unique_ptr<SocketAiocb> Win32SocketAioQueue::timeddequeue(const Time& timeout) {
   DWORD dwBytesTransferred = 0;
   ULONG_PTR ulCompletionKey = 0;
   LPOVERLAPPED lpOverlapped = NULL;
@@ -102,9 +91,9 @@ unique_ptr<Aiocb> AioQueue::timeddequeue(const Time& timeout) {
     return NULL;
   }
 
-  unique_ptr<Aiocb> aiocb;
+  unique_ptr<SocketAiocb> aiocb;
   {
-    Aiocb* aiocb_temp;
+    SocketAiocb* aiocb_temp;
     memcpy_s(
       &aiocb_temp,
       sizeof(aiocb_temp),
@@ -121,7 +110,7 @@ unique_ptr<Aiocb> AioQueue::timeddequeue(const Time& timeout) {
   }
 
   switch (aiocb->type()) {
-    case Aiocb::Type::ACCEPT: {
+    case SocketAiocb::Type::ACCEPT: {
     AcceptAiocb& accept_aiocb = static_cast<AcceptAiocb&>(*aiocb);
 
     if (accept_aiocb.error() == 0) {
@@ -180,12 +169,12 @@ unique_ptr<Aiocb> AioQueue::timeddequeue(const Time& timeout) {
   }
   break;
 
-  case Aiocb::Type::CONNECT: {
+  case SocketAiocb::Type::CONNECT: {
     log_completion(static_cast<ConnectAiocb&>(*aiocb));
   }
   break;
 
-  case Aiocb::Type::RECV: {
+  case SocketAiocb::Type::RECV: {
     RecvAiocb& recv_aiocb = static_cast<RecvAiocb&>(*aiocb);
 
     if (recv_aiocb.return_() > 0) {
@@ -200,7 +189,7 @@ unique_ptr<Aiocb> AioQueue::timeddequeue(const Time& timeout) {
   }
   break;
 
-  case Aiocb::Type::RECVFROM: {
+  case SocketAiocb::Type::RECVFROM: {
     RecvfromAiocb& recvfrom_aiocb = static_cast<RecvfromAiocb&>(*aiocb);
 
     if (recvfrom_aiocb.return_() > 0) {
@@ -215,12 +204,12 @@ unique_ptr<Aiocb> AioQueue::timeddequeue(const Time& timeout) {
   }
   break;
 
-  case Aiocb::Type::SEND: {
+  case SocketAiocb::Type::SEND: {
     log_completion(static_cast<SendAiocb&>(*aiocb));
   }
   break;
 
-  case Aiocb::Type::SENDFILE: {
+  case SocketAiocb::Type::SENDFILE: {
     log_completion(static_cast<SendfileAiocb&>(*aiocb));
   }
   break;
@@ -229,12 +218,12 @@ unique_ptr<Aiocb> AioQueue::timeddequeue(const Time& timeout) {
   return aiocb;
 }
 
-unique_ptr<Aiocb> AioQueue::tryenqueue(unique_ptr<Aiocb> unique_aiocb) {
-  Aiocb* aiocb = unique_aiocb.release();
+unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> unique_aiocb) {
+  SocketAiocb* aiocb = unique_aiocb.release();
   ::OVERLAPPED* lpOverlapped = reinterpret_cast<::OVERLAPPED*>(&aiocb->overlapped_);
 
   switch (aiocb->type()) {
-  case Aiocb::Type::ACCEPT: {
+  case SocketAiocb::Type::ACCEPT: {
     AcceptAiocb& accept_aiocb = static_cast<AcceptAiocb&>(*aiocb);
 
     log_enqueue(accept_aiocb);
@@ -257,7 +246,7 @@ unique_ptr<Aiocb> AioQueue::tryenqueue(unique_ptr<Aiocb> unique_aiocb) {
       if (lpfnAcceptEx == NULL) {
         accept_aiocb.set_error(WSAGetLastError());
         log_error(accept_aiocb);
-        return unique_ptr<Aiocb>(aiocb);
+        return unique_ptr<SocketAiocb>(aiocb);
       }
     }
 
@@ -338,11 +327,11 @@ unique_ptr<Aiocb> AioQueue::tryenqueue(unique_ptr<Aiocb> unique_aiocb) {
     accept_aiocb.set_error(WSAGetLastError());
     log_error(accept_aiocb);
 
-    return unique_ptr<Aiocb>(aiocb);
+    return unique_ptr<SocketAiocb>(aiocb);
   }
   break;
 
-  case Aiocb::Type::CONNECT: {
+  case SocketAiocb::Type::CONNECT: {
     ConnectAiocb& connect_aiocb = static_cast<ConnectAiocb&>(*aiocb);
 
     log_enqueue(connect_aiocb);
@@ -406,11 +395,11 @@ unique_ptr<Aiocb> AioQueue::tryenqueue(unique_ptr<Aiocb> unique_aiocb) {
 
     connect_aiocb.set_error(WSAGetLastError());
     log_error(connect_aiocb);
-    return unique_ptr<Aiocb>(aiocb);
+    return unique_ptr<SocketAiocb>(aiocb);
   }
   break;
 
-  case Aiocb::Type::RECV: {
+  case SocketAiocb::Type::RECV: {
     RecvAiocb& recv_aiocb = static_cast<RecvAiocb&>(*aiocb);
 
     log_enqueue(recv_aiocb);
@@ -458,11 +447,11 @@ unique_ptr<Aiocb> AioQueue::tryenqueue(unique_ptr<Aiocb> unique_aiocb) {
 
     recv_aiocb.set_error(WSAGetLastError());
     log_error(recv_aiocb);
-    return unique_ptr<Aiocb>(aiocb);
+    return unique_ptr<SocketAiocb>(aiocb);
   }
   break;
 
-  case Aiocb::Type::RECVFROM: {
+  case SocketAiocb::Type::RECVFROM: {
     RecvfromAiocb& recvfrom_aiocb = static_cast<RecvfromAiocb&>(*aiocb);
 
     log_enqueue(recvfrom_aiocb);
@@ -517,11 +506,11 @@ unique_ptr<Aiocb> AioQueue::tryenqueue(unique_ptr<Aiocb> unique_aiocb) {
 
     recvfrom_aiocb.set_error(WSAGetLastError());
     log_error(recvfrom_aiocb);
-    return unique_ptr<Aiocb>(aiocb);
+    return unique_ptr<SocketAiocb>(aiocb);
   }
   break;
 
-  case Aiocb::Type::SEND: {
+  case SocketAiocb::Type::SEND: {
     SendAiocb& send_aiocb = static_cast<SendAiocb&>(*aiocb);
 
     log_enqueue(send_aiocb);
@@ -567,11 +556,11 @@ unique_ptr<Aiocb> AioQueue::tryenqueue(unique_ptr<Aiocb> unique_aiocb) {
 
     send_aiocb.set_error(WSAGetLastError());
     log_error(send_aiocb);
-    return unique_ptr<Aiocb>(aiocb);
+    return unique_ptr<SocketAiocb>(aiocb);
   }
   break;
 
-  case Aiocb::Type::SENDFILE: {
+  case SocketAiocb::Type::SENDFILE: {
     SendfileAiocb& sendfile_aiocb = static_cast<SendfileAiocb&>(*aiocb);
 
     if (lpfnTransmitFile == NULL) {
@@ -614,13 +603,13 @@ unique_ptr<Aiocb> AioQueue::tryenqueue(unique_ptr<Aiocb> unique_aiocb) {
 
     sendfile_aiocb.set_error(WSAGetLastError());
     log_error(sendfile_aiocb);
-    return unique_ptr<Aiocb>(aiocb);
+    return unique_ptr<SocketAiocb>(aiocb);
   }
   break;
   }
 }
 
-void AioQueue::wake() {
+void Win32SocketAioQueue::wake() {
   //return PostQueuedCompletionStatus(
   //          hIoCompletionPort,
   //          0,
@@ -629,6 +618,7 @@ void AioQueue::wake() {
   //        )
   //        == TRUE;
   ::PostQueuedCompletionStatus(hIoCompletionPort, 0, 0, NULL);
+}
 }
 }
 }

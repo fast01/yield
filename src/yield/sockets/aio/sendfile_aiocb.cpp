@@ -1,5 +1,3 @@
-// yield/sockets/aio/sendfile_aiocb.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 
@@ -88,7 +86,7 @@ SendfileAiocb::SendfileAiocb(
   fd_t fd,
   off_t offset,
   size_t nbytes
-) : Aiocb(offset),
+) : SocketAiocb(offset),
   nbytes_(nbytes),
   socket_(socket_) {
   init(fd);

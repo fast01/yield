@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_SOCKETS_AIO_AIOCB_HPP_
-#define _YIELD_SOCKETS_AIO_AIOCB_HPP_
+#ifndef _YIELD_SOCKETS_AIO_SOCKET_AIOCB_HPP_
+#define _YIELD_SOCKETS_AIO_SOCKET_AIOCB_HPP_
 
 #include "yield/types.hpp"
 
@@ -38,14 +38,15 @@ class Socket;
 
 namespace aio {
 #ifdef _WIN32
-class AioQueue;
+namespace win32 {
+class Win32SocketAioQueue;
+}
 #endif
-class NbioQueue;
 
 /**
-  Asynchronous Input/Output Control Block (Aiocb) for sockets.
+  Asynchronous Input/Output Control Block (SocketAiocb) for sockets.
 */
-class Aiocb {
+class SocketAiocb {
 public:
   class Type {
   public:
@@ -60,7 +61,7 @@ public:
   };
 
 public:
-  virtual ~Aiocb() {
+  virtual ~SocketAiocb() {
   }
 
 public:
@@ -99,20 +100,20 @@ public:
   virtual Type::Enum type() const = 0;
 
 protected:
-  Aiocb() {
+  SocketAiocb() {
     init();
   }
 
-  Aiocb(off_t offset)
+  SocketAiocb(off_t offset)
     : offset_(offset) {
     init();
   }
 
 protected:
+  friend class SocketNbioQueue;
 #ifdef _WIN32
-  friend class AioQueue;
+  friend class win32::Win32SocketAioQueue;
 #endif
-  friend class NbioQueue;
 
   void set_error(uint32_t error) {
     this->error_ = error;
@@ -146,7 +147,7 @@ private:
 #pragma warning(pop)
     void* hEvent;
   } overlapped_;
-  Aiocb* this_;
+  SocketAiocb* this_;
 #endif
 };
 }

@@ -1,5 +1,5 @@
 #include <string>
-#include "yield/sockets/aio/aiocb.hpp"
+#include "yield/sockets/aio/socket_aiocb.hpp"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -8,7 +8,7 @@
 namespace yield {
 namespace sockets {
 namespace aio {
-void Aiocb::init() {
+void SocketAiocb::init() {
 #ifdef _WIN32
   static_assert(sizeof(overlapped_) == sizeof(::OVERLAPPED), "");
   memset(&overlapped_, 0, sizeof(overlapped_));

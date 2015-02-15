@@ -32,7 +32,7 @@
 
 #include <ostream>
 
-#include "yield/sockets/aio/aiocb.hpp"
+#include "yield/sockets/aio/socket_aiocb.hpp"
 #include "yield/sockets/stream_socket.hpp"
 
 namespace yield {
@@ -46,7 +46,7 @@ namespace aio {
 /**
   AIO control block for accept operations on sockets.
 */
-class AcceptAiocb : public Aiocb {
+class AcceptAiocb : public SocketAiocb {
 public:
   /**
     Construct an AcceptAiocb with an optional buffer for receiving data
@@ -102,10 +102,10 @@ public:
   }
 
 protected:
+  friend class SocketNbioQueue;
 #ifdef _WIN32
-  friend class AioQueue;
+  friend class win32::Win32SocketAioQueue;
 #endif
-  friend class NbioQueue;
 
   void set_accepted_socket(::std::shared_ptr<StreamSocket> accepted_socket) {
     this->accepted_socket_ = accepted_socket;

@@ -30,7 +30,7 @@
 #ifndef _YIELD_SOCKETS_AIO_SENDFILE_AIOCB_HPP_
 #define _YIELD_SOCKETS_AIO_SENDFILE_AIOCB_HPP_
 
-#include "yield/sockets/aio/aiocb.hpp"
+#include "yield/sockets/aio/socket_aiocb.hpp"
 
 #include <stdio.h>
 
@@ -42,7 +42,7 @@ namespace aio {
 /**
   AIO control block for sendfile operations on sockets.
 */
-class SendfileAiocb : public Aiocb {
+class SendfileAiocb : public SocketAiocb {
 public:
   /**
     Construct a SendfileAiocb, passing the same parameters as to sendfile.
