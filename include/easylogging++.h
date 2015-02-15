@@ -36,6 +36,8 @@
 #   elif(_MSC_VER >= 1700)
 #      define ELPP_CXX11 1
 #   endif  // (_MSC_VER == 1600)
+#pragma warning(push)
+#pragma warning(disable: 4242 4244 4365 4623)
 #endif  // defined(_MSC_VER)
 // Clang++
 #if defined(__clang__) && (__clang__ == 1)
@@ -6660,4 +6662,7 @@ static T* checkNotNull(T* ptr, const char* name, const char* loggers, ...) {
 #else
 #   define START_EASYLOGGINGPP(argc, argv) el::Helpers::setArgs(argc, argv)
 #endif  // defined(ELPP_UNICODE)
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 #endif // EASYLOGGINGPP_H
