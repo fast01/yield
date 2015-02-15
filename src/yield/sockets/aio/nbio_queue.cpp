@@ -126,12 +126,6 @@ void NbioQueue::associate(Aiocb& aiocb, RetryStatus retry_status) {
   }
 }
 
-bool NbioQueue::enqueue(unique_ptr<Aiocb> aiocb) {
-  bool ret = aiocb_queue.enqueue(move(aiocb));
-  fd_event_queue.wake();
-  return ret;
-}
-
 uint8_t NbioQueue::get_aiocb_priority(const Aiocb& aiocb) {
   switch (aiocb.type()) {
   case Aiocb::Type::ACCEPT:
@@ -587,6 +581,18 @@ NbioQueue::retry_sendfile(
       return NULL;
     }
   }
+}
+
+unique_ptr<Aiocb> NbioQueue::tryenqueue(unique_ptr<Aiocb> aiocb) {
+  unique_ptr<Aiocb> ret = aiocb_queue.tryenqueue(move(aiocb));
+  if (ret == NULL) {
+    fd_event_queue.wake();
+  }
+  return ret;
+}
+
+void NbioQueue::wake() {
+  fd_event_queue.wake();
 }
 }
 }

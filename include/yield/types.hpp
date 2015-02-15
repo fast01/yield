@@ -30,7 +30,7 @@
 #ifndef _YIELD_TYPES_HPP_
 #define _YIELD_TYPES_HPP_
 
-#include <stdint.h>
+#include <cstdint>
 
 #ifdef _WIN32
 #ifndef _STRUCT_IOVEC_DEFINED

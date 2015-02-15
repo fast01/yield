@@ -66,8 +66,8 @@ public:
 
 public:
   // yield::EventQueue
-  bool enqueue(::std::unique_ptr<Aiocb> aiocb) override;
   ::std::unique_ptr<Aiocb> timeddequeue(const Time& timeout) override;
+  ::std::unique_ptr<Aiocb> tryenqueue(::std::unique_ptr<Aiocb> aiocb) override;
   void wake() override;
 
 private:

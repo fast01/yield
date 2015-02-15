@@ -30,6 +30,8 @@
 #ifndef _YIELD_SOCKETS_AIO_AIOCB_HPP_
 #define _YIELD_SOCKETS_AIO_AIOCB_HPP_
 
+#include "yield/types.hpp"
+
 namespace yield {
 namespace sockets {
 class Socket;
@@ -121,15 +123,31 @@ protected:
   }
 
 private:
-  void init() {
-    error_ = 0;
-    return__ = -1;
-  }
+  void init();
 
 private:
   uint32_t error_;
   off_t offset_;
   ssize_t return__;
+
+#ifdef _WIN32
+  struct {
+    unsigned long* Internal;
+    unsigned long* InternalHigh;
+#pragma warning(push)
+#pragma warning(disable: 4201)
+    union {
+      struct {
+        unsigned long Offset;
+        unsigned long OffsetHigh;
+      };
+      void* Pointer;
+    };
+#pragma warning(pop)
+    void* hEvent;
+  } overlapped_;
+  Aiocb* this_;
+#endif
 };
 }
 }
