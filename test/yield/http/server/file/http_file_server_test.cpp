@@ -35,7 +35,7 @@ namespace http {
 namespace server {
 namespace file {
 TEST(HttpFileServer, constructor) {
-  HttpFileServer<>(".", "/", 8080);
+  HttpFileServer(".", "/", 8080);
 }
 
 //TEST(HttpFileServer, visit) {

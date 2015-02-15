@@ -31,22 +31,21 @@
 #define _YIELD_HTTP_SERVER_FILE_HTTP_FILE_SERVER_HPP_
 
 #include "yield/http/server/http_server.hpp"
-#include "yield/http/server/file/http_file_request_handler.hpp"
+#include "yield/http/server/file/http_file_server_event_handler.hpp"
 
 namespace yield {
 namespace http {
 namespace server {
 namespace file {
-template <class AioQueueType = yield::sockets::aio::AioQueue>
-class HttpFileServer : public HttpServer<AioQueueType> {
+class HttpFileServer : public HttpServer {
 public:
   HttpFileServer(
     const yield::fs::Path& root_directory_path,
     const yield::uri::Uri& root_uri,
     const yield::sockets::SocketAddress& sockname
   )
-    : HttpServer<AioQueueType>(
-      *new HttpFileRequestHandler(root_directory_path, root_uri),
+    : HttpServer(
+      ::std::unique_ptr< EventHandler<HttpServerEvent> >(new HttpFileServerEventHandler(root_directory_path, root_uri)),
       sockname
     ) {
   }

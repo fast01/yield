@@ -40,9 +40,9 @@ public:
   }
 
 public:
-  virtual double get_arrival_rate_s() const = 0;
-  virtual double get_rho() const = 0;
-  virtual double get_service_rate_s() const = 0;
+  virtual double arrival_rate_s() const = 0;
+  virtual double rho() const = 0;
+  virtual double service_rate_s() const = 0;
 
   virtual void visit() = 0;
   virtual bool visit(const Time& timeout) = 0;

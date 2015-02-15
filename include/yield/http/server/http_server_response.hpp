@@ -29,17 +29,11 @@
 #define _YIELD_HTTP_SERVER_HTTP_SERVER_RESPONSE_HPP_
 
 #include "yield/http/http_response.hpp"
-#include "yield/http/server/http_server_event.hpp"
 
 namespace yield {
 namespace http {
 namespace server {
-class HttpServerResponse : public ::yield::http::HttpResponse, public HttpServerEvent {
-public:
-  Type type() const override {
-    return Type::RESPONSE;
-  }
-
+class HttpServerResponse : public ::yield::http::HttpResponse {
 private:
   friend class HttpServerRequest;
 

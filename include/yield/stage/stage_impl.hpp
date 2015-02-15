@@ -32,6 +32,7 @@
 
 #include "yield/event_handler.hpp"
 #include "yield/event_queue.hpp"
+#include "yield/logging.hpp"
 #include "yield/time.hpp"
 #include "yield/stage/stage.hpp"
 #include "yield/stage/synchronized_event_queue.hpp"
@@ -41,112 +42,114 @@ namespace stage {
 template <class EventT>
 class StageImpl : public EventHandler<EventT>, public Stage {
 public:
-  Stage(YO_NEW_REF EventHandler<EventT>& event_handler)
-    : event_handler(&event_handler),
-      event_queue(*new ::yield::queue::SynchronizedEventQueue) {
+  StageImpl(::std::unique_ptr< EventHandler<EventT>> event_handler)
+    : event_handler_(::std::move(event_handler)),
+      event_queue_(new ::yield::stage::SynchronizedEventQueue) {
     init();
   }
 
-  Stage(YO_NEW_REF EventHandler<EventT>& event_handler, YO_NEW_REF EventQueue<EventT>& event_queue)
-    : event_handler(&event_handler),
-      event_queue(event_queue) {
+  StageImpl(::std::unique_ptr< EventHandler<EventT> > event_handler, ::std::unique_ptr< EventQueue<EventT> > event_queue)
+    : event_handler_(::std::move(event_handler)),
+      event_queue_(::std::move(event_queue)) {
     init();
   }
 
-  ~Stage() {
-    EventQueue<EventT>::dec_ref(event_queue);
-    EventHandler<EventT>::dec_ref(event_handler);
+  virtual ~StageImpl() {
   }
 
 public:
-  double get_arrival_rate_s() const {
-    return arrival_rate_s;
+  double arrival_rate_s() const {
+    return arrival_rate_s_;
   }
 
-  double get_rho() const {
-    return rho;
+  double rho() const {
+    return rho_;
   }
 
-  double get_service_rate_s() const {
-    return service_rate_s;
+  double service_rate_s() const {
+    return service_rate_s_;
   }
 
   void visit() {
-    EventT& event = event_queue.dequeue();
-    event_queue_length--;
+    ::std::unique_ptr<EventT> event = event_queue_->dequeue();
+    if (event == NULL) {
+      return;
+    }
+
+    event_queue_length_--;
 
     Time service_time_start(Time::now());
 
-    service(event);
+    service(::std::move(event));
 
     Time service_time(Time::now() - service_time_start);
   }
 
   bool visit(const Time& timeout) {
-    EventT* event = event_queue.timeddequeue(timeout);
-
-    if (event != NULL) {
-      event_queue_length--;
-
-      Time service_time_start(Time::now());
-
-      service(*event);
-
-      Time service_time(Time::now() - service_time_start);
-
-      return true;
-    } else {
+    ::std::unique_ptr<EventT> event = event_queue_->timeddequeue(timeout);
+    if (event == NULL) {
       return false;
     }
+
+    event_queue_length_--;
+
+    Time service_time_start(Time::now());
+
+    service(::std::move(event));
+
+    Time service_time(Time::now() - service_time_start);
+
+    return true;
   }
 
 public:
   // yield::EventHandler
-  void handle(YO_NEW_REF Event& event) {
-    enqueue(event);
+  void handle(::std::unique_ptr<EventT> event) override {
+    tryenqueue(::std::move(event));
   }
 
 protected:
-  Stage(YO_NEW_REF EventQueue<EventT>& event_queue) {
-    : event_handler(NULL), event_queue(event_queue) {
+  StageImpl(::std::unique_ptr< EventQueue<EventT> > event_queue)
+    : event_queue_(::std::move(event_queue)) {
     init();
   }
 
   EventQueue<EventT>& get_event_queue() {
-    return event_queue;
+    return event_queue_;
   }
 
 private:
-  void enqueue(YO_NEW_REF EventT& event) {
-    event_queue_length++;
-    event_queue_arrival_count++;
+  ::std::unique_ptr<EventT> tryenqueue(::std::unique_ptr<EventT> event) {
+    event_queue_length_++;
+    event_queue_arrival_count_++;
 
-    if (event_queue.enqueue(event)) {
-      return;
-    }/* else {
+    if (event_queue_->tryenqueue(::std::move(event)) == NULL) {
+      return NULL;
+    } else {
       LOG(ERROR) << "event queue full, stopping.";
-    }*/
+      return NULL;
+    }
   }
 
   void init() {
-    event_queue_arrival_count = 0;
-    event_queue_length = 0;
+    event_queue_arrival_count_ = 0;
+    event_queue_length_ = 0;
   }
 
-  void service(YO_NEW_REF EventT& event) {
-    event_handler->handle(event);
+  virtual void service(::std::unique_ptr<EventT> event) {
+    event_handler_->handle(::std::move(event));
   }
 
 private:
-  double arrival_rate_s;
-  EventHandler<EventT>* event_handler;
-  EventQueue<EventT>& event_queue;
-  uint32_t event_queue_arrival_count, event_queue_length;
-  double rho;
-  double service_rate_s;
+  double arrival_rate_s_;
+  ::std::unique_ptr< EventHandler<EventT> > event_handler_;
+  ::std::unique_ptr< EventQueue<EventT> > event_queue_;
+  uint32_t event_queue_arrival_count_, event_queue_length_;
+  double rho_;
+  double service_rate_s_;
   // Sampler<uint64_t, 1024, Mutex> service_times;
 };
-};
-};
+}
+}
 
 #endif

@@ -30,8 +30,8 @@
 #ifndef _YIELD_HTTP_SERVER_HTTP_SERVER_HPP_
 #define _YIELD_HTTP_SERVER_HTTP_SERVER_HPP_
 
-#include "yield/stage/stage.hpp"
-#include "yield/http/server/http_request_queue.hpp"
+#include "yield/stage/stage_impl.hpp"
+#include "yield/http/server/http_server_event_queue.hpp"
 
 namespace yield {
 namespace http {
@@ -43,8 +43,7 @@ namespace server {
     HttpRequestQueue and dispatches HttpRequests and associated Events to
     an EventHandler.
 */
-template <class AioQueueType = yield::sockets::aio::AioQueue>
-class HttpServer : public yield::stage::Stage {
+class HttpServer : public ::yield::stage::StageImpl<HttpServerEvent> {
 public:
   /**
     Construct an HttpServer that will listen to the given socket address and
@@ -55,12 +54,12 @@ public:
     @param sockname address to listen to
   */
   HttpServer(
-    YO_NEW_REF EventHandler& http_request_handler,
+    ::std::unique_ptr< EventHandler<HttpServerEvent> > http_server_event_handler,
     const yield::sockets::SocketAddress& sockname
   )
-    : yield::stage::Stage(
-      http_request_handler,
-      *new HttpRequestQueue<AioQueueType>(sockname)
+    : ::yield::stage::StageImpl<HttpServerEvent>(
+      ::std::move(http_server_event_handler),
+      ::std::unique_ptr< EventQueue<HttpServerEvent> >(new HttpServerEventQueue(sockname))
     ) {
   }
 };

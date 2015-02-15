@@ -31,7 +31,7 @@
 #define _YIELD_HTTP_SERVER_FILE_HTTP_FILE_REQUEST_HANDLER_HPP_
 
 #include "yield/event_handler.hpp"
-#include "yield/http/server/http_request.hpp"
+#include "yield/http/server/http_server_request.hpp"
 #include "yield/fs/path.hpp"
 #include "yield/uri/uri.hpp"
 
@@ -39,16 +39,16 @@ namespace yield {
 namespace http {
 namespace server {
 namespace file {
-class HttpFileRequestHandler : public EventHandler<HttpRequest> {
+class HttpFileServerEventHandler : public EventHandler<HttpServerEvent> {
 public:
-  HttpFileRequestHandler(
+  HttpFileServerEventHandler(
     const yield::fs::Path& root_directory_path,
     const yield::uri::Uri& root_uri
   );
 
 public:
   // yield::EventHandler
-  void handle(::std::unique_ptr<HttpRequest> event) override;
+  void handle(::std::unique_ptr<HttpServerEvent> event) override;
 
 private:
   yield::fs::Path root_directory_path;

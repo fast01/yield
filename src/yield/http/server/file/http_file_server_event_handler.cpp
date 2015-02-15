@@ -27,21 +27,24 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "yield/http/server/file/http_file_server_event_handler.hpp"
+
 #include "yield/logging.hpp"
 #include "yield/fs/file_system.hpp"
-#include "yield/http/server/http_request.hpp"
-#include "yield/http/server/file/http_file_request_handler.hpp"
+#include "yield/http/server/http_server_request.hpp"
 
 namespace yield {
 namespace http {
 namespace server {
 namespace file {
-using yield::fs::File;
-using yield::fs::FileSystem;
-using yield::fs::Path;
-using yield::uri::Uri;
+using ::std::shared_ptr;
+using ::std::unique_ptr;
+using ::yield::fs::File;
+using ::yield::fs::FileSystem;
+using ::yield::fs::Path;
+using ::yield::uri::Uri;
 
-HttpFileRequestHandler::HttpFileRequestHandler(
+HttpFileServerEventHandler::HttpFileServerEventHandler(
   const Path& root_directory_path,
   const Uri& root_uri
 ) : root_directory_path(root_directory_path),
@@ -49,7 +52,12 @@ HttpFileRequestHandler::HttpFileRequestHandler(
   this->root_uri.get_path(root_uri_path);
 }
 
-void HttpFileRequestHandler::handle(::std::unique_ptr<HttpRequest> http_request) {
+void HttpFileServerEventHandler::handle(unique_ptr<HttpServerEvent> event) {
+  if (event->type() != HttpServerEvent::Type::REQUEST) {
+    return;
+  }
+
+  unique_ptr<HttpServerRequest> http_request(static_cast<HttpServerRequest*>(event.release()));
   iovec http_request_uri_path;
   http_request->uri().get_path(http_request_uri_path);
 
@@ -69,21 +77,17 @@ void HttpFileRequestHandler::handle(::std::unique_ptr<HttpRequest> http_request)
 
       Path file_abspath = root_directory_path / file_relpath;
 
-      File* file = FileSystem().open(file_abspath);
+      unique_ptr<File> file = FileSystem().open(file_abspath);
       if (file != NULL) {
-        File::Map* map = file->mmap(SIZE_MAX, 0, true);
+        unique_ptr<File::Map> map = file->mmap(SIZE_MAX, 0, true);
         if (map != NULL) {
-          http_request.respond(200, *map);
+          http_request->respond(200, shared_ptr<File::Map>(map.release()));
         } else {
-          http_request.respond(404, Exception());
+          http_request->respond(404, Exception());
         }
-
-        File::dec_ref(*file);
       } else {
-        http_request.respond(404, Exception());
+        http_request->respond(404, Exception());
       }
-
-      HttpRequest::dec_ref(http_request);
     }
   }
 }

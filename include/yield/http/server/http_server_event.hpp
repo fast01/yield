@@ -35,8 +35,7 @@ class HttpServerEvent {
 public:
   enum class Type {
     MESSAGE_BODY_CHUNK,
-    REQUEST,
-    RESPONSE
+    REQUEST
   };
 
 public:
