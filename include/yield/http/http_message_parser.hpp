@@ -47,6 +47,10 @@ class HttpMessageParser {
 protected:
   class ParseCallbacks {
   public:
+    virtual ~ParseCallbacks() {
+    }
+
+  public:
     virtual void handle_http_message_body_chunk(::std::unique_ptr<HttpMessageBodyChunk>) = 0;
     virtual void read(::std::shared_ptr<Buffer>) = 0;
   };

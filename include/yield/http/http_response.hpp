@@ -47,7 +47,10 @@ public:
   */
   HttpResponse(
     uint16_t status_code
-  );
+  ) : HttpMessage<HttpResponse>(NULL, NULL, HTTP_VERSION_DEFAULT),
+      status_code_(status_code) {
+    init();
+  }
 
   /**
     Construct an HttpResponse from its constituent parts.

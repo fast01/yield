@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/auto_object.hpp"
 #include "yield/buffer.hpp"
 #include "yield/date_time.hpp"
 #include "yield/http/http_request.hpp"
@@ -38,9 +37,9 @@ namespace yield {
 namespace http {
 TEST(HttpRequest, constructor) {
   HttpRequest(HttpRequest::Method::GET, "/");
-  HttpRequest(HttpRequest::Method::GET, "/", &Buffer::copy("test"));
-  HttpRequest(HttpRequest::Method::GET, "/", &Buffer::copy("test"));
-  HttpRequest(HttpRequest::Method::GET, "/", &Buffer::copy("test"), 1);
+  HttpRequest(HttpRequest::Method::GET, "/", Buffer::copy("test"));
+  HttpRequest(HttpRequest::Method::GET, "/", Buffer::copy("test"));
+  HttpRequest(HttpRequest::Method::GET, "/", Buffer::copy("test"), 1);
 }
 
 //TEST(HttpRequest, get_creation_date_time) {

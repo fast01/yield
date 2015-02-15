@@ -27,24 +27,25 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/auto_object.hpp"
 #include "yield/buffer.hpp"
 #include "yield/http/http_request.hpp"
 #include "gtest/gtest.h"
 
 namespace yield {
 namespace http {
+using ::std::shared_ptr;
 using ::std::string;
+using ::std::unique_ptr;
 using ::std::vector;
 
-TEST(HTTPMessage, body_buffer) {
-  ASSERT_EQ(HttpRequest(HttpRequest::Method::GET, "/").body_buffer(), static_cast<Object*>(NULL));
+TEST(HttpMessage, body_buffer) {
+  ASSERT_EQ(HttpRequest(HttpRequest::Method::GET, "/").body_buffer().get(), static_cast<Buffer*>(NULL));
 
-  auto_Object<Buffer> body = Buffer::copy("body");
+  shared_ptr<Buffer> body = Buffer::copy("body");
   ASSERT_EQ(
     memcmp(
       *static_cast<Buffer*>(
-        HttpRequest(HttpRequest::Method::GET, "/", &body->inc_ref()).body_buffer()
+        HttpRequest(HttpRequest::Method::GET, "/", body).body_buffer().get()
       ),
       "body",
       4
@@ -53,17 +54,17 @@ TEST(HTTPMessage, body_buffer) {
   );
 }
 
-TEST(HTTPMessage, get_date_field) {
-  auto_Object<HttpRequest> http_request
-  = new HttpRequest(HttpRequest::Method::GET, "/");
+TEST(HttpMessage, get_date_field) {
+  unique_ptr<HttpRequest> http_request
+  (new HttpRequest(HttpRequest::Method::GET, "/"));
   http_request->set_field("Date", "Wed, 15 Nov 1995 06:25:24 GMT");
   DateTime date = http_request->get_date_field("Date");
   ASSERT_NE(date, DateTime::INVALID_DATE_TIME);
 }
 
-TEST(HTTPMessage, get_field) {
-  auto_Object<HttpRequest> http_request
-  = new HttpRequest(HttpRequest::Method::GET, "/");
+TEST(HttpMessage, get_field) {
+  unique_ptr<HttpRequest> http_request
+  (new HttpRequest(HttpRequest::Method::GET, "/"));
   // Set a field before the desired field
   http_request->set_field("Host", "localhost");
   http_request->set_field("Date", "Wed, 15 Nov 1995 06:25:24 GMT");
@@ -93,9 +94,9 @@ TEST(HTTPMessage, get_field) {
   ASSERT_TRUE(http_request->get_field("DateX").empty());
 }
 
-TEST(HTTPMessage, get_fields) {
-  auto_Object<HttpRequest> http_request
-  = new HttpRequest(HttpRequest::Method::GET, "/");
+TEST(HttpMessage, get_fields) {
+  unique_ptr<HttpRequest> http_request
+  (new HttpRequest(HttpRequest::Method::GET, "/"));
   http_request->set_field("Host", "localhost");
   http_request->set_field("XHost", "localhost");
 

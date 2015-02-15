@@ -35,8 +35,8 @@ namespace yield {
 namespace http {
 TEST(HttpResponse, constructor) {
   HttpResponse(404);
-  HttpResponse(404, &Buffer::copy("test"));
-  HttpResponse(1, 404, &Buffer::copy("test"));
+  HttpResponse(404, Buffer::copy("test"));
+  HttpResponse(1, 404, Buffer::copy("test"));
 }
 
 TEST(HttpResponse, status_code) {

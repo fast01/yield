@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/auto_object.hpp"
 #include "yield/buffer.hpp"
 #include "yield/http/http_message_body_chunk.hpp"
 #include "yield/http/http_response.hpp"
@@ -36,45 +35,66 @@
 
 namespace yield {
 namespace http {
+using ::std::unique_ptr;
+
+class TestParseCallbacks : public HttpResponseParser::ParseCallbacks {
+public:
+  void handle_http_response(::std::unique_ptr<HttpResponse> http_response) override {
+    http_response_.swap(http_response);
+  }
+
+  void handle_http_message_body_chunk(::std::unique_ptr<HttpMessageBodyChunk> http_message_body_chunk) override {
+    http_message_body_chunk_.swap(http_message_body_chunk);
+  }
+
+  void read(::std::shared_ptr<Buffer>) override {
+  }
+
+public:
+  unique_ptr<HttpResponse> http_response_;
+  unique_ptr<HttpMessageBodyChunk> http_message_body_chunk_;
+};
+
+
 TEST(HttpResponseParser, MalformedReasonPhraseMissing) {
   HttpResponseParser http_response_parser("HTTP/1.1 200\r\n\r\n");
-  HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
-  ASSERT_NE(http_response, static_cast<Object*>(NULL));
-  ASSERT_EQ(http_response->status_code(), 400);
-  HttpResponse::dec_ref(http_response);
+  TestParseCallbacks callbacks;
+  http_response_parser.parse(callbacks);
+  ASSERT_NE(callbacks.http_response_.get(), static_cast<HttpResponse*>(NULL));
+  ASSERT_EQ(callbacks.http_response_->status_code(), 400);
 }
 
 TEST(HttpResponseParser, MalformedStatusCodeAlpha) {
   HttpResponseParser http_response_parser("HTTP/1.1 XX OK\r\n\r\n");
-  HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
-  ASSERT_NE(http_response, static_cast<Object*>(NULL));
-  ASSERT_EQ(http_response->status_code(), 400);
-  HttpResponse::dec_ref(http_response);
+  TestParseCallbacks callbacks;
+  http_response_parser.parse(callbacks);
+  ASSERT_NE(callbacks.http_response_.get(), static_cast<HttpResponse*>(NULL));
+  ASSERT_EQ(callbacks.http_response_->status_code(), 400);
 }
 
 TEST(HttpResponseParser, MalformedStatusCodeMissing) {
   HttpResponseParser http_response_parser("HTTP/1.1 OK\r\n\r\n");
-  HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
-  ASSERT_NE(http_response, static_cast<Object*>(NULL));
-  ASSERT_EQ(http_response->status_code(), 400);
-  HttpResponse::dec_ref(http_response);
+  TestParseCallbacks callbacks;
+  http_response_parser.parse(callbacks);
+  ASSERT_NE(callbacks.http_response_.get(), static_cast<HttpResponse*>(NULL));
+  ASSERT_EQ(callbacks.http_response_->status_code(), 400);
 }
 
 TEST(HttpResponseParser, MalformedStatusLineMissing) {
   HttpResponseParser http_response_parser("Host: localhost\r\n\r\n");
-  HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
-  ASSERT_NE(http_response, static_cast<Object*>(NULL));
-  ASSERT_EQ(http_response->status_code(), 400);
-  HttpResponse::dec_ref(http_response);
+  TestParseCallbacks callbacks;
+  http_response_parser.parse(callbacks);
+  ASSERT_NE(callbacks.http_response_.get(), static_cast<HttpResponse*>(NULL));
+  ASSERT_EQ(callbacks.http_response_->status_code(), 400);
 }
 
 TEST(HttpResponseParser, WellFormedStatusLineOnly) {
   HttpResponseParser http_response_parser("HTTP/1.1 200 OK\r\n\r\n");
-  HttpResponse* http_response = Object::cast<HttpResponse>(http_response_parser.parse());
-  ASSERT_NE(http_response, static_cast<Object*>(NULL));
-  ASSERT_EQ(http_response->status_code(), 200);
-  ASSERT_EQ(http_response->body_buffer(), static_cast<Buffer*>(NULL));
-  HttpResponse::dec_ref(http_response);
+  TestParseCallbacks callbacks;
+  http_response_parser.parse(callbacks);
+  ASSERT_NE(callbacks.http_response_.get(), static_cast<HttpResponse*>(NULL));
+  ASSERT_EQ(callbacks.http_response_->status_code(), 200);
+  ASSERT_EQ(callbacks.http_response_->body_buffer().get(), static_cast<Buffer*>(NULL));
 }
 }
 }
