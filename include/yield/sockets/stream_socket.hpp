@@ -102,9 +102,9 @@ public:
     @return the duplicate StreamSocket on success, NULL+errno on failure.
   */
   virtual ::std::unique_ptr<StreamSocket> dup() {
-    socket_t socket_ = Socket::create(get_domain(), TYPE, get_protocol());
+    socket_t socket_ = Socket::create(domain(), TYPE, protocol());
     if (socket_ != static_cast<socket_t>(-1)) {
-      return ::std::unique_ptr<StreamSocket>(new StreamSocket(get_domain(), get_protocol(), socket_));
+      return ::std::unique_ptr<StreamSocket>(new StreamSocket(domain(), protocol(), socket_));
     } else {
       return NULL;
     }
@@ -164,7 +164,7 @@ protected:
 
 protected:
   virtual ::std::unique_ptr<StreamSocket> dup2(socket_t socket_) {
-    return ::std::unique_ptr<StreamSocket>(new StreamSocket(get_domain(), get_protocol(), socket_));
+    return ::std::unique_ptr<StreamSocket>(new StreamSocket(domain(), protocol(), socket_));
   }
 };
 }

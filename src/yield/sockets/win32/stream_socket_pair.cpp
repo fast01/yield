@@ -34,25 +34,18 @@ namespace yield {
 namespace sockets {
 StreamSocketPair::StreamSocketPair() {
   StreamSocket listen_stream_socket(AF_INET);
-  if (listen_stream_socket.bind(SocketAddress::IN_LOOPBACK)) {
-    if (listen_stream_socket.listen()) {
-      try {
-        first_ = ::std::make_shared<StreamSocket>(AF_INET);
-        if (first_->connect(*listen_stream_socket.getsockname())) {
-          second_ = listen_stream_socket.accept();
-          if (second_ == NULL) {
-            throw Exception();
-          }
-        } else {
-          throw Exception();
-        }
-      } catch (Exception&) {
-        throw;
-      }
-    } else {
-      throw Exception();
-    }
-  } else {
+  if (!listen_stream_socket.bind(SocketAddress::IN_LOOPBACK)) {
+    throw Exception();
+  }
+  if (!listen_stream_socket.listen()) {
+    throw Exception();
+  }
+  first_ = ::std::make_shared<StreamSocket>(AF_INET);
+  if (!first_->connect(*listen_stream_socket.getsockname())) {
+    throw Exception();
+  }
+  second_ = listen_stream_socket.accept();
+  if (second_ == NULL) {
     throw Exception();
   }
 }

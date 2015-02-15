@@ -156,7 +156,7 @@ TEST_F(FdEventQueueTest, associate_zero) {
   signal_pipe();
 
   shared_ptr<FdEvent> event = fd_event_queue.timeddequeue(0);
-  ASSERT_EQ(event.get(), static_cast<Event*>(NULL));
+  ASSERT_EQ(event.get(), static_cast<FdEvent*>(NULL));
 }
 
 TEST(FdEventQueue, constructor) {

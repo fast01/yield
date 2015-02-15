@@ -105,9 +105,9 @@ public:
       (AF_INET, SOCK_STREAM, IPPROTO_TCP) for TCP sockets.
   */
   Socket(int domain, int type, int protocol)
-    : domain(domain),
-      type(type),
-      protocol(protocol) {
+    : domain_(domain),
+      type_(type),
+      protocol_(protocol) {
     socket_ = create(domain, type, protocol);
     if (socket_ == static_cast<socket_t>(-1)) {
       throw Exception();
@@ -141,8 +141,8 @@ public:
     Get the domain (e.g., AF_INET) of this socket.
     @return the domain of this socket
   */
-  int get_domain() const {
-    return domain;
+  int domain() const {
+    return domain_;
   }
 
 public:
@@ -181,15 +181,6 @@ public:
 
 public:
   /**
-    Get the protocol (e.g. IPPROTO_TCP) of this socket
-    @return the protocol of this socket
-  */
-  int get_protocol() const {
-    return protocol;
-  }
-
-public:
-  /**
     Get the address this socket is bound to.
     @return the address this socket is bound to
   */
@@ -211,15 +202,6 @@ public:
 
 public:
   /**
-    Get the type (e.g., SOCK_STREAM) of this socket.
-    @return the type of this socket
-  */
-  int get_type() const {
-    return type;
-  }
-
-public:
-  /**
     Get the underlying socket descriptor.
     @return the underlying socket descriptor
   */
@@ -236,6 +218,14 @@ public:
     return reinterpret_cast<fd_t>(static_cast<socket_t>(*this));
   }
 #endif
+
+  /**
+    Get the protocol (e.g. IPPROTO_TCP) of this socket
+    @return the protocol of this socket
+  */
+  int protocol() const {
+    return protocol_;
+  }
 
 public:
   /**
@@ -451,6 +441,15 @@ public:
 
 public:
   /**
+    Get the type (e.g., SOCK_STREAM) of this socket.
+    @return the type of this socket
+  */
+  int type() const {
+    return type_;
+  }
+
+public:
+  /**
     Check if the last recv call failed because it would have blocked.
     Equivalent to errno == EWOULDBLOCK on POSIX systems.
     @return true if the last recv call failed because it would have blocked
@@ -494,16 +493,16 @@ public:
 
 protected:
   Socket(int domain, int type, int protocol, socket_t socket_)
-    : domain(domain),
-      type(type),
-      protocol(protocol),
+    : domain_(domain),
+      type_(type),
+      protocol_(protocol),
       socket_(socket_)
   { }
 
   static socket_t create(int domain, int type, int protocol);
 
 private:
-  int domain, type, protocol;
+  int domain_, type_, protocol_;
   socket_t socket_;
 };
 

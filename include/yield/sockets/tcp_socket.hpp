@@ -85,9 +85,9 @@ public:
 public:
   // yield::sockets::StreamSocket
   virtual ::std::unique_ptr<StreamSocket> dup() override {
-    socket_t socket_ = Socket::create(get_domain(), TYPE, PROTOCOL);
+    socket_t socket_ = Socket::create(domain(), TYPE, PROTOCOL);
     if (socket_ != static_cast<socket_t>(-1)) {
-      return ::std::unique_ptr<StreamSocket>(new TcpSocket(get_domain(), socket_));
+      return ::std::unique_ptr<StreamSocket>(new TcpSocket(domain(), socket_));
     } else {
       return NULL;
     }
@@ -101,7 +101,7 @@ protected:
 protected:
   // yield::sockets::StreamSocket
   virtual ::std::unique_ptr<StreamSocket> dup2(socket_t socket_) {
-    return ::std::unique_ptr<StreamSocket>(new TcpSocket(get_domain(), socket_));
+    return ::std::unique_ptr<StreamSocket>(new TcpSocket(domain(), socket_));
   }
 };
 }

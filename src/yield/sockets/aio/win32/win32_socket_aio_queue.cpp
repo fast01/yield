@@ -131,7 +131,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::timeddequeue(const Time& timeout) {
       );
 
       DWORD dwLocalAddressLength
-      = SocketAddress::len(accepted_socket.get_domain()) + 16;
+      = SocketAddress::len(accepted_socket.domain()) + 16;
       DWORD dwRemoteAddressLength = dwLocalAddressLength;
       DWORD dwReceiveDataLength =
         recv_buffer.capacity() - recv_buffer.size() -
@@ -155,7 +155,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::timeddequeue(const Time& timeout) {
 
       if (peername != NULL) {
         accept_aiocb.set_peername(
-          make_shared<SocketAddress>(SocketAddress(*peername, accepted_socket.get_domain()))
+          make_shared<SocketAddress>(SocketAddress(*peername, accepted_socket.domain()))
         );
 
         if (accept_aiocb.return_() > 0)
@@ -279,7 +279,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
 
       DWORD dwBytesReceived;
       DWORD dwLocalAddressLength
-      = SocketAddress::len(accepted_socket->get_domain()) + 16;
+      = SocketAddress::len(accepted_socket->domain()) + 16;
       DWORD dwReceiveDataLength;
       DWORD dwRemoteAddressLength = dwLocalAddressLength;
 
@@ -360,7 +360,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
 
     const SocketAddress* peername
     = connect_aiocb.peername().filter(
-        connect_aiocb.socket().get_domain()
+        connect_aiocb.socket().domain()
       );
 
     if (peername != NULL) {
@@ -459,7 +459,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
     DWORD dwFlags = static_cast<DWORD>(recvfrom_aiocb.flags());
     sockaddr* peername = recvfrom_aiocb.peername();
     socklen_t& peername_len = recvfrom_aiocb.peername_len();
-    peername_len = SocketAddress::len(recvfrom_aiocb.socket().get_domain());
+    peername_len = SocketAddress::len(recvfrom_aiocb.socket().domain());
 
     if (recvfrom_aiocb.buffer()->get_next_buffer() == NULL) {
       iovec wsabuf = recvfrom_aiocb.buffer()->as_read_iovec();

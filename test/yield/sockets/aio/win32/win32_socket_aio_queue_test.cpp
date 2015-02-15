@@ -27,14 +27,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "yield/sockets/aio/aio_queue.hpp"
-#include "../aio_queue_test.hpp"
+#include "yield/sockets/aio/win32/win32_socket_aio_queue.hpp"
+#include "../socket_aio_queue_test.hpp"
 
 namespace yield {
 namespace sockets {
 namespace aio {
 namespace win32 {
-INSTANTIATE_TYPED_TEST_CASE_P(AioQueue, AioQueueTest, AioQueue);
+INSTANTIATE_TYPED_TEST_CASE_P(Win32SocketAioQueue, SocketAioQueueTest, Win32SocketAioQueue);
 }
 }
 }

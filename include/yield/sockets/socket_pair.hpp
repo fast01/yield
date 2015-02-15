@@ -60,7 +60,7 @@ public:
     Since the two sockets are functionally equivalent this is only a convention.
     @return the "first" socket in the pair
   */
-  ::std::shared_ptr<Socket>& first() {
+  ::std::shared_ptr<SocketType>& first() {
     return first_;
   }
 
@@ -69,7 +69,7 @@ public:
     Since the two sockets are functionally equivalent this is only a convention.
     @return the "second" socket in the pair
   */
-  ::std::shared_ptr<Socket>& second() {
+  ::std::shared_ptr<SocketType>& second() {
     return second_;
   }
 
@@ -88,8 +88,8 @@ protected:
   }
 
 protected:
-  ::std::shared_ptr<Socket> first_;
-  ::std::shared_ptr<Socket> second_;
+  ::std::shared_ptr<SocketType> first_;
+  ::std::shared_ptr<SocketType> second_;
 };
 }
 }

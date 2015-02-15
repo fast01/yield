@@ -46,7 +46,7 @@ const int Socket::Option::REUSEADDR = SO_REUSEADDR;
 const int Socket::Option::SNDBUF = SO_SNDBUF;
 
 bool Socket::bind(const SocketAddress& _name) {
-  const SocketAddress* name = _name.filter(get_domain());
+  const SocketAddress* name = _name.filter(domain());
   if (name != NULL) {
     return ::bind(*this, *name, name->len()) != -1;
   } else {
@@ -59,7 +59,7 @@ bool Socket::close() {
 }
 
 bool Socket::connect(const SocketAddress& _peername) {
-  const SocketAddress* peername = _peername.filter(get_domain());
+  const SocketAddress* peername = _peername.filter(domain());
   if (peername != NULL) {
     if (::connect(*this, *peername, peername->len()) != -1) {
       return true;
@@ -140,7 +140,7 @@ socket_t Socket::create(int domain, int type, int protocol) {
 bool Socket::getpeername(SocketAddress& peername) const {
   socklen_t peernamelen = peername.len();
   if (::getpeername(*this, peername, &peernamelen) != -1) {
-    CHECK_EQ(peername.get_family(), get_domain());
+    CHECK_EQ(peername.get_family(), domain());
     return true;
   } else {
     return false;
@@ -150,7 +150,7 @@ bool Socket::getpeername(SocketAddress& peername) const {
 bool Socket::getsockname(SocketAddress& sockname) const {
   socklen_t socknamelen = sockname.len();
   if (::getsockname(*this, sockname, &socknamelen) != -1) {
-    CHECK_EQ(sockname.get_family(), get_domain());
+    CHECK_EQ(sockname.get_family(), domain());
     return true;
   } else {
     return false;

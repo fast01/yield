@@ -99,8 +99,6 @@ private:
   void associate(SocketAiocb& aiocb, RetryStatus retry_status);
 
 private:
-  template <class AiocbType> void log_completion(AiocbType&);
-  template <class AiocbType> void log_error(AiocbType&);
   template <class AiocbType> void log_retry(AiocbType&);
   template <class AiocbType> void log_partial_send(AiocbType&, size_t);
   template <class AiocbType> void log_wouldblock(AiocbType&, RetryStatus);

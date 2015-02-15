@@ -35,29 +35,25 @@
 namespace yield {
 namespace sockets {
 namespace aio {
-class PartialSendStreamSocket : public StreamSocket {
+class PartialSendStreamSocket final : public StreamSocket {
 public:
-  PartialSendStreamSocket(StreamSocket& stream_socket)
+  PartialSendStreamSocket(::std::shared_ptr<StreamSocket> stream_socket)
     : StreamSocket(
-      stream_socket.get_domain(),
-      stream_socket.get_protocol(),
+      stream_socket->domain(),
+      stream_socket->protocol(),
       static_cast<socket_t>(-1)
     ),
-    stream_socket(stream_socket.inc_ref()) {
-  }
-
-  ~PartialSendStreamSocket() {
-    StreamSocket::dec_ref(stream_socket);
+    stream_socket_(stream_socket) {
   }
 
 public:
   // yield::sockets::Socket
-  operator socket_t() const {
-    return stream_socket.operator socket_t();
+  operator socket_t() const override {
+    return stream_socket_->operator socket_t();
   }
 
-  ssize_t send(const void* buf, size_t buflen, const MessageFlags& flags) {
-    return stream_socket.send(buf, 1, flags);
+  ssize_t send(const void* buf, size_t buflen, const MessageFlags& flags) override {
+    return stream_socket_->send(buf, 1, flags);
   }
 
   ssize_t
@@ -65,25 +61,25 @@ public:
     const iovec* iov,
     int iovlen,
     const MessageFlags& flags
-  ) {
+  ) override {
     CHECK_GT(iovlen, 0);
     iovec iov0 = iov[0];
     iov0.iov_len = 1;
-    return stream_socket.sendmsg(&iov0, 1, flags);
+    return stream_socket_->sendmsg(&iov0, 1, flags);
   }
 
-  bool set_blocking_mode(bool blocking_mode) {
-    return stream_socket.set_blocking_mode(blocking_mode);
+  bool set_blocking_mode(bool blocking_mode) override {
+    return stream_socket_->set_blocking_mode(blocking_mode);
   }
 
 public:
   // yield::sockets::StreamSocket
-  ssize_t sendfile(fd_t fd, off_t offset, size_t nbytes) {
-    return stream_socket.sendfile(fd, offset, 1);
+  ssize_t sendfile(fd_t fd, off_t offset, size_t nbytes) override {
+    return stream_socket_->sendfile(fd, offset, 1);
   }
 
 private:
-  StreamSocket& stream_socket;
+  ::std::shared_ptr<StreamSocket> stream_socket_;
 };
 }
 }

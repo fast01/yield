@@ -38,19 +38,17 @@ DatagramSocketPair::DatagramSocketPair() {
 
   SocketAddress socknames[2];
 
-  if (first_->bind(SocketAddress::IN_LOOPBACK)) {
-    if (!first_->getsockname(socknames[0])) {
-      throw Exception();
-    }
-  } else {
+  if (!first_->bind(SocketAddress::IN_LOOPBACK)) {
+    throw Exception();
+  }
+  if (!first_->getsockname(socknames[0])) {
     throw Exception();
   }
 
-  if (second_->bind(SocketAddress::IN_LOOPBACK)) {
-    if (!second_->getsockname(socknames[1])) {
-      throw Exception();
-    }
-  } else {
+  if (!second_->bind(SocketAddress::IN_LOOPBACK)) {
+    throw Exception();
+  }
+  if (!second_->getsockname(socknames[1])) {
     throw Exception();
   }
 

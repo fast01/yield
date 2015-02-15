@@ -50,7 +50,7 @@ DatagramSocket::sendmsg(
   }
 #endif
 
-  const SocketAddress* peername_ = peername.filter(get_domain());
+  const SocketAddress* peername_ = peername.filter(domain());
   if (peername_ != NULL) {
     ssize_t sendto_ret
     = WSASendTo(
@@ -86,7 +86,7 @@ DatagramSocket::sendto(
   const MessageFlags& flags,
   const SocketAddress& peername
 ) {
-  const SocketAddress* peername_ = peername.filter(get_domain());
+  const SocketAddress* peername_ = peername.filter(domain());
   if (peername_ != NULL) {
     return ::sendto(
              *this,

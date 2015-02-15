@@ -46,7 +46,7 @@ DatagramSocket::sendmsg(
   memset(&msghdr_, 0, sizeof(msghdr_));
   msghdr_.msg_iov = const_cast<iovec*>(iov);
   msghdr_.msg_iovlen = iovlen;
-  const SocketAddress* peername_ = peername.filter(get_domain());
+  const SocketAddress* peername_ = peername.filter(domain());
   if (peername_ != NULL) {
     const sockaddr* peername_sockaddr = *peername_;
     msghdr_.msg_name = const_cast<sockaddr*>(peername_sockaddr);
@@ -64,7 +64,7 @@ DatagramSocket::sendto(
   const MessageFlags& flags,
   const SocketAddress& peername
 ) {
-  const SocketAddress* peername_ = peername.filter(get_domain());
+  const SocketAddress* peername_ = peername.filter(domain());
   if (peername_ != NULL) {
     return ::sendto(
              *this,
