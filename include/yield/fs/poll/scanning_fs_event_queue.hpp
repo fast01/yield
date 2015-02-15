@@ -30,6 +30,8 @@
 #ifndef _YIELD_FS_POLL_SCANNING_FS_EVENT_QUEUE_HPP_
 #define _YIELD_FS_POLL_SCANNING_FS_EVENT_QUEUE_HPP_
 
+#include <map>
+
 #include "yield/event_queue.hpp"
 #include "yield/fs/poll/fs_event.hpp"
 #include "yield/stage/synchronized_event_queue.hpp"
@@ -47,12 +49,6 @@ template <class> class Watches;
     ReadDirectoryChangesW on Win32 or inotify on Linux) are not available.
 */
 class ScanningFsEventQueue final : public EventQueue<FsEvent> {
-public:
-  /**
-    Construct a ScanningFsEventQueue.
-  */
-  ScanningFsEventQueue();
-
 public:
   /**
     Associate a file system path with this ScanningFsEventQueue,
@@ -78,10 +74,11 @@ public:
   // yield::EventQueue
   ::std::unique_ptr<FsEvent> timeddequeue(const Time& timeout) override;
   ::std::unique_ptr<FsEvent> tryenqueue(::std::unique_ptr<FsEvent> event) override;
+  void wake() override;
 
 private:
   ::yield::stage::SynchronizedEventQueue<FsEvent> event_queue_;
-  ::std::unique_ptr< Watches<ScanningWatch> > watches_;
+  ::std::map< Path, ::std::unique_ptr<ScanningWatch> > watches_;
 };
 }
 }

@@ -27,9 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "directory_watch.hpp"
-#include "file_watch.hpp"
-#include "../watches.hpp"
+#include "./directory_watch.hpp"
+#include "./file_watch.hpp"
 #include "yield/exception.hpp"
 #include "yield/logging.hpp"
 #include "yield/fs/poll/fs_event_queue.hpp"
@@ -40,7 +39,8 @@
 namespace yield {
 namespace fs {
 namespace poll {
-using ::std::make_shared;
+using ::std::make_pair;
+using ::std::move;
 using ::std::shared_ptr;
 using ::std::unique_ptr;
 using win32::DirectoryWatch;
@@ -51,16 +51,19 @@ FsEventQueue::FsEventQueue() {
   if (hIoCompletionPort_ == INVALID_HANDLE_VALUE) {
     throw Exception();
   }
-  watches_.reset(new Watches<win32::Watch>);
+}
+
+FsEventQueue::~FsEventQueue() {
+  ::CloseHandle(hIoCompletionPort_);
 }
 
 bool FsEventQueue::associate(const Path& path, FsEvent::Type fs_event_types) {
-  shared_ptr<Watch> watch = watches_->find(path);
-  if (watch != NULL) {
-    if (watch->fs_event_types() == fs_event_types) {
+  auto watch_i = watches_.find(path);
+  if (watch_i != watches_.end()) {
+    if (watch_i->second->fs_event_types() == fs_event_types) {
       return true;
     } else {
-      watches_->erase(path);
+      watches_.erase(watch_i);
     }
   }
 
@@ -81,17 +84,16 @@ bool FsEventQueue::associate(const Path& path, FsEvent::Type fs_event_types) {
         0
       ) != INVALID_HANDLE_VALUE
     ) {
-      shared_ptr<win32::Watch> watch;
+      unique_ptr<win32::Watch> watch;
       if (path == directory_path) {
-        watch = make_shared<DirectoryWatch>(directory, fs_event_types, path);
+        watch.reset(new DirectoryWatch(directory, fs_event_types, path));
       } else {
-        watch
-        = make_shared<FileWatch>(
+        watch.reset(new FileWatch(
           directory,
           directory_path,
           path,
           fs_event_types
-        );
+        ));
       }
 
       DWORD dwBytesRead = 0;
@@ -108,7 +110,8 @@ bool FsEventQueue::associate(const Path& path, FsEvent::Type fs_event_types) {
         )
       ) {
         CHECK_EQ(dwBytesRead, 0);
-        watches_->insert(path, watch);
+        CHECK(watches_.find(path) == watches_.end());
+        watches_.insert(make_pair(path, move(watch)));
         return true;
       } else {
         return false;
@@ -122,9 +125,10 @@ bool FsEventQueue::associate(const Path& path, FsEvent::Type fs_event_types) {
 }
 
 bool FsEventQueue::dissociate(const Path& path) {
-  shared_ptr<win32::Watch> watch = watches_->erase(path);
-  if (watch != NULL) {
-    watch->close();
+  auto watch_i = watches_.find(path);
+  if (watch_i != watches_.end()) {
+    watch_i->second->close();
+    watches_.erase(watch_i);
     return true;
   } else {
     return false;

@@ -68,6 +68,11 @@ public:
   */
   FsEventQueue();
 
+  /**
+    Destroy an FsEventQueue, releasing any system resources as necessary.
+  */
+  ~FsEventQueue();
+
 public:
   /**
     Associate a file system path with this FsEventQueue,
@@ -105,7 +110,7 @@ private:
   ::std::unique_ptr<linux::Watches> watches_;
 #elif defined(_WIN32)
   fd_t hIoCompletionPort_;
-  ::std::unique_ptr< Watches<win32::Watch> > watches_;
+  ::std::map< Path, ::std::unique_ptr<win32::Watch> > watches_;
 #endif
 };
 #else

@@ -29,7 +29,6 @@
 
 #include "./scanning_directory_watch.hpp"
 #include "./scanning_file_watch.hpp"
-#include "./watches.hpp"
 #include "yield/logging.hpp"
 #include "yield/fs/file_system.hpp"
 #include "yield/fs/poll/scanning_fs_event_queue.hpp"
@@ -37,12 +36,9 @@
 namespace yield {
 namespace fs {
 namespace poll {
+using ::std::make_pair;
 using ::std::move;
 using ::std::unique_ptr;
-
-ScanningFsEventQueue::ScanningFsEventQueue()
-  : watches_(new Watches<ScanningWatch>) {
-}
 
 bool
 ScanningFsEventQueue::associate(
@@ -61,12 +57,13 @@ ScanningFsEventQueue::associate(
   } else {
     watch.reset(new ScanningFileWatch(fs_event_types, path));
   }
-  watches_->insert(path, move(watch));
+  CHECK(watches_.find(path) == watches_.end());
+  watches_.insert(make_pair(path, move(watch)));
   return true;
 }
 
 bool ScanningFsEventQueue::dissociate(const Path& path) {
-  return watches_->erase(path) != NULL;
+  return watches_.erase(path) == 1;
 }
 
 unique_ptr<FsEvent> ScanningFsEventQueue::tryenqueue(unique_ptr<FsEvent> event) {
@@ -79,17 +76,13 @@ unique_ptr<FsEvent> ScanningFsEventQueue::timeddequeue(const Time& timeout) {
     return event;
   }
     
-  if (watches_->empty()) {
+  if (watches_.empty()) {
     return event_queue_.timeddequeue(timeout);
   }
 
   Time timeout_remaining(timeout);
   for (;;) {
-    for (
-      Watches<ScanningWatch>::const_iterator watch_i = watches_->begin();
-      watch_i != watches_->end();
-      ++watch_i
-    ) {
+    for (auto watch_i = watches_.cbegin(), end = watches_.cend(); watch_i != end; ++watch_i) {
       Time start_time = Time::now();
 
       watch_i->second->scan(event_queue_);
@@ -106,6 +99,10 @@ unique_ptr<FsEvent> ScanningFsEventQueue::timeddequeue(const Time& timeout) {
       }
     }
   }
+}
+
+void ScanningFsEventQueue::wake() {
+  event_queue_.wake();
 }
 }
 }

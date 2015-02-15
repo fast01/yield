@@ -30,7 +30,6 @@
 #ifndef _YIELD_FS_POLL_FS_EVENT_QUEUE_TEST_HPP_
 #define _YIELD_FS_POLL_FS_EVENT_QUEUE_TEST_HPP_
 
-#include "../../event_queue_test.hpp"
 #include "yield/date_time.hpp"
 #include "yield/exception.hpp"
 #include "yield/logging.hpp"
@@ -42,6 +41,8 @@
 namespace yield {
 namespace fs {
 namespace poll {
+using ::std::unique_ptr;
+
 template <class TypeParam>
 class FsEventQueueTest : public ::testing::Test {
 public:
@@ -124,8 +125,8 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_dir_add) {
     throw Exception();
   }
 
-  auto_Object<FsEvent> fs_event =
-    Object::cast<FsEvent>(fs_event_queue.dequeue());
+  unique_ptr<FsEvent> fs_event =
+    fs_event_queue.dequeue();
   ASSERT_EQ(fs_event->get_type(), FsEvent::TYPE_DIRECTORY_ADD);
   ASSERT_EQ(fs_event->get_path(), this->get_test_directory_path());
 }
@@ -152,8 +153,8 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_dir_modify) {
     throw Exception();
   }
 
-  auto_Object<FsEvent> fs_event =
-    Object::cast<FsEvent>(fs_event_queue.dequeue());
+  unique_ptr<FsEvent> fs_event =
+    fs_event_queue.dequeue();
   ASSERT_EQ(fs_event->get_type(), FsEvent::TYPE_DIRECTORY_MODIFY);
   ASSERT_EQ(fs_event->get_path(), this->get_test_directory_path());
 }
@@ -170,8 +171,8 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_dir_modify) {
 //  if (!FileSystem().mkdir(test_subdirectory_path))
 //    throw Exception();
 //
-//  auto_Object<FsEvent> fs_event =
-//    Object::cast<FsEvent>(fs_event_queue.dequeue());
+//  unique_ptr<FsEvent> fs_event =
+//    fs_event_queue.dequeue());
 //  ASSERT_EQ(fs_event->get_type(), FsEvent::TYPE_DIRECTORY_ADD);
 //  ASSERT_EQ(fs_event->get_path(), test_subdirectory_path);
 //}
@@ -195,8 +196,8 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_dir_remove) {
     throw Exception();
   }
 
-  auto_Object<FsEvent> fs_event =
-    Object::cast<FsEvent>(fs_event_queue.dequeue());
+  unique_ptr<FsEvent> fs_event =
+    fs_event_queue.dequeue();
   ASSERT_EQ(fs_event->get_type(), FsEvent::TYPE_DIRECTORY_REMOVE);
   ASSERT_EQ(fs_event->get_path(), this->get_test_directory_path());
 }
@@ -216,8 +217,8 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_dir_remove) {
 //  if (!FileSystem().rmdir(test_subdirectory_path))
 //    throw Exception();
 //
-//  auto_Object<FsEvent> fs_event =
-//    Object::cast<FsEvent>(fs_event_queue.dequeue());
+//  unique_ptr<FsEvent> fs_event =
+//    fs_event_queue.dequeue());
 //  ASSERT_EQ(fs_event->get_type(), FsEvent::TYPE_DIRECTORY_REMOVE);
 //  ASSERT_EQ(fs_event->get_path(), test_subdirectory_path);
 //}
@@ -247,8 +248,8 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_dir_rename) {
     throw Exception();
   }
 
-  auto_Object<FsEvent> fs_event =
-    Object::cast<FsEvent>(fs_event_queue.dequeue());
+  unique_ptr<FsEvent> fs_event =
+    fs_event_queue.dequeue();
   ASSERT_EQ(fs_event->get_type(), FsEvent::TYPE_DIRECTORY_RENAME);
   ASSERT_EQ(fs_event->get_old_path(), this->get_test_directory_path());
   ASSERT_EQ(fs_event->get_new_path(), new_test_directory_path);
@@ -271,8 +272,8 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_file_add) {
     throw Exception();
   }
 
-  auto_Object<FsEvent> fs_event =
-    Object::cast<FsEvent>(fs_event_queue.dequeue());
+  unique_ptr<FsEvent> fs_event =
+    fs_event_queue.dequeue();
   ASSERT_EQ(fs_event->get_type(), FsEvent::TYPE_FILE_ADD);
   ASSERT_EQ(fs_event->get_path(), this->get_test_file_path());
 }
@@ -289,8 +290,8 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_file_add) {
 //  if (!FileSystem().touch(test_file_path))
 //    throw Exception();
 //
-//  auto_Object<FsEvent> fs_event =
-//    Object::cast<FsEvent>(fs_event_queue.dequeue());
+//  unique_ptr<FsEvent> fs_event =
+//    fs_event_queue.dequeue());
 //  ASSERT_EQ(fs_event->get_type(), FsEvent::TYPE_FILE_ADD);
 //  ASSERT_EQ(fs_event->get_path(), test_file_path);
 //}
@@ -317,8 +318,8 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_file_modify) {
     throw Exception();
   }
 
-  auto_Object<FsEvent> fs_event =
-    Object::cast<FsEvent>(fs_event_queue.dequeue());
+  unique_ptr<FsEvent> fs_event =
+    fs_event_queue.dequeue();
   ASSERT_EQ(fs_event->get_type(), FsEvent::TYPE_FILE_MODIFY);
   ASSERT_EQ(fs_event->get_path(), this->get_test_file_path());
 }
@@ -342,8 +343,8 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_file_remove) {
     throw Exception();
   }
 
-  auto_Object<FsEvent> fs_event =
-    Object::cast<FsEvent>(fs_event_queue.dequeue());
+  unique_ptr<FsEvent> fs_event =
+    fs_event_queue.dequeue();
   ASSERT_EQ(fs_event->get_type(), FsEvent::TYPE_FILE_REMOVE);
   ASSERT_EQ(fs_event->get_path(), this->get_test_file_path());
 }
@@ -363,8 +364,8 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_file_remove) {
 //  if (!FileSystem().unlink(test_file_path))
 //    throw Exception();
 //
-//  auto_Object<FsEvent> fs_event =
-//    Object::cast<FsEvent>(fs_event_queue.dequeue());
+//  unique_ptr<FsEvent> fs_event =
+//    fs_event_queue.dequeue());
 //  ASSERT_EQ(fs_event->get_type(), FsEvent::TYPE_FILE_REMOVE);
 //  ASSERT_EQ(fs_event->get_path(), test_file_path);
 //}
@@ -394,8 +395,8 @@ TYPED_TEST_P(FsEventQueueTest, associate_dir_dequeue_file_rename) {
     throw Exception();
   }
 
-  auto_Object<FsEvent> fs_event =
-    Object::cast<FsEvent>(fs_event_queue.dequeue());
+  unique_ptr<FsEvent> fs_event =
+    fs_event_queue.dequeue();
   ASSERT_EQ(fs_event->get_type(), FsEvent::TYPE_FILE_RENAME);
   ASSERT_EQ(fs_event->get_old_path(), this->get_test_file_path());
   ASSERT_EQ(fs_event->get_new_path(), new_test_file_path);
@@ -425,8 +426,8 @@ TYPED_TEST_P(FsEventQueueTest, associate_file_dequeue_file_modify) {
     throw Exception();
   }
 
-  auto_Object<FsEvent> fs_event =
-    Object::cast<FsEvent>(fs_event_queue.dequeue());
+  unique_ptr<FsEvent> fs_event =
+    fs_event_queue.dequeue();
   ASSERT_EQ(fs_event->get_type(), FsEvent::TYPE_FILE_MODIFY);
   ASSERT_EQ(fs_event->get_path(), this->get_test_file_path());
 }
@@ -450,8 +451,8 @@ TYPED_TEST_P(FsEventQueueTest, associate_file_dequeue_file_remove) {
     throw Exception();
   }
 
-  auto_Object<FsEvent> fs_event =
-    Object::cast<FsEvent>(fs_event_queue.dequeue());
+  unique_ptr<FsEvent> fs_event =
+    fs_event_queue.dequeue();
   ASSERT_EQ(fs_event->get_type(), FsEvent::TYPE_FILE_REMOVE);
   ASSERT_EQ(fs_event->get_path(), this->get_test_file_path());
 }
@@ -468,8 +469,8 @@ TYPED_TEST_P(FsEventQueueTest, dissociate) {
     throw Exception();
   }
 
-  Event* fs_event = fs_event_queue.timeddequeue(0);
-  ASSERT_EQ(fs_event, static_cast<Event*>(NULL));
+  unique_ptr<FsEvent> fs_event = fs_event_queue.timeddequeue(0);
+  ASSERT_EQ(fs_event, static_cast<FsEvent*>(NULL));
 }
 
 REGISTER_TYPED_TEST_CASE_P(
