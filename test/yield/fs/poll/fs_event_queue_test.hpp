@@ -470,7 +470,7 @@ TYPED_TEST_P(FsEventQueueTest, dissociate) {
   }
 
   unique_ptr<FsEvent> fs_event = fs_event_queue.timeddequeue(0);
-  ASSERT_EQ(fs_event, static_cast<FsEvent*>(NULL));
+  ASSERT_EQ(fs_event.get(), static_cast<FsEvent*>(NULL));
 }
 
 REGISTER_TYPED_TEST_CASE_P(

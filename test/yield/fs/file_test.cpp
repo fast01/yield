@@ -335,7 +335,7 @@ TEST_F(FileTest, pwrite) {
 }
 
 TEST_F(FileTest, pwrite_Buffer) {
-  unique_ptr<Buffer> buffer = Buffer::copy(" string");
+  shared_ptr<Buffer> buffer = Buffer::copy(" string");
   ssize_t pwrite_ret = get_write_file().pwrite(*buffer, 4);
   if (pwrite_ret >= 0) {
     ASSERT_EQ(pwrite_ret, 7);

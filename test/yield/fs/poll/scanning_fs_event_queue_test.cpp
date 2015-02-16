@@ -28,6 +28,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "fs_event_queue_test.hpp"
+#include "yield/fs/poll/scanning_watch.hpp"
 #include "yield/fs/poll/scanning_fs_event_queue.hpp"
 
 namespace yield {
