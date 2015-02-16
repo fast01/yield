@@ -90,40 +90,40 @@ TEST(Buffer, constructor_capacity_data_size) {
 }
 
 TEST(Buffer, copy_alignment_capacity_data_size) {
-  unique_ptr<Buffer> buffer(Buffer::copy(4096, 5, "test", 4));
+  shared_ptr<Buffer> buffer(Buffer::copy(4096, 5, "test", 4));
   ASSERT_EQ(strncmp(*buffer, "test", 4), 0);
   ASSERT_GE(buffer->capacity(), 5u);
   ASSERT_EQ(buffer->size(), 4);
 }
 
 TEST(Buffer, copy_Buffer) {
-  unique_ptr<Buffer> buffer1 = Buffer::copy("test", 4);
-  unique_ptr<Buffer> buffer2 = Buffer::copy(*buffer1);
+  shared_ptr<Buffer> buffer1 = Buffer::copy("test", 4);
+  shared_ptr<Buffer> buffer2 = Buffer::copy(*buffer1);
   ASSERT_EQ(strncmp(*buffer1, *buffer2, 4), 0);
   ASSERT_EQ(buffer2->size(), 4);
 }
 
 TEST(Buffer, copy_capacity_data_size) {
-  unique_ptr<Buffer> buffer(Buffer::copy(5, "test", 4));
+  shared_ptr<Buffer> buffer(Buffer::copy(5, "test", 4));
   ASSERT_EQ(strncmp(*buffer, "test", 4), 0);
   ASSERT_GE(buffer->capacity(), 5u);
   ASSERT_EQ(buffer->size(), 4);
 }
 
 TEST(Buffer, copy_const_void_size_t) {
-  unique_ptr<Buffer> buffer(Buffer::copy("test", 4));
+  shared_ptr<Buffer> buffer(Buffer::copy("test", 4));
   ASSERT_EQ(strncmp(*buffer, "test", 4), 0);
   ASSERT_EQ(buffer->size(), 4);
 }
 
 TEST(Buffer, copy_c_string) {
-  unique_ptr<Buffer> buffer(Buffer::copy("test"));
+  shared_ptr<Buffer> buffer(Buffer::copy("test"));
   ASSERT_EQ(strncmp(*buffer, "test", 4), 0);
   ASSERT_EQ(buffer->size(), 4);
 }
 
 TEST(Buffer, copy_string) {
-  unique_ptr<Buffer> buffer(Buffer::copy(string("test")));
+  shared_ptr<Buffer> buffer(Buffer::copy(string("test")));
   ASSERT_EQ(strncmp(*buffer, "test", 4), 0);
   ASSERT_EQ(buffer->size(), 4);
 }
@@ -170,7 +170,7 @@ TEST(Buffer, is_page_aligned_iovec) {
 }
 
 TEST(Buffer, operator_array) {
-  unique_ptr<Buffer> buffer(Buffer::copy("m", 1));
+  shared_ptr<Buffer> buffer(Buffer::copy("m", 1));
   ASSERT_EQ((*buffer)[0], 'm');
 }
 
@@ -202,21 +202,21 @@ TEST(Buffer, operator_equals_Buffer) {
 }
 
 TEST(Buffer, operator_equals_c_string) {
-  unique_ptr<Buffer> buffer(Buffer::copy("test"));
+  shared_ptr<Buffer> buffer(Buffer::copy("test"));
   ASSERT_EQ(*buffer, "test");
   ASSERT_NE(*buffer, "test1");
   ASSERT_NE(*buffer, "text");
 }
 
 TEST(Buffer, operator_equals_string) {
-  unique_ptr<Buffer> buffer(Buffer::copy("test"));
+  shared_ptr<Buffer> buffer(Buffer::copy("test"));
   ASSERT_EQ(*buffer, string("test"));
   ASSERT_NE(*buffer, string("test1"));
   ASSERT_NE(*buffer, string("text"));
 }
 
 TEST(Buffer, print) {
-  unique_ptr<Buffer> buffer(Buffer::copy("test"));
+  shared_ptr<Buffer> buffer(Buffer::copy("test"));
 
   {
     std::ostringstream oss;

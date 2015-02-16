@@ -39,6 +39,7 @@ bool operator==(const iovec& left, const iovec& right) {
 
 namespace yield {
 using ::std::make_shared;
+using ::std::shared_ptr;
 using ::std::unique_ptr;
 using ::std::vector;
 
@@ -62,7 +63,7 @@ TEST(Buffers, as_write_iovecs) {
 }
 
 TEST(Buffers, as_write_iovecs_offset) {
-  unique_ptr<Buffer> buffers = Buffer::copy("test ");
+  shared_ptr<Buffer> buffers = Buffer::copy("test ");
   buffers->set_next_buffer(Buffer::copy("string"));
   vector<iovec> write_iovecs;
 
