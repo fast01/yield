@@ -1,6 +1,6 @@
 // test_ygi_request_handler.cpp
 
-// Copyright (c) 2014 Minor Gordon
+// Copyright (c) 2015 Minor Gordon
 // All rights reserved
 
 // This source file is part of the Yield project.

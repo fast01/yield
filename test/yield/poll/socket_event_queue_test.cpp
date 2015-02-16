@@ -1,6 +1,6 @@
 // socket_event_queue_test.cpp
 
-// Copyright (c) 2014 Minor Gordon
+// Copyright (c) 2015 Minor Gordon
 // All rights reserved
 
 // This source file is part of the Yield project.
