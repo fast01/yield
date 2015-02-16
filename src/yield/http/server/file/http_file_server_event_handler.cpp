@@ -1,5 +1,3 @@
-// yield/http/server/file/http_file_request_handler.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

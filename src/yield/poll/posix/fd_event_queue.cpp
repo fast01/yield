@@ -1,5 +1,3 @@
-// yield/poll/posix/fd_event_queue.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

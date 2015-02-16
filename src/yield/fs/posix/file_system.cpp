@@ -1,5 +1,3 @@
-// yield/fs/posix/file_system.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

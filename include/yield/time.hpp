@@ -1,5 +1,3 @@
-// yield/time.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

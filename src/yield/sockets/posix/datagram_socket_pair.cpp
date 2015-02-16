@@ -1,5 +1,3 @@
-// yield/sockets/posix/datagram_socket_pair.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

@@ -1,5 +1,3 @@
-// yield/sockets/socket_address.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

@@ -1,5 +1,3 @@
-// yield/sockets/win32/tcp_socket.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

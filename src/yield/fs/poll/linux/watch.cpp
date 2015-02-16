@@ -1,5 +1,3 @@
-// yield/fs/poll/linux/watch.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

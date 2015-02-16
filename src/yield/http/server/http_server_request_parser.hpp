@@ -1,5 +1,3 @@
-// yield/http/server/http_request_parser.hpp
-
 // Copyright (c) 2013 Minor Gordon
 // All rights reserved
 

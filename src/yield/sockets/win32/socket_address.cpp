@@ -1,5 +1,3 @@
-// yield/sockets/win32/socket_address.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

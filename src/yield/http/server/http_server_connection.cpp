@@ -1,5 +1,3 @@
-// yield/http/server/http_connection.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

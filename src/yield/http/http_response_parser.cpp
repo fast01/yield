@@ -1,7 +1,5 @@
 
 /* #line 1 "http_response_parser.rl" */
-// yield/http/http_response_parser.rl
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

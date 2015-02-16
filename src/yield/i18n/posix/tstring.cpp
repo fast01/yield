@@ -1,5 +1,3 @@
-// yield/i18n/posix/tstring.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

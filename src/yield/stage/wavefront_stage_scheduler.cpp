@@ -1,5 +1,3 @@
-// yield/stage/wavefront_stage_scheduler.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

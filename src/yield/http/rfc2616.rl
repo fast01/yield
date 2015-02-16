@@ -1,5 +1,3 @@
-// yield/http/rfc2616.rl
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

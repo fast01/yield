@@ -1,5 +1,3 @@
-// yield/http/server/ygi/ygi_request_handler.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

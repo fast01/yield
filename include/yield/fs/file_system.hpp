@@ -1,5 +1,3 @@
-// yield/fs/file_system.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

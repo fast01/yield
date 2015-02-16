@@ -1,5 +1,3 @@
-// yield/fs/win32/named_pipe.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

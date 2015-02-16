@@ -1,5 +1,3 @@
-// yield/stage/stage_impl.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

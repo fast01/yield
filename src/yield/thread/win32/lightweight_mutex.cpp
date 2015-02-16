@@ -1,5 +1,3 @@
-// yield/thread/win32/lightweight_mutex.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

@@ -1,5 +1,3 @@
-// yield/fs/win32/directory.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

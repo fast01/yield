@@ -1,5 +1,3 @@
-// yield/http/http_request_parser.rl
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

@@ -1,5 +1,3 @@
-// yield/sockets/aio/nbio_queue.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

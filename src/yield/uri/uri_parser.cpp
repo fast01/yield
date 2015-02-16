@@ -1,7 +1,5 @@
 
 #line 1 "uri_parser.rl"
-// yield/uri/uri_parser.rl
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

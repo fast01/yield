@@ -1,5 +1,3 @@
-// yield/fs/poll/win32/directory_watch.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

@@ -1,5 +1,3 @@
-// yield/http/http_message_parser.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

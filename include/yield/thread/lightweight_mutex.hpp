@@ -1,5 +1,3 @@
-// yield/thread/lightweight_mutex.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

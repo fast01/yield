@@ -1,5 +1,3 @@
-// yield/fs/posix/stat.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

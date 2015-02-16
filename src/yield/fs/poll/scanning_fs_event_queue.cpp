@@ -1,5 +1,3 @@
-// yield/fs/poll/scanning_fs_event_queue.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

@@ -1,7 +1,5 @@
 
 /* #line 1 "http_message_parser.rl" */
-// yield/http/http_message_parser.rl
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

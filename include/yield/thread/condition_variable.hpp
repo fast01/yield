@@ -1,5 +1,3 @@
-// yield/thread/condition_variable.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

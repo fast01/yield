@@ -1,5 +1,3 @@
-// yield/thread/win32/semaphore.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

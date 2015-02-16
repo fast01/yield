@@ -1,5 +1,3 @@
-// yield/i18n/posix/code.cpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 

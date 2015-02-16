@@ -1,5 +1,3 @@
-// yield/uri/uri_parser.hpp
-
 // Copyright (c) 2014 Minor Gordon
 // All rights reserved
 
