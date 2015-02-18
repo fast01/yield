@@ -48,13 +48,14 @@ TYPED_TEST_CASE_P(EventQueueTest);
 
 TYPED_TEST_P(EventQueueTest, dequeue) {
   unique_ptr<TestEvent> event = unique_ptr<TestEvent>(new TestEvent);
+  TestEvent* event_dead_ptr = event.get();
   TypeParam event_queue;
 
   unique_ptr<TestEvent> enqueue_ret = event_queue.tryenqueue(move(event));
   ASSERT_EQ(enqueue_ret.get(), static_cast<TestEvent*>(NULL));
 
   unique_ptr<TestEvent> dequeued_event = event_queue.dequeue();
-  ASSERT_EQ(event, dequeued_event);
+  ASSERT_EQ(event_dead_ptr, dequeued_event.get());
 
   ::std::unique_ptr<TestEvent> null_event = static_cast<EventQueue<TestEvent>&>(event_queue).trydequeue();
   ASSERT_EQ(null_event.get(), static_cast<TestEvent*>(NULL));
@@ -62,13 +63,14 @@ TYPED_TEST_P(EventQueueTest, dequeue) {
 
 TYPED_TEST_P(EventQueueTest, timeddequeue) {
   unique_ptr<TestEvent> event = unique_ptr<TestEvent>(new TestEvent);
+  TestEvent* event_dead_ptr = event.get();
   TypeParam event_queue;
 
   unique_ptr<TestEvent> enqueue_ret = event_queue.tryenqueue(move(event));
   ASSERT_EQ(enqueue_ret.get(), static_cast<TestEvent*>(NULL));
 
   unique_ptr<TestEvent> dequeued_event = event_queue.timeddequeue(1.0);
-  ASSERT_EQ(event, dequeued_event);
+  ASSERT_EQ(event_dead_ptr, dequeued_event.get());
 
   ::std::unique_ptr<TestEvent> null_event = event_queue.timeddequeue(1.0);
   ASSERT_EQ(null_event.get(), static_cast<TestEvent*>(NULL));
@@ -76,6 +78,7 @@ TYPED_TEST_P(EventQueueTest, timeddequeue) {
 
 TYPED_TEST_P(EventQueueTest, trydequeue) {
   unique_ptr<TestEvent> event = unique_ptr<TestEvent>(new TestEvent);
+  TestEvent* event_dead_ptr = event.get();
   TypeParam event_queue;
 
   unique_ptr<TestEvent> enqueue_ret = event_queue.tryenqueue(move(event));
@@ -83,7 +86,7 @@ TYPED_TEST_P(EventQueueTest, trydequeue) {
 
   unique_ptr<TestEvent> dequeued_event
   = static_cast<EventQueue<TestEvent>&>(event_queue).trydequeue();
-  ASSERT_EQ(event, dequeued_event);
+  ASSERT_EQ(event_dead_ptr, dequeued_event.get());
 
   ::std::unique_ptr<TestEvent> null_event
   = static_cast<EventQueue<TestEvent>&>(event_queue).trydequeue();
