@@ -99,12 +99,11 @@ public:
 
 protected:
   SocketAiocb() {
-    init();
+    init(0);
   }
 
-  SocketAiocb(off_t offset)
-    : offset_(offset) {
-    init();
+  SocketAiocb(off_t offset) {
+    init(offset);
   }
 
 protected:
@@ -122,7 +121,7 @@ protected:
   }
 
 private:
-  void init();
+  void init(off_t offset);
 
 private:
   uint32_t error_;

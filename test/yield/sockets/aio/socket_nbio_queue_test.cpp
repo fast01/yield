@@ -52,7 +52,7 @@ TEST(SocketNbioQueue, partial_send) {
   }
 
   unique_ptr<SendAiocb> aiocb(new SendAiocb(partial_send_stream_socket, Buffer::copy("test"), 0));
-  if (!aio_queue.tryenqueue(move(aiocb))) {
+  if (aio_queue.tryenqueue(move(aiocb)) != NULL) {
     throw Exception();
   }
 

@@ -503,12 +503,12 @@ SocketNbioQueue::retry_sendfile(
         case RETRY_STATUS_ERROR:
           return aiocb;
         default: {
-          AiocbState* aiocb_state = new AiocbState(move(aiocb), partial_send_len);
-          SocketState* socket_state = new SocketState();
           uint8_t aiocb_priority = get_aiocb_priority(*aiocb);
-          socket_state->aiocb_state[aiocb_priority] = aiocb_state;
+          SocketState* socket_state = new SocketState();
           this->socket_state[aiocb->socket()] = socket_state;
           associate(*aiocb, retry_status);
+          socket_state->aiocb_state[aiocb_priority] = new AiocbState(move(aiocb), partial_send_len);
+          // aiocb is empty here
         }
         break;
         }

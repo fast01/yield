@@ -95,7 +95,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::timeddequeue(const Time& timeout) {
     memcpy_s(
       &aiocb_temp,
       sizeof(aiocb_temp),
-      reinterpret_cast<char*>(&lpOverlapped) + sizeof(::OVERLAPPED),
+      reinterpret_cast<char*>(lpOverlapped) + sizeof(::OVERLAPPED),
       sizeof(aiocb_temp)
     );
     aiocb.reset(aiocb_temp);
