@@ -321,7 +321,7 @@ TEST(Buffer, set_next_buffer) {
   ASSERT_EQ(buffer->get_next_buffer(), buffer3);
 
   buffer->set_next_buffer(NULL);
-  ASSERT_EQ(buffer->get_next_buffer().get(), static_cast<void*>(NULL));
+  ASSERT_FALSE(buffer->get_next_buffer());
 }
 
 TEST(Buffer, size) {

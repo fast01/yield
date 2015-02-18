@@ -174,7 +174,7 @@ TEST(StreamSocket, want_accept) {
     if (listen_stream_socket.listen()) {
       if (listen_stream_socket.set_blocking_mode(false)) {
         unique_ptr<StreamSocket> server_stream_socket = listen_stream_socket.accept();
-        ASSERT_EQ(server_stream_socket.get(), static_cast<StreamSocket*>(NULL));
+        ASSERT_FALSE(server_stream_socket);
         ASSERT_TRUE(listen_stream_socket.want_accept());
         return;
       }

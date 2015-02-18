@@ -204,7 +204,7 @@ SocketNbioQueue::RetryStatus SocketNbioQueue::retry_accept(AcceptAiocb& accept_a
       accept_aiocb.set_accepted_socket(accepted_socket);
       accept_aiocb.set_peername(peername);
 
-      if (accept_aiocb.recv_buffer() != NULL) {
+      if (accept_aiocb.recv_buffer()) {
         if (accepted_socket->set_blocking_mode(false)) {
           ssize_t recv_ret =
             accepted_socket->recv(*accept_aiocb.recv_buffer(), 0);
@@ -243,7 +243,7 @@ SocketNbioQueue::retry_connect(
 
   if (connect_aiocb.socket().set_blocking_mode(false)) {
     if (connect_aiocb.socket().connect(connect_aiocb.peername())) {
-      if (connect_aiocb.send_buffer() != NULL) {
+      if (connect_aiocb.send_buffer()) {
         return retry_send(
                  connect_aiocb,
                  *connect_aiocb.send_buffer(),

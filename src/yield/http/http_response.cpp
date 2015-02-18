@@ -225,9 +225,9 @@ void HttpResponse::init() {
 
 std::ostream& operator<<(std::ostream& os, const HttpResponse& http_response) {
   std::ostringstream body;
-  if (http_response.body_buffer() != NULL) {
-    body << static_cast<Buffer*>(http_response.body_buffer().get());
-  } else if (http_response.body_file() != NULL) {
+  if (http_response.body_buffer()) {
+    body << http_response.body_buffer().get();
+  } else if (http_response.body_file()) {
     body << "File";
   } else {
     body << "NULL";

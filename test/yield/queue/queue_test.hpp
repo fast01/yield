@@ -53,18 +53,18 @@ TYPED_TEST_P(QueueTest, trydequeue) {
   TypeParam queue;
 
   unique_ptr<uint32_t> in_value(new uint32_t(1));
-  ASSERT_EQ(queue.tryenqueue(move(in_value)).get(), static_cast<uint32_t*>(NULL));
+  ASSERT_FALSE(queue.tryenqueue(move(in_value)));
   unique_ptr<uint32_t> out_value = queue.trydequeue();
-  ASSERT_NE(out_value.get(), static_cast<uint32_t*>(NULL));
+  ASSERT_TRUE(out_value);
   ASSERT_EQ(*out_value, 1);
-  ASSERT_EQ(queue.trydequeue().get(), static_cast<uint32_t*>(NULL));
+  ASSERT_FALSE(queue.trydequeue());
 }
 
 TYPED_TEST_P(QueueTest, tryenqueue) {
   TypeParam queue;
 
   unique_ptr<uint32_t> in_value(new uint32_t(1));
-  ASSERT_EQ(queue.tryenqueue(move(in_value)).get(), static_cast<uint32_t*>(NULL));
+  ASSERT_FALSE(queue.tryenqueue(move(in_value)));
 }
 
 REGISTER_TYPED_TEST_CASE_P(QueueTest, create, trydequeue, tryenqueue);

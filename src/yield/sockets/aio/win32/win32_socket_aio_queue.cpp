@@ -364,7 +364,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
     if (peername != NULL) {
       PVOID lpSendBuffer;
       DWORD dwSendDataLength;
-      if (connect_aiocb.send_buffer() != NULL) {
+      if (connect_aiocb.send_buffer()) {
         lpSendBuffer = *connect_aiocb.send_buffer();
         dwSendDataLength = connect_aiocb.send_buffer()->size();
       } else {

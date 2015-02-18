@@ -46,7 +46,7 @@ TEST(NonBlockingConcurrentQueue, full) {
   for (unsigned char i = 0; i < 8; i++) {
     unique_ptr<uint32_t> in(new uint32_t(in_values[i]));
     unique_ptr<uint32_t> out = queue.tryenqueue(move(in));
-    ASSERT_EQ(out.get(), static_cast<uint32_t*>(NULL));
+    ASSERT_FALSE(out);
   }
 
   // Full case

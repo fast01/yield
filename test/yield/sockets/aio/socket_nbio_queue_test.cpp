@@ -52,12 +52,11 @@ TEST(SocketNbioQueue, partial_send) {
   }
 
   unique_ptr<SendAiocb> aiocb(new SendAiocb(partial_send_stream_socket, Buffer::copy("test"), 0));
-  if (aio_queue.tryenqueue(move(aiocb)) != NULL) {
+  if (aio_queue.tryenqueue(move(aiocb))) {
     throw Exception();
   }
 
   unique_ptr<SocketAiocb> out_aiocb = aio_queue.dequeue();
-  //ASSERT_EQ(&out_aiocb.get(), &aiocb.get());
   ASSERT_EQ(out_aiocb->error(), 0);
   ASSERT_EQ(out_aiocb->return_(), 4);
 
@@ -101,12 +100,11 @@ TEST_F(NBIOQueuePartialSendFileTest, partial_sendfile) {
   ASSERT_EQ(aiocb->nbytes(), stbuf->get_size());
   ASSERT_EQ(aiocb->offset(), 0);
 
-  if (aio_queue.tryenqueue(unique_ptr<SocketAiocb>(aiocb.release())) != NULL) {
+  if (aio_queue.tryenqueue(unique_ptr<SocketAiocb>(aiocb.release()))) {
     throw Exception();
   }
 
   unique_ptr<SocketAiocb> out_aiocb = aio_queue.dequeue();
-  //ASSERT_EQ(&out_aiocb.get(), &aiocb.get());
   ASSERT_EQ(out_aiocb->error(), 0);
   ASSERT_EQ(
     out_aiocb->return_(),
@@ -133,12 +131,11 @@ TEST(SocketNbioQueue, partial_sendmsg) {
   buffer->set_next_buffer(Buffer::copy(" string"));
   unique_ptr<SendAiocb> aiocb
   (new SendAiocb(partial_send_stream_socket, buffer, 0));
-  if (aio_queue.tryenqueue(unique_ptr<SocketAiocb>(aiocb.release())) != NULL) {
+  if (aio_queue.tryenqueue(unique_ptr<SocketAiocb>(aiocb.release()))) {
     throw Exception();
   }
 
   unique_ptr<SocketAiocb> out_aiocb = aio_queue.dequeue();
-  //ASSERT_EQ(&out_aiocb.get(), &aiocb.get());
   ASSERT_EQ(out_aiocb->error(), 0);
   ASSERT_EQ(out_aiocb->return_(), 11);
 

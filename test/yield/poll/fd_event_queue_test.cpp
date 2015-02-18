@@ -156,7 +156,7 @@ TEST_F(FdEventQueueTest, associate_zero) {
   signal_pipe();
 
   shared_ptr<FdEvent> event = fd_event_queue.timeddequeue(0);
-  ASSERT_EQ(event.get(), static_cast<FdEvent*>(NULL));
+  ASSERT_FALSE(event);
 }
 
 TEST(FdEventQueue, constructor) {
@@ -205,7 +205,7 @@ TEST_F(FdEventQueueTest, dissociate) {
   signal_pipe();
 
   shared_ptr<FdEvent> event = fd_event_queue.timeddequeue(0);
-  ASSERT_EQ(event.get(), static_cast<FdEvent*>(NULL));
+  ASSERT_FALSE(event);
 
   if (!fd_event_queue.associate(get_read_fd(), FdEvent::TYPE_READ_READY)) {
     throw Exception();  // associate after dissociate should succeed

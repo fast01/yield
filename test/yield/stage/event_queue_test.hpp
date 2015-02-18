@@ -51,14 +51,12 @@ TYPED_TEST_P(EventQueueTest, dequeue) {
   TestEvent* event_dead_ptr = event.get();
   TypeParam event_queue;
 
-  unique_ptr<TestEvent> enqueue_ret = event_queue.tryenqueue(move(event));
-  ASSERT_EQ(enqueue_ret.get(), static_cast<TestEvent*>(NULL));
+  ASSERT_FALSE(event_queue.tryenqueue(move(event)));
 
   unique_ptr<TestEvent> dequeued_event = event_queue.dequeue();
   ASSERT_EQ(event_dead_ptr, dequeued_event.get());
 
-  ::std::unique_ptr<TestEvent> null_event = static_cast<EventQueue<TestEvent>&>(event_queue).trydequeue();
-  ASSERT_EQ(null_event.get(), static_cast<TestEvent*>(NULL));
+  ASSERT_FALSE(static_cast<EventQueue<TestEvent>&>(event_queue).trydequeue());
 }
 
 TYPED_TEST_P(EventQueueTest, timeddequeue) {
@@ -66,14 +64,12 @@ TYPED_TEST_P(EventQueueTest, timeddequeue) {
   TestEvent* event_dead_ptr = event.get();
   TypeParam event_queue;
 
-  unique_ptr<TestEvent> enqueue_ret = event_queue.tryenqueue(move(event));
-  ASSERT_EQ(enqueue_ret.get(), static_cast<TestEvent*>(NULL));
+  ASSERT_FALSE(event_queue.tryenqueue(move(event)));
 
   unique_ptr<TestEvent> dequeued_event = event_queue.timeddequeue(1.0);
   ASSERT_EQ(event_dead_ptr, dequeued_event.get());
 
-  ::std::unique_ptr<TestEvent> null_event = event_queue.timeddequeue(1.0);
-  ASSERT_EQ(null_event.get(), static_cast<TestEvent*>(NULL));
+  ASSERT_FALSE(event_queue.timeddequeue(1.0));
 }
 
 TYPED_TEST_P(EventQueueTest, trydequeue) {
@@ -81,16 +77,13 @@ TYPED_TEST_P(EventQueueTest, trydequeue) {
   TestEvent* event_dead_ptr = event.get();
   TypeParam event_queue;
 
-  unique_ptr<TestEvent> enqueue_ret = event_queue.tryenqueue(move(event));
-  ASSERT_EQ(enqueue_ret.get(), static_cast<TestEvent*>(NULL));
+  ASSERT_FALSE(event_queue.tryenqueue(move(event)));
 
   unique_ptr<TestEvent> dequeued_event
   = static_cast<EventQueue<TestEvent>&>(event_queue).trydequeue();
   ASSERT_EQ(event_dead_ptr, dequeued_event.get());
 
-  ::std::unique_ptr<TestEvent> null_event
-  = static_cast<EventQueue<TestEvent>&>(event_queue).trydequeue();
-  ASSERT_EQ(null_event.get(), static_cast<TestEvent*>(NULL));
+  ASSERT_FALSE(static_cast<EventQueue<TestEvent>&>(event_queue).trydequeue());
 }
 
 REGISTER_TYPED_TEST_CASE_P(EventQueueTest, dequeue, timeddequeue, trydequeue);

@@ -39,7 +39,7 @@ using ::std::unique_ptr;
 using ::std::vector;
 
 TEST(HttpMessage, body_buffer) {
-  ASSERT_EQ(HttpRequest(HttpRequest::Method::GET, "/").body_buffer().get(), static_cast<Buffer*>(NULL));
+  ASSERT_FALSE(HttpRequest(HttpRequest::Method::GET, "/").body_buffer());
 
   shared_ptr<Buffer> body = Buffer::copy("body");
   ASSERT_EQ(

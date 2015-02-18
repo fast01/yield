@@ -60,7 +60,7 @@ TEST(HttpResponseParser, MalformedReasonPhraseMissing) {
   HttpResponseParser http_response_parser("HTTP/1.1 200\r\n\r\n");
   TestParseCallbacks callbacks;
   http_response_parser.parse(callbacks);
-  ASSERT_NE(callbacks.http_response_.get(), static_cast<HttpResponse*>(NULL));
+  ASSERT_TRUE(callbacks.http_response_);
   ASSERT_EQ(callbacks.http_response_->status_code(), 400);
 }
 
@@ -68,7 +68,7 @@ TEST(HttpResponseParser, MalformedStatusCodeAlpha) {
   HttpResponseParser http_response_parser("HTTP/1.1 XX OK\r\n\r\n");
   TestParseCallbacks callbacks;
   http_response_parser.parse(callbacks);
-  ASSERT_NE(callbacks.http_response_.get(), static_cast<HttpResponse*>(NULL));
+  ASSERT_TRUE(callbacks.http_response_);
   ASSERT_EQ(callbacks.http_response_->status_code(), 400);
 }
 
@@ -76,7 +76,7 @@ TEST(HttpResponseParser, MalformedStatusCodeMissing) {
   HttpResponseParser http_response_parser("HTTP/1.1 OK\r\n\r\n");
   TestParseCallbacks callbacks;
   http_response_parser.parse(callbacks);
-  ASSERT_NE(callbacks.http_response_.get(), static_cast<HttpResponse*>(NULL));
+  ASSERT_TRUE(callbacks.http_response_);
   ASSERT_EQ(callbacks.http_response_->status_code(), 400);
 }
 
@@ -84,7 +84,7 @@ TEST(HttpResponseParser, MalformedStatusLineMissing) {
   HttpResponseParser http_response_parser("Host: localhost\r\n\r\n");
   TestParseCallbacks callbacks;
   http_response_parser.parse(callbacks);
-  ASSERT_NE(callbacks.http_response_.get(), static_cast<HttpResponse*>(NULL));
+  ASSERT_TRUE(callbacks.http_response_);
   ASSERT_EQ(callbacks.http_response_->status_code(), 400);
 }
 
@@ -92,9 +92,9 @@ TEST(HttpResponseParser, WellFormedStatusLineOnly) {
   HttpResponseParser http_response_parser("HTTP/1.1 200 OK\r\n\r\n");
   TestParseCallbacks callbacks;
   http_response_parser.parse(callbacks);
-  ASSERT_NE(callbacks.http_response_.get(), static_cast<HttpResponse*>(NULL));
+  ASSERT_TRUE(callbacks.http_response_);
   ASSERT_EQ(callbacks.http_response_->status_code(), 200);
-  ASSERT_EQ(callbacks.http_response_->body_buffer().get(), static_cast<Buffer*>(NULL));
+  ASSERT_FALSE(callbacks.http_response_->body_buffer());
 }
 }
 }

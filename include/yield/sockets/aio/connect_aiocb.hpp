@@ -73,8 +73,8 @@ public:
     Get the buffer of data to send after the connection is established.
     @return the buffer of data to send after the connection is established
   */
-  Buffer* send_buffer() {
-    return send_buffer_.get();
+  ::std::shared_ptr<Buffer>& send_buffer() {
+    return send_buffer_;
   }
 
   /**

@@ -77,8 +77,8 @@ HttpMessage(
   fields_offset_(fields_offset),
   header_(header),
   http_version_(http_version) {
-  if (body_buffer != NULL) {
-    CHECK_EQ(body_file, NULL);
+  if (body_buffer) {
+    CHECK(!body_file);
   }
 }
 

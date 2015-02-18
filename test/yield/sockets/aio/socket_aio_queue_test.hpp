@@ -88,12 +88,11 @@ TYPED_TEST_P(SocketAioQueueTest, recv) {
 
   shared_ptr<Buffer> buffer = make_shared<Buffer>(4096);
   unique_ptr<SocketAiocb> aiocb(new RecvAiocb(sockets.first(), buffer, 0));
-  if (aio_queue.tryenqueue(move(aiocb)) != NULL) {
+  if (aio_queue.tryenqueue(move(aiocb))) {
     throw Exception();
   }
 
   unique_ptr<SocketAiocb> out_aiocb = aio_queue.dequeue();
-  //ASSERT_EQ(out_aiocb.get(), aiocb.get());
   ASSERT_EQ(out_aiocb->error(), 0);
   ASSERT_EQ(out_aiocb->return_(), 1);
   ASSERT_EQ(buffer->size(), 1);
@@ -112,12 +111,11 @@ TYPED_TEST_P(SocketAioQueueTest, recvfrom) {
 
   shared_ptr<Buffer> buffer = make_shared<Buffer>(4096);
   unique_ptr<SocketAiocb> aiocb(new RecvfromAiocb(sockets.first(), buffer, 0));
-  if (aio_queue.tryenqueue(move(aiocb)) != NULL) {
+  if (aio_queue.tryenqueue(move(aiocb))) {
     throw Exception();
   }
 
   shared_ptr<SocketAiocb> out_aiocb = aio_queue.dequeue();
-  //ASSERT_EQ(out_aiocb.get(), aiocb.get());
   ASSERT_EQ(out_aiocb->error(), 0);
   ASSERT_EQ(out_aiocb->return_(), 1);
   ASSERT_EQ(buffer->size(), 1);
@@ -137,12 +135,11 @@ TYPED_TEST_P(SocketAioQueueTest, recvmsg) {
   shared_ptr<Buffer> buffer = make_shared<Buffer>(1);
   buffer->set_next_buffer(make_shared<Buffer>(1));
   unique_ptr<SocketAiocb> aiocb(new RecvAiocb(sockets.first(), buffer, 0));
-  if (aio_queue.tryenqueue(move(aiocb)) != NULL) {
+  if (aio_queue.tryenqueue(move(aiocb))) {
     throw Exception();
   }
 
   unique_ptr<SocketAiocb> out_aiocb = aio_queue.dequeue();
-  //ASSERT_EQ(out_aiocb.get(), aiocb.get());
   ASSERT_EQ(out_aiocb->error(), 0);
   ASSERT_EQ(out_aiocb->return_(), 2);
   ASSERT_EQ(buffer->size(), 1);
@@ -161,16 +158,13 @@ TYPED_TEST_P(SocketAioQueueTest, recv_queued) {
 
   for (uint8_t i = 0; i < 2; i++) {
     unique_ptr<SocketAiocb> aiocb(new RecvAiocb(sockets.first(), make_shared<Buffer>(2), 0));
-    if (aio_queue.tryenqueue(move(aiocb)) != NULL) {
+    if (aio_queue.tryenqueue(move(aiocb))) {
       throw Exception();
     }
   }
 
   // For the NbioQueue: force the first retry
-  {
-    unique_ptr<SocketAiocb> out_aiocb = aio_queue.trydequeue();
-    ASSERT_EQ(out_aiocb.get(), static_cast<SocketAiocb*>(NULL));
-  }
+  ASSERT_FALSE(aio_queue.trydequeue());
 
   sockets.second()->send("te", 2, 0);
 
@@ -182,10 +176,7 @@ TYPED_TEST_P(SocketAioQueueTest, recv_queued) {
     ASSERT_EQ(static_cast<RecvAiocb&>(*out_aiocb).buffer()->size(), 2);
   }
 
-  {
-    unique_ptr<SocketAiocb> out_aiocb = aio_queue.trydequeue();
-    ASSERT_EQ(out_aiocb.get(), static_cast<SocketAiocb*>(NULL));
-  }
+  ASSERT_FALSE(aio_queue.trydequeue());
 
   sockets.second()->send("st", 2, 0);
 
@@ -208,16 +199,13 @@ TYPED_TEST_P(SocketAioQueueTest, recv_split) {
 
   for (uint8_t i = 0; i < 2; i++) {
     unique_ptr<SocketAiocb> aiocb(new RecvAiocb(sockets.first(), make_shared<Buffer>(2), 0));
-    if (aio_queue.tryenqueue(move(aiocb)) != NULL) {
+    if (aio_queue.tryenqueue(move(aiocb))) {
       throw Exception();
     }
   }
 
   // For the NbioQueue: force the first retry
-  {
-    unique_ptr<SocketAiocb> out_aiocb = aio_queue.trydequeue();
-    ASSERT_EQ(out_aiocb.get(), static_cast<SocketAiocb*>(NULL));
-  }
+  ASSERT_FALSE(aio_queue.trydequeue());
 
   sockets.second()->send("test", 4, 0);
 
@@ -239,12 +227,11 @@ TYPED_TEST_P(SocketAioQueueTest, send) {
   }
 
   unique_ptr<SocketAiocb> aiocb(new SendAiocb(sockets.first(), Buffer::copy("test"), 0));
-  if (aio_queue.tryenqueue(move(aiocb)) != NULL) {
+  if (aio_queue.tryenqueue(move(aiocb))) {
     throw Exception();
   }
 
   unique_ptr<SocketAiocb> out_aiocb = aio_queue.dequeue();
-  //ASSERT_EQ(out_aiocb.get(), aiocb.get());
   ASSERT_EQ(out_aiocb->error(), 0);
   ASSERT_EQ(out_aiocb->return_(), 4);
 
@@ -270,12 +257,11 @@ TYPED_TEST_P(SocketAioQueueTest, sendfile) {
   ASSERT_EQ(static_cast<SendfileAiocb*>(aiocb.get())->nbytes(), stbuf->get_size());
   ASSERT_EQ(aiocb->offset(), 0);
 
-  if (aio_queue.tryenqueue(move(aiocb)) != NULL) {
+  if (aio_queue.tryenqueue(move(aiocb))) {
     throw Exception();
   }
 
   unique_ptr<SocketAiocb> out_aiocb = aio_queue.dequeue();
-  //ASSERT_EQ(out_aiocb.get(), aiocb.get());
   ASSERT_EQ(out_aiocb->error(), 0);
   ASSERT_EQ(
     out_aiocb->return_(),
@@ -304,7 +290,6 @@ TYPED_TEST_P(SocketAioQueueTest, sendmsg) {
   }
 
   unique_ptr<SocketAiocb> out_aiocb = aio_queue.dequeue();
-  //ASSERT_EQ(out_aiocb.get(), aiocb.get());
   ASSERT_EQ(out_aiocb->error(), 0);
   ASSERT_EQ(out_aiocb->return_(), 11);
 

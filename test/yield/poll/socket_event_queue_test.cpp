@@ -94,7 +94,7 @@ TEST(SocketEventQueue, dissociate) {
   sockets.first()->send("m", 1, 0);
 
   shared_ptr<FdEvent> event = socket_event_queue.timeddequeue(0);
-  ASSERT_EQ(event.get(), static_cast<FdEvent*>(NULL));
+  ASSERT_FALSE(event);
 
   if (!socket_event_queue.associate(*sockets.first(), FdEvent::TYPE_READ_READY)) {
     throw Exception();  // associate after dissociate should succeed
@@ -130,7 +130,7 @@ TEST(SocketEventQueue, dissociate_two) {
   }
 
   shared_ptr<FdEvent> event = socket_event_queue.timeddequeue(0);
-  ASSERT_EQ(event.get(), static_cast<FdEvent*>(NULL));
+  ASSERT_FALSE(event);
 }
 
 TEST(SocketEventQueue, dequeue_SocketEvent) {

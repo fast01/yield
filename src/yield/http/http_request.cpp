@@ -193,9 +193,9 @@ HttpRequest::HttpRequest(
 
 std::ostream& operator<<(std::ostream& os, const HttpRequest& http_request) {
   std::ostringstream body;
-  if (http_request.body_buffer() != NULL) {
+  if (http_request.body_buffer()) {
     body << http_request.body_buffer();
-  } else if (http_request.body_file() != NULL) {
+  } else if (http_request.body_file()) {
     body << "File";
   } else {
     body << "NULL";

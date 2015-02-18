@@ -70,7 +70,7 @@ public:
 
   void read(shared_ptr<Buffer> buffer) override {
     unique_ptr<RecvAiocb> recv_aiocb(new RecvAiocb(buffer, connection_.shared_from_this(), 0));
-    if (connection_.aio_queue_->tryenqueue(move(recv_aiocb)) != NULL) {
+    if (connection_.aio_queue_->tryenqueue(move(recv_aiocb))) {
       connection_.state_ = STATE_ERROR;
     }
   }
@@ -90,7 +90,7 @@ void HttpServerConnection::handle(unique_ptr<AcceptAiocb> accept_aiocb) {
     shared_ptr<Buffer> recv_buffer
     = make_shared<Buffer>(Buffer::getpagesize(), Buffer::getpagesize());
     unique_ptr<RecvAiocb> recv_aiocb(new RecvAiocb(recv_buffer, shared_from_this(), 0));
-    if (aio_queue_->tryenqueue(move(recv_aiocb)) != NULL) {
+    if (aio_queue_->tryenqueue(move(recv_aiocb))) {
       state_ = STATE_ERROR;
     }
   }
@@ -101,14 +101,14 @@ HttpServerConnection::handle(
   unique_ptr<HttpMessageBodyChunk> http_message_body_chunk
 ) {
   shared_ptr<Buffer> send_buffer;
-  if (http_message_body_chunk->data() != NULL) {
+  if (http_message_body_chunk->data()) {
     send_buffer = http_message_body_chunk->data();
   } else {
     send_buffer = Buffer::copy("0\r\n\r\n", 5);
   }
 
   unique_ptr<SendAiocb> send_aiocb(new SendAiocb(shared_ptr<Socket>(socket_), send_buffer, 0));
-  if (aio_queue_->tryenqueue(move(send_aiocb)) != NULL) {
+  if (aio_queue_->tryenqueue(move(send_aiocb))) {
     state_ = STATE_ERROR;
   }
 }
@@ -121,10 +121,10 @@ HttpServerConnection::handle(
 
   http_response->finalize();
 
-  if (http_response->body_buffer() != NULL) {
-    CHECK_EQ(http_response->body_file(), NULL);
+  if (http_response->body_buffer()) {
+    CHECK(!http_response->body_file());
     http_response->header()->set_next_buffer(http_response->body_buffer());
-  } else if (http_response->body_file() != NULL) {
+  } else if (http_response->body_file()) {
     unique_ptr<SendAiocb> send_aiocb(new SendAiocb(socket_, http_response->header(), 0));
     if (aio_queue_->tryenqueue(move(send_aiocb)) == NULL) {
       unique_ptr<SendfileAiocb> sendfile_aiocb(new SendfileAiocb(shared_ptr<StreamSocket>(socket_), *http_response->body_file()));
@@ -139,7 +139,7 @@ HttpServerConnection::handle(
   }
 
   unique_ptr<SendAiocb> send_aiocb(new SendAiocb(socket_, http_response->header(), 0));
-  if (aio_queue_->tryenqueue(move(send_aiocb)) != NULL) {
+  if (aio_queue_->tryenqueue(move(send_aiocb))) {
     state_ = STATE_ERROR;
   }
 }
