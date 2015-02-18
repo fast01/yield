@@ -37,7 +37,7 @@ namespace yield {
 namespace http {
 using ::std::unique_ptr;
 
-class TestParseCallbacks : public HttpResponseParser::ParseCallbacks {
+class TestResponseParseCallbacks final : public HttpResponseParser::ParseCallbacks {
 public:
   void handle_http_response(::std::unique_ptr<HttpResponse> http_response) override {
     http_response_.swap(http_response);
@@ -58,41 +58,41 @@ public:
 
 TEST(HttpResponseParser, MalformedReasonPhraseMissing) {
   HttpResponseParser http_response_parser("HTTP/1.1 200\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestResponseParseCallbacks callbacks;
   http_response_parser.parse(callbacks);
-  ASSERT_TRUE(callbacks.http_response_);
+  ASSERT_TRUE(static_cast<bool>(callbacks.http_response_));
   ASSERT_EQ(callbacks.http_response_->status_code(), 400);
 }
 
 TEST(HttpResponseParser, MalformedStatusCodeAlpha) {
   HttpResponseParser http_response_parser("HTTP/1.1 XX OK\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestResponseParseCallbacks callbacks;
   http_response_parser.parse(callbacks);
-  ASSERT_TRUE(callbacks.http_response_);
+  ASSERT_TRUE(static_cast<bool>(callbacks.http_response_));
   ASSERT_EQ(callbacks.http_response_->status_code(), 400);
 }
 
 TEST(HttpResponseParser, MalformedStatusCodeMissing) {
   HttpResponseParser http_response_parser("HTTP/1.1 OK\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestResponseParseCallbacks callbacks;
   http_response_parser.parse(callbacks);
-  ASSERT_TRUE(callbacks.http_response_);
+  ASSERT_TRUE(static_cast<bool>(callbacks.http_response_));
   ASSERT_EQ(callbacks.http_response_->status_code(), 400);
 }
 
 TEST(HttpResponseParser, MalformedStatusLineMissing) {
   HttpResponseParser http_response_parser("Host: localhost\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestResponseParseCallbacks callbacks;
   http_response_parser.parse(callbacks);
-  ASSERT_TRUE(callbacks.http_response_);
+  ASSERT_TRUE(static_cast<bool>(callbacks.http_response_));
   ASSERT_EQ(callbacks.http_response_->status_code(), 400);
 }
 
 TEST(HttpResponseParser, WellFormedStatusLineOnly) {
   HttpResponseParser http_response_parser("HTTP/1.1 200 OK\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestResponseParseCallbacks callbacks;
   http_response_parser.parse(callbacks);
-  ASSERT_TRUE(callbacks.http_response_);
+  ASSERT_TRUE(static_cast<bool>(callbacks.http_response_));
   ASSERT_EQ(callbacks.http_response_->status_code(), 200);
   ASSERT_FALSE(callbacks.http_response_->body_buffer());
 }

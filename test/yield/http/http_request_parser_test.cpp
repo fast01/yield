@@ -38,7 +38,7 @@ namespace http {
 using ::std::move;
 using ::std::unique_ptr;
 
-class TestParseCallbacks : public HttpRequestParser::ParseCallbacks {
+class TestRequestParseCallbacks : public HttpRequestParser::ParseCallbacks {
 public:
   void handle_http_request(::std::unique_ptr<HttpRequest> http_request) override {
     http_request_.swap(http_request);
@@ -64,56 +64,56 @@ public:
 
 TEST(HttpRequestParser, MalformedHTTPVersionMissing) {
   HttpRequestParser http_request_parser("GET /\r\nHost: localhost\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestRequestParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_FALSE(callbacks.http_request_);
 }
 
 TEST(HttpRequestParser, MalformedHTTPVersionMissingHTTP) {
   HttpRequestParser http_request_parser("GET / /1.0\r\nHost: localhost\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestRequestParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_FALSE(callbacks.http_request_);
 }
 
 TEST(HttpRequestParser, MalformedHTTPVersionMissingMinorVersion) {
   HttpRequestParser http_request_parser("GET / HTTP/1.\r\nHost: localhost\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestRequestParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_FALSE(callbacks.http_request_);
 }
 
 TEST(HttpRequestParser, MalformedHTTPVersionMissingTrailingCRLF) {
   HttpRequestParser http_request_parser("GET / HTTP/1.1Host: localhost\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestRequestParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_FALSE(callbacks.http_request_);
 }
 
 TEST(HttpRequestParser, MalformedMethodMissing) {
   HttpRequestParser http_request_parser("/ HTTP/1.0\r\nHost: localhost\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestRequestParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_FALSE(callbacks.http_request_);
 }
 
 TEST(HttpRequestParser, MalformedURIEmbeddedLF) {
   HttpRequestParser http_request_parser("GET /\r HTTP/1.1\r\nHost: localhost\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestRequestParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_FALSE(callbacks.http_request_);
 }
 
 TEST(HttpRequestParser, MalformedURIMissing) {
   HttpRequestParser http_request_parser("GET HTTP/1.1\r\nHost: localhost\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestRequestParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_FALSE(callbacks.http_request_);
 }
 
 TEST(HttpRequestParser, WellFormedRequestLineOnly) {
   HttpRequestParser http_request_parser("GET / HTTP/1.1\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestRequestParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(callbacks.http_request_);
   ASSERT_EQ(callbacks.http_request_->method(), HttpRequest::Method::GET);

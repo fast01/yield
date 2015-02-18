@@ -40,6 +40,9 @@ class HttpResponseParser : public HttpMessageParser {
 public:
   class ParseCallbacks : public HttpMessageParser::ParseCallbacks {
   public:
+    virtual ~ParseCallbacks() {
+    }
+
     virtual void handle_http_response(::std::unique_ptr<HttpResponse>) = 0;
   };
 

@@ -38,7 +38,7 @@ namespace http {
 using ::std::move;
 using ::std::unique_ptr;
 
-class TestParseCallbacks : public HttpRequestParser::ParseCallbacks {
+class TestMessageParseCallbacks : public HttpRequestParser::ParseCallbacks {
 public:
   void handle_http_request(::std::unique_ptr<HttpRequest> http_request) override {
     http_request_.swap(http_request);
@@ -63,21 +63,21 @@ public:
 
 TEST(HttpMessageParser, MalformedFieldMissingColon) {
   HttpRequestParser http_request_parser("GET / HTTP/1.1\r\nHost\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestMessageParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(callbacks.http_request_);
 }
 
 TEST(HttpMessageParser, MalformedFieldMissingName) {
   HttpRequestParser http_request_parser("GET / HTTP/1.1\r\n: localhost\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestMessageParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(callbacks.http_request_);
 }
 
 TEST(HttpMessageParser, WellFormedChunkedBodyWithChunkExtension) {
   HttpRequestParser http_request_parser("GET / HTTP/1.1\r\nTransfer-Encoding: chunked\r\n\r\n1;chunk_ext1;chunk_ext2=\"ChunkExtension\"\r\nx\r\n0\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestMessageParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(callbacks.http_request_);
   ASSERT_EQ(callbacks.http_request_->http_version(), 1);
@@ -95,7 +95,7 @@ TEST(HttpMessageParser, WellFormedChunkedBodyWithChunkExtension) {
 
 TEST(HttpMessageParser, WellFormedChunkedBodyWithTrailer) {
   HttpRequestParser http_request_parser("GET / HTTP/1.1\r\nTransfer-Encoding: chunked\r\n\r\n1\r\nx\r\n1\r\ny\r\n0\r\nHost: localhost\r\nX-Host: x-localhost\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestMessageParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(callbacks.http_request_);
   ASSERT_EQ(callbacks.http_request_->http_version(), 1);
@@ -118,7 +118,7 @@ TEST(HttpMessageParser, WellFormedChunkedBodyWithTrailer) {
 
 TEST(HttpMessageParser, WellFormed1ChunkBody) {
   HttpRequestParser http_request_parser("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n1\r\nx\r\n0\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestMessageParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(callbacks.http_request_);
   ASSERT_EQ(callbacks.http_request_->http_version(), 1);
@@ -137,7 +137,7 @@ TEST(HttpMessageParser, WellFormed1ChunkBody) {
 
 TEST(HttpMessageParser, WellFormed2ChunkBody) {
   HttpRequestParser http_request_parser("GET / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n1\r\nx\r\n1\r\ny\r\n0\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestMessageParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(callbacks.http_request_);
   ASSERT_EQ(callbacks.http_request_->http_version(), 1);
@@ -161,7 +161,7 @@ TEST(HttpMessageParser, WellFormed2ChunkBody) {
 
 TEST(HttpMessageParser, WellFormedFieldMissingValue) {
   HttpRequestParser http_request_parser("GET / HTTP/1.1\r\nHost:\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestMessageParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(callbacks.http_request_);
   ASSERT_EQ(callbacks.http_request_->http_version(), 1);
@@ -170,7 +170,7 @@ TEST(HttpMessageParser, WellFormedFieldMissingValue) {
 
 TEST(HttpMessageParser, WellFormedNoBody) {
   HttpRequestParser http_request_parser("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
-  TestParseCallbacks callbacks;
+  TestMessageParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(callbacks.http_request_);
   ASSERT_FALSE(callbacks.http_request_->body_buffer());
@@ -178,7 +178,7 @@ TEST(HttpMessageParser, WellFormedNoBody) {
 
 TEST(HttpMessageParser, WellFormedNormalBody) {
   HttpRequestParser http_request_parser("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 2\r\n\r\n12");
-  TestParseCallbacks callbacks;
+  TestMessageParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(callbacks.http_request_);
   ASSERT_TRUE(callbacks.http_request_->body_buffer());
@@ -188,7 +188,7 @@ TEST(HttpMessageParser, WellFormedNormalBody) {
 TEST(HttpMessageParser, WellFormedPipelinedNoBody) {
   HttpRequestParser http_request_parser("GET / HTTP/1.1\r\nHost: localhost\r\n\r\nGET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
   {
-  TestParseCallbacks callbacks;
+  TestMessageParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(callbacks.http_request_);
   ASSERT_EQ(callbacks.http_request_->http_version(), 1);
@@ -196,7 +196,7 @@ TEST(HttpMessageParser, WellFormedPipelinedNoBody) {
   ASSERT_FALSE(callbacks.http_request_->body_buffer());
   }
   {
-  TestParseCallbacks callbacks;
+  TestMessageParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(callbacks.http_request_);
   ASSERT_EQ(callbacks.http_request_->http_version(), 1);
@@ -208,7 +208,7 @@ TEST(HttpMessageParser, WellFormedPipelinedNoBody) {
 TEST(HttpMessageParser, WellFormedPipelinedNormalBody) {
   HttpRequestParser http_request_parser("GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 2\r\n\r\n12GET / HTTP/1.1\r\nHost: localhost\r\nContent-Length: 2\r\n\r\n12");
   {
-  TestParseCallbacks callbacks;
+  TestMessageParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(callbacks.http_request_);
   ASSERT_EQ(callbacks.http_request_->http_version(), 1);
@@ -217,7 +217,7 @@ TEST(HttpMessageParser, WellFormedPipelinedNormalBody) {
   ASSERT_EQ(callbacks.http_request_->body_buffer()->size(), 2u);
   }
   {
-  TestParseCallbacks callbacks;
+  TestMessageParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(callbacks.http_request_);
   ASSERT_EQ(callbacks.http_request_->http_version(), 1);
