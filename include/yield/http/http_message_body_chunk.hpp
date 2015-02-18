@@ -41,7 +41,6 @@ class HttpMessageBodyChunk {
 public:
   /**
     Construct an HttpMessageBodyChunk with the given data.
-    Steals the reference to data.
   */
   HttpMessageBodyChunk(::std::shared_ptr<Buffer> data)
     : data_(data)
@@ -67,7 +66,7 @@ public:
     terminating 0CRLFCRLF chunk with no data.
   */
   bool is_last() const {
-    return data_ == NULL;
+    return static_cast<bool>(data_);
   }
 
   /**
@@ -75,7 +74,7 @@ public:
     @return the size of the chunk data
   */
   size_t size() const {
-    return data_ != NULL ? data_->size() : 0;
+    return data_ ? data_->size() : 0;
   }
 
 private:
