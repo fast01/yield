@@ -274,7 +274,7 @@ public:
     @return a new Lock specifying an existing lock that would conflict with lock on
       success, NULL+errno on failure
   */
-  YO_NEW_REF Lock* getlk(const Lock& lock);
+  ::std::unique_ptr<Lock> getlk(const Lock& lock);
 #endif
 
 public:

@@ -42,6 +42,9 @@
 
 namespace yield {
 namespace fs {
+using ::std::move;
+using ::std::unique_ptr;
+
 mode_t FileSystem::FILE_MODE_DEFAULT = S_IREAD | S_IWRITE;
 mode_t FileSystem::DIRECTORY_MODE_DEFAULT = S_IREAD | S_IWRITE | S_IEXEC;
 
@@ -61,12 +64,12 @@ bool FileSystem::chown(const Path& path, uid_t uid, gid_t gid) {
   return ::chown(path.c_str(), uid, gid) == 0;
 }
 
-YO_NEW_REF File* FileSystem::creat(const Path& path) {
-  return creat(path, FILE_MODE_DEFAULT);
+unique_ptr<File> FileSystem::creat(const Path& path) {
+  return move(creat(path, FILE_MODE_DEFAULT));
 }
 
-YO_NEW_REF File* FileSystem::creat(const Path& path, mode_t mode) {
-  return open(path, O_CREAT | O_WRONLY | O_TRUNC, mode);
+unique_ptr<File> FileSystem::creat(const Path& path, mode_t mode) {
+  return move(open(path, O_CREAT | O_WRONLY | O_TRUNC, mode));
 }
 
 bool FileSystem::exists(const Path& path) {
@@ -87,10 +90,10 @@ bool FileSystem::link(const Path& old_path, const Path& new_path) {
   return ::link(old_path.c_str(), new_path.c_str()) == 0;
 }
 
-YO_NEW_REF Stat* FileSystem::lstat(const Path& path) {
+unique_ptr<Stat> FileSystem::lstat(const Path& path) {
   struct stat stbuf;
   if (::lstat(path.c_str(), &stbuf) == 0) {
-    return new Stat(stbuf);
+    return unique_ptr<Stat>(new Stat(stbuf));
   } else {
     return NULL;
   }
@@ -104,14 +107,14 @@ bool FileSystem::mkdir(const Path& path, mode_t mode) {
   return ::mkdir(path.c_str(), mode) == 0;
 }
 
-YO_NEW_REF File*
+unique_ptr<File>
 FileSystem::mkfifo(
   const Path& path,
   uint32_t flags,
   mode_t mode
 ) {
   if (::mkfifo(path.c_str(), mode) == 0) {
-    return open(path, flags | O_NONBLOCK, mode);
+    return move(open(path, flags | O_NONBLOCK, mode));
   } else {
     return NULL;
   }
@@ -136,7 +139,7 @@ bool FileSystem::mktree(const Path& path, mode_t mode) {
   return ret;
 }
 
-File*
+unique_ptr<File>
 FileSystem::open(
   const Path& path,
   uint32_t flags,
@@ -144,16 +147,16 @@ FileSystem::open(
 ) {
   fd_t fd = ::open(path.c_str(), flags, mode);
   if (fd >= 0) {
-    return new File(fd);
+    return unique_ptr<File>(new File(fd));
   } else {
     return NULL;
   }
 }
 
-Directory* FileSystem::opendir(const Path& path) {
+unique_ptr<Directory> FileSystem::opendir(const Path& path) {
   DIR* dirp = ::opendir(path.c_str());
   if (dirp != NULL) {
-    return new Directory(dirp, path);
+    return unique_ptr<Directory>(new Directory(dirp, path));
   } else {
     return NULL;
   }
@@ -189,8 +192,8 @@ bool FileSystem::rmdir(const Path& path) {
 }
 
 bool FileSystem::rmtree(const Path& path) {
-  Directory* test_dir = opendir(path);
-  if (test_dir != NULL) {
+  unique_ptr<Directory> test_dir = opendir(path);
+  if (test_dir == NULL) {
     auto_Object<Directory> dir(test_dir);
     Directory::Entry* test_dentry = dir->read();
     if (test_dentry != NULL) {

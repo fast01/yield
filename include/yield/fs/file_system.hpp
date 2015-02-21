@@ -174,7 +174,7 @@ public:
     @param path path to the file
     @return a new Stat object on success, NULL+errno on failure
   */
-  YO_NEW_REF Stat* lstat(const Path& path);
+  ::std::unique_ptr<Stat> lstat(const Path& path);
 #endif
 
 public:
@@ -212,7 +212,7 @@ public:
     @param mode mode (permissions) of the new named pipe
     @return a new File object on success, NULL+errno on failure
   */
-  YO_NEW_REF File*
+  ::std::unique_ptr<File>
   mkfifo(
     const Path& path,
     uint32_t flags = 0,
@@ -265,7 +265,7 @@ public:
     @param mode mode (permissions) of a new file
     @return a new File object on success, NULL+errno on failure
   */
-  YO_NEW_REF File*
+  ::std::unique_ptr<File>
   open(
     const Path& path,
     uint32_t flags = 0,
