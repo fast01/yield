@@ -37,35 +37,31 @@
 
 namespace yield {
 namespace poll {
+using ::std::move;
+using ::std::unique_ptr;
+
 FdEventQueue::FdEventQueue(bool) throw(Exception) {
-  epfd = epoll_create(32768);
-  if (epfd != -1) {
-    try {
-      wake_fd = eventfd(0, 0);
-      if (wake_fd != -1) {
-        try {
-          if (!associate(wake_fd, POLLIN)) {
-            throw Exception();
-          }
-        } catch (Exception&) {
-          close(wake_fd);
-          throw;
-        }
-      } else {
-        throw Exception();
-      }
-    } catch (Exception&) {
-      close(epfd);
-      throw;
-    }
-  } else {
+  epfd_ = epoll_create(32768);
+  if (epfd_ == -1) {
+    throw Exception();
+  }
+
+  wake_fd_ = eventfd(0, 0);
+  if (wake_fd_ == -1) {
+    ::close(epfd_);
+    throw Exception();
+  }
+
+  if (!associate(wake_fd_, POLLIN)) {
+    ::close(wake_fd_);
+    ::close(epfd_);
     throw Exception();
   }
 }
 
 FdEventQueue::~FdEventQueue() {
-  close(epfd);
-  close(wake_fd);
+  ::close(epfd_);
+  ::close(wake_fd_);
 }
 
 bool FdEventQueue::associate(fd_t fd, FdEvent::Type fd_event_types) {
@@ -75,10 +71,10 @@ bool FdEventQueue::associate(fd_t fd, FdEvent::Type fd_event_types) {
     epoll_event_.data.fd = fd;
     epoll_event_.events = fd_event_types;
 
-    if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &epoll_event_) == 0) {
+    if (epoll_ctl(epfd_, EPOLL_CTL_ADD, fd, &epoll_event_) == 0) {
       return true;
     } else if (errno == EEXIST) {
-      return epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &epoll_event_) == 0;
+      return epoll_ctl(epfd_, EPOLL_CTL_MOD, fd, &epoll_event_) == 0;
     } else {
       return false;
     }
@@ -94,10 +90,13 @@ bool FdEventQueue::dissociate(fd_t fd) {
   // event can be specified as NULL when using EPOLL_CTL_DEL.
   epoll_event epoll_event_;
   memset(&epoll_event_, 0, sizeof(epoll_event_));
-  return epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &epoll_event_) == 0;
+  return epoll_ctl(epfd_, EPOLL_CTL_DEL, fd, &epoll_event_) == 0;
 }
 
-bool FdEventQueue::enqueue(Event& event) {
+unique_ptr<FdEvent> FdEventQueue::tryenqueue(unique_ptr<FdEvent>) {
+  CHECK(false);
+  return NULL;
+/*
   if (event_queue.enqueue(event)) {
     uint64_t data = 1;
     ssize_t write_ret = write(wake_fd, &data, sizeof(data));
@@ -106,33 +105,36 @@ bool FdEventQueue::enqueue(Event& event) {
   } else {
     return false;
   }
+*/
 }
 
-YO_NEW_REF Event* FdEventQueue::timeddequeue(const Time& timeout) {
-  Event* event = event_queue.trydequeue();
-  if (event != NULL) {
-    return event;
-  } else {
-    epoll_event epoll_event_;
-    int timeout_ms
+unique_ptr<FdEvent> FdEventQueue::timeddequeue(const Time& timeout) {
+  epoll_event epoll_event_;
+  int timeout_ms
     = (timeout == Time::FOREVER) ? -1 : static_cast<int>(timeout.ms());
-    int ret = epoll_wait(epfd, &epoll_event_, 1, timeout_ms);
-    if (ret > 0) {
-      CHECK_EQ(ret, 1);
-
-      if (epoll_event_.data.fd == wake_fd) {
-        uint64_t data;
-        ssize_t read_ret = read(wake_fd, &data, sizeof(data));
-        CHECK_EQ(read_ret, static_cast<ssize_t>(sizeof(data)));
-        return event_queue.trydequeue();
-      } else {
-        return new FdEvent(epoll_event_.data.fd, epoll_event_.events);
-      }
-    } else {
-      CHECK(ret == 0 || errno == EINTR);
-      return NULL;
-    }
+  int ret = epoll_wait(epfd_, &epoll_event_, 1, timeout_ms);
+  if (ret == 0) {
+    return NULL;
+  } else if (ret < 0) {
+    CHECK_EQ(errno, EINTR);
+    return NULL;
   }
+  CHECK_EQ(ret, 1);
+
+  if (epoll_event_.data.fd == wake_fd_) {
+    uint64_t data;
+    ssize_t read_ret = read(wake_fd_, &data, sizeof(data));
+    CHECK_EQ(read_ret, static_cast<ssize_t>(sizeof(data)));
+    return NULL;
+  }
+
+  return unique_ptr<FdEvent>(new FdEvent(epoll_event_.data.fd, epoll_event_.events));
+}
+
+void FdEventQueue::wake() {
+  uint64_t data = 1;
+  ssize_t write_ret = write(wake_fd_, &data, sizeof(data));
+  CHECK_EQ(write_ret, static_cast<ssize_t>(sizeof(data)));
 }
 }
 }

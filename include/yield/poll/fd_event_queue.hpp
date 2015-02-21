@@ -81,21 +81,21 @@ public:
 
 private:
 #if defined(__linux__)
-  int epfd, wake_fd;
+  int epfd_, wake_fd_;
 #elif defined(__MACH__) || defined(__FreeBSD__)
-  int kq, wake_pipe[2];
+  int kq_, wake_pipe_[2];
 #elif defined(__sun)
-  int port;
+  int port_;
 #elif defined(_WIN32)
   class FdImpl;
   class Impl;
   class SocketImpl;
   class SocketPoller;
   class SocketSelector;
-  Impl* pimpl;
+  Impl* pimpl_;
 #else
-  ::std::vector<pollfd> pollfds;
-  int wake_pipe[2];
+  ::std::vector<pollfd> pollfds_;
+  int wake_pipe_[2];
 #endif
 };
 }

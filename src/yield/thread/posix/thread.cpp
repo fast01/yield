@@ -37,9 +37,9 @@
 
 namespace yield {
 namespace thread {
-Thread::Thread(YO_NEW_REF Runnable& runnable)
-  : runnable(&runnable) {
-  state = STATE_READY;
+Thread::Thread(::std::unique_ptr<Runnable> runnable)
+  : runnable_(::std::move(runnable)) {
+  state_ = STATE_READY;
 
   pthread_attr_t attr;
   pthread_attr_init(&attr);
@@ -48,7 +48,7 @@ Thread::Thread(YO_NEW_REF Runnable& runnable)
   if (pthread_create(&pthread, &attr, &run, this) == 0) {
     pthread_attr_destroy(&attr);
 
-    while (state == STATE_READY) {
+    while (state_ == STATE_READY) {
       sleep(0);
     }
   } else {
@@ -59,8 +59,7 @@ Thread::Thread(YO_NEW_REF Runnable& runnable)
 
 Thread::Thread(pthread_t pthread)
   : pthread(pthread) {
-  runnable = NULL;
-  state = STATE_READY;
+  state_ = STATE_READY;
 }
 
 Thread::~Thread() {
@@ -68,8 +67,6 @@ Thread::~Thread() {
     cancel();
     join();
   }
-
-  Runnable::dec_ref(runnable);
 }
 
 bool Thread::cancel() {
@@ -97,8 +94,8 @@ bool Thread::key_delete(uintptr_t key) {
   return pthread_key_delete(key) == 0;
 }
 
-auto_Object<Thread> Thread::self() {
-  Thread* thread = new Thread(pthread_self());
+::std::unique_ptr<Thread> Thread::self() {
+  ::std::unique_ptr<Thread> thread(new Thread(pthread_self()));
 #if defined(__linux__)
   thread->tid = syscall(SYS_gettid);
 #elif defined(__sun)
@@ -117,9 +114,9 @@ void* Thread::run() {
 #elif defined(__sun)
   thread = thr_self();
 #endif
-  state = STATE_RUNNING;
-  runnable->run();
-  state = STATE_SUSPENDED;
+  state_ = STATE_RUNNING;
+  runnable_->run();
+  state_ = STATE_SUSPENDED;
   return NULL;
 }
 
