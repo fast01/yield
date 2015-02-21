@@ -325,7 +325,35 @@ public:
     @param path path to the parent directory
     @return true on success, false+errno on failure
   */
-  bool rmtree(const Path& path);
+  bool rmtree(const Path& path) {
+    ::std::unique_ptr<Directory> directory = opendir(path);
+    if (directory != NULL) {
+      ::std::unique_ptr<Directory::Entry> dentry = directory->read();
+      if (dentry != NULL) {
+        do {
+          if (dentry->is_special()) {
+            continue;
+          }
+
+          Path dentry_path(path / dentry->get_name());
+
+          if (dentry->ISDIR()) {
+            if (rmtree(dentry_path)) {
+              continue;
+            } else {
+              return false;
+            }
+          } else if (unlink(dentry_path)) {
+            continue;
+          } else {
+            return false;
+          }
+        } while (directory->read(*dentry));
+      }
+    }
+
+    return rmdir(path);
+  }
 
 public:
   /**
