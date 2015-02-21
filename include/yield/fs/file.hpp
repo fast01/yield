@@ -73,37 +73,37 @@ public:
 
   public:
     /**
+      Check if this lock is exclusive (read/write).
+      @return true if the lock is exclusive (read/write), false if it is shared (read-only)
+    */
+    bool is_exclusive() const;
+
+    /**
       Get the length (extent) of the lock in bytes.
       @return the length (extent) of the lock in bytes.
     */
-    uint64_t get_len() const;
+    uint64_t len() const;
 
 #ifndef _WIN32
     /**
       Get the process ID (pid) of the owner of this lock.
       @return the process ID (pid) of the owner of this lock
     */
-    pid_t get_pid() const;
+    pid_t pid() const;
 #endif
 
     /**
       Get the start offset in the file of this lock.
       @return the start offset in the file of this lock.
     */
-    uint64_t get_start() const;
+    uint64_t start() const;
 
     /**
       Get the nature of the start offset of this lock relative to the current
         file pointer: SEEK_CUR, SEEK_END, SEEK_SET.
       @return the nature of the start offset
     */
-    int16_t get_whence() const;
-
-    /**
-      Check if this lock is exclusive (read/write).
-      @return true if the lock is exclusive (read/write), false if it is shared (read-only)
-    */
-    bool is_exclusive() const;
+    int16_t whence() const;
 
   public:
 #ifndef _WIN32
@@ -118,10 +118,10 @@ public:
 
   private:
 #ifdef _WIN32
-    bool exclusive;
-    uint64_t len;
-    uint64_t start;
-    int16_t whence;
+    bool exclusive_;
+    uint64_t len_;
+    uint64_t start_;
+    int16_t whence_;
 #else
     struct flock flock_;
 #endif
@@ -140,8 +140,8 @@ public:
       Get the offset in the file at which this map starts.
       @return the offset in the file at which this map starts
     */
-    uint64_t get_file_offset() const {
-      return file_offset;
+    uint64_t file_offset() const {
+      return file_offset_;
     }
 
     /**
@@ -208,17 +208,17 @@ public:
     );
 
   private:
-    fd_t fd;
+    fd_t fd_;
 #ifdef _WIN32
-    fd_t file_mapping;
+    fd_t file_mapping_;
 #endif
-    uint64_t file_offset;
+    uint64_t file_offset_;
 #ifdef _WIN32
-    bool read_only;
-    bool shared;
+    bool read_only_;
+    bool shared_;
 #else
-    int flags;
-    int prot;
+    int flags_;
+    int prot_;
 #endif
   };
 
@@ -248,7 +248,7 @@ public:
     @return a new File with a dup'd file descriptor on success, NULL+errno on failure
   */
   ::std::unique_ptr<File> dup() {
-    return dup(fd);
+    return dup(fd_);
   }
 
   /**
@@ -303,7 +303,7 @@ public:
     @return the platform-specific file descriptor underlying this file
   */
   operator fd_t() const {
-    return fd;
+    return fd_;
   }
 
 public:
@@ -443,7 +443,7 @@ private:
 #endif
 
 private:
-  fd_t fd;
+  fd_t fd_;
 };
 }
 }
