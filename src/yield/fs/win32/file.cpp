@@ -43,26 +43,26 @@ File::Lock::Lock(
   uint64_t len,
   bool exclusive,
   int16_t whence
-) : exclusive(exclusive),
-  len(len),
-  start(start),
-  whence(whence)
+) : exclusive_(exclusive),
+  len_(len),
+  start_(start),
+  whence_(whence)
 { }
 
-uint64_t File::Lock::get_len() const {
-  return len;
-}
-
-uint64_t File::Lock::get_start() const {
-  return start;
-}
-
-int16_t File::Lock::get_whence() const {
-  return whence;
-}
-
 bool File::Lock::is_exclusive() const {
-  return exclusive;
+  return exclusive_;
+}
+
+uint64_t File::Lock::len() const {
+  return len_;
+}
+
+uint64_t File::Lock::start() const {
+  return start_;
+}
+
+int16_t File::Lock::whence() const {
+  return whence_;
 }
 
 
@@ -75,11 +75,11 @@ File::Map::Map(
   bool read_only,
   bool shared
 ) : Buffer(capacity, data, capacity),
-  fd(fd),
-  file_mapping(file_mapping),
-  file_offset(file_offset),
-  read_only(read_only),
-  shared(shared) {
+  fd_(fd),
+  file_mapping_(file_mapping),
+  file_offset_(file_offset),
+  read_only_(read_only),
+  shared_(shared) {
   if (data_ == reinterpret_cast<void*>(-1)) {
     CHECK_EQ(file_mapping, NULL);
   } else {
@@ -92,15 +92,15 @@ File::Map::Map(
 File::Map::~Map() {
   unmap();
   data_ = NULL;
-  ::CloseHandle(fd);
+  ::CloseHandle(fd_);
 }
 
 bool File::Map::is_read_only() const {
-  return read_only;
+  return read_only_;
 }
 
 bool File::Map::is_shared() const {
-  return shared;
+  return shared_;
 }
 
 bool File::Map::sync() {
@@ -121,15 +121,14 @@ bool File::Map::sync(void* ptr, size_t length) {
 }
 
 bool File::Map::unmap() {
-  if (file_mapping != NULL) {
-
+  if (file_mapping_ != NULL) {
     if (
       UnmapViewOfFile(data())
       &&
-      CloseHandle(file_mapping)
+      CloseHandle(file_mapping_)
     ) {
       data_ = reinterpret_cast<void*>(-1);
-      file_mapping = NULL;
+      file_mapping_ = NULL;
       return true;
     } else {
       CHECK(false);
@@ -143,7 +142,7 @@ bool File::Map::unmap() {
 
 
 File::File(fd_t fd)
-  : fd(fd)
+  : fd_(fd)
 { }
 
 File::~File() {
@@ -151,12 +150,12 @@ File::~File() {
 }
 
 bool File::close() {
-  if (fd != INVALID_HANDLE_VALUE) {
-    if (CloseHandle(fd)) {
-      fd = INVALID_HANDLE_VALUE;
+  if (fd_ != INVALID_HANDLE_VALUE) {
+    if (::CloseHandle(fd_)) {
+      fd_ = INVALID_HANDLE_VALUE;
       return true;
     } else {
-      fd = INVALID_HANDLE_VALUE;
+      fd_ = INVALID_HANDLE_VALUE;
       return false;
     }
   } else {
@@ -563,16 +562,16 @@ bool File::setlk(const Lock& lock, bool wait) {
   overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 
   if (overlapped.hEvent != INVALID_HANDLE_VALUE) {
-    overlapped.Offset = static_cast<DWORD>(lock.get_start());
-    overlapped.OffsetHigh = static_cast<DWORD>(lock.get_start() >> 32);
+    overlapped.Offset = static_cast<DWORD>(lock.start());
+    overlapped.OffsetHigh = static_cast<DWORD>(lock.start() >> 32);
 
     if (
       LockFileEx(
         *this,
         dwFlags,
         0,
-        static_cast<DWORD>(lock.get_len()),
-        static_cast<DWORD>(lock.get_len() >> 32),
+        static_cast<DWORD>(lock.len()),
+        static_cast<DWORD>(lock.len() >> 32),
         &overlapped
       )
     ) {
@@ -623,10 +622,10 @@ bool File::truncate(off_t length) {
 bool File::unlk(const Lock& lock) {
   return UnlockFile(
            *this,
-           static_cast<DWORD>(lock.get_start()),
-           static_cast<DWORD>(lock.get_start() >> 32),
-           static_cast<DWORD>(lock.get_len()),
-           static_cast<DWORD>(lock.get_len() >> 32)
+           static_cast<DWORD>(lock.start()),
+           static_cast<DWORD>(lock.start() >> 32),
+           static_cast<DWORD>(lock.len()),
+           static_cast<DWORD>(lock.len() >> 32)
          ) == TRUE;
 }
 
