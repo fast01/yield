@@ -191,45 +191,10 @@ bool FileSystem::rmdir(const Path& path) {
   return ::rmdir(path.c_str()) == 0;
 }
 
-bool FileSystem::rmtree(const Path& path) {
-  unique_ptr<Directory> test_dir = opendir(path);
-  if (test_dir == NULL) {
-    auto_Object<Directory> dir(test_dir);
-    Directory::Entry* test_dentry = dir->read();
-    if (test_dentry != NULL) {
-      auto_Object<Directory::Entry> dentry(*test_dentry);
-
-      do {
-        if (dentry->is_special()) {
-          continue;
-        }
-
-        Path dentry_path(path / dentry->get_name());
-
-        if (dentry->ISDIR()) {
-          if (rmtree(dentry_path)) {
-            continue;
-          } else {
-            return false;
-          }
-        } else if (unlink(dentry_path)) {
-          continue;
-        } else {
-          return false;
-        }
-      } while (dir->read(*dentry));
-
-      return rmdir(path);
-    }
-  }
-
-  return false;
-}
-
-Stat* FileSystem::stat(const Path& path) {
+unique_ptr<Stat> FileSystem::stat(const Path& path) {
   struct stat stbuf;
   if (::stat(path.c_str(), &stbuf) == 0) {
-    return new Stat(stbuf);
+    return unique_ptr<Stat>(new Stat(stbuf));
   } else {
     return NULL;
   }
@@ -248,13 +213,7 @@ bool FileSystem::touch(const Path& path) {
 }
 
 bool FileSystem::touch(const Path& path, mode_t mode) {
-  File* file = creat(path, mode);
-  if (file != NULL) {
-    File::dec_ref(*file);
-    return true;
-  } else {
-    return false;
-  }
+  return creat(path, mode) != NULL;
 }
 
 bool FileSystem::unlink(const Path& path) {

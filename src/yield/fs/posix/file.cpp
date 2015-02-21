@@ -38,6 +38,8 @@
 
 namespace yield {
 namespace fs {
+using ::std::unique_ptr;
+
 File::Lock::Lock(
   uint64_t len,
   uint64_t start,
@@ -55,54 +57,51 @@ File::Lock::Lock(
 File::Lock::Lock(const struct flock& flock_) : flock_(flock_) {
 }
 
-uint64_t File::Lock::get_len() const {
+bool File::Lock::is_exclusive() const {
+  return flock_.l_type == F_WRLCK;
+}
+
+uint64_t File::Lock::len() const {
   return flock_.l_len;
 }
 
-pid_t File::Lock::get_pid() const {
+pid_t File::Lock::pid() const {
   return flock_.l_pid;
 }
 
-uint64_t File::Lock::get_start() const {
+uint64_t File::Lock::start() const {
   return flock_.l_start;
 }
 
-int16_t File::Lock::get_whence() const {
+int16_t File::Lock::whence() const {
   return flock_.l_whence;
-}
-
-bool File::Lock::is_exclusive() const {
-  return flock_.l_type == F_WRLCK;
 }
 
 
 File::Map::Map(
   size_t capacity,
   void* data,
-  File& file,
   uint64_t file_offset,
   int flags,
   int prot
 )
   : Buffer(capacity, data, capacity),
-    file(file.inc_ref()),
-    file_offset(file_offset),
-    flags(flags),
-    prot(prot)
+    file_offset_(file_offset),
+    flags_(flags),
+    prot_(prot)
 { }
 
 File::Map::~Map() {
   unmap();
   data_ = NULL;
-  File::dec_ref(file);
 }
 
 bool File::Map::is_read_only() const {
-  return (prot & PROT_WRITE) != PROT_WRITE;
+  return (prot_ & PROT_WRITE) != PROT_WRITE;
 }
 
 bool File::Map::is_shared() const {
-  return (flags & MAP_SHARED) == MAP_SHARED;
+  return (flags_ & MAP_SHARED) == MAP_SHARED;
 }
 
 bool File::Map::sync() {
@@ -144,7 +143,7 @@ bool File::Map::unmap() {
 #pragma GCC diagnostic warning "-Wold-style-cast"
 
 
-File::File(fd_t fd) : fd(fd) {
+File::File(fd_t fd) : fd_(fd) {
 }
 
 File::~File() {
@@ -152,9 +151,9 @@ File::~File() {
 }
 
 bool File::close() {
-  if (fd >= 0) {
-    if (::close(fd) == 0) {
-      fd = -1;
+  if (fd_ >= 0) {
+    if (::close(fd_) == 0) {
+      fd_ = -1;
       return true;
     } else {
       return false;
@@ -172,26 +171,26 @@ bool File::datasync() {
 #endif
 }
 
-YO_NEW_REF File* File::dup(fd_t fd) {
+unique_ptr<File> File::dup(fd_t fd) {
   fd_t dup_fd = ::dup(fd);
   if (dup_fd != -1) {
-    return new File(dup_fd);
+    return unique_ptr<File>(new File(dup_fd));
   } else {
     return NULL;
   }
 }
 
-YO_NEW_REF File* File::dup(FILE* file) {
+unique_ptr<File> File::dup(FILE* file) {
   return dup(fileno(file));
 }
 
-YO_NEW_REF File::Lock* File::getlk(const Lock& lock) {
+unique_ptr<File::Lock> File::getlk(const Lock& lock) {
   struct flock flock_ = lock;
   if (fcntl(*this, F_GETLK, &flock_) == 0) {
     if (flock_.l_type == F_UNLCK) { // No lock blocking lock
       return NULL;
     } else {
-      return new Lock(flock_);
+      return unique_ptr<Lock>(new Lock(flock_));
     }
   } else {
     return NULL;
@@ -199,7 +198,7 @@ YO_NEW_REF File::Lock* File::getlk(const Lock& lock) {
 }
 
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-YO_NEW_REF File::Map*
+unique_ptr<File::Map>
 File::mmap(
   size_t length,
   off_t offset,
@@ -228,15 +227,14 @@ File::mmap(
     data = MAP_FAILED;
   }
 
-  return new
+  return unique_ptr<File::Map>(new
          File::Map(
            length,
            data,
-           *this,
            offset,
            flags,
            prot
-         );
+         ));
 }
 #pragma GCC diagnostic warning "-Wold-style-cast"
 
@@ -328,10 +326,10 @@ bool File::setlkw(const Lock& lock) {
   return fcntl(*this, F_SETLKW, &flock_) == 0;
 }
 
-Stat* File::stat() {
+unique_ptr<Stat> File::stat() {
   struct stat stbuf;
   if (fstat(*this, &stbuf) == 0) {
-    return new Stat(stbuf);
+    return unique_ptr<Stat>(new Stat(stbuf));
   } else {
     return NULL;
   }

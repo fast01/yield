@@ -193,8 +193,8 @@ public:
     Map(
       size_t capacity,
       void* data,
-      fd_t fd,
 #ifdef _WIN32
+      fd_t fd,
       fd_t file_mapping,
 #endif
       uint64_t file_offset,
@@ -208,8 +208,8 @@ public:
     );
 
   private:
-    fd_t fd_;
 #ifdef _WIN32
+    fd_t fd_;
     fd_t file_mapping_;
 #endif
     uint64_t file_offset_;
