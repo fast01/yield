@@ -40,16 +40,27 @@ using ::std::unique_ptr;
 
 class TestRequestParseCallbacks : public HttpRequestParser::ParseCallbacks {
 public:
-  void handle_http_request(::std::unique_ptr<HttpRequest> http_request) override {
-    http_request_.swap(http_request);
+  void
+  handle_http_request(
+    ::std::shared_ptr<Buffer> body,
+    uint16_t fields_offset,
+    ::std::shared_ptr<Buffer> header,
+    uint8_t http_version,
+    HttpRequest::Method method,
+    const yield::uri::Uri& uri
+  ) override {
+    http_request_.reset(new HttpRequest(body, fields_offset, header, http_version, method, uri));
   }
 
-  void handle_error_http_response(::std::unique_ptr<HttpResponse> error_http_response) override {
-    error_http_response_.swap(error_http_response);
+  void
+  handle_error_http_response(
+    uint8_t http_version,
+    uint16_t status_code
+  ) override {
+    error_http_response_.reset(new HttpResponse(http_version, status_code));
   }
 
-  void handle_http_message_body_chunk(::std::unique_ptr<HttpMessageBodyChunk> http_message_body_chunk) override {
-    http_message_body_chunk_.swap(http_message_body_chunk);
+  void handle_http_message_body_chunk(::std::shared_ptr<Buffer> data) override {
   }
 
   void read(::std::shared_ptr<Buffer>) override {
@@ -57,7 +68,6 @@ public:
 
 public:
   unique_ptr<HttpResponse> error_http_response_;
-  unique_ptr<HttpMessageBodyChunk> http_message_body_chunk_;
   unique_ptr<HttpRequest> http_request_;
 };
 

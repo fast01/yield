@@ -39,12 +39,27 @@ using ::std::unique_ptr;
 
 class TestResponseParseCallbacks final : public HttpResponseParser::ParseCallbacks {
 public:
-  void handle_http_response(::std::unique_ptr<HttpResponse> http_response) override {
-    http_response_.swap(http_response);
+  void handle_http_message_body_chunk(::std::shared_ptr<Buffer>) override {
   }
 
-  void handle_http_message_body_chunk(::std::unique_ptr<HttpMessageBodyChunk> http_message_body_chunk) override {
-    http_message_body_chunk_.swap(http_message_body_chunk);
+  void
+  handle_http_response(
+    ::std::shared_ptr<Buffer> body,
+    uint8_t http_version,
+    uint16_t status_code
+  ) override {
+    http_response_.reset(new HttpResponse(http_version, status_code, body));
+  }
+
+  void
+  handle_http_response(
+    ::std::shared_ptr<Buffer> body,
+    uint16_t fields_offset,
+    ::std::shared_ptr<Buffer> header,
+    uint8_t http_version,
+    uint16_t status_code
+  ) override {
+    http_response_.reset(new HttpResponse(body, fields_offset, header, http_version, status_code));
   }
 
   void read(::std::shared_ptr<Buffer>) override {

@@ -25,10 +25,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "./http_server_request_parser.hpp"
 #include "yield/logging.hpp"
 #include "yield/fs/file.hpp"
+#include "yield/http/http_request_parser.hpp"
 #include "yield/http/server/http_server_connection.hpp"
+#include "yield/http/server/http_server_request.hpp"
 #include "yield/sockets/aio/send_aiocb.hpp"
 #include "yield/sockets/aio/sendfile_aiocb.hpp"
 
@@ -48,24 +49,33 @@ using ::yield::sockets::aio::RecvAiocb;
 using ::yield::sockets::aio::SendAiocb;
 using ::yield::sockets::aio::SendfileAiocb;
 
-class HttpServerConnection::ParseCallbacks final : public HttpServerRequestParser::ParseCallbacks {
+class HttpServerConnection::ParseCallbacks final : public HttpRequestParser::ParseCallbacks {
 public:
   ParseCallbacks(HttpServerConnection& connection)
     : connection_(connection) {
   }
 
-  void handle_error_http_response(unique_ptr<HttpResponse> http_response) override {
-      CHECK_EQ(http_response->status_code(), 400);
+  void handle_error_http_response(uint8_t http_version, uint16_t status_code) override {
+      unique_ptr<HttpServerResponse> http_response(new HttpServerResponse(http_version, status_code));
       DLOG(DEBUG) << "parsed " << *http_response;
-      connection_.handle(unique_ptr<HttpServerResponse>(static_cast<HttpServerResponse*>(http_response.release())));
+      connection_.handle(move(http_response));
   }
 
-  void handle_http_message_body_chunk(unique_ptr<HttpMessageBodyChunk> http_message_body_chunk) override {
+  void handle_http_message_body_chunk(shared_ptr<Buffer> data) override {
   }
 
-  void handle_http_request(unique_ptr<HttpRequest> http_request) override {
+  void
+  handle_http_request(
+    ::std::shared_ptr<Buffer> body,
+    uint16_t fields_offset,
+    ::std::shared_ptr<Buffer> header,
+    uint8_t http_version,
+    HttpRequest::Method method,
+    const yield::uri::Uri& uri
+  ) {
+      unique_ptr<HttpServerRequest> http_request(new HttpServerRequest(body, connection_.shared_from_this(), fields_offset, header, http_version, method, uri));
       DLOG(DEBUG) << "parsed " << *http_request;
-      connection_.event_handler_->handle(unique_ptr<HttpServerRequest>(static_cast<HttpServerRequest*>(http_request.release())));
+      connection_.event_handler_->handle(move(http_request));
   }
 
   void read(shared_ptr<Buffer> buffer) override {
@@ -155,7 +165,7 @@ HttpServerConnection::handle(
 
 void HttpServerConnection::parse(shared_ptr<Buffer> recv_buffer) {
   CHECK(!recv_buffer->empty());
-  HttpServerRequestParser parser(shared_from_this(), recv_buffer);
+  HttpRequestParser parser(recv_buffer);
   ParseCallbacks parse_callbacks(*this);
   parser.parse(parse_callbacks);
 }

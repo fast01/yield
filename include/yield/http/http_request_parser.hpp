@@ -45,8 +45,21 @@ public:
     }
 
   public:
-    virtual void handle_http_request(::std::unique_ptr<HttpRequest>) = 0;
-    virtual void handle_error_http_response(::std::unique_ptr<HttpResponse>) = 0;    
+    virtual void
+    handle_http_request(
+      ::std::shared_ptr<Buffer> body,
+      uint16_t fields_offset,
+      ::std::shared_ptr<Buffer> header,
+      uint8_t http_version,
+      HttpRequest::Method method,
+      const yield::uri::Uri& uri
+    ) = 0;
+
+    virtual void
+    handle_error_http_response(
+      uint8_t http_version,
+      uint16_t status_code
+    ) = 0;
   };
 
 public:
@@ -74,35 +87,6 @@ public:
     Parse the next object from the buffer specified in the constructor.
   */
   void parse(ParseCallbacks&);
-
-protected:
-  virtual ::std::unique_ptr<HttpRequest>
-  create_http_request(
-    ::std::shared_ptr<Buffer> body,
-    uint16_t fields_offset,
-    ::std::shared_ptr<Buffer> header,
-    uint8_t http_version,
-    HttpRequest::Method method,
-    const yield::uri::Uri& uri
-  ) {
-    return ::std::unique_ptr<HttpRequest>(new HttpRequest(
-             body,
-             fields_offset,
-             header,
-             http_version,
-             method,
-             uri
-           ));
-  }
-
-  virtual ::std::unique_ptr<HttpResponse>
-  create_http_response(
-    ::std::shared_ptr<Buffer> body,
-    uint8_t http_version,
-    uint16_t status_code
-  ) {
-    return ::std::unique_ptr<HttpResponse>(new HttpResponse(body, http_version, status_code));
-  }
 
 protected:
   bool parse_request_line(

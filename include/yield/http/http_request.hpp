@@ -185,16 +185,106 @@ public:
     Construct an HttpRequest from its constituent parts.
     @param method the HTTP request method e.g., HttpRequest::Method::GET
     @param uri the HTTP request Uri e.g., /
-    @param body an optional body, usually a Buffer
     @param http_version the HTTP version as a single byte (0 or 1 for HTTP/1.0
       and HTTP/1.1, respectively)
   */
   HttpRequest(
     Method method,
     const yield::uri::Uri& uri,
-    ::std::shared_ptr<Buffer> body_buffer = NULL,
     uint8_t http_version = HTTP_VERSION_DEFAULT
-  );
+  ) : HttpMessage<HttpRequest>(NULL, NULL, http_version),
+      method_(method),
+      uri_(uri) {
+    init_header();
+  }
+
+  /**
+    Construct an HttpRequest from its constituent parts.
+    @param body an optional body
+    @param method the HTTP request method e.g., HttpRequest::Method::GET
+    @param uri the HTTP request Uri e.g., /
+    @param http_version the HTTP version as a single byte (0 or 1 for HTTP/1.0
+      and HTTP/1.1, respectively)
+  */
+  HttpRequest(
+    ::std::shared_ptr<Buffer> body,
+    Method method,
+    const yield::uri::Uri& uri,
+    uint8_t http_version = HTTP_VERSION_DEFAULT
+  ) : HttpMessage<HttpRequest>(body, NULL, http_version),
+    method_(method),
+    uri_(uri) {
+    init_header();
+  }
+
+  /**
+    Construct an HttpRequest from its constituent parts.
+    @param body an optional body
+    @param method the HTTP request method e.g., HttpRequest::Method::GET
+    @param uri the HTTP request Uri e.g., /
+    @param http_version the HTTP version as a single byte (0 or 1 for HTTP/1.0
+      and HTTP/1.1, respectively)
+  */
+  HttpRequest(
+    ::std::shared_ptr< ::yield::fs::File > body,
+    Method method,
+    const yield::uri::Uri& uri,
+    uint8_t http_version = HTTP_VERSION_DEFAULT
+  ) : HttpMessage<HttpRequest>(NULL, body, http_version),
+    method_(method),
+    uri_(uri) {
+    init_header();
+  }
+
+
+  /**
+    Construct an HttpRequest from its constituent parts.
+    @param method the HTTP request method e.g., HttpRequest::Method::GET
+    @param uri the HTTP request Uri e.g., /
+    @param body an optional body
+    @param http_version the HTTP version as a single byte (0 or 1 for HTTP/1.0
+      and HTTP/1.1, respectively)
+  */
+  HttpRequest(
+    Method method,
+    const yield::uri::Uri& uri,
+    ::std::shared_ptr<Buffer> body,
+    uint8_t http_version = HTTP_VERSION_DEFAULT
+  ) : HttpMessage<HttpRequest>(body, NULL, http_version),
+    method_(method),
+    uri_(uri) {
+    init_header();
+  }
+
+  /**
+    Construct an HttpRequest from its constituent parts.
+    Usually called from parsers.
+    @param body the HTTP request body, optional
+    @param fields_offset offset into the header buffer where the fields start
+    @param header header buffer, required
+    @param http_version the HTTP version as a single byte (0 or 1 for HTTP/1.0
+      and HTTP/1.1, respectively)
+    @param method the HTTP request method e.g., HttpRequest::Method::GET
+    @param uri the HTTP request Uri e.g., /
+  */
+  HttpRequest(
+    ::std::shared_ptr<Buffer> body,
+    uint16_t fields_offset,
+    ::std::shared_ptr<Buffer> header,
+    uint8_t http_version,
+    Method method,
+    const yield::uri::Uri& uri
+  )
+    : HttpMessage<HttpRequest>(
+      body,
+      NULL,
+      fields_offset,
+      header,
+      http_version
+    ),
+    method_(method),
+    uri_(uri) {
+  }
 
   /**
     Empty virtual destructor.
@@ -218,17 +308,8 @@ public:
     return uri_;
   }
 
-protected:
-  friend class HttpRequestParser;
-
-  HttpRequest(
-    ::std::shared_ptr<Buffer> body_buffer,
-    uint16_t fields_offset,
-    ::std::shared_ptr<Buffer> header,
-    uint8_t http_version,
-    Method method,
-    const yield::uri::Uri& uri
-  );
+private:
+  void init_header();
 
 private:
   Method method_;

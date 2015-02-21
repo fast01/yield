@@ -36,17 +36,20 @@ namespace server {
 class HttpServerResponse : public ::yield::http::HttpResponse {
 public:
   HttpServerResponse(
-    uint16_t status_code,
-    ::std::shared_ptr< ::yield::fs::File > body
-  ) 
-    : HttpResponse(status_code, body) {
+    uint8_t http_version,
+    uint16_t status_code
+  ) : HttpResponse(http_version, status_code) {
   }
-
-private:
-  friend class HttpServerRequest;
 
   HttpServerResponse(::std::shared_ptr<Buffer> body, uint8_t http_version, uint16_t status_code)
     : ::yield::http::HttpResponse(body, http_version, status_code) {
+  }
+
+  HttpServerResponse(
+    ::std::shared_ptr< ::yield::fs::File > body,
+    uint8_t http_version,
+    uint16_t status_code
+  ) : HttpResponse(body, http_version, status_code) {
   }
 };
 }

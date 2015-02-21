@@ -86,15 +86,8 @@ void HttpRequestParser::parse(ParseCallbacks& callbacks) {
       if (parse_fields(fields_offset, content_length)) {
 	    ::std::shared_ptr<Buffer> body;
         if (parse_body(content_length, body)) {
-          callbacks.handle_http_request(create_http_request(
-                   body,
-                   fields_offset,
-                   buffer_,
-                   http_version,
-                   method,
-                   uri
-                ));
-				return;
+          callbacks.handle_http_request(body, fields_offset, buffer_, http_version, method, uri);
+          return;
         } else {
           ::std::shared_ptr<Buffer> next_buffer
           = Buffer::copy(
@@ -124,14 +117,10 @@ void HttpRequestParser::parse(ParseCallbacks& callbacks) {
       p = ps;
 	  callbacks.read(next_buffer);
     } else { // Error parsing
-      ::std::unique_ptr<HttpResponse> http_response
-        = ::std::move(create_http_response(NULL, 400, http_version));
-      http_response->set_field("Content-Length", 14, "0", 1);
-	  callbacks.handle_error_http_response(::std::move(http_response));
+	  callbacks.handle_error_http_response(http_version, 400);
     }
   } else { // p == eof
-    ::std::shared_ptr<Buffer> next_buffer = ::std::make_shared<Buffer>(Buffer::getpagesize(), Buffer::getpagesize());
-	callbacks.read(next_buffer);
+	callbacks.read(::std::make_shared<Buffer>(Buffer::getpagesize(), Buffer::getpagesize()));
   }
 }
 

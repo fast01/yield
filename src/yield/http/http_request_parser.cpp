@@ -88,15 +88,8 @@ void HttpRequestParser::parse(ParseCallbacks& callbacks) {
       if (parse_fields(fields_offset, content_length)) {
 	    ::std::shared_ptr<Buffer> body;
         if (parse_body(content_length, body)) {
-          callbacks.handle_http_request(create_http_request(
-                   body,
-                   fields_offset,
-                   buffer_,
-                   http_version,
-                   method,
-                   uri
-                ));
-				return;
+          callbacks.handle_http_request(body, fields_offset, buffer_, http_version, method, uri);
+          return;
         } else {
           ::std::shared_ptr<Buffer> next_buffer
           = Buffer::copy(
@@ -126,14 +119,10 @@ void HttpRequestParser::parse(ParseCallbacks& callbacks) {
       p = ps;
 	  callbacks.read(next_buffer);
     } else { // Error parsing
-      ::std::unique_ptr<HttpResponse> http_response
-        = ::std::move(create_http_response(NULL, 400, http_version));
-      http_response->set_field("Content-Length", 14, "0", 1);
-	  callbacks.handle_error_http_response(::std::move(http_response));
+	  callbacks.handle_error_http_response(http_version, 400);
     }
   } else { // p == eof
-    ::std::shared_ptr<Buffer> next_buffer = ::std::make_shared<Buffer>(Buffer::getpagesize(), Buffer::getpagesize());
-	callbacks.read(next_buffer);
+	callbacks.read(::std::make_shared<Buffer>(Buffer::getpagesize(), Buffer::getpagesize()));
   }
 }
 
@@ -150,7 +139,7 @@ bool HttpRequestParser::parse_request_line(
   int cs;
 
   
-/* #line 153 "http_request_parser.cpp" */
+/* #line 140 "http_request_parser.cpp" */
 static const char _request_line_parser_actions[] = {
 	0, 1, 0, 1, 1, 1, 5, 1, 
 	6, 1, 7, 1, 8, 1, 9, 1, 
@@ -3152,12 +3141,12 @@ static const int request_line_parser_error = 0;
 static const int request_line_parser_en_main = 1;
 
 
-/* #line 3153 "http_request_parser.cpp" */
+/* #line 3140 "http_request_parser.cpp" */
 	{
 	cs = request_line_parser_start;
 	}
 
-/* #line 3156 "http_request_parser.cpp" */
+/* #line 3143 "http_request_parser.cpp" */
 	{
 	int _klen;
 	unsigned int _trans;
@@ -3230,11 +3219,11 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-/* #line 32 "rfc2616.rl" */
+/* #line 30 "rfc2616.rl" */
 	{ http_version = 0; }
 	break;
 	case 1:
-/* #line 33 "rfc2616.rl" */
+/* #line 31 "rfc2616.rl" */
 	{ http_version = 1; }
 	break;
 	case 2:
@@ -3282,82 +3271,82 @@ _match:
 	{ query.iov_len = p - static_cast<char*>(query.iov_base); }
 	break;
 	case 13:
-/* #line 161 "http_request_parser.rl" */
+/* #line 148 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::CONNECT; }
 	break;
 	case 14:
-/* #line 162 "http_request_parser.rl" */
+/* #line 149 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::COPY; }
 	break;
 	case 15:
-/* #line 163 "http_request_parser.rl" */
+/* #line 150 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::DELETE; }
 	break;
 	case 16:
-/* #line 164 "http_request_parser.rl" */
+/* #line 151 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::GET; }
 	break;
 	case 17:
-/* #line 165 "http_request_parser.rl" */
+/* #line 152 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::HEAD; }
 	break;
 	case 18:
-/* #line 166 "http_request_parser.rl" */
+/* #line 153 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::LOCK; }
 	break;
 	case 19:
-/* #line 167 "http_request_parser.rl" */
+/* #line 154 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::MKCOL; }
 	break;
 	case 20:
-/* #line 168 "http_request_parser.rl" */
+/* #line 155 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::MOVE; }
 	break;
 	case 21:
-/* #line 169 "http_request_parser.rl" */
+/* #line 156 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::OPTIONS; }
 	break;
 	case 22:
-/* #line 170 "http_request_parser.rl" */
+/* #line 157 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::PATCH; }
 	break;
 	case 23:
-/* #line 171 "http_request_parser.rl" */
+/* #line 158 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::POST; }
 	break;
 	case 24:
-/* #line 172 "http_request_parser.rl" */
+/* #line 159 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::PROPFIND; }
 	break;
 	case 25:
-/* #line 173 "http_request_parser.rl" */
+/* #line 160 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::PROPPATCH; }
 	break;
 	case 26:
-/* #line 174 "http_request_parser.rl" */
+/* #line 161 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::PUT; }
 	break;
 	case 27:
-/* #line 175 "http_request_parser.rl" */
+/* #line 162 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::TRACE; }
 	break;
 	case 28:
-/* #line 176 "http_request_parser.rl" */
+/* #line 163 "http_request_parser.rl" */
 	{ method = HttpRequest::Method::UNLOCK; }
 	break;
 	case 29:
-/* #line 188 "http_request_parser.rl" */
+/* #line 175 "http_request_parser.rl" */
 	{ path.iov_base = p; }
 	break;
 	case 30:
-/* #line 189 "http_request_parser.rl" */
+/* #line 176 "http_request_parser.rl" */
 	{ path.iov_len = p - static_cast<char*>(path.iov_base); }
 	break;
 	case 31:
-/* #line 200 "http_request_parser.rl" */
+/* #line 187 "http_request_parser.rl" */
 	{ {p++; goto _out; } }
 	break;
-/* #line 3323 "http_request_parser.cpp" */
+/* #line 3310 "http_request_parser.cpp" */
 		}
 	}
 
@@ -3369,7 +3358,7 @@ _again:
 	_out: {}
 	}
 
-/* #line 205 "http_request_parser.rl" */
+/* #line 192 "http_request_parser.rl" */
 
 
   return cs != request_line_parser_error;

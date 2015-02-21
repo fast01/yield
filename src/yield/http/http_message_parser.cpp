@@ -91,7 +91,7 @@ void HttpMessageParser::parse_body_chunks(ParseCallbacks& callbacks) {
   ps = p;
 
   
-/* #line 94 "http_message_parser.cpp" */
+/* #line 92 "http_message_parser.cpp" */
 static const char _chunk_parser_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 1, 5, 1, 6, 1, 
@@ -640,12 +640,12 @@ static const int chunk_parser_error = 0;
 static const int chunk_parser_en_main = 1;
 
 
-/* #line 641 "http_message_parser.cpp" */
+/* #line 639 "http_message_parser.cpp" */
 	{
 	cs = chunk_parser_start;
 	}
 
-/* #line 644 "http_message_parser.cpp" */
+/* #line 642 "http_message_parser.cpp" */
 	{
 	int _klen;
 	unsigned int _trans;
@@ -678,7 +678,7 @@ _resume:
 	case 0: {
 		_widec = (short)(256u + ((*p) - 0u));
 		if ( 
-/* #line 100 "rfc2616.rl" */
+/* #line 98 "rfc2616.rl" */
  seen_chunk_size++ < chunk_size  ) _widec += 256;
 		break;
 	}
@@ -750,27 +750,27 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_name.iov_base = p; }
 	break;
 	case 1:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_name.iov_len = p - static_cast<char*>(field_name.iov_base); }
 	break;
 	case 2:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_value.iov_base = p; }
 	break;
 	case 3:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_value.iov_len = p - static_cast<char*>(field_value.iov_base); }
 	break;
 	case 4:
-/* #line 84 "rfc2616.rl" */
+/* #line 82 "rfc2616.rl" */
 	{ chunk_size_p = p; }
 	break;
 	case 5:
-/* #line 86 "rfc2616.rl" */
+/* #line 84 "rfc2616.rl" */
 	{
                  char* chunk_size_pe = p;
                  chunk_size
@@ -780,29 +780,29 @@ _match:
                }
 	break;
 	case 6:
-/* #line 101 "rfc2616.rl" */
+/* #line 99 "rfc2616.rl" */
 	{ chunk_data_p = p; }
 	break;
 	case 7:
-/* #line 107 "rfc2616.rl" */
+/* #line 105 "rfc2616.rl" */
 	{ chunk_size = 0; }
 	break;
 	case 8:
-/* #line 99 "http_message_parser.rl" */
+/* #line 97 "http_message_parser.rl" */
 	{
     if (chunk_size > 0) {
       // Cut off the chunk size + extension + CRLF before
       // the chunk data and the CRLF after
       callbacks.handle_http_message_body_chunk(
-	    create_http_message_body_chunk(Buffer::copy(chunk_data_p, p - chunk_data_p - 2))
-	   );
+	    Buffer::copy(chunk_data_p, p - chunk_data_p - 2)
+      );
     } else { // Last chunk
-      callbacks.handle_http_message_body_chunk(create_http_message_body_chunk(NULL));
+      callbacks.handle_http_message_body_chunk(NULL);
       return;
 	}
     }
 	break;
-/* #line 790 "http_message_parser.cpp" */
+/* #line 788 "http_message_parser.cpp" */
 		}
 	}
 
@@ -814,7 +814,7 @@ _again:
 	_out: {}
 	}
 
-/* #line 116 "http_message_parser.rl" */
+/* #line 114 "http_message_parser.rl" */
 
 
   CHECK(cs == chunk_parser_error);
@@ -837,7 +837,7 @@ HttpMessageParser::parse_content_length_field(
   // Don't look for the trailing CRLF before the body,
   // since it may not be present yet.
   
-/* #line 821 "http_message_parser.cpp" */
+/* #line 819 "http_message_parser.cpp" */
 static const char _content_length_field_parser_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 2, 2, 3
@@ -891,12 +891,12 @@ static const int content_length_field_parser_error = 0;
 static const int content_length_field_parser_en_main = 5;
 
 
-/* #line 873 "http_message_parser.cpp" */
+/* #line 871 "http_message_parser.cpp" */
 	{
 	cs = content_length_field_parser_start;
 	}
 
-/* #line 876 "http_message_parser.cpp" */
+/* #line 874 "http_message_parser.cpp" */
 	{
 	int _klen;
 	unsigned int _trans;
@@ -971,23 +971,23 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_name.iov_base = p; }
 	break;
 	case 1:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_name.iov_len = p - static_cast<char*>(field_name.iov_base); }
 	break;
 	case 2:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_value.iov_base = p; }
 	break;
 	case 3:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_value.iov_len = p - static_cast<char*>(field_value.iov_base); }
 	break;
 	case 4:
-/* #line 144 "http_message_parser.rl" */
+/* #line 142 "http_message_parser.rl" */
 	{
         if (
           parse_content_length_field(
@@ -999,7 +999,7 @@ _match:
           return true;
       }
 	break;
-/* #line 973 "http_message_parser.cpp" */
+/* #line 971 "http_message_parser.cpp" */
 		}
 	}
 
@@ -1012,7 +1012,7 @@ _again:
 	_out: {}
 	}
 
-/* #line 159 "http_message_parser.rl" */
+/* #line 157 "http_message_parser.rl" */
 
 
   return false;
@@ -1070,7 +1070,7 @@ DateTime HttpMessageParser::parse_date(const char* ps, const char* pe) {
   int day = 0, month = 0, year = 0;
 
   
-/* #line 1040 "http_message_parser.cpp" */
+/* #line 1038 "http_message_parser.cpp" */
 static const char _date_parser_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 1, 5, 1, 6, 1, 
@@ -1296,12 +1296,12 @@ static const int date_parser_error = 0;
 static const int date_parser_en_main = 1;
 
 
-/* #line 1264 "http_message_parser.cpp" */
+/* #line 1262 "http_message_parser.cpp" */
 	{
 	cs = date_parser_start;
 	}
 
-/* #line 1267 "http_message_parser.cpp" */
+/* #line 1265 "http_message_parser.cpp" */
 	{
 	int _klen;
 	unsigned int _trans;
@@ -1376,27 +1376,27 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-/* #line 35 "rfc2616.rl" */
+/* #line 33 "rfc2616.rl" */
 	{ hour = atoi(p); }
 	break;
 	case 1:
-/* #line 36 "rfc2616.rl" */
+/* #line 34 "rfc2616.rl" */
 	{ minute = atoi(p); }
 	break;
 	case 2:
-/* #line 37 "rfc2616.rl" */
+/* #line 35 "rfc2616.rl" */
 	{ second = atoi(p); }
 	break;
 	case 3:
-/* #line 39 "rfc2616.rl" */
+/* #line 37 "rfc2616.rl" */
 	{ day = atoi(p); }
 	break;
 	case 4:
-/* #line 40 "rfc2616.rl" */
+/* #line 38 "rfc2616.rl" */
 	{ day = atoi(p); }
 	break;
 	case 5:
-/* #line 47 "rfc2616.rl" */
+/* #line 45 "rfc2616.rl" */
 	{
             switch (*(p - 1))
             {
@@ -1430,18 +1430,18 @@ _match:
           }
 	break;
 	case 6:
-/* #line 78 "rfc2616.rl" */
+/* #line 76 "rfc2616.rl" */
 	{ year = atoi(p); year += (year < 50 ? 2000 : 1900); }
 	break;
 	case 7:
-/* #line 79 "rfc2616.rl" */
+/* #line 77 "rfc2616.rl" */
 	{ year = atoi(p); }
 	break;
 	case 8:
-/* #line 222 "http_message_parser.rl" */
+/* #line 220 "http_message_parser.rl" */
 	{ return DateTime::INVALID_DATE_TIME; }
 	break;
-/* #line 1397 "http_message_parser.cpp" */
+/* #line 1395 "http_message_parser.cpp" */
 		}
 	}
 
@@ -1458,10 +1458,10 @@ _again:
 	while ( __nacts-- > 0 ) {
 		switch ( *__acts++ ) {
 	case 8:
-/* #line 222 "http_message_parser.rl" */
+/* #line 220 "http_message_parser.rl" */
 	{ return DateTime::INVALID_DATE_TIME; }
 	break;
-/* #line 1415 "http_message_parser.cpp" */
+/* #line 1413 "http_message_parser.cpp" */
 		}
 	}
 	}
@@ -1469,7 +1469,7 @@ _again:
 	_out: {}
 	}
 
-/* #line 227 "http_message_parser.rl" */
+/* #line 225 "http_message_parser.rl" */
 
 
   if (cs != date_parser_error) {
@@ -1495,7 +1495,7 @@ HttpMessageParser::parse_field(
   // Don't look for the trailing CRLF before the body,
   // since it may not be present yet.
   
-/* #line 1445 "http_message_parser.cpp" */
+/* #line 1443 "http_message_parser.cpp" */
 static const char _field_parser_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 2, 2, 3
@@ -1549,12 +1549,12 @@ static const int field_parser_error = 0;
 static const int field_parser_en_main = 5;
 
 
-/* #line 1497 "http_message_parser.cpp" */
+/* #line 1495 "http_message_parser.cpp" */
 	{
 	cs = field_parser_start;
 	}
 
-/* #line 1500 "http_message_parser.cpp" */
+/* #line 1498 "http_message_parser.cpp" */
 	{
 	int _klen;
 	unsigned int _trans;
@@ -1629,23 +1629,23 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_name.iov_base = p; }
 	break;
 	case 1:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_name.iov_len = p - static_cast<char*>(field_name.iov_base); }
 	break;
 	case 2:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_value.iov_base = p; }
 	break;
 	case 3:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_value.iov_len = p - static_cast<char*>(field_value.iov_base); }
 	break;
 	case 4:
-/* #line 258 "http_message_parser.rl" */
+/* #line 256 "http_message_parser.rl" */
 	{
         if (
           field_name.iov_len == in_field_name.iov_len
@@ -1661,7 +1661,7 @@ _match:
         }
       }
 	break;
-/* #line 1601 "http_message_parser.cpp" */
+/* #line 1599 "http_message_parser.cpp" */
 		}
 	}
 
@@ -1674,7 +1674,7 @@ _again:
 	_out: {}
 	}
 
-/* #line 277 "http_message_parser.rl" */
+/* #line 275 "http_message_parser.rl" */
 
 
   return false;
@@ -1694,7 +1694,7 @@ HttpMessageParser::parse_fields(
   // Don't look for the trailing CRLF before the body,
   // since it may not be present yet.
   
-/* #line 1630 "http_message_parser.cpp" */
+/* #line 1628 "http_message_parser.cpp" */
 static const char _static_fields_parser_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 2, 2, 3
@@ -1748,12 +1748,12 @@ static const int static_fields_parser_error = 0;
 static const int static_fields_parser_en_main = 5;
 
 
-/* #line 1682 "http_message_parser.cpp" */
+/* #line 1680 "http_message_parser.cpp" */
 	{
 	cs = static_fields_parser_start;
 	}
 
-/* #line 1685 "http_message_parser.cpp" */
+/* #line 1683 "http_message_parser.cpp" */
 	{
 	int _klen;
 	unsigned int _trans;
@@ -1828,26 +1828,26 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_name.iov_base = p; }
 	break;
 	case 1:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_name.iov_len = p - static_cast<char*>(field_name.iov_base); }
 	break;
 	case 2:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_value.iov_base = p; }
 	break;
 	case 3:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_value.iov_len = p - static_cast<char*>(field_value.iov_base); }
 	break;
 	case 4:
-/* #line 302 "http_message_parser.rl" */
+/* #line 300 "http_message_parser.rl" */
 	{ fields.push_back(std::make_pair(field_name, field_value)); }
 	break;
-/* #line 1773 "http_message_parser.cpp" */
+/* #line 1771 "http_message_parser.cpp" */
 		}
 	}
 
@@ -1860,7 +1860,7 @@ _again:
 	_out: {}
 	}
 
-/* #line 308 "http_message_parser.rl" */
+/* #line 306 "http_message_parser.rl" */
 
 }
 
@@ -1877,7 +1877,7 @@ HttpMessageParser::parse_fields(
   iovec field_name = {0, 0}, field_value = {0, 0};
 
   
-/* #line 1799 "http_message_parser.cpp" */
+/* #line 1797 "http_message_parser.cpp" */
 static const char _fields_parser_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4, 1, 5, 1, 6, 2, 
@@ -1946,12 +1946,12 @@ static const int fields_parser_error = 0;
 static const int fields_parser_en_main = 1;
 
 
-/* #line 1866 "http_message_parser.cpp" */
+/* #line 1864 "http_message_parser.cpp" */
 	{
 	cs = fields_parser_start;
 	}
 
-/* #line 1869 "http_message_parser.cpp" */
+/* #line 1867 "http_message_parser.cpp" */
 	{
 	int _klen;
 	unsigned int _trans;
@@ -2024,23 +2024,23 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_name.iov_base = p; }
 	break;
 	case 1:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_name.iov_len = p - static_cast<char*>(field_name.iov_base); }
 	break;
 	case 2:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_value.iov_base = p; }
 	break;
 	case 3:
-/* #line 83 "rfc2616.rl" */
+/* #line 81 "rfc2616.rl" */
 	{ field_value.iov_len = p - static_cast<char*>(field_value.iov_base); }
 	break;
 	case 4:
-/* #line 330 "http_message_parser.rl" */
+/* #line 328 "http_message_parser.rl" */
 	{
         parse_content_length_field(
           field_name,
@@ -2050,14 +2050,14 @@ _match:
       }
 	break;
 	case 5:
-/* #line 338 "http_message_parser.rl" */
+/* #line 336 "http_message_parser.rl" */
 	{ {p++; goto _out; } }
 	break;
 	case 6:
-/* #line 339 "http_message_parser.rl" */
+/* #line 337 "http_message_parser.rl" */
 	{ return false; }
 	break;
-/* #line 1967 "http_message_parser.cpp" */
+/* #line 1965 "http_message_parser.cpp" */
 		}
 	}
 
@@ -2073,10 +2073,10 @@ _again:
 	while ( __nacts-- > 0 ) {
 		switch ( *__acts++ ) {
 	case 6:
-/* #line 339 "http_message_parser.rl" */
+/* #line 337 "http_message_parser.rl" */
 	{ return false; }
 	break;
-/* #line 1984 "http_message_parser.cpp" */
+/* #line 1982 "http_message_parser.cpp" */
 		}
 	}
 	}
@@ -2084,7 +2084,7 @@ _again:
 	_out: {}
 	}
 
-/* #line 344 "http_message_parser.rl" */
+/* #line 342 "http_message_parser.rl" */
 
 
   return cs != fields_parser_error;

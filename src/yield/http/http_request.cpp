@@ -109,43 +109,16 @@ HttpRequest::Method::parse(
   throw Exception("unknown method");
 }
 
-HttpRequest::HttpRequest(
-  ::std::shared_ptr<Buffer> body_buffer,
-  uint16_t fields_offset,
-  ::std::shared_ptr<Buffer> header,
-  uint8_t http_version,
-  Method method,
-  const yield::uri::Uri& uri
-)
-  : HttpMessage<HttpRequest>(
-    body_buffer,
-    NULL,
-    fields_offset,
-    header,
-    http_version
-  ),
-  method_(method),
-  uri_(uri)
-{ }
-
-HttpRequest::HttpRequest(
-  Method method,
-  const yield::uri::Uri& uri,
-  ::std::shared_ptr<Buffer> body_buffer,
-  uint8_t http_version
-)
-  : HttpMessage<HttpRequest>(body_buffer, NULL, http_version),
-    method_(method),
-    uri_(uri) {
-  header()->put(method.get_name(), method.get_name_len());
+void HttpRequest::init_header() {
+  header()->put(method_.get_name(), method_.get_name_len());
 
   header()->put(' ');
 
   iovec uri_path;
-  uri.get_path(uri_path);
+  uri_.get_path(uri_path);
   header()->put(uri_path);
 
-  if (http_version == 0) {
+  if (http_version() == 0) {
     header()->put(" HTTP/1.0\r\n", 11);
   } else {
     header()->put(" HTTP/1.1\r\n", 11);
@@ -153,10 +126,10 @@ HttpRequest::HttpRequest(
 
   set_fields_offset(static_cast<uint16_t>(header()->size()));
 
-  if (uri.has_host()) {
+  if (uri_.has_host()) {
     iovec uri_host;
-    uri.get_host(uri_host);
-    if (uri.get_port() == 80) {
+    uri_.get_host(uri_host);
+    if (uri_.get_port() == 80) {
       set_field("Host", 4, uri_host);
     } else {
       const char* uri_port_p
@@ -183,7 +156,7 @@ HttpRequest::HttpRequest(
           uri_host.iov_len
         );
         host << ':';
-        host << uri.get_port();
+        host << uri_.get_port();
 
         set_field("Host", 4, host.str());
       }

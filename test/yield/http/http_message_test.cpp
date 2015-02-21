@@ -45,7 +45,7 @@ TEST(HttpMessage, body_buffer) {
   ASSERT_EQ(
     memcmp(
       *static_cast<Buffer*>(
-        HttpRequest(HttpRequest::Method::GET, "/", body).body_buffer().get()
+        HttpRequest(body, HttpRequest::Method::GET, "/").body_buffer().get()
       ),
       "body",
       4

@@ -99,10 +99,10 @@ void HttpMessageParser::parse_body_chunks(ParseCallbacks& callbacks) {
       // Cut off the chunk size + extension + CRLF before
       // the chunk data and the CRLF after
       callbacks.handle_http_message_body_chunk(
-	    create_http_message_body_chunk(Buffer::copy(chunk_data_p, p - chunk_data_p - 2))
-	   );
+	    Buffer::copy(chunk_data_p, p - chunk_data_p - 2)
+      );
     } else { // Last chunk
-      callbacks.handle_http_message_body_chunk(create_http_message_body_chunk(NULL));
+      callbacks.handle_http_message_body_chunk(NULL);
       return;
 	}
     }

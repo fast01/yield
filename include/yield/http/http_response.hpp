@@ -41,95 +41,76 @@ class HttpResponse : public HttpMessage<HttpResponse> {
 public:
   /**
     Construct an HttpResponse from its constituent parts.
-    @param status_code numeric status code e.g., 200
-  */
-  HttpResponse(
-    uint16_t status_code
-  ) : HttpMessage<HttpResponse>(NULL, NULL, HTTP_VERSION_DEFAULT),
-      status_code_(status_code) {
-    init();
-  }
-
-  /**
-    Construct an HttpResponse from its constituent parts.
-    @param status_code numeric status code e.g., 200
-    @param body optional body
-  */
-  HttpResponse(
-    uint16_t status_code,
-    ::std::shared_ptr<Buffer> body
-  ) : HttpMessage<HttpResponse>(body, NULL, HTTP_VERSION_DEFAULT),
-      status_code_(status_code) {
-    init();
-  }
-
-  /**
-    Construct an HttpResponse from its constituent parts.
     @param http_version HTTP version as a single byte (0 or 1 for HTTP/1.0 or
       HTTP/1.1, respectively.)
     @param status_code numeric status code e.g., 200
-    @param body optional body
   */
   HttpResponse(
     uint8_t http_version,
-    uint16_t status_code,
-    ::std::shared_ptr<Buffer> body
-  ) : HttpMessage<HttpResponse>(
-    body,
-    NULL,
-    http_version
-  ),
-  status_code_(status_code) {
+    uint16_t status_code
+  ) : HttpMessage<HttpResponse>(NULL, NULL, http_version),
+    status_code_(status_code) {
     init();
   }
 
   /**
     Construct an HttpResponse from its constituent parts.
-    @param status_code numeric status code e.g., 200
     @param body optional body
     @param http_version HTTP version as a single byte (0 or 1 for HTTP/1.0 or
       HTTP/1.1, respectively.)
+    @param status_code numeric status code e.g., 200
   */
-  HttpResponse(
-    uint16_t status_code,
-    ::std::shared_ptr< ::yield::fs::File > body
-  ) 
-    : HttpMessage<HttpResponse>(NULL, body, HTTP_VERSION_DEFAULT),
-      status_code_(status_code) {
-    init();
-  }
-
-  /**
-    Empty virtual destructor.
-  */
-  virtual ~HttpResponse() { }
-
-public:
-  /**
-    Get the numeric status code e.g., 200.
-    @return the numeric status code
-  */
-  uint16_t status_code() const {
-    return status_code_;
-  }
-
-protected:
-  friend class HttpRequestParser;
-  friend class HttpResponseParser;
-
   HttpResponse(
     ::std::shared_ptr<Buffer> body,
     uint8_t http_version,
     uint16_t status_code
-  ) : HttpMessage<HttpResponse>(
-        body,
-        NULL,
-        http_version
-      ),
-      status_code_(status_code) {
-      init();
-    }
+  ) : HttpMessage<HttpResponse>(body, NULL, http_version),
+    status_code_(status_code) {
+    init();
+  }
 
+  /**
+    Construct an HttpResponse from its constituent parts.
+    @param body optional body
+    @param http_version HTTP version as a single byte (0 or 1 for HTTP/1.0 or
+      HTTP/1.1, respectively.)
+    @param status_code numeric status code e.g., 200
+  */
+  HttpResponse(
+    ::std::shared_ptr< ::yield::fs::File > body,
+    uint8_t http_version,
+    uint16_t status_code
+  ) : HttpMessage<HttpResponse>(NULL, body, http_version),
+    status_code_(status_code) {
+    init();
+  }
+
+  /**
+    Construct an HttpResponse from its constituent parts.
+    @param http_version HTTP version as a single byte (0 or 1 for HTTP/1.0 or
+      HTTP/1.1, respectively.)
+    @param status_code numeric status code e.g., 200
+    @param body optional body
+  */
+  HttpResponse(
+    uint8_t http_version,
+    uint16_t status_code,
+    ::std::shared_ptr<Buffer> body
+  ) : HttpMessage<HttpResponse>(body, NULL, http_version),
+    status_code_(status_code) {
+    init();
+  }
+
+  /**
+    Construct an HttpResponse from its constituent parts.
+    @param body the HTTP request body, optional
+    @param fields_offset offset into the header buffer where the fields start
+    @param header header buffer, required
+    @param http_version the HTTP version as a single byte (0 or 1 for HTTP/1.0
+      and HTTP/1.1, respectively)
+    @param method the HTTP request method e.g., HttpRequest::Method::GET
+    @param uri the HTTP request Uri e.g., /
+  */
   HttpResponse(
     ::std::shared_ptr<Buffer> body,
     uint16_t fields_offset,
@@ -144,6 +125,20 @@ protected:
         http_version
       ),
       status_code_(status_code) {
+  }
+
+  /**
+    Empty virtual destructor.
+  */
+  virtual ~HttpResponse() { }
+
+public:
+  /**
+    Get the numeric status code e.g., 200.
+    @return the numeric status code
+  */
+  uint16_t status_code() const {
+    return status_code_;
   }
 
 private:

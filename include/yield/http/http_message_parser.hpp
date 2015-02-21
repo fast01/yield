@@ -49,7 +49,7 @@ protected:
     }
 
   public:
-    virtual void handle_http_message_body_chunk(::std::unique_ptr<HttpMessageBodyChunk>) = 0;
+    virtual void handle_http_message_body_chunk(::std::shared_ptr<Buffer> data) = 0;
     virtual void read(::std::shared_ptr<Buffer>) = 0;
   };
 
@@ -58,14 +58,6 @@ protected:
   HttpMessageParser(const ::std::string& buffer); // For testing
 
   virtual ~HttpMessageParser() {
-  }
-
-protected:
-  virtual ::std::unique_ptr<HttpMessageBodyChunk>
-  create_http_message_body_chunk(
-    ::std::shared_ptr<Buffer> data
-  ) {
-    return ::std::unique_ptr<HttpMessageBodyChunk>(new HttpMessageBodyChunk(data));
   }
 
 protected:

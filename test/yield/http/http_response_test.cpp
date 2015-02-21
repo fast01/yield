@@ -34,14 +34,12 @@
 namespace yield {
 namespace http {
 TEST(HttpResponse, constructor) {
-  HttpResponse(404);
-  HttpResponse(404, Buffer::copy("test"));
   HttpResponse(1, 404, Buffer::copy("test"));
 }
 
 TEST(HttpResponse, status_code) {
-  ASSERT_EQ(HttpResponse(200).status_code(), 200);
-  ASSERT_EQ(HttpResponse(404).status_code(), 404);
+  ASSERT_EQ(HttpResponse(1, 200).status_code(), 200);
+  ASSERT_EQ(HttpResponse(1, 404).status_code(), 404);
 }
 }
 }

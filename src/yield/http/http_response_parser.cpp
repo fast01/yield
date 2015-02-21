@@ -55,13 +55,7 @@ void HttpResponseParser::parse(ParseCallbacks& callbacks) {
       if (parse_fields(fields_offset, content_length)) {
         ::std::shared_ptr<Buffer> body;
         if (parse_body(content_length, body)) {
-          callbacks.handle_http_response(create_http_response(
-                   body,
-                   fields_offset,
-                   buffer_,
-                   http_version,
-                   status_code
-                 ));
+          callbacks.handle_http_response(body, fields_offset, buffer_, http_version, status_code);
         } else {
           ::std::shared_ptr<Buffer> next_buffer
             = Buffer::copy(
@@ -71,8 +65,8 @@ void HttpResponseParser::parse(ParseCallbacks& callbacks) {
                 eof - ps
               );
           ps = p;
-		  callbacks.read(next_buffer);
-		  return;
+          callbacks.read(next_buffer);
+          return;
         }
       }
     } else {
@@ -89,12 +83,9 @@ void HttpResponseParser::parse(ParseCallbacks& callbacks) {
             eof - ps
           );
       p = ps;
-	  callbacks.read(next_buffer);
+      callbacks.read(next_buffer);
     } else { // Error parsing
-      ::std::unique_ptr<HttpResponse> http_response
-        = ::std::move(create_http_response(NULL, 400, http_version));
-      http_response->set_field("Content-Length", 14, "0", 1);
-	  callbacks.handle_http_response(::std::move(http_response));
+      callbacks.handle_http_response(NULL, http_version, 400);
     }
   } else { // p == eof
     callbacks.read(::std::make_shared<Buffer>(Buffer::getpagesize(), Buffer::getpagesize()));
@@ -109,7 +100,7 @@ HttpResponseParser::parse_status_line(
   int cs;
 
   
-/* #line 112 "http_response_parser.cpp" */
+/* #line 101 "http_response_parser.cpp" */
 static const char _status_line_parser_actions[] = {
 	0, 1, 0, 1, 1, 1, 2, 1, 
 	3, 1, 4
@@ -174,12 +165,12 @@ static const int status_line_parser_error = 0;
 static const int status_line_parser_en_main = 1;
 
 
-/* #line 175 "http_response_parser.cpp" */
+/* #line 164 "http_response_parser.cpp" */
 	{
 	cs = status_line_parser_start;
 	}
 
-/* #line 178 "http_response_parser.cpp" */
+/* #line 167 "http_response_parser.cpp" */
 	{
 	int _klen;
 	unsigned int _trans;
@@ -252,26 +243,26 @@ _match:
 		switch ( *_acts++ )
 		{
 	case 0:
-/* #line 32 "rfc2616.rl" */
+/* #line 30 "rfc2616.rl" */
 	{ http_version = 0; }
 	break;
 	case 1:
-/* #line 33 "rfc2616.rl" */
+/* #line 31 "rfc2616.rl" */
 	{ http_version = 1; }
 	break;
 	case 2:
-/* #line 119 "http_response_parser.rl" */
+/* #line 108 "http_response_parser.rl" */
 	{ status_code = static_cast<uint16_t>(atoi(p)); }
 	break;
 	case 3:
-/* #line 127 "http_response_parser.rl" */
+/* #line 116 "http_response_parser.rl" */
 	{ {p++; goto _out; } }
 	break;
 	case 4:
-/* #line 128 "http_response_parser.rl" */
+/* #line 117 "http_response_parser.rl" */
 	{ return false; }
 	break;
-/* #line 264 "http_response_parser.cpp" */
+/* #line 253 "http_response_parser.cpp" */
 		}
 	}
 
@@ -287,10 +278,10 @@ _again:
 	while ( __nacts-- > 0 ) {
 		switch ( *__acts++ ) {
 	case 4:
-/* #line 128 "http_response_parser.rl" */
+/* #line 117 "http_response_parser.rl" */
 	{ return false; }
 	break;
-/* #line 281 "http_response_parser.cpp" */
+/* #line 270 "http_response_parser.cpp" */
 		}
 	}
 	}
@@ -298,7 +289,7 @@ _again:
 	_out: {}
 	}
 
-/* #line 133 "http_response_parser.rl" */
+/* #line 122 "http_response_parser.rl" */
 
 
   return cs != status_line_parser_error;

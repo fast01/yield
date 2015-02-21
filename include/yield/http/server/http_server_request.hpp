@@ -49,26 +49,77 @@ class HttpServerRequestParser;
   These <code>HttpRequest</code>s are usually created by
     <code>HttpServerRequestQueue</code>.
 */
-class HttpServerRequest final : public ::yield::http::HttpRequest, public HttpServerEvent {
+class HttpServerRequest final : public HttpRequest, public HttpServerEvent {
 public:
+  /**
+    Construct an HttpRequest that originates from the given server connection.
+    @param body an optional body
+    @param connection the server connection
+    @param method the HTTP request method e.g., HttpRequest::Method::GET
+    @param uri the HTTP request Uri e.g., /
+    @param http_version the HTTP version as a single byte (0 or 1 for HTTP/1.0
+      and HTTP/1.1, respectively)
+  */
+  HttpServerRequest(
+    ::std::shared_ptr<Buffer> body,
+    ::std::shared_ptr<HttpServerConnection> connection,
+    Method method,
+    const yield::uri::Uri& uri,
+    uint8_t http_version = HTTP_VERSION_DEFAULT
+  ) : HttpRequest(body, method, uri, http_version),
+    connection_(connection),
+    creation_date_time_(DateTime::now()) {
+  }
+
   /**
     Construct an HttpRequest that originates from the given server connection.
     @param connection the server connection
     @param method the HTTP request method e.g., HttpRequest::Method::GET
     @param uri the HTTP request Uri e.g., /
-    @param body an optional body, usually a Buffer
+    @param body an optional body
     @param http_version the HTTP version as a single byte (0 or 1 for HTTP/1.0
       and HTTP/1.1, respectively)
   */
   HttpServerRequest(
+    ::std::shared_ptr< ::yield::fs::File > body,
     ::std::shared_ptr<HttpServerConnection> connection,
     Method method,
     const yield::uri::Uri& uri,
-    ::std::shared_ptr<Buffer> body = NULL,
     uint8_t http_version = HTTP_VERSION_DEFAULT
-  ) : yield::http::HttpRequest(method, uri, body, http_version),
+  ) : HttpRequest(body, method, uri, http_version),
     connection_(connection),
     creation_date_time_(DateTime::now()) {
+  }
+
+  /**
+    Construct an HttpRequest that originates from the given server connection.
+    @param body an optional body
+    @param connection the server connection
+    @param fields_offset offset into the header buffer where the fields start
+    @param header header buffer
+    @param http_version the HTTP version as a single byte (0 or 1 for HTTP/1.0
+      and HTTP/1.1, respectively)
+    @param method the HTTP request method e.g., HttpRequest::Method::GET
+    @param uri the HTTP request Uri e.g., /
+  */
+  HttpServerRequest(
+    ::std::shared_ptr<Buffer> body,
+    ::std::shared_ptr<HttpServerConnection> connection,
+    uint16_t fields_offset,
+    ::std::shared_ptr<Buffer> header,
+    uint8_t http_version,
+    Method method,
+    const yield::uri::Uri& uri
+  ) : HttpRequest(
+    body,
+    fields_offset,
+    header,
+    http_version,
+    method,
+    uri
+  ),
+  connection_(connection),
+  creation_date_time_(DateTime::now()) {
   }
 
 public:
@@ -147,29 +198,6 @@ public:
 public:
   Type type() const override {
     return Type::REQUEST;
-  }
-
-protected:
-  friend class HttpServerRequestParser;
-
-  HttpServerRequest(
-    ::std::shared_ptr<Buffer> body,
-    ::std::shared_ptr<HttpServerConnection> connection,
-    uint16_t fields_offset,
-    ::std::shared_ptr<Buffer> header,
-    uint8_t http_version,
-    Method method,
-    const yield::uri::Uri& uri
-  ) : yield::http::HttpRequest(
-    body,
-    fields_offset,
-    header,
-    http_version,
-    method,
-    uri
-  ),
-  connection_(connection),
-  creation_date_time_(DateTime::now()) {
   }
 
 private:
