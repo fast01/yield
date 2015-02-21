@@ -43,7 +43,7 @@ Watches::~Watches() {
 
 Watch* Watches::erase(const Path& path) {
   for (iterator watch_i = begin(); watch_i != end(); ++watch_i) {
-    if (watch_i->second->get_path() == path) {
+    if (watch_i->second->path() == path) {
       Watch* watch = watch_i->second;
       map<int, Watch*>::erase(watch_i);
       return watch;
@@ -55,7 +55,7 @@ Watch* Watches::erase(const Path& path) {
 
 Watch* Watches::find(const Path& path) {
   for (iterator watch_i = begin(); watch_i != end(); ++watch_i) {
-    if (watch_i->second->get_path() == path) {
+    if (watch_i->second->path() == path) {
       return watch_i->second;
     }
   }
@@ -73,9 +73,9 @@ Watch* Watches::find(int wd) {
 }
 
 void Watches::insert(Watch& watch) {
-  iterator watch_i = map<int, Watch*>::find(watch.get_wd());
+  iterator watch_i = map<int, Watch*>::find(watch.wd());
   CHECK_EQ(watch_i, end());
-  map<int, Watch*>::insert(make_pair(watch.get_wd(), &watch));
+  map<int, Watch*>::insert(make_pair(watch.wd(), &watch));
 }
 }
 }

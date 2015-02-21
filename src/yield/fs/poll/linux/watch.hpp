@@ -31,6 +31,7 @@
 #include "../watch.hpp"
 
 #include <map>
+#include <memory>
 
 struct inotify_event;
 
@@ -52,23 +53,21 @@ public:
   ~Watch();
 
 public:
-  int get_wd() const {
-    return wd;
-  }
-
-public:
-  YO_NEW_REF FsEvent* parse(const inotify_event&);
-
-public:
-  // yield::fs::poll::Watch
   bool is_directory_watch() const {
     return true;
   }
 
+  int wd() const {
+    return wd_;
+  }
+
+public:
+  ::std::unique_ptr<FsEvent> parse(const inotify_event&);
+
 private:
-  int inotify_fd;
-  std::map<uint32_t, Path> old_names;
-  int wd;
+  int inotify_fd_;
+  std::map<uint32_t, Path> old_names_;
+  int wd_;
 };
 
 }

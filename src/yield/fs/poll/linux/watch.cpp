@@ -43,15 +43,15 @@ Watch::Watch(
   const Path& path,
   int wd
 ) : yield::fs::poll::Watch(fs_event_types, path),
-  inotify_fd(inotify_fd),
-  wd(wd) {
+  inotify_fd_(inotify_fd),
+  wd_(wd) {
 }
 
 Watch::~Watch() {
-  inotify_rm_watch(inotify_fd, wd);
+  inotify_rm_watch(inotify_fd_, wd_);
 }
 
-YO_NEW_REF FsEvent* Watch::parse(const inotify_event& inotify_event_) {
+::std::unique_ptr<FsEvent> Watch::parse(const inotify_event& inotify_event_) {
   uint32_t mask = inotify_event_.mask;
 
   bool isdir;
@@ -66,13 +66,13 @@ YO_NEW_REF FsEvent* Watch::parse(const inotify_event& inotify_event_) {
     // len includes a NULL terminator, but may also include
     // one or more bytes of padding. Do a strlen to find the real length.
     name = Path(inotify_event_.name); //, inotify_event_.len - 1);
-    path = this->get_path() / name;
+    path = this->path() / name;
   } else {
-    path = this->get_path();
+    path = this->path();
   }
 
   DLOG(DEBUG) <<
-      "Watch(path=" << get_path() << ", wd=" << get_wd() << ")"
+      "Watch(path=" << this->path() << ", wd=" << wd() << ")"
       << ": read inotify_event(" <<
       "cookie=" << inotify_event_.cookie <<
       ", " <<
@@ -114,7 +114,7 @@ YO_NEW_REF FsEvent* Watch::parse(const inotify_event& inotify_event_) {
   } else if ((mask & IN_MOVED_FROM) == IN_MOVED_FROM) {
     mask ^= IN_MOVED_FROM;
     CHECK(!name.empty());
-    old_names[inotify_event_.cookie] = name;
+    old_names_[inotify_event_.cookie] = name;
     return NULL;
   } else if ((mask & IN_MOVED_TO) == IN_MOVED_TO) {
     mask ^= IN_MOVED_TO;
@@ -124,21 +124,21 @@ YO_NEW_REF FsEvent* Watch::parse(const inotify_event& inotify_event_) {
       isdir ? FsEvent::TYPE_DIRECTORY_RENAME : FsEvent::TYPE_FILE_RENAME;
 
     map<uint32_t, Path>::iterator old_name_i
-    = old_names.find(inotify_event_.cookie);
-    CHECK_NE(old_name_i, old_names.end());
+    = old_names_.find(inotify_event_.cookie);
+    CHECK_NE(old_name_i, old_names_.end());
 
     if (want_fs_event_type(fs_event_type)) {
-      FsEvent* fs_event
-      = new FsEvent(
-        this->get_path() / old_name_i->second,
-        path,
-        fs_event_type
-      );
-      old_names.erase(old_name_i);
+      ::std::unique_ptr<FsEvent> fs_event(
+        new FsEvent(
+          this->path() / old_name_i->second,
+          path,
+          fs_event_type
+        ));
+      old_names_.erase(old_name_i);
       log_fs_event(*fs_event);
       return fs_event;
     } else {
-      old_names.erase(old_name_i);
+      old_names_.erase(old_name_i);
       return NULL;
     }
   }
@@ -146,7 +146,7 @@ YO_NEW_REF FsEvent* Watch::parse(const inotify_event& inotify_event_) {
   CHECK_EQ(mask, 0);
 
   if (want_fs_event_type(fs_event_type)) {
-    FsEvent* fs_event = new FsEvent(path, fs_event_type);
+    ::std::unique_ptr<FsEvent> fs_event(new FsEvent(path, fs_event_type));
     log_fs_event(*fs_event);
     return fs_event;
   } else {
