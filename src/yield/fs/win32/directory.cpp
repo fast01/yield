@@ -59,20 +59,6 @@ bool Directory::close() {
   }
 }
 
-::std::unique_ptr<Directory::Entry> Directory::read() {
-  Entry* entry = NULL;
-  if (read(entry)) {
-    return ::std::unique_ptr<Entry>(entry);
-  } else {
-    return NULL;
-  }
-}
-
-bool Directory::read(Entry& entry) {
-  Entry* p_dentry = &entry;
-  return read(p_dentry);
-}
-
 bool Directory::read(Entry*& entry) {
   if (hFindFile == INVALID_HANDLE_VALUE) {
     const size_t file_name_info_size

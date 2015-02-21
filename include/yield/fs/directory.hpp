@@ -231,7 +231,10 @@ public:
     }
   }
 
-  bool read(Entry&);
+  bool read(Entry& entry) {
+    Entry* p_dentry = &entry;
+    return read(p_dentry);
+  }
 
 public:
   void rewind();
