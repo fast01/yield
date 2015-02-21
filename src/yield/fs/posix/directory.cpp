@@ -50,20 +50,6 @@ bool Directory::close() {
   }
 }
 
-Directory::Entry* Directory::read() {
-  Entry* entry = NULL;
-  if (read(entry)) {
-    return entry;
-  } else {
-    return NULL;
-  }
-}
-
-bool Directory::read(Entry& entry) {
-  Entry* p_entry = &entry;
-  return read(p_entry);
-}
-
 bool Directory::read(Entry*& entry) {
   struct dirent* dirent_;
   while ((dirent_ = readdir(dirp)) != NULL) {

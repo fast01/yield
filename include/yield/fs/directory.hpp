@@ -52,7 +52,7 @@ public:
 #ifdef _WIN32
   class Entry : public Stat {
 #else
-  class Entry : public Object {
+  class Entry {
 #endif
   public:
     /**
@@ -222,7 +222,15 @@ public:
 #endif
 
 public:
-  ::std::unique_ptr<Entry> read();
+  ::std::unique_ptr<Entry> read() {
+    Entry* entry = NULL;
+    if (read(entry)) {
+      return ::std::unique_ptr<Entry>(entry);
+    } else {
+      return NULL;
+    }
+  }
+
   bool read(Entry&);
 
 public:
