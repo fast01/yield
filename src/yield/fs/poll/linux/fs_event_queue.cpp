@@ -43,66 +43,56 @@ namespace poll {
 using linux::Watches;
 
 FsEventQueue::FsEventQueue() {
-  epoll_fd = epoll_create(32768);
-  if (epoll_fd != -1) {
-    try {
-      event_fd = eventfd(0, 0);
-      if (event_fd != -1) {
-        try {
-          epoll_event epoll_event_;
-          memset(&epoll_event_, 0, sizeof(epoll_event_));
-          epoll_event_.data.fd = event_fd;
-          epoll_event_.events = EPOLLIN;
-          if (
-            epoll_ctl(epoll_fd, EPOLL_CTL_ADD, event_fd, &epoll_event_) == 0
-          ) {
-            inotify_fd = inotify_init();
-            if (inotify_fd != -1) {
-              try {
-                memset(&epoll_event_, 0, sizeof(epoll_event_));
-                epoll_event_.data.fd = inotify_fd;
-                epoll_event_.events = EPOLLIN;
-                if (
-                  epoll_ctl(
-                    epoll_fd,
-                    EPOLL_CTL_ADD,
-                    inotify_fd,
-                    &epoll_event_
-                  ) == 0
-                ) {
-                  watches = new linux::Watches;
-                } else {
-                  throw Exception();
-                }
-              } catch (Exception&) {
-                close(inotify_fd);
-                throw;
-              }
-            } else {
-              throw Exception();
-            }
-          } else {
-            throw Exception();
-          }
-        } catch (Exception&) {
-          close(event_fd);
-          throw;
-        }
-      } else {
-        throw Exception();
-      }
-    } catch (Exception&) {
-      close(epoll_fd);
-      throw;
-    }
-  } else {
+  epoll_fd_ = ::epoll_create(32768);
+  if (epoll_fd_ == -1) {
     throw Exception();
   }
+
+  event_fd_ = ::eventfd(0, 0);
+  if (event_fd_ == -1) {
+    Exception e;
+    ::close(epoll_fd_);
+    throw e;
+  }
+
+  epoll_event epoll_event_;
+  memset(&epoll_event_, 0, sizeof(epoll_event_));
+  epoll_event_.data.fd = event_fd;
+  epoll_event_.events = EPOLLIN;
+  if (::epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, event_fd_, &epoll_event_) != 0) {
+    Exception e;
+    ::close(epoll_fd_);
+    ::close(event_fd_);
+    throw e;
+  }
+
+  inotify_fd_ = inotify_init();
+  if (inotify_fd_ == -1) {
+    Exception e;
+    ::close(epoll_fd_);
+    ::close(event_fd_);
+    throw e;
+  }
+
+  memset(&epoll_event_, 0, sizeof(epoll_event_));
+  epoll_event_.data.fd = inotify_fd_;
+  epoll_event_.events = EPOLLIN;
+  if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, inotify_fd_, &epoll_event_) != 0) {
+    Exception e;
+    ::close(epoll_fd_);
+    ::close(event_fd_);
+    ::close(inotify_fd_);
+    throw e;
+  }
+
+  watches_ = new linux::Watches;
 }
 
 FsEventQueue::~FsEventQueue() {
-  close(inotify_fd);
-  delete watches;
+  ::close(epoll_fd_);
+  ::close(event_fd_);
+  ::close(inotify_fd);
+  delete watches_;
 }
 
 bool
@@ -110,12 +100,12 @@ FsEventQueue::associate(
   const Path& path,
   FsEvent::Type fs_event_types
 ) {
-  linux::Watch* watch = watches->find(path);
+  linux::Watch* watch = watches_->find(path);
   if (watch != NULL) {
-    if (watch->get_fs_event_types() == fs_event_types) {
+    if (watch->fs_event_types() == fs_event_types) {
       return true;
     } else {
-      watch = watches->erase(path);
+      watch = watches_->erase(path);
       CHECK_NOTNULL(watch);
       delete watch;
     }
@@ -158,7 +148,7 @@ FsEventQueue::associate(
 }
 
 bool FsEventQueue::dissociate(const Path& path) {
-  linux::Watch* watch = watches->erase(path);
+  linux::Watch* watch = watches_->erase(path);
   if (watch != NULL) {
     delete watch;
     return true;
@@ -167,7 +157,7 @@ bool FsEventQueue::dissociate(const Path& path) {
   }
 }
 
-bool FsEventQueue::enqueue(YO_NEW_REF FsEvent& event) {
+::std::unique_ptr<FsEvent> FsEventQueue::tryenqueue(::std::unique_ptr<FsEvent> event) {
   CHECK(false);
   return false;
   //if (event_queue.enqueue(event)) {
@@ -180,57 +170,65 @@ bool FsEventQueue::enqueue(YO_NEW_REF FsEvent& event) {
   //}
 }
 
-YO_NEW_REF Event* FsEventQueue::timeddequeue(const Time& timeout) {
-  Event* event = event_queue.trydequeue();
-  if (event != NULL) {
+::std::unique_ptr<FsEvent> FsEventQueue::timeddequeue(const Time& timeout) {
+  ::std::unique_ptr<FsEvent> event = event_queue_.trydequeue();
+  if (event) {
     return event;
-  } else {
-    epoll_event epoll_event_;
-    int timeout_ms
-    = (timeout == Time::FOREVER) ? -1 : static_cast<int>(timeout.ms());
-    int ret = epoll_wait(epoll_fd, &epoll_event_, 1, timeout_ms);
-
-    if (ret > 0) {
-      CHECK_EQ(ret, 1);
-
-      if (epoll_event_.data.fd == event_fd) {
-        uint64_t data;
-        read(event_fd, &data, sizeof(data));
-        return event_queue.trydequeue();
-      } else {
-        CHECK_EQ(epoll_event_.data.fd, inotify_fd);
-
-        char inotify_events[(sizeof(inotify_event) + PATH_MAX) * 16];
-        ssize_t read_ret
-        = ::read(inotify_fd, inotify_events, sizeof(inotify_events));
-        CHECK_GT(read_ret, 0);
-
-        const char* inotify_events_p = inotify_events;
-        const char* inotify_events_pe
-        = inotify_events + static_cast<size_t>(read_ret);
-
-        do {
-          const inotify_event* inotify_event_
-          = reinterpret_cast<const inotify_event*>(inotify_events_p);
-
-          linux::Watch* watch = watches->find(inotify_event_->wd);
-          if (watch != NULL) {
-            FsEvent* fs_event = watch->parse(*inotify_event_);
-            if (fs_event != NULL) {
-              event_queue.enqueue(*fs_event);
-            }
-          }
-
-          inotify_events_p += sizeof(inotify_event) + inotify_event_->len;
-        } while (inotify_events_p < inotify_events_pe);
-
-        return event_queue.trydequeue();
-      }
-    } else {
-      CHECK(ret == 0 || errno == EINTR);
-      return NULL;
-    }
   }
+
+  epoll_event epoll_event_;
+  int timeout_ms
+  = (timeout == Time::FOREVER) ? -1 : static_cast<int>(timeout.ms());
+  int ret = epoll_wait(epoll_fd_, &epoll_event_, 1, timeout_ms);
+
+  if (ret == 0) {
+    return NULL;
+  } else if (ret < 0) {
+    CHECK(errno == EINTR);
+    return NULL;    
+  }
+
+  CHECK_EQ(ret, 1);
+
+  if (epoll_event_.data.fd == event_fd_) {
+    uint64_t data;
+    ::read(event_fd_, &data, sizeof(data));
+    return NULL;
+  }
+
+  CHECK_EQ(epoll_event_.data.fd, inotify_fd_);
+
+  char inotify_events[(sizeof(inotify_event) + PATH_MAX) * 16];
+  ssize_t read_ret
+  = ::read(inotify_fd_, inotify_events, sizeof(inotify_events));
+  CHECK_GT(read_ret, 0);
+
+  const char* inotify_events_p = inotify_events;
+  const char* inotify_events_pe
+  = inotify_events + static_cast<size_t>(read_ret);
+
+  do {
+    const inotify_event* inotify_event_
+    = reinterpret_cast<const inotify_event*>(inotify_events_p);
+
+    linux::Watch* watch = watches_->find(inotify_event_->wd);
+    if (watch != NULL) {
+      FsEvent* fs_event = watch->parse(*inotify_event_);
+      if (fs_event != NULL) {
+        event_queue_.tryenqueue(*fs_event);
+      }
+    }
+
+    inotify_events_p += sizeof(inotify_event) + inotify_event_->len;
+  } while (inotify_events_p < inotify_events_pe);
+
+  return event_queue_.trydequeue();
+}
+
+void FsEventQueue::wake() {
+  uint64_t data = 1;
+  ssize_t write_ret = ::write(event_fd_, &data, sizeof(data));
+  CHECK_EQ(write_ret, static_cast<ssize_t>(sizeof(data)));
 }
 }
 }
