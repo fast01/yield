@@ -57,7 +57,7 @@ FsEventQueue::FsEventQueue() {
 
   epoll_event epoll_event_;
   memset(&epoll_event_, 0, sizeof(epoll_event_));
-  epoll_event_.data.fd = event_fd;
+  epoll_event_.data.fd = event_fd_;
   epoll_event_.events = EPOLLIN;
   if (::epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, event_fd_, &epoll_event_) != 0) {
     Exception e;
@@ -85,14 +85,13 @@ FsEventQueue::FsEventQueue() {
     throw e;
   }
 
-  watches_ = new linux::Watches;
+  watches_.reset(new linux::Watches);
 }
 
 FsEventQueue::~FsEventQueue() {
   ::close(epoll_fd_);
   ::close(event_fd_);
-  ::close(inotify_fd);
-  delete watches_;
+  ::close(inotify_fd_);
 }
 
 bool
@@ -137,14 +136,14 @@ FsEventQueue::associate(
     mask |= IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
   }
 
-  int wd = inotify_add_watch(inotify_fd, path.c_str(), mask);
-  if (wd != -1) {
-    watch = new linux::Watch(fs_event_types, inotify_fd, path, wd);
-    watches->insert(*watch);
-    return true;
-  } else {
+  int wd = inotify_add_watch(inotify_fd_, path.c_str(), mask);
+  if (wd == -1) {
     return false;
   }
+
+  watch = new linux::Watch(fs_event_types, inotify_fd_, path, wd);
+  watches_->insert(*watch);
+  return true;
 }
 
 bool FsEventQueue::dissociate(const Path& path) {
@@ -185,7 +184,7 @@ bool FsEventQueue::dissociate(const Path& path) {
     return NULL;
   } else if (ret < 0) {
     CHECK(errno == EINTR);
-    return NULL;    
+    return NULL;
   }
 
   CHECK_EQ(ret, 1);
@@ -213,9 +212,9 @@ bool FsEventQueue::dissociate(const Path& path) {
 
     linux::Watch* watch = watches_->find(inotify_event_->wd);
     if (watch != NULL) {
-      FsEvent* fs_event = watch->parse(*inotify_event_);
-      if (fs_event != NULL) {
-        event_queue_.tryenqueue(*fs_event);
+      ::std::unique_ptr<FsEvent> fs_event = watch->parse(*inotify_event_);
+      if (fs_event) {
+        event_queue_.tryenqueue(::std::move(fs_event));
       }
     }
 

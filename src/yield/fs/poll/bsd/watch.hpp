@@ -34,10 +34,12 @@
 struct kevent;
 
 namespace yield {
-class EventHandler;
+template <class> class EventHandler;
 
 namespace fs {
 namespace poll {
+class FsEvent;
+
 namespace bsd {
 class Watch {
 public:
@@ -46,7 +48,7 @@ public:
   }
 
 public:
-  virtual void read(const kevent&, EventHandler& fs_event_handler) = 0;
+  virtual void read(const kevent&, EventHandler<FsEvent>& fs_event_handler) = 0;
 
 protected:
   Watch(int fd)

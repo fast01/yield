@@ -36,8 +36,6 @@
 struct inotify_event;
 
 namespace yield {
-class EventHandler;
-
 namespace fs {
 namespace poll {
 namespace linux {
