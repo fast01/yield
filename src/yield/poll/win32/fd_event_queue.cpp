@@ -534,37 +534,37 @@ private:
 FdEventQueue::FdEventQueue(bool for_sockets_only) throw(Exception) {
   if (for_sockets_only) {
 #if _WIN32_WINNT >= 0x0600
-    pimpl = new SocketPoller;
+    pimpl_ = new SocketPoller;
 #else
-    pimpl = new SocketSelector;
+    pimpl_ = new SocketSelector;
 #endif
   } else {
-    pimpl = new FdImpl;
+    pimpl_ = new FdImpl;
   }
 }
 
 FdEventQueue::~FdEventQueue() {
-  delete pimpl;
+  delete pimpl_;
 }
 
 bool FdEventQueue::associate(fd_t fd, FdEvent::Type fd_event_types) {
-  return pimpl->associate(fd, fd_event_types);
+  return pimpl_->associate(fd, fd_event_types);
 }
 
 bool FdEventQueue::dissociate(fd_t fd) {
-  return pimpl->dissociate(fd);
+  return pimpl_->dissociate(fd);
 }
 
 unique_ptr<FdEvent> FdEventQueue::tryenqueue(unique_ptr<FdEvent> event) {
-  return pimpl->tryenqueue(::std::move(event));
+  return pimpl_->tryenqueue(::std::move(event));
 }
 
 unique_ptr<FdEvent> FdEventQueue::timeddequeue(const Time& timeout) {
-  return pimpl->timeddequeue(timeout);
+  return pimpl_->timeddequeue(timeout);
 }
 
 void FdEventQueue::wake() {
-  pimpl->wake();
+  pimpl_->wake();
 }
 }
 }
