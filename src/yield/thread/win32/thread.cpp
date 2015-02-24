@@ -35,8 +35,8 @@
 
 namespace yield {
 namespace thread {
-Thread::Thread(::std::unique_ptr<Runnable> runnable) {
-  runnable_.reset(runnable.release());
+Thread::Thread(::std::unique_ptr<Runnable> runnable)
+  : runnable_(::std::move(runnable)) {
   state_ = STATE_READY;
 
   handle = CreateThread(NULL, 0, run, this, NULL, &id);
