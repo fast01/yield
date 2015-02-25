@@ -105,9 +105,8 @@ TEST_F(DirectoryTest, close) {
 #ifndef _WIN32
 TEST_F(DirectoryTest, read_dev) {
   unique_ptr<Directory> directory = FileSystem().opendir("/dev");
-  Directory::Entry* dentry = directory->read();
-  while (dentry != NULL) {
-    Directory::Entry::dec_ref(*dentry);
+  unique_ptr<Directory::Entry> dentry = directory->read();
+  while (dentry) {
     dentry = directory->read();
   }
 }

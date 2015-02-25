@@ -51,11 +51,11 @@ public:
 
 public:
   File& get_read_file() {
-    if (read_file == NULL) {
+    if (!read_file) {
       get_write_file();
 
       read_file = FileSystem().open(path, O_RDONLY);
-      if (read_file == NULL) {
+      if (!read_file) {
         throw Exception();
       }
     }
@@ -64,9 +64,9 @@ public:
   }
 
   File& get_write_file() {
-    if (write_file == NULL) {
+    if (!write_file) {
       write_file = FileSystem().open(path, O_CREAT | O_TRUNC | O_WRONLY);
-      if (write_file == NULL) {
+      if (!write_file) {
         throw Exception();
       }
     }
@@ -123,12 +123,12 @@ TEST_F(FileTest, datasync) {
 
 TEST_F(FileTest, dup) {
   unique_ptr<File> dup_file = get_read_file().dup();
-  if (dup_file == NULL) {
+  if (!dup_file) {
     throw Exception();
   }
 
   dup_file = File::dup(static_cast<fd_t>(get_read_file()));
-  if (dup_file == NULL) {
+  if (!dup_file) {
     throw Exception();
   }
 }
@@ -139,10 +139,8 @@ TEST_F(FileTest, getlk) {
     throw Exception();
   }
 
-  File::Lock* lock = get_write_file().getlk(File::Lock(0, 256));
-  if (lock != NULL) {
-    File::Lock::dec_ref(*lock);
-  } else {
+  unique_ptr<File::Lock> lock = get_write_file().getlk(File::Lock(0, 256));
+  if (!lock) {
     throw Exception();
   }
 }
