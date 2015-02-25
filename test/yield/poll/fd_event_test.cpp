@@ -28,6 +28,9 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "yield/poll/fd_event.hpp"
+#ifdef _WIN32
+#include "yield/socket_t.hpp"
+#endif
 #include "gtest/gtest.h"
 
 namespace yield {

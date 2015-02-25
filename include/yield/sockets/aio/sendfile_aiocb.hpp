@@ -28,6 +28,7 @@
 #ifndef _YIELD_SOCKETS_AIO_SENDFILE_AIOCB_HPP_
 #define _YIELD_SOCKETS_AIO_SENDFILE_AIOCB_HPP_
 
+#include "yield/fd_t.hpp"
 #include "yield/sockets/aio/socket_aiocb.hpp"
 
 #include <stdio.h>

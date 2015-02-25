@@ -1,5 +1,3 @@
-// queue_test.hpp
-
 // Copyright (c) 2015 Minor Gordon
 // All rights reserved
 
@@ -27,49 +25,30 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_QUEUE_QUEUE_TEST_HPP_
-#define _YIELD_QUEUE_QUEUE_TEST_HPP_
+#ifndef _YIELD_MEMCPY_S_HPP_
+#define _YIELD_MEMCPY_S_HPP_
 
-#include <cstdint>
+#ifndef _WIN32
+#include <cstring>
 
-#include "yield/logging.hpp"
-#include "gtest/gtest.h"
-
-namespace yield {
-namespace queue {
-using ::std::move;
-using ::std::unique_ptr;
-
-template <class TypeParam>
-class QueueTest : public ::testing::Test {
-};
-
-TYPED_TEST_CASE_P(QueueTest);
-
-TYPED_TEST_P(QueueTest, create) {
-  new TypeParam();
+/**
+  Checked variant of memcpy.
+  @param dest memory location to copy to
+  @param dest_len length of the memory region pointed to by dest
+  @param src memory location to copy from
+  @param src_len length of the memory region pointed to by src
+*/
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+inline void
+memcpy_s(
+  void* dest,
+  size_t dest_len,
+  const void* src,
+  size_t src_len
+) {
+  memcpy(dest, src, src_len);
 }
-
-TYPED_TEST_P(QueueTest, trydequeue) {
-  TypeParam queue;
-
-  unique_ptr<uint32_t> in_value(new uint32_t(1));
-  ASSERT_FALSE(queue.tryenqueue(move(in_value)));
-  unique_ptr<uint32_t> out_value = queue.trydequeue();
-  ASSERT_TRUE(static_cast<bool>(out_value));
-  ASSERT_EQ(*out_value, 1);
-  ASSERT_FALSE(queue.trydequeue());
-}
-
-TYPED_TEST_P(QueueTest, tryenqueue) {
-  TypeParam queue;
-
-  unique_ptr<uint32_t> in_value(new uint32_t(1));
-  ASSERT_FALSE(queue.tryenqueue(move(in_value)));
-}
-
-REGISTER_TYPED_TEST_CASE_P(QueueTest, create, trydequeue, tryenqueue);
-}
-}
+#pragma GCC diagnostic warning "-Wunused-parameter"
+#endif
 
 #endif

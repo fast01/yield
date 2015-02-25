@@ -28,7 +28,7 @@
 #ifndef _YIELD_I18N_CODE_HPP_
 #define _YIELD_I18N_CODE_HPP_
 
-#include "yield/types.hpp"
+#include <cstdint>
 
 namespace yield {
 namespace i18n {

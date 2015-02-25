@@ -1,5 +1,3 @@
-// queue_test.hpp
-
 // Copyright (c) 2015 Minor Gordon
 // All rights reserved
 
@@ -27,49 +25,24 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_QUEUE_QUEUE_TEST_HPP_
-#define _YIELD_QUEUE_QUEUE_TEST_HPP_
+#ifndef _YIELD_SOCKET_T_HPP_
+#define _YIELD_SOCKET_T_HPP_
 
 #include <cstdint>
 
-#include "yield/logging.hpp"
-#include "gtest/gtest.h"
-
 namespace yield {
-namespace queue {
-using ::std::move;
-using ::std::unique_ptr;
-
-template <class TypeParam>
-class QueueTest : public ::testing::Test {
-};
-
-TYPED_TEST_CASE_P(QueueTest);
-
-TYPED_TEST_P(QueueTest, create) {
-  new TypeParam();
-}
-
-TYPED_TEST_P(QueueTest, trydequeue) {
-  TypeParam queue;
-
-  unique_ptr<uint32_t> in_value(new uint32_t(1));
-  ASSERT_FALSE(queue.tryenqueue(move(in_value)));
-  unique_ptr<uint32_t> out_value = queue.trydequeue();
-  ASSERT_TRUE(static_cast<bool>(out_value));
-  ASSERT_EQ(*out_value, 1);
-  ASSERT_FALSE(queue.trydequeue());
-}
-
-TYPED_TEST_P(QueueTest, tryenqueue) {
-  TypeParam queue;
-
-  unique_ptr<uint32_t> in_value(new uint32_t(1));
-  ASSERT_FALSE(queue.tryenqueue(move(in_value)));
-}
-
-REGISTER_TYPED_TEST_CASE_P(QueueTest, create, trydequeue, tryenqueue);
-}
+/**
+  Platform-specific socket descriptor type (e.g., int on POSIX systems).
+*/
+#if defined(_WIN64)
+typedef uint64_t socket_t;
+typedef int socklen_t;
+#elif defined(_WIN32)
+typedef uint32_t socket_t;
+typedef int socklen_t;
+#else
+typedef int socket_t;
+#endif
 }
 
 #endif

@@ -28,7 +28,6 @@
 #ifndef _YIELD_I18N_ICONV_HPP_
 #define _YIELD_I18N_ICONV_HPP_
 
-#include "yield/types.hpp"
 #include "yield/i18n/code.hpp"
 
 #include <string>

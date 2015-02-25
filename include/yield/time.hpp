@@ -28,7 +28,7 @@
 #ifndef _YIELD_TIME_HPP_
 #define _YIELD_TIME_HPP_
 
-#include "yield/types.hpp"
+#include <cstdint>
 
 namespace yield {
 /**

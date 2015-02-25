@@ -28,7 +28,9 @@
 #ifndef _YIELD_CHANNEL_HPP_
 #define _YIELD_CHANNEL_HPP_
 
-#include "yield/types.hpp"
+#include <cstdint>
+
+#include "yield/ssize_t.hpp"
 
 namespace yield {
 class Buffer;

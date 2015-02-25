@@ -28,7 +28,7 @@
 #ifndef _YIELD_THREAD_READER_WRITER_LOCK_HPP_
 #define _YIELD_THREAD_READER_WRITER_LOCK_HPP_
 
-#include "yield/types.hpp"
+#include <cstdint>
 
 #ifdef _WIN32
 struct _RTL_CRITICAL_SECTION;

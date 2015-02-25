@@ -28,7 +28,7 @@
 #ifndef _YIELD_THREAD_PROCESSOR_SET_HPP_
 #define _YIELD_THREAD_PROCESSOR_SET_HPP_
 
-#include "yield/types.hpp"
+#include <cstdint>
 
 #if defined(__linux__)
 #include <sched.h> // For cpu_set_t

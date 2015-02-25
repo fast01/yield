@@ -28,7 +28,9 @@
 #ifndef _YIELD_POLL_FD_EVENT_HPP_
 #define _YIELD_POLL_FD_EVENT_HPP_
 
-#include "yield/types.hpp"
+#include <cstdint>
+
+#include "yield/fd_t.hpp"
 
 namespace yield {
 namespace poll {

@@ -28,10 +28,9 @@
 #ifndef _YIELD_EXCEPTION_HPP_
 #define _YIELD_EXCEPTION_HPP_
 
+#include <cstdint>
 #include <exception>
 #include <string>
-
-#include "yield/types.hpp"
 
 namespace yield {
 /**

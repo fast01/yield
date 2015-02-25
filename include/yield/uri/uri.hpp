@@ -31,6 +31,7 @@
 #include <memory>
 
 #include "yield/exception.hpp"
+#include "yield/iovec.hpp"
 
 #ifdef _WIN32
 #pragma warning(push)

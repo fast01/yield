@@ -31,6 +31,7 @@
 #include <memory>
 
 #include "yield/exception.hpp"
+#include "yield/socket_t.hpp"
 #include "yield/uri/uri.hpp"
 
 #ifndef _WIN32

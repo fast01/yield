@@ -28,10 +28,9 @@
 #ifndef _YIELD_I18N_TSTRING_HPP_
 #define _YIELD_I18N_TSTRING_HPP_
 
-#include "yield/types.hpp"
-#include "yield/i18n/code.hpp"
-
 #include <string>
+
+#include "yield/i18n/code.hpp"
 
 namespace yield {
 namespace i18n {

@@ -28,6 +28,7 @@
 #ifndef _YIELD_SOCKETS_AIO_WIN32_SOCKET_AIO_QUEUE_HPP_
 #define _YIELD_SOCKETS_AIO_WIN32_SOCKET_AIO_QUEUE_HPP_
 
+#include "yield/fd_t.hpp"
 #include "yield/sockets/aio/socket_aio_queue.hpp"
 
 namespace yield {

@@ -30,6 +30,7 @@
 
 #include <memory>
 
+#include "yield/fd_t.hpp"
 #include "yield/fs/path.hpp"
 
 #ifdef _WIN32

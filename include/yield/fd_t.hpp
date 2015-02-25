@@ -25,48 +25,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_TYPES_HPP_
-#define _YIELD_TYPES_HPP_
-
-#include <cstdint>
-
-#ifdef _WIN32
-#ifndef _STRUCT_IOVEC_DEFINED
-struct iovec {
-  size_t iov_len;
-  void* iov_base;
-};
-#define _STRUCT_IOVEC_DEFINED 1
-#endif
-//typedef int64_t _off_t;
-//typedef int64_t off_t;
-//#define _OFF_T_DEFINED
-typedef intptr_t ssize_t;
-#else
-#include <sys/types.h>
-#include <sys/uio.h> // For struct iovec
-#ifdef __sun
-// Solaris's unistd.h defines a function yield that conflicts with the
-// namespace yield. This ugliness is necessary to get around that.
-#ifdef __XOPEN_OR_POSIX
-#error
-#endif
-#define __XOPEN_OR_POSIX 1
-#ifdef __EXTENSIONS__
-#undef __EXTENSIONS__
-#include <unistd.h> // For ssize_t
-#define __EXTENSIONS__ 1
-#else
-#include <unistd.h> // For ssize_t
-#endif
-#undef __XOPEN_OR_POSIX
-#endif
-#endif
-
-#ifndef _WIN32
-#include <cstring>
-using std::memcpy;
-#endif
+#ifndef _YIELD_FD_T_HPP_
+#define _YIELD_FD_T_HPP_
 
 namespace yield {
 /**
@@ -79,42 +39,6 @@ const static fd_t INVALID_FD = reinterpret_cast<fd_t>(-1);
 typedef int fd_t;
 const static fd_t INVALID_FD = -1;
 #endif
-
-/**
-  Platform-specific socket descriptor type (e.g., int on POSIX systems).
-*/
-#if defined(_WIN64)
-typedef uint64_t socket_t;
-typedef int socklen_t;
-#elif defined(_WIN32)
-typedef uint32_t socket_t;
-typedef int socklen_t;
-#else
-typedef int socket_t;
-#endif
 }
-
-#ifndef _WIN32
-/**
-  Checked variant of memcpy.
-  @param dest memory location to copy to
-  @param dest_len length of the memory region pointed to by dest
-  @param src memory location to copy from
-  @param src_len length of the memory region pointed to by src
-*/
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-inline void
-memcpy_s(
-  void* dest,
-  size_t dest_len,
-  const void* src,
-  size_t src_len
-) {
-  memcpy(dest, src, src_len);
-}
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#endif
-
-#include "yield/config.hpp"
 
 #endif

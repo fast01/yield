@@ -28,9 +28,9 @@
 #ifndef _YIELD_BUFFERS_HPP_
 #define _YIELD_BUFFERS_HPP_
 
-#include "yield/types.hpp"
-
 #include <vector>
+
+#include "yield/iovec.hpp"
 
 namespace yield {
 class Buffer;
@@ -39,7 +39,7 @@ class Buffer;
   Static methods for manipulating linked lists of <code>Buffer</code>s
     (Buffer::get_next_buffer, Buffer::set_next_buffer).
 */
-class Buffers {
+class Buffers final {
 public:
   /**
     Construct an array of iovecs for reading into a linked list of Buffers

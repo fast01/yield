@@ -28,7 +28,8 @@
 #ifndef _YIELD_SOCKETS_AIO_SOCKET_AIOCB_HPP_
 #define _YIELD_SOCKETS_AIO_SOCKET_AIOCB_HPP_
 
-#include "yield/types.hpp"
+#include "yield/socket_t.hpp"
+#include "yield/ssize_t.hpp"
 
 namespace yield {
 namespace sockets {

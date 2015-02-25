@@ -32,6 +32,8 @@
 #include "yield/buffers.hpp"
 #include "yield/channel.hpp"
 #include "yield/exception.hpp"
+#include "yield/fd_t.hpp"
+#include "yield/socket_t.hpp"
 #include "yield/sockets/socket_address.hpp"
 
 namespace yield {

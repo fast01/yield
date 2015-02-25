@@ -30,6 +30,7 @@
 
 #include "yield/buffer.hpp"
 #include "yield/channel.hpp"
+#include "yield/fd_t.hpp"
 
 #ifdef _WIN32
 #define O_SYNC     010000

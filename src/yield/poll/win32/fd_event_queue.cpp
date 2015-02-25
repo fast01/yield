@@ -26,6 +26,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "yield/poll/fd_event_queue.hpp"
+#include "yield/socket_t.hpp"
 
 #include <WinSock2.h>
 #pragma comment(lib, "ws2_32.lib")
