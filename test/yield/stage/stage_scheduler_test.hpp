@@ -32,23 +32,25 @@
 
 #include "test_event.hpp"
 #include "test_event_handler.hpp"
-#include "yield/stage/stage.hpp"
+#include "yield/stage/stage_impl.hpp"
 #include "yield/stage/stage_scheduler.hpp"
 #include "yield/thread/thread.hpp"
 #include "gtest/gtest.h"
 
 namespace yield {
 namespace stage {
+using ::std::move;
+using ::std::unique_ptr;
+
 template <class StageSchedulerType>
 class StageSchedulerScheduleTest : public ::testing::Test {
 public:
   // ::testing::Test
   void run() {
-    auto_Object<TestEventHandler> event_handler = new TestEventHandler;
-    auto_Object<Stage> stage = new Stage(event_handler->inc_ref());
-    auto_Object<StageScheduler> stage_scheduler = new StageSchedulerType;
-    stage_scheduler->schedule(*stage);
-    stage->handle(*new TestEvent);
+    unique_ptr<Stage> stage = new StageImpl<TestEvent>(unique_ptr<TestEventHandler>(new TestEventHandler));
+    unique_ptr<StageScheduler> stage_scheduler(new StageSchedulerType);
+    stage_scheduler->schedule(move(stage));
+    stage->handle(unique_ptr<TestEvent>(new TestEvent)));
     while (event_handler->get_seen_events_count() < 1) {
       yield::thread::Thread::sleep(0.1);
     }
