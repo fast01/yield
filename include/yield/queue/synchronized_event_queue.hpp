@@ -1,5 +1,3 @@
-// synchronized_event_queue_test.cpp
-
 // Copyright (c) 2015 Minor Gordon
 // All rights reserved
 
@@ -27,11 +25,45 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "./event_queue_test.hpp"
-#include "yield/stage/synchronized_event_queue.hpp"
+#ifndef _YIELD_QUEUE_SYNCHRONIZED_EVENT_QUEUE_HPP_
+#define _YIELD_QUEUE_SYNCHRONIZED_EVENT_QUEUE_HPP_
+
+#include "yield/event_queue.hpp"
+#include "yield/queue/synchronized_queue.hpp"
 
 namespace yield {
-namespace stage {
-INSTANTIATE_TYPED_TEST_CASE_P(SynchronizedEventQueue, EventQueueTest, SynchronizedEventQueue<TestEvent>);
+namespace queue {
+/**
+  An EventQueue implementation that wraps a SynchronizedQueue.
+*/
+template <class EventT>
+class SynchronizedEventQueue final : public EventQueue<EventT> {
+public:
+  // yield::EventQueue
+  ::std::unique_ptr<EventT> dequeue() override {
+    return synchronized_queue_.dequeue();
+  }
+
+  ::std::unique_ptr<EventT> timeddequeue(const Time& timeout) override {
+    return synchronized_queue_.timeddequeue(timeout);
+  }
+
+  ::std::unique_ptr<EventT> trydequeue() override {
+    return synchronized_queue_.trydequeue();
+  }
+
+  ::std::unique_ptr<EventT> tryenqueue(::std::unique_ptr<EventT> event) override {
+    return synchronized_queue_.tryenqueue(::std::move(event));
+  }
+
+  void wake() override {
+    return synchronized_queue_.wake();
+  }
+
+private:
+  SynchronizedQueue<EventT> synchronized_queue_;
+};
 }
 }
+
+#endif

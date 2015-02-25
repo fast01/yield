@@ -32,7 +32,7 @@
 #include "yield/event_queue.hpp"
 #include "yield/time.hpp"
 #include "yield/stage/stage.hpp"
-#include "yield/stage/synchronized_event_queue.hpp"
+#include "yield/queue/synchronized_event_queue.hpp"
 
 namespace yield {
 namespace stage {
@@ -41,7 +41,7 @@ class StageImpl : public EventHandler<EventT>, public Stage {
 public:
   StageImpl(::std::unique_ptr< EventHandler<EventT>> event_handler)
     : event_handler_(::std::move(event_handler)),
-      event_queue_(new ::yield::stage::SynchronizedEventQueue<EventT>) {
+      event_queue_(new ::yield::queue::SynchronizedEventQueue<EventT>) {
     init();
   }
 

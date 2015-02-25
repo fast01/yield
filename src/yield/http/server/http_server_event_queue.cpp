@@ -131,7 +131,7 @@ void
 HttpServerEventQueue::init(
   const SocketAddress& sockname
 ) throw(Exception) {
-  event_queue_ = make_shared< ::yield::stage::SynchronizedEventQueue<HttpServerEvent> >();
+  event_queue_ = make_shared< ::yield::queue::SynchronizedEventQueue<HttpServerEvent> >();
 
   if (!aio_queue_->associate(*socket_)) {
     throw Exception();

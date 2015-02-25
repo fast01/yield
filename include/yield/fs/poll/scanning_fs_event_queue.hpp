@@ -32,7 +32,7 @@
 
 #include "yield/event_queue.hpp"
 #include "yield/fs/poll/fs_event.hpp"
-#include "yield/stage/synchronized_event_queue.hpp"
+#include "yield/queue/synchronized_event_queue.hpp"
 
 namespace yield {
 namespace fs {
@@ -75,7 +75,7 @@ public:
   void wake() override;
 
 private:
-  ::yield::stage::SynchronizedEventQueue<FsEvent> event_queue_;
+  ::yield::queue::SynchronizedEventQueue<FsEvent> event_queue_;
   ::std::map< Path, ::std::unique_ptr<ScanningWatch> > watches_;
 };
 }

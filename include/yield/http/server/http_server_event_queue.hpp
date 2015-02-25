@@ -34,7 +34,7 @@
 #include "yield/http/server/http_server_event.hpp"
 #include "yield/sockets/socket_address.hpp"
 #include "yield/sockets/aio/socket_aio_queue.hpp"
-#include "yield/stage/synchronized_event_queue.hpp"
+#include "yield/queue/synchronized_event_queue.hpp"
 
 namespace yield {
 namespace sockets {
@@ -99,7 +99,7 @@ private:
 private:
   ::std::shared_ptr< ::yield::sockets::aio::SocketAioQueue > aio_queue_;
   ::std::vector< ::std::shared_ptr<HttpServerConnection> > connections_;
-  ::std::shared_ptr< ::yield::stage::SynchronizedEventQueue<HttpServerEvent> > event_queue_;
+  ::std::shared_ptr< ::yield::queue::SynchronizedEventQueue<HttpServerEvent> > event_queue_;
   ::std::shared_ptr< ::yield::sockets::StreamSocket > socket_;
 };
 }
