@@ -25,35 +25,77 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_FS_WIN32_NAMED_PIPE_HPP_
-#define _YIELD_FS_WIN32_NAMED_PIPE_HPP_
+#ifndef _YIELD_UNIQUE_FD_HPP_
+#define _YIELD_UNIQUE_FD_HPP_
 
-#include "yield/fs/file.hpp"
+#include "yield/fd_t.hpp"
 
 namespace yield {
-namespace fs {
-class NamedPipe : public File {
+class unique_fd final {
 public:
-  NamedPipe(unique_fd hNamedPipe);
+  explicit unique_fd(fd_t fd = INVALID_FD)
+    : fd_(fd) {
+  }
+
+  unique_fd(unique_fd&& other) {
+    fd_ = other.fd_;
+    other.fd_ = INVALID_FD;
+  }
+
+  unique_fd(const unique_fd&) = delete;
+
+  ~unique_fd() {
+    close();
+  }
 
 public:
-  // yield::Channel
-  ssize_t read(void* buf, size_t buflen) override;
-  ssize_t readv(const iovec* iov, int iovlen) override;
-  ssize_t write(const void* buf, size_t buflen) override;
-  ssize_t writev(const iovec* iov, int iovlen) override;
+  bool close();
 
-  // yield::File
-  bool datasync() override;
-  bool sync() override;
+  unique_fd dup();
+
+  fd_t get() const {
+    return fd_;
+  }
+
+public:
+  operator bool() const {
+    return fd_ != INVALID_FD;
+  }
+
+  fd_t& operator*() {
+    return fd_;
+  }
+
+  const fd_t& operator*() const {
+    return fd_;
+  }
+
+  const fd_t* operator->() const {
+    return &fd_;
+  }
+
+  fd_t* operator->() {
+    return &fd_;
+  }
+
+  unique_fd& operator=(unique_fd&& other) {
+    fd_ = other.fd_;
+    other.fd_ = INVALID_FD;
+    return *this;
+  }
+
+  unique_fd& operator=(const unique_fd&) = delete;
+
+public:
+  fd_t release() {
+    fd_t ret = get();
+    fd_ = INVALID_FD;
+    return ret;
+  }
 
 private:
-  bool connect();
-
-private:
-  bool connected;
+  fd_t fd_;
 };
-}
 }
 
 #endif

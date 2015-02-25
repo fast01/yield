@@ -31,6 +31,7 @@
 #include "yield/buffer.hpp"
 #include "yield/channel.hpp"
 #include "yield/fd_t.hpp"
+#include "yield/unique_fd.hpp"
 
 #ifdef _WIN32
 #define O_SYNC     010000
@@ -210,7 +211,7 @@ public:
 
   private:
 #ifdef _WIN32
-    fd_t fd_;
+    unique_fd fd_;
     fd_t file_mapping_;
 #endif
     uint64_t file_offset_;
@@ -226,22 +227,18 @@ public:
 public:
   /**
     Construct a File by wrapping a file descriptor.
-    Takes ownership of the file descriptor.
     @param fd the file descriptor to take ownership of
   */
-  File(fd_t fd);
-
-  /**
-    Destruct a File, closing its file descriptor.
-  */
-  ~File();
+  File(unique_fd fd)
+    : fd_(::std::move(fd)) {
+  }
 
 public:
   /**
     Flush any changes to a file's data to disk, ignoring metadata changes.
     @return true on success, false+errno on failure
   */
-  bool datasync();
+  virtual bool datasync();
 
 public:
   /**
@@ -249,7 +246,7 @@ public:
     @return a new File with a dup'd file descriptor on success, NULL+errno on failure
   */
   ::std::unique_ptr<File> dup() {
-    return dup(fd_);
+    return dup(*fd_);
   }
 
   /**
@@ -304,7 +301,7 @@ public:
     @return the platform-specific file descriptor underlying this file
   */
   operator fd_t() const {
-    return fd_;
+    return *fd_;
   }
 
 public:
@@ -401,7 +398,7 @@ public:
     Flush data and metadata changes to this file to disk.
     @return true on success, false+errno on failure
   */
-  bool sync();
+  virtual bool sync();
 
 public:
   /**
@@ -430,13 +427,16 @@ public:
 
 public:
   // yield::Channel
-  bool close();
-  ssize_t read(Buffer& buffer);
-  ssize_t read(void* buf, size_t buflen);
-  ssize_t readv(const iovec* iov, int iovlen);
-  ssize_t write(const Buffer& buffer);
-  ssize_t write(const void* buf, size_t buflen);
-  ssize_t writev(const iovec* iov, int iovlen);
+  bool close() override {
+    return fd_.close();
+  }
+
+  ssize_t read(Buffer& buffer) override;
+  ssize_t read(void* buf, size_t buflen) override;
+  ssize_t readv(const iovec* iov, int iovlen) override;
+  ssize_t write(const Buffer& buffer) override;
+  ssize_t write(const void* buf, size_t buflen) override;
+  ssize_t writev(const iovec* iov, int iovlen) override;
 
 private:
 #ifdef _WIN32
@@ -444,7 +444,7 @@ private:
 #endif
 
 private:
-  fd_t fd_;
+  unique_fd fd_;
 };
 }
 }

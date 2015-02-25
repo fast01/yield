@@ -25,35 +25,57 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_FS_WIN32_NAMED_PIPE_HPP_
-#define _YIELD_FS_WIN32_NAMED_PIPE_HPP_
+#include "yield/unique_fd.hpp"
 
-#include "yield/fs/file.hpp"
+#include <memory>
+
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
 
 namespace yield {
-namespace fs {
-class NamedPipe : public File {
-public:
-  NamedPipe(unique_fd hNamedPipe);
+bool unique_fd::close() {
+  if (fd_ == INVALID_FD) {
+    return false;
+  }
 
-public:
-  // yield::Channel
-  ssize_t read(void* buf, size_t buflen) override;
-  ssize_t readv(const iovec* iov, int iovlen) override;
-  ssize_t write(const void* buf, size_t buflen) override;
-  ssize_t writev(const iovec* iov, int iovlen) override;
-
-  // yield::File
-  bool datasync() override;
-  bool sync() override;
-
-private:
-  bool connect();
-
-private:
-  bool connected;
-};
-}
-}
-
+#ifdef _WIN32
+  if (::CloseHandle(fd_)) {
+#else
+  if (::close(fd_) == -1) {
 #endif
+    fd_ = INVALID_FD;
+    return true;
+  } else {
+    fd_ = INVALID_HANDLE_VALUE;
+    return false;
+  }
+}
+
+unique_fd unique_fd::dup() {
+#ifdef _WIN32
+  fd_t dup_fd;
+  if (
+    DuplicateHandle(
+      GetCurrentProcess(),
+      fd_,
+      GetCurrentProcess(),
+      &dup_fd,
+      0,
+      FALSE,
+      DUPLICATE_SAME_ACCESS
+    )
+  ) {
+    return unique_fd(dup_fd);
+  }
+#else
+  fd_t dup_fd = ::dup(fd_);
+  if (dup_fd != INVALID_FD) {
+    return unique_fd(dup_fd);
+  }
+#endif
+  return unique_fd();
+}
+}

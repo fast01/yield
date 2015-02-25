@@ -25,14 +25,16 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "named_pipe.hpp"
+#include "./named_pipe.hpp"
+
+#include <memory>
 
 #include <Windows.h>
 
 namespace yield {
 namespace fs {
-NamedPipe::NamedPipe(HANDLE hNamedPipe)
-  : File(hNamedPipe) {
+NamedPipe::NamedPipe(unique_fd hNamedPipe)
+  : File(::std::move(hNamedPipe)) {
   connected = false;
 }
 

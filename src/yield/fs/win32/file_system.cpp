@@ -25,7 +25,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "named_pipe.hpp"
+#include "./named_pipe.hpp"
 #include "yield/logging.hpp"
 #include "yield/fs/path.hpp"
 #include "yield/fs/directory.hpp"
@@ -93,20 +93,20 @@ bool FileSystem::mkdir(const Path& path) {
       dwPipeMode |= PIPE_WAIT;
     }
 
-    HANDLE hNamedPipe
-    = CreateNamedPipe(
-        path.c_str(),
-        dwOpenMode,
-        dwPipeMode,
-        PIPE_UNLIMITED_INSTANCES,
-        4096,
-        4096,
-        0,
-        NULL
-      );
+    unique_fd hNamedPipe(
+      CreateNamedPipe(
+          path.c_str(),
+          dwOpenMode,
+          dwPipeMode,
+          PIPE_UNLIMITED_INSTANCES,
+          4096,
+          4096,
+          0,
+          NULL
+        ));
 
-    if (hNamedPipe != INVALID_HANDLE_VALUE) {
-      return ::std::unique_ptr<NamedPipe>(new NamedPipe(hNamedPipe));
+    if (hNamedPipe) {
+      return ::std::unique_ptr<NamedPipe>(new NamedPipe(::std::move(hNamedPipe)));
     } else {
       return NULL;
     }
@@ -197,7 +197,7 @@ FileSystem::open(
       SetEndOfFile(fd);
     }
 
-    return ::std::unique_ptr<File>(new File(fd));
+    return ::std::unique_ptr<File>(new File(unique_fd(fd)));
   }
 
   return NULL;

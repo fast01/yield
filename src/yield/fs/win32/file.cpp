@@ -25,6 +25,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <memory>
+
 #include "yield/buffers.hpp"
 #include "yield/logging.hpp"
 #include "yield/fs/file.hpp"
@@ -92,7 +94,6 @@ File::Map::Map(
 File::Map::~Map() {
   unmap();
   data_ = NULL;
-  ::CloseHandle(fd_);
 }
 
 bool File::Map::is_read_only() const {
@@ -140,29 +141,6 @@ bool File::Map::unmap() {
   }
 }
 
-
-File::File(fd_t fd)
-  : fd_(fd)
-{ }
-
-File::~File() {
-  close();
-}
-
-bool File::close() {
-  if (fd_ != INVALID_HANDLE_VALUE) {
-    if (::CloseHandle(fd_)) {
-      fd_ = INVALID_HANDLE_VALUE;
-      return true;
-    } else {
-      fd_ = INVALID_HANDLE_VALUE;
-      return false;
-    }
-  } else {
-    return false;
-  }
-}
-
 bool File::datasync() {
   return FlushFileBuffers(*this) != 0;
 }
@@ -180,7 +158,7 @@ bool File::datasync() {
       DUPLICATE_SAME_ACCESS
     )
   ) {
-    return ::std::unique_ptr<File>(new File(dup_fd));
+    return ::std::unique_ptr<File>(new File(unique_fd(dup_fd)));
   } else {
     return NULL;
   }
