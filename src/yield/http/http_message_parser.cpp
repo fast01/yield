@@ -73,7 +73,7 @@ HttpMessageParser::parse_body(
  ) {
     return true;
   } else if (static_cast<size_t>(eof - p) >= content_length) {
-    out_body.swap(Buffer::copy(p, content_length));
+    out_body = Buffer::copy(p, content_length);
     p += content_length;
     return true;
   } else
