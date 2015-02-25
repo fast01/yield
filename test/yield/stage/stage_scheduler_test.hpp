@@ -47,7 +47,7 @@ class StageSchedulerScheduleTest : public ::testing::Test {
 public:
   // ::testing::Test
   void run() {
-    unique_ptr<Stage> stage = new StageImpl<TestEvent>(unique_ptr<TestEventHandler>(new TestEventHandler));
+    unique_ptr<StageImpl<TestEvent>> stage = new StageImpl<TestEvent>(unique_ptr<TestEventHandler>(new TestEventHandler));
     unique_ptr<StageScheduler> stage_scheduler(new StageSchedulerType);
     stage_scheduler->schedule(move(stage));
     stage->handle(unique_ptr<TestEvent>(new TestEvent));
