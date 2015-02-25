@@ -68,7 +68,7 @@ SocketAddress::SocketAddress(const SocketAddress& other, uint16_t port) {
     CHECK(false);
   }
 
-  if (other.next_socket_address != NULL) {
+  if (other.next_socket_address) {
     next_socket_address.reset(new SocketAddress(*other.next_socket_address, port));
   } else {
     next_socket_address.reset();
@@ -136,14 +136,15 @@ const SocketAddress* SocketAddress::filter(int family) const {
   CHECK_GT(len(family), 0);
 
   const SocketAddress* next_socket_address = this;
-
-  do {
+  for (;;) {
     if (next_socket_address->get_family() == family) {
       return next_socket_address;
-    } else {
+    } else if (next_socket_address->next_socket_address) {
       next_socket_address = next_socket_address->next_socket_address.get();
+    } else {
+      break;
     }
-  } while (next_socket_address != NULL);
+  }
 
   WSASetLastError(WSAEAFNOSUPPORT);
 
@@ -207,7 +208,7 @@ SocketAddress::getnameinfo(
   int flags
 ) const {
   const SocketAddress* next_socket_address = this;
-  do {
+  for (;;) {
     if (
       ::getnameinfo(
         *this,
@@ -222,8 +223,12 @@ SocketAddress::getnameinfo(
       return true;
     }
 
-    next_socket_address = next_socket_address->next_socket_address.get();
-  } while (next_socket_address != NULL);
+    if (next_socket_address->next_socket_address) {
+      next_socket_address = next_socket_address->next_socket_address.get();
+    } else {
+      break;
+    }
+  }
 
   return false;
 }
