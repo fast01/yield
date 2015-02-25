@@ -30,8 +30,8 @@
 #ifndef _YIELD_STAGE_STAGE_SCHEDULER_TEST_HPP_
 #define _YIELD_STAGE_STAGE_SCHEDULER_TEST_HPP_
 
-#include "test_event.hpp"
-#include "test_event_handler.hpp"
+#include "./test_event.hpp"
+#include "./test_event_handler.hpp"
 #include "yield/stage/stage_impl.hpp"
 #include "yield/stage/stage_scheduler.hpp"
 #include "yield/thread/thread.hpp"
@@ -45,13 +45,12 @@ using ::std::unique_ptr;
 template <class StageSchedulerType>
 class StageSchedulerScheduleTest : public ::testing::Test {
 public:
-  // ::testing::Test
   void run() {
-    unique_ptr<StageImpl<TestEvent>> stage = new StageImpl<TestEvent>(unique_ptr<TestEventHandler>(new TestEventHandler));
+    unique_ptr<StageImpl<TestEvent>> stage(new StageImpl<TestEvent>(unique_ptr<TestEventHandler>(new TestEventHandler)));
     unique_ptr<StageScheduler> stage_scheduler(new StageSchedulerType);
     stage_scheduler->schedule(move(stage));
     stage->handle(unique_ptr<TestEvent>(new TestEvent));
-    while (event_handler->get_seen_events_count() < 1) {
+    while (static_cast<TestEventHandler&>(stage->event_handler()).get_seen_events_count() < 1) {
       yield::thread::Thread::sleep(0.1);
     }
   }

@@ -33,7 +33,8 @@
 namespace yield {
 namespace stage {
 typedef StageSchedulerScheduleTest<WavefrontStageScheduler> WavefrontStageSchedulerScheduleTest;
-TEST_F(WavefrontStageSchedulerScheduleTest, schedule) {
+TEST_F(WavefrontStageSchedulerScheduleTest, run) {
+  this->run();
 }
 }
 }
