@@ -67,17 +67,16 @@ SendfileAiocb::SendfileAiocb(
     throw Exception();
   }
 #else
-  offset = lseek(fd, 0, SEEK_CUR);
-  if (offset != static_cast<off_t>(-1)) {
-    struct stat stbuf;
-    if (fstat(fd, &stbuf) == 0) {
-      nbytes = stbuf.st_size - offset;
-    } else {
-      throw Exception();
-    }
-  } else {
+  offset_ = ::lseek(fd_, 0, SEEK_CUR);
+  if (offset_ == static_cast<off_t>(-1)) {
     throw Exception();
   }
+
+  struct stat stbuf;
+  if (fstat(fd, &stbuf) != 0) {
+    throw Exception();
+  }
+  nbytes_ = stbuf.st_size - offset_;
 #endif
 }
 
