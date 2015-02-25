@@ -55,7 +55,7 @@ TYPED_TEST_P(QueueTest, trydequeue) {
   unique_ptr<uint32_t> in_value(new uint32_t(1));
   ASSERT_FALSE(queue.tryenqueue(move(in_value)));
   unique_ptr<uint32_t> out_value = queue.trydequeue();
-  ASSERT_TRUE(out_value);
+  ASSERT_TRUE(static_cast<bool>(out_value));
   ASSERT_EQ(*out_value, 1);
   ASSERT_FALSE(queue.trydequeue());
 }
