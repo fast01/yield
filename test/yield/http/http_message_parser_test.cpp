@@ -162,7 +162,7 @@ TEST(HttpMessageParser, WellFormedNormalBody) {
   TestMessageParseCallbacks callbacks;
   http_request_parser.parse(callbacks);
   ASSERT_TRUE(static_cast<bool>(callbacks.http_request_));
-  ASSERT_TRUE(callbacks.http_request_->body_buffer());
+  ASSERT_TRUE(static_cast<bool>(callbacks.http_request_->body_buffer()));
   ASSERT_EQ(callbacks.http_request_->body_buffer()->size(), 2u);
 }
 
@@ -174,7 +174,7 @@ TEST(HttpMessageParser, WellFormedPipelinedNoBody) {
   ASSERT_TRUE(static_cast<bool>(callbacks.http_request_));
   ASSERT_EQ(callbacks.http_request_->http_version(), 1);
   ASSERT_EQ((*callbacks.http_request_)["Host"], "localhost");
-  ASSERT_FALSE(callbacks.http_request_->body_buffer());
+  ASSERT_FALSE(static_cast<bool>(callbacks.http_request_->body_buffer()));
   }
   {
   TestMessageParseCallbacks callbacks;
@@ -182,7 +182,7 @@ TEST(HttpMessageParser, WellFormedPipelinedNoBody) {
   ASSERT_TRUE(static_cast<bool>(callbacks.http_request_));
   ASSERT_EQ(callbacks.http_request_->http_version(), 1);
   ASSERT_EQ((*callbacks.http_request_)["Host"], "localhost");
-  ASSERT_FALSE(callbacks.http_request_->body_buffer());
+  ASSERT_FALSE(static_cast<bool>(callbacks.http_request_->body_buffer()));
   }
 }
 
@@ -194,7 +194,7 @@ TEST(HttpMessageParser, WellFormedPipelinedNormalBody) {
   ASSERT_TRUE(static_cast<bool>(callbacks.http_request_));
   ASSERT_EQ(callbacks.http_request_->http_version(), 1);
   ASSERT_EQ((*callbacks.http_request_)["Host"], "localhost");
-  ASSERT_TRUE(callbacks.http_request_->body_buffer());
+  ASSERT_TRUE(static_cast<bool>(callbacks.http_request_->body_buffer()));
   ASSERT_EQ(callbacks.http_request_->body_buffer()->size(), 2u);
   }
   {
@@ -203,7 +203,7 @@ TEST(HttpMessageParser, WellFormedPipelinedNormalBody) {
   ASSERT_TRUE(static_cast<bool>(callbacks.http_request_));
   ASSERT_EQ(callbacks.http_request_->http_version(), 1);
   ASSERT_EQ((*callbacks.http_request_)["Host"], "localhost");
-  ASSERT_TRUE(callbacks.http_request_->body_buffer());
+  ASSERT_TRUE(static_cast<bool>(callbacks.http_request_->body_buffer()));
   ASSERT_EQ(callbacks.http_request_->body_buffer()->size(), 2u);
   }
 }

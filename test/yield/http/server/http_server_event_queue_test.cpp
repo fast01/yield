@@ -67,10 +67,10 @@ protected:
 #else
       = FileSystem().open("Makefile");
 #endif
-      if (file != NULL) {
+      if (file) {
         unique_ptr<Stat> stbuf = file->stat();
-        if (stbuf != NULL) {
-          unique_ptr<HttpServerResponse> http_response(new HttpServerResponse(200, shared_ptr<File>(move(file))));
+        if (stbuf) {
+          unique_ptr<HttpServerResponse> http_response(new HttpServerResponse(shared_ptr<File>(move(file)), http_request->http_version(), 200));
           http_response->set_field(
             "Content-Length",
             static_cast<size_t>(stbuf->get_size())
@@ -92,7 +92,7 @@ TEST_F(HttpServerEventQueueTest, dequeue) {
   TestHttpServerEventQueue http_request_queue;
   for (;;) {
     unique_ptr<HttpServerEvent> http_request = http_request_queue.timeddequeue(30.0);
-    if (http_request != NULL) {
+    if (http_request) {
       handle(unique_ptr<HttpServerRequest>(static_cast<HttpServerRequest*>(http_request.release())));
     } else {
       break;
