@@ -35,12 +35,14 @@
 
 namespace yield {
 namespace sockets {
+using ::std::unique_ptr;
+
 const int StreamSocket::TYPE = SOCK_STREAM;
 
 const int StreamSocket::Option::KEEPALIVE = SO_KEEPALIVE;
 const int StreamSocket::Option::LINGER = SO_LINGER;
 
-StreamSocket* StreamSocket::accept(SocketAddress& peername) {
+unique_ptr<StreamSocket> StreamSocket::accept(SocketAddress& peername) {
   socklen_t peernamelen = peername.len();
 
   socket_t peer_socket = ::accept(*this, peername, &peernamelen);

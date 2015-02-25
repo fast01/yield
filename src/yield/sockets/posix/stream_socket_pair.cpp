@@ -31,14 +31,15 @@
 
 namespace yield {
 namespace sockets {
+using ::std::shared_ptr;
+
 StreamSocketPair::StreamSocketPair() {
   socket_t sv[2];
-  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sv) != -1) {
-    sockets[0] = new StreamSocket(AF_UNIX, 0, sv[0]);
-    sockets[1] = new StreamSocket(AF_UNIX, 0, sv[1]);
-  } else {
+  if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sv) == -1) {
     throw Exception();
   }
+  first_ = shared_ptr<StreamSocket>(new StreamSocket(AF_UNIX, 0, sv[0]));
+  second_ = shared_ptr<StreamSocket>(new StreamSocket(AF_UNIX, 0, sv[1]));
 }
 }
 }

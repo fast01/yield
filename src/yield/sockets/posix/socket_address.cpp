@@ -38,6 +38,10 @@
 
 namespace yield {
 namespace sockets {
+using ::std::make_shared;
+using ::std::shared_ptr;
+using ::std::unique_ptr;
+
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 const int SocketAddress::GETNAMEINFO_FLAG_NOFQDN = NI_NOFQDN;
 const int SocketAddress::GETNAMEINFO_FLAG_NAMEREQD = NI_NAMEREQD;
@@ -85,8 +89,8 @@ SocketAddress::SocketAddress(const SocketAddress& other, uint16_t port) {
     CHECK(false);
   }
 
-  if (other.next_socket_address != NULL) {
-    next_socket_address = new SocketAddress(*other.next_socket_address, port);
+  if (other.next_socket_address) {
+    next_socket_address = make_shared<SocketAddress>(*other.next_socket_address, port);
   } else {
     next_socket_address = NULL;
   }
@@ -102,9 +106,8 @@ void SocketAddress::assign(const addrinfo& addrinfo_) {
 
   addr.ss_family = static_cast<uint16_t>(addrinfo_.ai_family);
 
-  SocketAddress::dec_ref(next_socket_address);
   if (addrinfo_.ai_next != NULL) {
-    next_socket_address = new SocketAddress(*addrinfo_.ai_next);
+    next_socket_address = make_shared<SocketAddress>(*addrinfo_.ai_next);
   } else {
     next_socket_address = NULL;
   }
@@ -145,28 +148,29 @@ void SocketAddress::assign(const sockaddr_in6& sockaddr_in6_) {
 
 const SocketAddress* SocketAddress::filter(int family) const {
   const SocketAddress* next_socket_address = this;
-
-  do {
+  for (;;) {
     if (next_socket_address->get_family() == family) {
       return next_socket_address;
+    } else if (next_socket_address->next_socket_address) {
+      next_socket_address = next_socket_address->next_socket_address.get();
     } else {
-      next_socket_address = next_socket_address->next_socket_address;
+      break;
     }
-  } while (next_socket_address != NULL);
+  }
 
   errno = EAFNOSUPPORT;
 
   return NULL;
 }
 
-SocketAddress*
+unique_ptr<SocketAddress>
 SocketAddress::getaddrinfo(
   const char* nodename,
   const char* servname
 ) {
   addrinfo* addrinfo_ = _getaddrinfo(nodename, servname);
   if (addrinfo_ != NULL) {
-    SocketAddress* socket_address = new SocketAddress(*addrinfo_);
+    unique_ptr<SocketAddress> socket_address(new SocketAddress(*addrinfo_));
     freeaddrinfo(addrinfo_);
     return socket_address;
   } else {
@@ -214,7 +218,7 @@ SocketAddress::getnameinfo(
   int flags
 ) const {
   const SocketAddress* next_socket_address = this;
-  do {
+  for (;;) {
     if (
       ::getnameinfo(
         *this,
@@ -229,8 +233,12 @@ SocketAddress::getnameinfo(
       return true;
     }
 
-    next_socket_address = next_socket_address->next_socket_address;
-  } while (next_socket_address != NULL);
+    if (next_socket_address->next_socket_address) {
+      next_socket_address = next_socket_address->next_socket_address.get();
+    } else {
+      break;
+    }
+  }
 
   return false;
 }

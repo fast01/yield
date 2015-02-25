@@ -33,12 +33,11 @@ namespace yield {
 namespace sockets {
 DatagramSocketPair::DatagramSocketPair() {
   socket_t sv[2];
-  if (::socketpair(AF_UNIX, SOCK_DGRAM, 0, sv) != -1) {
-    sockets[0] = new DatagramSocket(AF_UNIX, 0, sv[0]);
-    sockets[1] = new DatagramSocket(AF_UNIX, 0, sv[1]);
-  } else {
+  if (::socketpair(AF_UNIX, SOCK_DGRAM, 0, sv) == -1) {
     throw Exception();
   }
+  first_ = ::std::shared_ptr<DatagramSocket>(new DatagramSocket(AF_UNIX, 0, sv[0]));
+  second_ = ::std::shared_ptr<DatagramSocket>(new DatagramSocket(AF_UNIX, 0, sv[1]));
 }
 }
 }
