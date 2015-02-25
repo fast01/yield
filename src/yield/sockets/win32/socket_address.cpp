@@ -25,13 +25,15 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "winsock.hpp"
+#include "./winsock.hpp"
 #include "yield/exception.hpp"
 #include "yield/logging.hpp"
 #include "yield/sockets/socket_address.hpp"
 
 namespace yield {
 namespace sockets {
+using ::std::make_shared;
+
 const int SocketAddress::GETNAMEINFO_FLAG_NOFQDN = NI_NOFQDN;
 const int SocketAddress::GETNAMEINFO_FLAG_NAMEREQD = NI_NAMEREQD;
 const int SocketAddress::GETNAMEINFO_FLAG_NUMERICHOST = NI_NUMERICHOST;
@@ -69,7 +71,7 @@ SocketAddress::SocketAddress(const SocketAddress& other, uint16_t port) {
   }
 
   if (other.next_socket_address) {
-    next_socket_address.reset(new SocketAddress(*other.next_socket_address, port));
+    next_socket_address = ::std::make_shared<SocketAddress>(*other.next_socket_address, port);
   } else {
     next_socket_address.reset();
   }
@@ -88,7 +90,7 @@ void SocketAddress::assign(const addrinfo& addrinfo_) {
   addr.ss_family = static_cast<uint16_t>(addrinfo_.ai_family);
 
   if (addrinfo_.ai_next != NULL) {
-    next_socket_address.reset(new SocketAddress(*addrinfo_.ai_next));
+    next_socket_address = make_shared<SocketAddress>(*addrinfo_.ai_next);
   } else {
     next_socket_address.reset();
   }
