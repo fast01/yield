@@ -147,7 +147,7 @@ FileSystem::open(
 ) {
   fd_t fd = ::open(path.c_str(), flags, mode);
   if (fd >= 0) {
-    return unique_ptr<File>(new File(fd));
+    return unique_ptr<File>(new File(unique_fd(fd)));
   } else {
     return NULL;
   }

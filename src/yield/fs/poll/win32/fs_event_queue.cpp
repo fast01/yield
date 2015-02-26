@@ -45,14 +45,13 @@ using win32::DirectoryWatch;
 using win32::FileWatch;
 
 FsEventQueue::FsEventQueue() {
-  hIoCompletionPort_ = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-  if (hIoCompletionPort_ == INVALID_HANDLE_VALUE) {
+  hIoCompletionPort_.reset(CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0));
+  if (!hIoCompletionPort_) {
     throw Exception();
   }
 }
 
 FsEventQueue::~FsEventQueue() {
-  ::CloseHandle(hIoCompletionPort_);
 }
 
 bool FsEventQueue::associate(const Path& path, FsEvent::Type fs_event_types) {
@@ -77,7 +76,7 @@ bool FsEventQueue::associate(const Path& path, FsEvent::Type fs_event_types) {
     if (
       CreateIoCompletionPort(
         *directory,
-        hIoCompletionPort_,
+        *hIoCompletionPort_,
         0,
         0
       ) != INVALID_HANDLE_VALUE
@@ -157,7 +156,7 @@ unique_ptr<FsEvent> FsEventQueue::timeddequeue(const Time& timeout) {
 
   BOOL bRet
   = GetQueuedCompletionStatus(
-      hIoCompletionPort_,
+      *hIoCompletionPort_,
       &dwBytesTransferred,
       &ulCompletionKey,
       &lpOverlapped,

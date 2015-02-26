@@ -143,26 +143,6 @@ bool File::Map::unmap() {
 #pragma GCC diagnostic warning "-Wold-style-cast"
 
 
-File::File(fd_t fd) : fd_(fd) {
-}
-
-File::~File() {
-  close();
-}
-
-bool File::close() {
-  if (fd_ >= 0) {
-    if (::close(fd_) == 0) {
-      fd_ = -1;
-      return true;
-    } else {
-      return false;
-    }
-  } else {
-    return false;
-  }
-}
-
 bool File::datasync() {
 #ifdef __linux__
   return fdatasync(*this) != -1;

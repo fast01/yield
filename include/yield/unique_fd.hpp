@@ -93,6 +93,11 @@ public:
     return ret;
   }
 
+  void reset(fd_t fd) {
+    close();
+    fd_ = fd;
+  }
+
 private:
   fd_t fd_;
 };

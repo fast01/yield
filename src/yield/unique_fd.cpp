@@ -44,7 +44,7 @@ bool unique_fd::close() {
 #ifdef _WIN32
   if (::CloseHandle(fd_)) {
 #else
-  if (::close(fd_) == -1) {
+  if (::close(fd_) == 0) {
 #endif
     fd_ = INVALID_FD;
     return true;

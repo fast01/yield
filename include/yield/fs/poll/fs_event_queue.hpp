@@ -28,6 +28,7 @@
 #ifndef _YIELD_FS_POLL_FS_EVENT_QUEUE_HPP_
 #define _YIELD_FS_POLL_FS_EVENT_QUEUE_HPP_
 
+#include "yield/unique_fd.hpp"
 #if defined(__FreeBSD__) || defined(__linux__) || defined(__MACH__) || defined(_WIN32)
 #include "yield/event_queue.hpp"
 #include "yield/queue/blocking_concurrent_queue.hpp"
@@ -101,13 +102,13 @@ public:
 private:
   ::yield::queue::BlockingConcurrentQueue<FsEvent> event_queue_;
 #if defined(__FreeBSD__) || defined(__MACH__)
-  int kq_, wake_pipe_[2];
+  unique_fd kq_, wake_pipe_[2];
   ::std::unique_ptr< Watches<bsd::Watch> > watches_;
 #elif defined(__linux__)
-  int epoll_fd_, event_fd_, inotify_fd_;
+  unique_fd epoll_fd_, event_fd_, inotify_fd_;
   ::std::unique_ptr<linux::Watches> watches_;
 #elif defined(_WIN32)
-  fd_t hIoCompletionPort_;
+  unique_fd hIoCompletionPort_;
   ::std::map< Path, ::std::unique_ptr<win32::Watch> > watches_;
 #endif
 };
