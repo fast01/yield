@@ -28,7 +28,7 @@
 #ifndef _YIELD_SOCKETS_AIO_SENDFILE_AIOCB_HPP_
 #define _YIELD_SOCKETS_AIO_SENDFILE_AIOCB_HPP_
 
-#include "yield/fd_t.hpp"
+#include "yield/unique_fd.hpp"
 #include "yield/sockets/aio/socket_aiocb.hpp"
 
 #include <stdio.h>
@@ -66,7 +66,8 @@ public:
     size_t nbytes
   );
 
-  virtual ~SendfileAiocb();
+  virtual ~SendfileAiocb() {
+  }
 
 public:
   /**
@@ -74,7 +75,7 @@ public:
     @return the descriptor of the file from which data is sent
   */
   fd_t fd() {
-    return fd_;
+    return *fd_;
   }
 
   /**
@@ -109,7 +110,7 @@ private:
   void init(fd_t fd);
 
 private:
-  fd_t fd_;
+  unique_fd fd_;
   size_t nbytes_;
   off_t offset_;
   ::std::shared_ptr<StreamSocket> socket_;

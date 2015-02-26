@@ -91,22 +91,15 @@ SendfileAiocb::SendfileAiocb(
   init(fd);
 }
 
-SendfileAiocb::~SendfileAiocb() {
-#ifdef _WIN32
-  CloseHandle(fd_);
-#else
-  close(fd_);
-#endif
-}
-
 void SendfileAiocb::init(fd_t fd) {
 #ifdef _WIN32
+  fd_t dup_fd;
   if (
     !DuplicateHandle(
       GetCurrentProcess(),
       fd,
       GetCurrentProcess(),
-      &this->fd_,
+      &dup_fd,
       0,
       FALSE,
       DUPLICATE_SAME_ACCESS
@@ -114,9 +107,10 @@ void SendfileAiocb::init(fd_t fd) {
   ) {
     throw Exception();
   }
+  fd_.reset(dup_fd);
 #else
-  this->fd_ = dup(fd);
-  if (this->fd_ == -1) {
+  fd_.reset(::dup(fd));
+  if (!this->fd_) {
     throw Exception();
   }
 #endif
