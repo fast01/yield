@@ -46,7 +46,7 @@ class HttpServerRequest;
 */
 class HttpServerConnection final : private ::std::enable_shared_from_this<HttpServerConnection> {
 public:
-  enum State { STATE_CONNECTED, STATE_ERROR };
+  enum class State { CONNECTED, ERROR };
 
 public:
   //EventHandler<HttpServerRequest>& http_request_handler() {
@@ -104,7 +104,7 @@ private:
       event_handler_(event_handler),
       peername_(peername),
       socket_(socket_) {
-    state_ = STATE_CONNECTED;
+    state_ = State::CONNECTED;
   }
 
 private:

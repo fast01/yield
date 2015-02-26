@@ -88,7 +88,7 @@ public:
     @return true if this thread is running
   */
   bool is_running() {
-    return state_ == STATE_RUNNING;
+    return state_ == State::RUNNING;
   }
 
 public:
@@ -199,7 +199,7 @@ private:
 #endif
 
   ::std::unique_ptr<Runnable> runnable_;
-  enum { STATE_READY, STATE_RUNNING, STATE_SUSPENDED } state_;
+  enum class State { READY, RUNNING, SUSPENDED } state_;
 };
 }
 }

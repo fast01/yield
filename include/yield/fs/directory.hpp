@@ -60,22 +60,22 @@ public:
       Type of a directory entry: directory, regular file, et al.
       Mirrors Stat::IS*.
     */
-    enum Type {
+    enum class Type {
 #ifndef _WIN32
-      TYPE_BLK,
-      TYPE_CHR,
+      BLK,
+      CHR,
 #endif
 #ifdef _WIN32
-      TYPE_DEV,
+      DEV,
 #endif
-      TYPE_DIR,
+      DIR,
 #ifndef _WIN32
-      TYPE_FIFO,
-      TYPE_LNK,
+      FIFO,
+      LNK,
 #endif
-      TYPE_REG,
+      REG,
 #ifndef _WIN32
-      TYPE_SOCK
+      SOCK
 #endif
     };
 
@@ -105,7 +105,7 @@ public:
       @return true if this directory entry refers to a block device
     */
     bool ISBLK() const {
-      return get_type() == TYPE_BLK;
+      return get_type() == Type::BLK;
     }
 
     /**
@@ -113,7 +113,7 @@ public:
       @return true if this directory entry refers to a character device
     */
     bool ISCHR() const {
-      return get_type() == TYPE_CHR;
+      return get_type() == Type::CHR;
     }
 
     /**
@@ -121,7 +121,7 @@ public:
       @return true if this directory entry refers to a directory
     */
     bool ISDIR() const {
-      return get_type() == TYPE_DIR;
+      return get_type() == Type::DIR;
     }
 
     /**
@@ -129,7 +129,7 @@ public:
       @return true if this directory entry refers to a named pipe
     */
     bool ISFIFO() const {
-      return get_type() == TYPE_FIFO;
+      return get_type() == Type::FIFO;
     }
 
     /**
@@ -137,7 +137,7 @@ public:
       @return true if this directory entry refers to a symbolic link
     */
     bool ISLNK() const {
-      return get_type() == TYPE_LNK;
+      return get_type() == Type::LNK;
     }
 
     /**
@@ -145,7 +145,7 @@ public:
       @return true if this directory entry refers to a regular file
     */
     bool ISREG() const {
-      return get_type() == TYPE_REG;
+      return get_type() == Type::REG;
     }
 
     /**
@@ -153,7 +153,7 @@ public:
       @return true if this directory entry refers to a Unix socket
     */
     bool ISSOCK() const {
-      return get_type() == TYPE_SOCK;
+      return get_type() == Type::SOCK;
     }
 #endif
 

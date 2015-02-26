@@ -81,7 +81,7 @@ public:
   void read(shared_ptr<Buffer> buffer) override {
     unique_ptr<RecvAiocb> recv_aiocb(new RecvAiocb(buffer, connection_.shared_from_this(), 0));
     if (connection_.aio_queue_->tryenqueue(move(recv_aiocb))) {
-      connection_.state_ = STATE_ERROR;
+      connection_.state_ = State::ERROR;
     }
   }
 
@@ -101,7 +101,7 @@ void HttpServerConnection::handle(unique_ptr<AcceptAiocb> accept_aiocb) {
     = make_shared<Buffer>(Buffer::getpagesize(), Buffer::getpagesize());
     unique_ptr<RecvAiocb> recv_aiocb(new RecvAiocb(recv_buffer, shared_from_this(), 0));
     if (aio_queue_->tryenqueue(move(recv_aiocb))) {
-      state_ = STATE_ERROR;
+      state_ = State::ERROR;
     }
   }
 }
@@ -119,7 +119,7 @@ HttpServerConnection::handle(
 
   unique_ptr<SendAiocb> send_aiocb(new SendAiocb(shared_ptr<Socket>(socket_), send_buffer, 0));
   if (aio_queue_->tryenqueue(move(send_aiocb))) {
-    state_ = STATE_ERROR;
+    state_ = State::ERROR;
   }
 }
 
@@ -141,16 +141,16 @@ HttpServerConnection::handle(
       if (aio_queue_->tryenqueue(move(sendfile_aiocb)) == NULL) {
         return;
       } else {
-        state_ = STATE_ERROR;
+        state_ = State::ERROR;
       }
     } else {
-      state_ = STATE_ERROR;
+      state_ = State::ERROR;
     }
   }
 
   unique_ptr<SendAiocb> send_aiocb(new SendAiocb(socket_, http_response->header(), 0));
   if (aio_queue_->tryenqueue(move(send_aiocb))) {
-    state_ = STATE_ERROR;
+    state_ = State::ERROR;
   }
 }
 

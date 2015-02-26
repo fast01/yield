@@ -37,12 +37,12 @@ namespace yield {
 namespace thread {
 Thread::Thread(::std::unique_ptr<Runnable> runnable)
   : runnable_(::std::move(runnable)) {
-  state_ = STATE_READY;
+  state_ = State::READY;
 
   handle = CreateThread(NULL, 0, run, this, NULL, &id);
 
   if (handle != NULL) {
-    while (state_ == STATE_READY) {
+    while (state_ == State::READY) {
       yield();
     }
   } else {
@@ -52,7 +52,7 @@ Thread::Thread(::std::unique_ptr<Runnable> runnable)
 
 Thread::Thread(HANDLE handle, DWORD id)
   : handle(handle), id(id) {
-  state_ = STATE_RUNNING;
+  state_ = State::RUNNING;
 }
 
 Thread::~Thread() {
@@ -91,9 +91,9 @@ unsigned long __stdcall Thread::run(void* this_) {
 }
 
 unsigned long Thread::run() {
-  state_ = STATE_RUNNING;
+  state_ = State::RUNNING;
   runnable_->run();
-  state_ = STATE_SUSPENDED;
+  state_ = State::SUSPENDED;
   return 0;
 }
 

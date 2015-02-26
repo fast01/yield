@@ -85,7 +85,7 @@ public:
     return *socket_;
   }
 
-  Type::Enum type() const override {
+  Type type() const override {
     return Type::CONNECT;
   }
 

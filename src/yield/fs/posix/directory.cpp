@@ -57,29 +57,29 @@ bool Directory::read(Entry*& entry) {
 #if defined(__FreeBSD__) || defined(__linux__) || defined(__MACH__)
     switch (dirent_->d_type) {
     case DT_BLK:
-      entry_type = Entry::TYPE_BLK;
+      entry_type = Entry::Type::BLK;
       break;
     case DT_CHR:
-      entry_type = Entry::TYPE_CHR;
+      entry_type = Entry::Type::CHR;
       break;
     case DT_DIR:
-      entry_type = Entry::TYPE_DIR;
+      entry_type = Entry::Type::DIR;
       break;
     case DT_FIFO:
-      entry_type = Entry::TYPE_FIFO;
+      entry_type = Entry::Type::FIFO;
       break;
     case DT_LNK:
-      entry_type = Entry::TYPE_LNK;
+      entry_type = Entry::Type::LNK;
       break;
     case DT_REG:
-      entry_type = Entry::TYPE_REG;
+      entry_type = Entry::Type::REG;
       break;
     case DT_SOCK:
-      entry_type = Entry::TYPE_SOCK;
+      entry_type = Entry::Type::SOCK;
       break;
     default:
       CHECK(false);
-      entry_type = Entry::TYPE_REG;
+      entry_type = Entry::Type::REG;
       break;
     }
 #else
@@ -89,21 +89,21 @@ bool Directory::read(Entry*& entry) {
     }
 
     if (S_ISBLK(stbuf.st_mode)) {
-      entry_type = Entry::TYPE_BLK;
+      entry_type = Entry::Type::BLK;
     } else if (S_ISCHR(stbuf.st_mode)) {
-      entry_type = Entry::TYPE_CHR;
+      entry_type = Entry::Type::CHR;
     } else if (S_ISDIR(stbuf.st_mode)) {
-      entry_type = Entry::TYPE_DIR;
+      entry_type = Entry::Type::DIR;
     } else if (S_ISFIFO(stbuf.st_mode)) {
-      entry_type = Entry::TYPE_FIFO;
+      entry_type = Entry::Type::FIFO;
     } else if (S_ISLNK(stbuf.st_mode)) {
-      entry_type = Entry::TYPE_LNK;
+      entry_type = Entry::Type::LNK;
     } else if (S_ISREG(stbuf.st_mode)) {
-      entry_type = Entry::TYPE_REG;
+      entry_type = Entry::Type::REG;
     } else if (S_ISSOCK(stbuf.st_mode)) {
-      entry_type = Entry::TYPE_SOCK;
+      entry_type = Entry::Type::SOCK;
     } else {
-      entry_type = Entry::TYPE_REG;
+      entry_type = Entry::Type::REG;
       CHECK(false);
     }
 #endif

@@ -42,32 +42,32 @@ bool ScanningWatch::equals(const Stat& left, const Stat& right) {
 Directory::Entry::Type ScanningWatch::type(const Stat& stbuf) {
 #ifdef _WIN32
   if (stbuf.ISDEV()) {
-    return Directory::Entry::TYPE_DEV;
+    return Directory::Entry::Type::DEV;
   } else if (stbuf.ISDIR()) {
-    return Directory::Entry::TYPE_DIR;
+    return Directory::Entry::Type::DIR;
   } else if (stbuf.ISREG()) {
-    return Directory::Entry::TYPE_REG;
+    return Directory::Entry::Type::REG;
   }
 #else
   if (stbuf.ISBLK()) {
-    return Directory::Entry::TYPE_BLK;
+    return Directory::Entry::Type::BLK;
   } else if (stbuf.ISCHR()) {
-    return Directory::Entry::TYPE_CHR;
+    return Directory::Entry::Type::CHR;
   } else if (stbuf.ISDIR()) {
-    return Directory::Entry::TYPE_DIR;
+    return Directory::Entry::Type::DIR;
   } else if (stbuf.ISFIFO()) {
-    return Directory::Entry::TYPE_FIFO;
+    return Directory::Entry::Type::FIFO;
   } else if (stbuf.ISLNK()) {
-    return Directory::Entry::TYPE_LNK;
+    return Directory::Entry::Type::LNK;
   } else if (stbuf.ISREG()) {
-    return Directory::Entry::TYPE_REG;
+    return Directory::Entry::Type::REG;
   } else if (stbuf.ISSOCK()) {
-    return Directory::Entry::TYPE_SOCK;
+    return Directory::Entry::Type::SOCK;
   }
 #endif
   else {
     CHECK(false);
-    return Directory::Entry::TYPE_REG;
+    return Directory::Entry::Type::REG;
   }
 }
 }

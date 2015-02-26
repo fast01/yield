@@ -39,7 +39,7 @@ namespace yield {
 namespace thread {
 Thread::Thread(::std::unique_ptr<Runnable> runnable)
   : runnable_(::std::move(runnable)) {
-  state_ = STATE_READY;
+  state_ = State::READY;
 
   pthread_attr_t attr;
   pthread_attr_init(&attr);
@@ -48,7 +48,7 @@ Thread::Thread(::std::unique_ptr<Runnable> runnable)
   if (pthread_create(&pthread, &attr, &run, this) == 0) {
     pthread_attr_destroy(&attr);
 
-    while (state_ == STATE_READY) {
+    while (state_ == State::READY) {
       sleep(0);
     }
   } else {
@@ -59,7 +59,7 @@ Thread::Thread(::std::unique_ptr<Runnable> runnable)
 
 Thread::Thread(pthread_t pthread)
   : pthread(pthread) {
-  state_ = STATE_READY;
+  state_ = State::READY;
 }
 
 Thread::~Thread() {
@@ -114,9 +114,9 @@ void* Thread::run() {
 #elif defined(__sun)
   thread = thr_self();
 #endif
-  state_ = STATE_RUNNING;
+  state_ = State::RUNNING;
   runnable_->run();
-  state_ = STATE_SUSPENDED;
+  state_ = State::SUSPENDED;
   return NULL;
 }
 

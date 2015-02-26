@@ -47,16 +47,13 @@ class Win32SocketAioQueue;
 */
 class SocketAiocb {
 public:
-  class Type {
-  public:
-    enum Enum {
-      ACCEPT,
-      CONNECT,
-      RECV,
-      RECVFROM,
-      SEND,
-      SENDFILE
-    };
+  enum class Type {
+    ACCEPT,
+    CONNECT,
+    RECV,
+    RECVFROM,
+    SEND,
+    SENDFILE
   };
 
 public:
@@ -96,7 +93,7 @@ public:
 
   virtual Socket& socket() = 0;
 
-  virtual Type::Enum type() const = 0;
+  virtual Type type() const = 0;
 
 protected:
   SocketAiocb() {

@@ -90,7 +90,7 @@ void HttpServerEventQueue::handle(unique_ptr<AcceptAiocb> accept_aiocb) {
 
       connection->handle(move(accept_aiocb));
 
-      if (connection->state() == HttpServerConnection::STATE_CONNECTED) {
+      if (connection->state() == HttpServerConnection::State::CONNECTED) {
         connections_.push_back(connection->shared_from_this());
       } else {
         delete connection;
@@ -108,10 +108,10 @@ void HttpServerEventQueue::handle(unique_ptr<AcceptAiocb> accept_aiocb) {
 void HttpServerEventQueue::handle(unique_ptr<RecvAiocb> recv_aiocb) {
   unique_ptr<HttpServerConnection::RecvAiocb> recv_aiocb_downcast(static_cast<HttpServerConnection::RecvAiocb*>(recv_aiocb.release()));  
   shared_ptr<HttpServerConnection> connection = recv_aiocb_downcast->connection();
-  if (recv_aiocb_downcast->connection()->state() == HttpServerConnection::STATE_CONNECTED) {
+  if (recv_aiocb_downcast->connection()->state() == HttpServerConnection::State::CONNECTED) {
     connection->handle(move(recv_aiocb_downcast));
 
-    if (connection->state() == HttpServerConnection::STATE_ERROR) {
+    if (connection->state() == HttpServerConnection::State::ERROR) {
       for (
         auto connection_i = connections_.begin(),
              connections_end = connections_.end();

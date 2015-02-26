@@ -84,11 +84,11 @@ public:
 private:
   class AiocbState;
 
-  enum RetryStatus {
-    RETRY_STATUS_COMPLETE,
-    RETRY_STATUS_ERROR,
-    RETRY_STATUS_WANT_RECV,
-    RETRY_STATUS_WANT_SEND
+  enum class RetryStatus {
+    COMPLETE,
+    ERROR,
+    WANT_RECV,
+    WANT_SEND
   };
 
   class SocketState;

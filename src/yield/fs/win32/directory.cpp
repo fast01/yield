@@ -129,11 +129,11 @@ Directory::Entry::Entry(const WIN32_FIND_DATA& find_data)
 
 Directory::Entry::Type Directory::Entry::get_type() const {
   if (ISDEV()) {
-    return TYPE_DEV;
+    return Type::DEV;
   } else if (ISDIR()) {
-    return TYPE_DIR;
+    return Type::DIR;
   } else {
-    return TYPE_REG;
+    return Type::REG;
   }
 }
 
