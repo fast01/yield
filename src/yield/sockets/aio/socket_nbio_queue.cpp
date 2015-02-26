@@ -437,8 +437,7 @@ SocketNbioQueue::retry_sendfile(
     if (fd_event != NULL) {
         fd_t fd = fd_event->fd();
 
-        map<fd_t, SocketState*>::iterator socket_state_i
-        = this->socket_state.find(fd);
+        auto socket_state_i = this->socket_state.find(fd);
         CHECK_NE(socket_state_i, this->socket_state.end());
         SocketState* socket_state = socket_state_i->second;
 
@@ -492,9 +491,7 @@ SocketNbioQueue::retry_sendfile(
 
     unique_ptr<SocketAiocb> aiocb(aiocb_queue.trydequeue());
     if (aiocb != NULL) {
-      map<fd_t, SocketState*>::iterator socket_state_i
-      = this->socket_state.find(aiocb->socket());
-
+      auto socket_state_i = this->socket_state.find(aiocb->socket());
       if (socket_state_i == this->socket_state.end()) {
         size_t partial_send_len = 0;
         RetryStatus retry_status = retry(*aiocb, partial_send_len);

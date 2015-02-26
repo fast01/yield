@@ -92,7 +92,7 @@ DirectoryWatch::parse(
     fs_event_type = FsEvent::TYPE_FILE_REMOVE;
 
     for (
-      vector<Path>::iterator subdirectory_name_i
+      auto subdirectory_name_i
       = subdirectory_names.begin();
       subdirectory_name_i != subdirectory_names.end();
       ++subdirectory_name_i
@@ -130,7 +130,7 @@ DirectoryWatch::parse(
 
   case FILE_ACTION_RENAMED_OLD_NAME: {
     for (
-      vector<Path>::iterator subdirectory_name_i
+      auto subdirectory_name_i
       = subdirectory_names.begin();
       subdirectory_name_i != subdirectory_names.end();
       ++subdirectory_name_i

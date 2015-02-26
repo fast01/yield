@@ -123,8 +123,7 @@ Watch::~Watch() {
     fs_event_type =
       isdir ? FsEvent::TYPE_DIRECTORY_RENAME : FsEvent::TYPE_FILE_RENAME;
 
-    map<uint32_t, Path>::iterator old_name_i
-    = old_names_.find(inotify_event_.cookie);
+    auto old_name_i = old_names_.find(inotify_event_.cookie);
     CHECK_NE(old_name_i, old_names_.end());
 
     if (want_fs_event_type(fs_event_type)) {

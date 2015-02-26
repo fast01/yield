@@ -60,7 +60,7 @@ FdEventQueue::~FdEventQueue() {
 bool FdEventQueue::associate(fd_t fd, FdEvent::Type fd_event_types) {
   if (fd_event_types > 0) {
     for (
-      vector<pollfd>::iterator pollfd_i = pollfds.begin();
+      auto pollfd_i = pollfds.begin();
       pollfd_i != pollfds.end();
       ++pollfd_i
     ) {
@@ -83,7 +83,7 @@ bool FdEventQueue::associate(fd_t fd, FdEvent::Type fd_event_types) {
 
 bool FdEventQueue::dissociate(fd_t fd) {
   for (
-    vector<pollfd>::iterator pollfd_i = pollfds.begin();
+    auto pollfd_i = pollfds.begin();
     pollfd_i != pollfds.end();
     ++pollfd_i
   ) {
@@ -112,7 +112,7 @@ YO_NEW_REF Event* FdEventQueue::timeddequeue(const Time& timeout) {
   = (timeout == Time::FOREVER) ? -1 : static_cast<int>(timeout.ms());
   int ret = ::poll(&pollfds[0], pollfds.size(), timeout_ms);
   if (ret > 0) {
-    vector<pollfd>::const_iterator pollfd_i = pollfds.begin();
+    auto pollfd_i = pollfds.cbegin();
 
     do {
       const pollfd& pollfd_ = *pollfd_i;

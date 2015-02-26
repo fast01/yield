@@ -280,7 +280,7 @@ public:
     // then call WSAPoll again if necessary.
     int ret = 0;
     do {
-      vector<pollfd>::iterator pollfd_i = pollfds.begin();
+      auto pollfd_i = pollfds.begin();
 
       do {
         pollfd& pollfd_ = *pollfd_i;
@@ -320,7 +320,7 @@ public:
   bool associate(socket_t socket_, uint16_t fd_event_types) override {
     if (fd_event_types != 0) {
       for (
-        vector<pollfd>::iterator pollfd_i = pollfds.begin();
+        auto pollfd_i = pollfds.begin();
         pollfd_i != pollfds.end();
         ++pollfd_i
       ) {
@@ -343,7 +343,7 @@ public:
 
   bool dissociate(socket_t socket_) override {
     for (
-      vector<pollfd>::iterator pollfd_i = pollfds.begin();
+      auto pollfd_i = pollfds.begin();
       pollfd_i != pollfds.end();
       ++pollfd_i
     ) {
@@ -413,7 +413,7 @@ public:
       );
 
     if (ret > 0) {
-      vector<SOCKET>::const_iterator socket_i = sockets.begin();
+      auto socket_i = sockets.cbegin();
 
       while (ret > 0 && socket_i != sockets.end()) {
         socket_t socket_ = *socket_i;
@@ -492,7 +492,7 @@ public:
       }
 
       for (
-        vector<SOCKET>::iterator socket_i = sockets.begin();
+        auto socket_i = sockets.begin();
         socket_i != sockets.end();
         ++socket_i
       ) {
@@ -510,7 +510,7 @@ public:
 
   bool dissociate(socket_t socket_) {
     for (
-      vector<SOCKET>::iterator socket_i = sockets.begin();
+      auto socket_i = sockets.begin();
       socket_i != sockets.end();
       ++socket_i
     ) {
