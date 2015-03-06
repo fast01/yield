@@ -114,6 +114,8 @@ private:
   template <class AiocbType>
   RetryStatus retry_send(AiocbType&, const Buffer&, size_t& partial_send_len);
   RetryStatus retry_sendfile(SendfileAiocb&, size_t& partial_send_len);
+  ::std::unique_ptr<SocketAiocb> timeddequeue_fd_event_queue(const Time&);
+  ::std::unique_ptr<SocketAiocb> trydequeue_aiocb_queue();
 
 private:
   ::yield::queue::BlockingConcurrentQueue<SocketAiocb> aiocb_queue;

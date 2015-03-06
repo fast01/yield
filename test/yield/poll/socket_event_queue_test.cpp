@@ -93,7 +93,7 @@ TEST(SocketEventQueue, dissociate) {
 
   sockets.first()->send("m", 1, 0);
 
-  shared_ptr<FdEvent> event = socket_event_queue.timeddequeue(0);
+  shared_ptr<FdEvent> event = socket_event_queue.timeddequeue(Time::ZERO);
   ASSERT_FALSE(event);
 
   if (!socket_event_queue.associate(*sockets.first(), FdEvent::TYPE_READ_READY)) {
@@ -129,7 +129,7 @@ TEST(SocketEventQueue, dissociate_two) {
     sockets.second()->recv(&m, 1, 0);
   }
 
-  shared_ptr<FdEvent> event = socket_event_queue.timeddequeue(0);
+  shared_ptr<FdEvent> event = socket_event_queue.timeddequeue(Time::ZERO);
   ASSERT_FALSE(event);
 }
 
