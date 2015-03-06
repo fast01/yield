@@ -33,26 +33,19 @@
 
 namespace yield {
 namespace fs {
-using yield::i18n::tstring;
+using ::std::move;
+using ::yield::i18n::tstring;
 
-Directory::Directory(HANDLE hDirectory)
-  : hDirectory(hDirectory), hFindFile(INVALID_HANDLE_VALUE)
+Directory::Directory(unique_fd hDirectory)
+  : hDirectory_(move(hDirectory))
 { }
 
-Directory::~Directory() {
-  close();
-}
-
 bool Directory::close() {
-  if (hDirectory != INVALID_HANDLE_VALUE) {
-    CloseHandle(hDirectory);
-    hDirectory = INVALID_HANDLE_VALUE;
-
-    if (hFindFile != INVALID_HANDLE_VALUE) {
-      FindClose(hFindFile);
-      hFindFile = INVALID_HANDLE_VALUE;
+  if (hDirectory_.close()) {
+    if (hFindFile_ != INVALID_HANDLE_VALUE) {
+      FindClose(hFindFile_);
+      hFindFile_ = INVALID_HANDLE_VALUE;
     }
-
     return true;
   } else {
     return false;
@@ -60,45 +53,32 @@ bool Directory::close() {
 }
 
 bool Directory::read(Entry*& entry) {
-  if (hFindFile == INVALID_HANDLE_VALUE) {
+  if (hFindFile_ == INVALID_HANDLE_VALUE) {
     const size_t file_name_info_size
     = sizeof(FILE_NAME_INFO) + sizeof(WCHAR) * MAX_PATH;
     char file_name_info_buffer[file_name_info_size];
     FILE_NAME_INFO* file_name_info = new(file_name_info_buffer) FILE_NAME_INFO;
 
     if (
-      GetFileInformationByHandleEx(
+      !GetFileInformationByHandleEx(
         *this,
         FileNameInfo,
         file_name_info,
         file_name_info_size
       )
     ) {
-      DWORD FileNameLength = file_name_info->FileNameLength;
-      FileNameLength /= sizeof(wchar_t);
-      wchar_t* FileName = file_name_info->FileName;
-      Path search_pattern = Path(FileName, FileNameLength) / L'*';
-
-      WIN32_FIND_DATA find_data;
-      hFindFile = FindFirstFile(search_pattern.c_str(), &find_data);
-      if (hFindFile != INVALID_HANDLE_VALUE) {
-        if (entry == NULL) {
-          entry = new Entry(find_data);
-        } else {
-          *entry = find_data;
-        }
-
-        return true;
-      } else {
-        return false;
-      }
-    } else {
       return false;
     }
-  }
+    DWORD FileNameLength = file_name_info->FileNameLength;
+    FileNameLength /= sizeof(wchar_t);
+    wchar_t* FileName = file_name_info->FileName;
+    Path search_pattern = Path(FileName, FileNameLength) / L'*';
 
-  WIN32_FIND_DATA find_data;
-  while (FindNextFile(hFindFile, &find_data)) {
+    WIN32_FIND_DATA find_data;
+    hFindFile_ = FindFirstFile(search_pattern.c_str(), &find_data);
+    if (hFindFile_ == INVALID_HANDLE_VALUE) {
+      return false;
+    }
     if (entry == NULL) {
       entry = new Entry(find_data);
     } else {
@@ -108,26 +88,37 @@ bool Directory::read(Entry*& entry) {
     return true;
   }
 
-  FindClose(hFindFile);
-  hFindFile = INVALID_HANDLE_VALUE;
+  WIN32_FIND_DATA find_data;
+  while (FindNextFile(hFindFile_, &find_data)) {
+    if (entry == NULL) {
+      entry = new Entry(find_data);
+    } else {
+      *entry = find_data;
+    }
+
+    return true;
+  }
+
+  FindClose(hFindFile_);
+  hFindFile_ = INVALID_HANDLE_VALUE;
 
   return false;
 }
 
 void Directory::rewind() {
-  if (hFindFile != INVALID_HANDLE_VALUE) {
-    FindClose(hFindFile);
-    hFindFile = INVALID_HANDLE_VALUE;
+  if (hFindFile_ != INVALID_HANDLE_VALUE) {
+    FindClose(hFindFile_);
+    hFindFile_ = INVALID_HANDLE_VALUE;
   }
 }
 
 
 Directory::Entry::Entry(const WIN32_FIND_DATA& find_data)
   : Stat(find_data),
-    name(find_data.cFileName) {
+    name_(find_data.cFileName) {
 }
 
-Directory::Entry::Type Directory::Entry::get_type() const {
+Directory::Entry::Type Directory::Entry::type() const {
   if (ISDEV()) {
     return Type::DEV;
   } else if (ISDIR()) {
@@ -138,20 +129,20 @@ Directory::Entry::Type Directory::Entry::get_type() const {
 }
 
 bool Directory::Entry::is_hidden() const {
-  return (get_attributes() & FILE_ATTRIBUTE_HIDDEN) != 0;
+  return (attributes() & FILE_ATTRIBUTE_HIDDEN) != 0;
 }
 
 bool Directory::Entry::is_special() const {
-  return get_name() == Path::CURRENT_DIRECTORY
+  return name() == Path::CURRENT_DIRECTORY
          ||
-         get_name() == Path::PARENT_DIRECTORY;
+         name() == Path::PARENT_DIRECTORY;
 }
 
 Directory::Entry&
 Directory::Entry::operator=(
   const WIN32_FIND_DATA& find_data
 ) {
-  name = find_data.cFileName;
+  name_ = find_data.cFileName;
   Stat::operator=(find_data);
   return *this;
 }

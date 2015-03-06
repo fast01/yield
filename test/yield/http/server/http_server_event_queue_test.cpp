@@ -73,7 +73,7 @@ protected:
           unique_ptr<HttpServerResponse> http_response(new HttpServerResponse(shared_ptr<File>(move(file)), http_request->http_version(), 200));
           http_response->set_field(
             "Content-Length",
-            static_cast<size_t>(stbuf->get_size())
+            static_cast<size_t>(stbuf->size())
           );
           http_request->respond(move(http_response));
         } else {

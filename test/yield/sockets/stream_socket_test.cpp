@@ -124,11 +124,11 @@ TEST_F(StreamSocketSendFileTest, sendfile) {
   unique_ptr<yield::fs::File> file
   = yield::fs::FileSystem().open(test_file_path);
   unique_ptr<yield::fs::Stat> stbuf = file->stat();
-  size_t size = static_cast<size_t>(stbuf->get_size());
+  size_t size = static_cast<size_t>(stbuf->size());
 
   StreamSocketPair stream_sockets;
   ssize_t sendfile_ret = stream_sockets.first()->sendfile(*file, 0, size);
-  ASSERT_EQ(sendfile_ret, stbuf->get_size());
+  ASSERT_EQ(sendfile_ret, stbuf->size());
 
   Buffer buffer(Buffer::getpagesize());
   ssize_t read_ret = stream_sockets.second()->read(buffer);

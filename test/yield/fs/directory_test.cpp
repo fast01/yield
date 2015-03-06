@@ -115,14 +115,14 @@ TEST_F(DirectoryTest, read_dev) {
 TEST_F(DirectoryTest, read) {
   for (uint8_t i = 0; i < 3; i++) {
     unique_ptr<Directory::Entry> dentry = get_directory().read();
-    if (dentry->get_name() == Path::CURRENT_DIRECTORY) {
+    if (dentry->name() == Path::CURRENT_DIRECTORY) {
       ASSERT_TRUE(dentry->ISDIR());
       ASSERT_TRUE(dentry->is_special());
-    } else if (dentry->get_name() == Path::PARENT_DIRECTORY) {
+    } else if (dentry->name() == Path::PARENT_DIRECTORY) {
       ASSERT_TRUE(dentry->ISDIR());
       ASSERT_TRUE(dentry->is_special());
     } else {
-      ASSERT_EQ(dentry->get_name(), get_test_file_name());
+      ASSERT_EQ(dentry->name(), get_test_file_name());
       ASSERT_TRUE(dentry->ISREG());
       ASSERT_FALSE(dentry->is_special());
     }
@@ -134,11 +134,11 @@ TEST_F(DirectoryTest, rewind) {
     for (uint8_t j = 0; j < 3; j++) {
       unique_ptr<Directory::Entry> dentry = get_directory().read();
       ASSERT_TRUE(
-        dentry->get_name() == Path::CURRENT_DIRECTORY
+        dentry->name() == Path::CURRENT_DIRECTORY
         ||
-        dentry->get_name() == Path::PARENT_DIRECTORY
+        dentry->name() == Path::PARENT_DIRECTORY
         ||
-        dentry->get_name() == get_test_file_name()
+        dentry->name() == get_test_file_name()
       );
     }
 

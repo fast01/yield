@@ -33,26 +33,21 @@
 namespace yield {
 namespace fs {
 Directory::Directory(DIR* dirp, const Path& path)
-  : dirp(dirp), path(path)
+  : dirp_(dirp_), path_(path)
 { }
 
-Directory::~Directory() {
-  close();
-}
-
 bool Directory::close() {
-  if (dirp != NULL) {
-    closedir(dirp);
-    dirp = NULL;
-    return true;
-  } else {
+  if (dirp_ == NULL) {
     return false;
   }
+  ::closedir(dirp_);
+  dirp_ = NULL;
+  return true;
 }
 
 bool Directory::read(Entry*& entry) {
   struct dirent* dirent_;
-  while ((dirent_ = readdir(dirp)) != NULL) {
+  while ((dirent_ = readdir(dirp_)) != NULL) {
     Entry::Type entry_type;
 #if defined(__FreeBSD__) || defined(__linux__) || defined(__MACH__)
     switch (dirent_->d_type) {
@@ -122,22 +117,22 @@ bool Directory::read(Entry*& entry) {
 }
 
 void Directory::rewind() {
-  rewinddir(dirp);
+  rewinddir(dirp_);
 }
 
 
-Directory::Entry::Type Directory::Entry::get_type() const {
+Directory::Entry::Type Directory::Entry::type() const {
   return type;
 }
 
 bool Directory::Entry::is_hidden() const {
-  return !get_name().empty() && get_name()[0] == '.';
+  return !name().empty() && name()[0] == '.';
 }
 
 bool Directory::Entry::is_special() const {
-  return get_name() == Path::CURRENT_DIRECTORY
+  return name() == Path::CURRENT_DIRECTORY
          ||
-         get_name() == Path::PARENT_DIRECTORY;
+         name() == Path::PARENT_DIRECTORY;
 }
 }
 }

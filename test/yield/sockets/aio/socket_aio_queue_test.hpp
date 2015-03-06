@@ -254,7 +254,7 @@ TYPED_TEST_P(SocketAioQueueTest, sendfile) {
   unique_ptr<yield::fs::Stat> stbuf = file->stat();
 
   unique_ptr<SocketAiocb> aiocb(new SendfileAiocb(sockets.first(), *file.get()));
-  ASSERT_EQ(static_cast<SendfileAiocb*>(aiocb.get())->nbytes(), stbuf->get_size());
+  ASSERT_EQ(static_cast<SendfileAiocb*>(aiocb.get())->nbytes(), stbuf->size());
   ASSERT_EQ(aiocb->offset(), 0);
 
   if (aio_queue.tryenqueue(move(aiocb))) {
@@ -265,7 +265,7 @@ TYPED_TEST_P(SocketAioQueueTest, sendfile) {
   ASSERT_EQ(out_aiocb->error(), 0);
   ASSERT_EQ(
     out_aiocb->return_(),
-    static_cast<ssize_t>(stbuf->get_size())
+    static_cast<ssize_t>(stbuf->size())
   );
 
   char test[4];

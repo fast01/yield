@@ -34,6 +34,7 @@
 #include "yield/fs/path.hpp"
 
 #ifdef _WIN32
+#include "yield/unique_fd.hpp"
 #include "yield/fs/stat.hpp"
 #else
 #include <dirent.h>
@@ -84,28 +85,13 @@ public:
     }
 
   public:
-    /**
-      Get the name of this directory entry.
-      @return the name of this directory entry
-    */
-    const Path& get_name() const {
-      return name;
-    }
-
-    /**
-      Get the type of this directory entry.
-      @return the type of this directory entry
-    */
-    Type get_type() const;
-
-  public:
 #ifndef _WIN32
     /**
       Check if this directory entry refers to a block device.
       @return true if this directory entry refers to a block device
     */
     bool ISBLK() const {
-      return get_type() == Type::BLK;
+      return type() == Type::BLK;
     }
 
     /**
@@ -113,7 +99,7 @@ public:
       @return true if this directory entry refers to a character device
     */
     bool ISCHR() const {
-      return get_type() == Type::CHR;
+      return type() == Type::CHR;
     }
 
     /**
@@ -121,7 +107,7 @@ public:
       @return true if this directory entry refers to a directory
     */
     bool ISDIR() const {
-      return get_type() == Type::DIR;
+      return type() == Type::DIR;
     }
 
     /**
@@ -129,7 +115,7 @@ public:
       @return true if this directory entry refers to a named pipe
     */
     bool ISFIFO() const {
-      return get_type() == Type::FIFO;
+      return type() == Type::FIFO;
     }
 
     /**
@@ -137,7 +123,7 @@ public:
       @return true if this directory entry refers to a symbolic link
     */
     bool ISLNK() const {
-      return get_type() == Type::LNK;
+      return type() == Type::LNK;
     }
 
     /**
@@ -145,7 +131,7 @@ public:
       @return true if this directory entry refers to a regular file
     */
     bool ISREG() const {
-      return get_type() == Type::REG;
+      return type() == Type::REG;
     }
 
     /**
@@ -153,7 +139,7 @@ public:
       @return true if this directory entry refers to a Unix socket
     */
     bool ISSOCK() const {
-      return get_type() == Type::SOCK;
+      return type() == Type::SOCK;
     }
 #endif
 
@@ -172,6 +158,21 @@ public:
       @return true if this directory entry refers to a special file
     */
     bool is_special() const;
+
+  public:
+    /**
+      Get the name of this directory entry.
+      @return the name of this directory entry
+    */
+    const Path& name() const {
+      return name_;
+    }
+
+    /**
+      Get the type of this directory entry.
+      @return the type of this directory entry
+    */
+    Type type() const;
 
   private:
     friend class Directory;
@@ -194,19 +195,22 @@ public:
 #endif
 
   private:
-    Path name;
+    Path name_;
 #ifndef _WIN32
-    Type type;
+    Type type_;
 #endif
   };
 
 public:
 #ifdef _WIN32
-  Directory(fd_t hDirectory);
+  Directory(unique_fd hDirectory);
 #else
   Directory(DIR* dirp, const Path& path);
 #endif
-  virtual ~Directory();
+
+  virtual ~Directory() {
+    close();
+  }
 
 public:
   bool close();
@@ -214,11 +218,11 @@ public:
 public:
 #ifdef _WIN32
   operator fd_t() const {
-    return hDirectory;
+    return *hDirectory_;
   }
 #else
   operator DIR* () {
-    return dirp;
+    return dirp_;
   }
 #endif
 
@@ -245,10 +249,11 @@ private:
 
 private:
 #ifdef _WIN32
-  fd_t hDirectory, hFindFile;
+  unique_fd hDirectory_;
+  fd_t hFindFile_;
 #else
-  DIR* dirp;
-  Path path;
+  DIR* dirp_;
+  Path path_;
 #endif
 };
 }

@@ -79,8 +79,8 @@ TEST_F(StatTest, get_atime) {
 
   DateTime now = DateTime::now();
   unique_ptr<Stat> stbuf = FileSystem().stat(get_test_dir_name());
-  ASSERT_NE(stbuf->get_atime(), DateTime::INVALID_DATE_TIME);
-  ASSERT_LE(stbuf->get_atime(), now);
+  ASSERT_NE(stbuf->atime(), DateTime::INVALID_DATE_TIME);
+  ASSERT_LE(stbuf->atime(), now);
 }
 
 TEST_F(StatTest, get_ctime) {
@@ -89,8 +89,8 @@ TEST_F(StatTest, get_ctime) {
   }
   DateTime now = DateTime::now();
   unique_ptr<Stat> stbuf = FileSystem().stat(get_test_dir_name());
-  ASSERT_NE(stbuf->get_ctime(), DateTime::INVALID_DATE_TIME);
-  ASSERT_LE(stbuf->get_ctime(), now);
+  ASSERT_NE(stbuf->ctime(), DateTime::INVALID_DATE_TIME);
+  ASSERT_LE(stbuf->ctime(), now);
 }
 
 TEST_F(StatTest, get_mtime) {
@@ -99,8 +99,8 @@ TEST_F(StatTest, get_mtime) {
   }
   DateTime now = DateTime::now();
   unique_ptr<Stat> stbuf = FileSystem().stat(get_test_dir_name());
-  ASSERT_NE(stbuf->get_mtime(), DateTime::INVALID_DATE_TIME);
-  ASSERT_LE(stbuf->get_mtime(), now);
+  ASSERT_NE(stbuf->mtime(), DateTime::INVALID_DATE_TIME);
+  ASSERT_LE(stbuf->mtime(), now);
 }
 
 TEST_F(StatTest, get_nlink) {
@@ -108,7 +108,7 @@ TEST_F(StatTest, get_nlink) {
     throw Exception();
   }
   unique_ptr<Stat> stbuf = FileSystem().stat(get_test_dir_name());
-  ASSERT_EQ(stbuf->get_nlink(), 1);
+  ASSERT_EQ(stbuf->nlink(), 1);
 }
 
 TEST_F(StatTest, get_size) {
@@ -116,7 +116,7 @@ TEST_F(StatTest, get_size) {
     throw Exception();
   }
   unique_ptr<Stat> stbuf = FileSystem().stat(get_test_dir_name());
-  ASSERT_EQ(stbuf->get_size(), 0);
+  ASSERT_EQ(stbuf->size(), 0);
 }
 
 #ifdef __linux__

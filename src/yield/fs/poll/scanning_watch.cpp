@@ -34,9 +34,9 @@ namespace poll {
 bool ScanningWatch::equals(const Stat& left, const Stat& right) {
   return type(left) == type(right)
          &&
-         left.get_mtime() == right.get_mtime()
+         left.mtime() == right.mtime()
          &&
-         left.get_size() == right.get_size();
+         left.size() == right.size();
 }
 
 Directory::Entry::Type ScanningWatch::type(const Stat& stbuf) {

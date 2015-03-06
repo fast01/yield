@@ -38,59 +38,47 @@ Stat::Stat(
   const DateTime& mtime,
   int16_t nlink,
   uint64_t size
-) : atime(atime),
-  attributes(attributes),
-  ctime(ctime),
-  mtime(mtime),
-  nlink(nlink),
-  size(size)
+) : atime_(atime),
+  attributes_(attributes),
+  ctime_(ctime),
+  mtime_(mtime),
+  nlink_(nlink),
+  size_(size)
 { }
 
 Stat::Stat(const BY_HANDLE_FILE_INFORMATION& stbuf)
-  : atime(stbuf.ftLastAccessTime),
-    attributes(stbuf.dwFileAttributes),
-    ctime(stbuf.ftCreationTime),
-    mtime(stbuf.ftLastWriteTime),
-    nlink(static_cast<int16_t>(stbuf.nNumberOfLinks)) {
+  : atime_(stbuf.ftLastAccessTime),
+    attributes_(stbuf.dwFileAttributes),
+    ctime_(stbuf.ftCreationTime),
+    mtime_(stbuf.ftLastWriteTime),
+    nlink_(static_cast<int16_t>(stbuf.nNumberOfLinks)) {
   set_size(stbuf.nFileSizeLow, stbuf.nFileSizeHigh);
 }
 
 Stat::Stat(const WIN32_FILE_ATTRIBUTE_DATA& stbuf)
-  : atime(stbuf.ftLastAccessTime),
-    attributes(stbuf.dwFileAttributes),
-    ctime(stbuf.ftCreationTime),
-    mtime(stbuf.ftLastWriteTime),
-    nlink(1) {
+  : atime_(stbuf.ftLastAccessTime),
+    attributes_(stbuf.dwFileAttributes),
+    ctime_(stbuf.ftCreationTime),
+    mtime_(stbuf.ftLastWriteTime),
+    nlink_(1) {
   set_size(stbuf.nFileSizeLow, stbuf.nFileSizeHigh);
 }
 
 Stat::Stat(const WIN32_FIND_DATA& stbuf)
-  : atime(stbuf.ftLastAccessTime),
-    attributes(stbuf.dwFileAttributes),
-    ctime(stbuf.ftCreationTime),
-    mtime(stbuf.ftLastWriteTime),
-    nlink(1) {
+  : atime_(stbuf.ftLastAccessTime),
+    attributes_(stbuf.dwFileAttributes),
+    ctime_(stbuf.ftCreationTime),
+    mtime_(stbuf.ftLastWriteTime),
+    nlink_(1) {
   set_size(stbuf.nFileSizeLow, stbuf.nFileSizeHigh);
 }
 
-uint32_t Stat::get_attributes() const {
-  return attributes;
-}
-
-int16_t Stat::get_nlink() const {
-  return nlink;
-}
-
-uint64_t Stat::get_size() const {
-  return size;
-}
-
 bool Stat::ISDEV() const {
-  return (attributes & FILE_ATTRIBUTE_DEVICE) == FILE_ATTRIBUTE_DEVICE;
+  return (attributes_ & FILE_ATTRIBUTE_DEVICE) == FILE_ATTRIBUTE_DEVICE;
 }
 
 bool Stat::ISDIR() const {
-  return (attributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
+  return (attributes_ & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
 }
 
 bool Stat::ISREG() const {
@@ -98,38 +86,38 @@ bool Stat::ISREG() const {
 }
 
 bool Stat::operator==(const Stat& other) const {
-  return get_atime() == other.get_atime() &&
-         get_attributes() == other.get_attributes() &&
-         get_ctime() == other.get_ctime() &&
-         get_mtime() == other.get_mtime() &&
-         get_nlink() == other.get_nlink() &&
-         get_size() == other.get_size();
+  return atime() == other.atime() &&
+         attributes() == other.attributes() &&
+         ctime() == other.ctime() &&
+         mtime() == other.mtime() &&
+         nlink() == other.nlink() &&
+         size() == other.size();
 }
 
 Stat::operator BY_HANDLE_FILE_INFORMATION() const {
   BY_HANDLE_FILE_INFORMATION bhfi;
   memset(&bhfi, 0, sizeof(bhfi));
-  bhfi.dwFileAttributes = get_attributes();
-  bhfi.ftCreationTime = get_ctime();
-  bhfi.ftLastAccessTime = get_atime();
-  bhfi.ftLastWriteTime = get_mtime();
+  bhfi.dwFileAttributes = attributes();
+  bhfi.ftCreationTime = ctime();
+  bhfi.ftLastAccessTime = atime();
+  bhfi.ftLastWriteTime = mtime();
   ULARGE_INTEGER size;
-  size.QuadPart = get_size();
+  size.QuadPart = this->size();
   bhfi.nFileSizeLow = size.LowPart;
   bhfi.nFileSizeHigh = size.HighPart;
-  bhfi.nNumberOfLinks = get_nlink();
+  bhfi.nNumberOfLinks = nlink();
   return bhfi;
 }
 
 Stat::operator WIN32_FILE_ATTRIBUTE_DATA() const {
   WIN32_FILE_ATTRIBUTE_DATA file_attribute_data;
   memset(&file_attribute_data, 0, sizeof(file_attribute_data));
-  file_attribute_data.dwFileAttributes = get_attributes();
-  file_attribute_data.ftCreationTime = get_ctime();
-  file_attribute_data.ftLastAccessTime = get_atime();
-  file_attribute_data.ftLastWriteTime = get_mtime();
+  file_attribute_data.dwFileAttributes = attributes();
+  file_attribute_data.ftCreationTime = ctime();
+  file_attribute_data.ftLastAccessTime = atime();
+  file_attribute_data.ftLastWriteTime = mtime();
   ULARGE_INTEGER size;
-  size.QuadPart = get_size();
+  size.QuadPart = this->size();
   file_attribute_data.nFileSizeLow = size.LowPart;
   file_attribute_data.nFileSizeHigh = size.HighPart;
   return file_attribute_data;
@@ -138,43 +126,43 @@ Stat::operator WIN32_FILE_ATTRIBUTE_DATA() const {
 Stat::operator WIN32_FIND_DATA() const {
   WIN32_FIND_DATA find_data;
   memset(&find_data, 0, sizeof(find_data));
-  find_data.dwFileAttributes = get_attributes();
-  find_data.ftCreationTime = get_ctime();
-  find_data.ftLastAccessTime = get_atime();
-  find_data.ftLastWriteTime = get_mtime();
+  find_data.dwFileAttributes = attributes();
+  find_data.ftCreationTime = ctime();
+  find_data.ftLastAccessTime = atime();
+  find_data.ftLastWriteTime = mtime();
   ULARGE_INTEGER size;
-  size.QuadPart = get_size();
+  size.QuadPart = this->size();
   find_data.nFileSizeLow = size.LowPart;
   find_data.nFileSizeHigh = size.HighPart;
   return find_data;
 }
 
 Stat& Stat::operator=(const BY_HANDLE_FILE_INFORMATION& stbuf) {
-  atime = stbuf.ftLastAccessTime;
-  attributes = stbuf.dwFileAttributes;
-  ctime = stbuf.ftCreationTime;
-  mtime = stbuf.ftLastWriteTime;
-  nlink = static_cast<int16_t>(stbuf.nNumberOfLinks);
+  atime_ = stbuf.ftLastAccessTime;
+  attributes_ = stbuf.dwFileAttributes;
+  ctime_ = stbuf.ftCreationTime;
+  mtime_ = stbuf.ftLastWriteTime;
+  nlink_ = static_cast<int16_t>(stbuf.nNumberOfLinks);
   set_size(stbuf.nFileSizeLow, stbuf.nFileSizeHigh);
   return *this;
 }
 
 Stat& Stat::operator=(const WIN32_FILE_ATTRIBUTE_DATA& stbuf) {
-  atime = stbuf.ftLastAccessTime;
-  attributes = stbuf.dwFileAttributes;
-  ctime = stbuf.ftCreationTime;
-  mtime = stbuf.ftLastWriteTime;
-  nlink = 1; // WIN32_FILE_ATTRIBUTE_DATA doesn't have a nNumberOfLinks
+  atime_ = stbuf.ftLastAccessTime;
+  attributes_ = stbuf.dwFileAttributes;
+  ctime_ = stbuf.ftCreationTime;
+  mtime_ = stbuf.ftLastWriteTime;
+  nlink_ = 1; // WIN32_FILE_ATTRIBUTE_DATA doesn't have a nNumberOfLinks
   set_size(stbuf.nFileSizeLow, stbuf.nFileSizeHigh);
   return *this;
 }
 
 Stat& Stat::operator=(const WIN32_FIND_DATA& stbuf) {
-  atime = stbuf.ftLastAccessTime;
-  attributes = stbuf.dwFileAttributes;
-  ctime = stbuf.ftCreationTime;
-  mtime = stbuf.ftLastWriteTime;
-  nlink = 1; // WIN32_FIND_DATA doesn't have a nNumberOfLinks
+  atime_ = stbuf.ftLastAccessTime;
+  attributes_ = stbuf.dwFileAttributes;
+  ctime_ = stbuf.ftCreationTime;
+  mtime_ = stbuf.ftLastWriteTime;
+  nlink_ = 1; // WIN32_FIND_DATA doesn't have a nNumberOfLinks
   set_size(stbuf.nFileSizeLow, stbuf.nFileSizeHigh);
   return *this;
 }
@@ -183,7 +171,7 @@ void Stat::set_size(uint32_t nFileSizeLow, uint32_t nFileSizeHigh) {
   ULARGE_INTEGER uliSize;
   uliSize.LowPart = nFileSizeLow;
   uliSize.HighPart = nFileSizeHigh;
-  size = static_cast<size_t>(uliSize.QuadPart);
+  size_ = static_cast<size_t>(uliSize.QuadPart);
 }
 }
 }

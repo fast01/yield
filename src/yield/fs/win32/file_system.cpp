@@ -216,7 +216,7 @@ FileSystem::open(
     );
 
   if (hDirectory != INVALID_HANDLE_VALUE) {
-    return ::std::unique_ptr<Directory>(new Directory(hDirectory));
+    return ::std::unique_ptr<Directory>(new Directory(unique_fd(hDirectory)));
   } else {
     return NULL;
   }

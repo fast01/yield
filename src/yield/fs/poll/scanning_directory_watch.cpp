@@ -60,10 +60,10 @@ ScanningDirectoryWatch::ScanningDirectoryWatch(
       unique_ptr<Stat> dentry_stat = stat(*dentry);
       if (dentry_stat != NULL) {
         CHECK_EQ(
-          dentries_->find(dentry->get_name()),
+          dentries_->find(dentry->name()),
           dentries_->end()
         );
-        dentries_->insert(make_pair(dentry->get_name(), move(dentry_stat)));
+        dentries_->insert(make_pair(dentry->name(), move(dentry_stat)));
       }
     }
 
@@ -92,18 +92,18 @@ ScanningDirectoryWatch::scan(
           shared_ptr<Stat> new_dentry_stat = stat(*new_dentry);
           if (new_dentry_stat != NULL) {
             CHECK_EQ(
-              new_dentries->find(new_dentry->get_name()),
+              new_dentries->find(new_dentry->name()),
               new_dentries->end()
             );
 
             new_dentries->insert(
-              make_pair(new_dentry->get_name(), new_dentry_stat)
+              make_pair(new_dentry->name(), new_dentry_stat)
             );
 
-            auto old_dentry_i = old_dentries->find(new_dentry->get_name());
+            auto old_dentry_i = old_dentries->find(new_dentry->name());
             if (old_dentry_i != old_dentries->end()) {
               shared_ptr<Stat> old_dentry_stat = old_dentry_i->second;
-              if (new_dentry->get_type() == type(*old_dentry_stat)) {
+              if (new_dentry->type() == type(*old_dentry_stat)) {
                 if (!equals(*new_dentry_stat, *old_dentry_stat)) {
                   FsEvent::Type fs_event_type =
                     new_dentry_stat->ISDIR() ?
@@ -113,7 +113,7 @@ ScanningDirectoryWatch::scan(
                   if ((fs_event_type & fs_event_types) == fs_event_type) {
                     unique_ptr<FsEvent> fs_event(
                     new FsEvent(
-                      this->path() / new_dentry->get_name(),
+                      this->path() / new_dentry->name(),
                       fs_event_type
                     ));
                     log_fs_event(*fs_event);
@@ -128,7 +128,7 @@ ScanningDirectoryWatch::scan(
             } else { // old_dentry_i == old_dentries->end()
               // Add the new_dentry to new_new_dentries to check for renaming below
               new_new_dentries.push_back(
-                make_pair(new_dentry->get_name(), new_dentry_stat)
+                make_pair(new_dentry->name(), new_dentry_stat)
               );
             }
           }
@@ -270,7 +270,7 @@ unique_ptr<Stat> ScanningDirectoryWatch::stat(Directory::Entry& dentry) {
 #ifdef _WIN32
   return unique_ptr<Stat>(new Stat(dentry));
 #else
-  return FileSystem().stat(this->path() / dentry.get_name());
+  return FileSystem().stat(this->path() / dentry.name());
 #endif
 }
 }

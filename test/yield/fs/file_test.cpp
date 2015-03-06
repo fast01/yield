@@ -51,27 +51,27 @@ public:
 
 public:
   File& get_read_file() {
-    if (!read_file) {
+    if (!read_file_) {
       get_write_file();
 
-      read_file = FileSystem().open(path, O_RDONLY);
-      if (!read_file) {
+      read_file_ = FileSystem().open(path, O_RDONLY);
+      if (!read_file_) {
         throw Exception();
       }
     }
 
-    return *read_file;
+    return *read_file_;
   }
 
   File& get_write_file() {
-    if (!write_file) {
-      write_file = FileSystem().open(path, O_CREAT | O_TRUNC | O_WRONLY);
-      if (!write_file) {
+    if (!write_file_) {
+      write_file_ = FileSystem().open(path, O_CREAT | O_TRUNC | O_WRONLY);
+      if (!write_file_) {
         throw Exception();
       }
     }
 
-    return *write_file;
+    return *write_file_;
   }
 
 public:
@@ -86,7 +86,7 @@ public:
 
 private:
   Path path;
-  unique_ptr<File> read_file, write_file;
+  unique_ptr<File> read_file_, write_file_;
 };
 
 
@@ -116,7 +116,7 @@ TEST_F(FileTest, datasync) {
   }
 
   ASSERT_GE(
-    get_write_file().stat()->get_size(),
+    get_write_file().stat()->size(),
     get_test_string().size()
   );
 }
@@ -469,14 +469,14 @@ TEST_F(FileTest, setlkw) {
 TEST_F(FileTest, stat) {
   DateTime now = DateTime::now();
   unique_ptr<Stat> stbuf = get_write_file().stat();
-  ASSERT_NE(stbuf->get_atime(), DateTime::INVALID_DATE_TIME);
-  ASSERT_LE(stbuf->get_atime(), now);
-  ASSERT_NE(stbuf->get_ctime(), DateTime::INVALID_DATE_TIME);
-  ASSERT_LE(stbuf->get_ctime(), now);
-  ASSERT_NE(stbuf->get_mtime(), DateTime::INVALID_DATE_TIME);
-  ASSERT_LE(stbuf->get_mtime(), now);
-  ASSERT_EQ(stbuf->get_nlink(), 1);
-  ASSERT_EQ(stbuf->get_size(), 0);
+  ASSERT_NE(stbuf->atime(), DateTime::INVALID_DATE_TIME);
+  ASSERT_LE(stbuf->atime(), now);
+  ASSERT_NE(stbuf->ctime(), DateTime::INVALID_DATE_TIME);
+  ASSERT_LE(stbuf->ctime(), now);
+  ASSERT_NE(stbuf->mtime(), DateTime::INVALID_DATE_TIME);
+  ASSERT_LE(stbuf->mtime(), now);
+  ASSERT_EQ(stbuf->nlink(), 1);
+  ASSERT_EQ(stbuf->size(), 0);
 }
 
 TEST_F(FileTest, sync) {
@@ -490,7 +490,7 @@ TEST_F(FileTest, sync) {
   }
 
   ASSERT_GE(
-    get_write_file().stat()->get_size(),
+    get_write_file().stat()->size(),
     get_test_string().size()
   );
 }
@@ -514,7 +514,7 @@ TEST_F(FileTest, truncate) {
     throw Exception();
   }
 
-  ASSERT_EQ(get_write_file().stat()->get_size(), 0);
+  ASSERT_EQ(get_write_file().stat()->size(), 0);
 }
 
 TEST_F(FileTest, unlk) {

@@ -48,7 +48,7 @@ DirectoryWatch::DirectoryWatch(
   if (dirent != NULL) {
     do {
       if (dirent->ISDIR() && !dirent->is_hidden() && !dirent->is_special()) {
-        subdirectory_names.push_back(dirent->get_name());
+        subdirectory_names.push_back(dirent->name());
       }
     } while (directory->read(*dirent));
     directory->rewind();

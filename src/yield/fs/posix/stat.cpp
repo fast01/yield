@@ -32,105 +32,65 @@
 namespace yield {
 namespace fs {
 Stat::Stat(const struct stat& stbuf)
-  : atime(stbuf.st_atime),
-    blksize(stbuf.st_blksize),
-    blocks(stbuf.st_blocks),
-    ctime(stbuf.st_ctime),
-    dev(stbuf.st_dev),
-    gid(stbuf.st_gid),
-    ino(stbuf.st_ino),
-    mode(stbuf.st_mode),
-    mtime(stbuf.st_mtime),
-    nlink(stbuf.st_nlink),
-    rdev(stbuf.st_rdev),
-    size(stbuf.st_size),
-    uid(stbuf.st_uid) {
-}
-
-uint64_t Stat::get_blksize() const {
-  return blksize;
-}
-
-uint64_t Stat::get_blocks() const {
-  return blocks;
-}
-
-uint64_t Stat::get_dev() const {
-  return dev;
-}
-
-gid_t Stat::get_gid() const {
-  return gid;
-}
-
-uint64_t Stat::get_ino() const {
-  return ino;
-}
-
-mode_t Stat::get_mode() const {
-  return mode;
-}
-
-int16_t Stat::get_nlink() const {
-  return nlink;
-}
-
-uint64_t Stat::get_rdev() const {
-  return rdev;
-}
-
-uint64_t Stat::get_size() const {
-  return size;
-}
-
-uid_t Stat::get_uid() const {
-  return uid;
+  : atime_(stbuf.st_atime),
+    blksize_(stbuf.st_blksize),
+    blocks_(stbuf.st_blocks),
+    ctime_(stbuf.st_ctime),
+    dev_(stbuf.st_dev),
+    gid_(stbuf.st_gid),
+    ino_(stbuf.st_ino),
+    mode_(stbuf.st_mode),
+    mtime_(stbuf.st_mtime),
+    nlink_(stbuf.st_nlink),
+    rdev_(stbuf.st_rdev),
+    size_(stbuf.st_size),
+    uid_(stbuf.st_uid) {
 }
 
 bool Stat::ISBLK() const {
-  return S_ISBLK(get_mode());
+  return S_ISBLK(mode());
 }
 
 bool Stat::ISCHR() const {
-  return S_ISCHR(get_mode());
+  return S_ISCHR(mode());
 }
 
 bool Stat::ISDIR() const {
-  return S_ISDIR(get_mode());
+  return S_ISDIR(mode());
 }
 
 bool Stat::ISFIFO() const {
-  return S_ISFIFO(get_mode());
+  return S_ISFIFO(mode());
 }
 
 bool Stat::ISLNK() const {
-  return S_ISLNK(get_mode());
+  return S_ISLNK(mode());
 }
 
 bool Stat::ISREG() const {
-  return S_ISREG(get_mode());
+  return S_ISREG(mode());
 }
 
 bool Stat::ISSOCK() const {
-  return S_ISSOCK(get_mode());
+  return S_ISSOCK(mode());
 }
 
 Stat::operator struct stat() const {
   struct stat stbuf;
   memset(&stbuf, 0, sizeof(stbuf));
-  stbuf.st_atime = static_cast<time_t>(get_atime().as_unix_date_time_s());
-  stbuf.st_blksize = get_blksize();
-  stbuf.st_blocks = get_blocks();
-  stbuf.st_ctime = static_cast<time_t>(get_ctime().as_unix_date_time_s());
-  stbuf.st_dev = static_cast<dev_t>(get_dev());
-  stbuf.st_gid = get_gid();
-  stbuf.st_ino = static_cast<ino_t>(get_ino());
-  stbuf.st_mode = get_mode();
-  stbuf.st_mtime = static_cast<time_t>(get_mtime().as_unix_date_time_s());
-  stbuf.st_nlink = get_nlink();
-  stbuf.st_rdev = static_cast<dev_t>(get_rdev());
-  stbuf.st_size = static_cast<off_t>(get_size());
-  stbuf.st_uid = get_uid();
+  stbuf.st_atime = static_cast<time_t>(atime().as_unix_date_time_s());
+  stbuf.st_blksize = blksize();
+  stbuf.st_blocks = blocks();
+  stbuf.st_ctime = static_cast<time_t>(ctime().as_unix_date_time_s());
+  stbuf.st_dev = static_cast<dev_t>(dev());
+  stbuf.st_gid = gid();
+  stbuf.st_ino = static_cast<ino_t>(ino());
+  stbuf.st_mode = mode();
+  stbuf.st_mtime = static_cast<time_t>(mtime().as_unix_date_time_s());
+  stbuf.st_nlink = nlink();
+  stbuf.st_rdev = static_cast<dev_t>(rdev());
+  stbuf.st_size = static_cast<off_t>(size());
+  stbuf.st_uid = uid();
   return stbuf;
 }
 
@@ -152,19 +112,19 @@ Stat::operator struct stat() const {
 //}
 
 bool Stat::operator==(const Stat& other) const {
-  return get_atime() == other.get_atime() &&
-         get_blksize() == other.get_blksize() &&
-         get_blocks() == other.get_blocks() &&
-         get_ctime() == other.get_ctime() &&
-         get_dev() == other.get_dev() &&
-         get_gid() == other.get_gid() &&
-         get_ino() == other.get_ino() &&
-         get_mode() == other.get_mode() &&
-         get_mtime() == other.get_mtime() &&
-         get_nlink() == other.get_nlink() &&
-         get_rdev() == other.get_rdev() &&
-         get_size() == other.get_size() &&
-         get_uid() == other.get_uid();
+  return atime() == other.atime() &&
+         blksize() == other.blksize() &&
+         blocks() == other.blocks() &&
+         ctime() == other.ctime() &&
+         dev() == other.dev() &&
+         gid() == other.gid() &&
+         ino() == other.ino() &&
+         mode() == other.mode() &&
+         mtime() == other.mtime() &&
+         nlink() == other.nlink() &&
+         rdev() == other.rdev() &&
+         size() == other.size() &&
+         uid() == other.uid();
 }
 }
 }

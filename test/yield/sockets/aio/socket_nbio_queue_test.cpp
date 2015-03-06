@@ -97,7 +97,7 @@ TEST_F(NBIOQueuePartialSendFileTest, partial_sendfile) {
 
   unique_ptr<SendfileAiocb> aiocb
   (new SendfileAiocb(partial_send_stream_socket, *file));
-  ASSERT_EQ(aiocb->nbytes(), stbuf->get_size());
+  ASSERT_EQ(aiocb->nbytes(), stbuf->size());
   ASSERT_EQ(aiocb->offset(), 0);
 
   if (aio_queue.tryenqueue(unique_ptr<SocketAiocb>(aiocb.release()))) {
@@ -108,7 +108,7 @@ TEST_F(NBIOQueuePartialSendFileTest, partial_sendfile) {
   ASSERT_EQ(out_aiocb->error(), 0);
   ASSERT_EQ(
     out_aiocb->return_(),
-    static_cast<ssize_t>(stbuf->get_size())
+    static_cast<ssize_t>(stbuf->size())
   );
 
   char test[4];

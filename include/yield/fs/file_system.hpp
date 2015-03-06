@@ -335,7 +335,7 @@ public:
             continue;
           }
 
-          Path dentry_path(path / dentry->get_name());
+          Path dentry_path(path / dentry->name());
 
           if (dentry->ISDIR()) {
             if (rmtree(dentry_path)) {

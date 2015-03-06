@@ -98,8 +98,8 @@ public:
     Get the last access time of the file referred to by this Stat.
     @return the last access time of the file referred to by this Stat
   */
-  const DateTime& get_atime() const {
-    return atime;
+  const DateTime& atime() const {
+    return atime_;
   }
 
 #ifdef _WIN32
@@ -107,7 +107,9 @@ public:
     Get the Win32 attributes of the file referred to by this Stat.
     @return the Win32 attributes of the file referred to by this Stat
   */
-  uint32_t get_attributes() const;
+  uint32_t attributes() const {
+    return attributes_;
+  }
 #endif
 
 #ifndef _WIN32
@@ -115,22 +117,25 @@ public:
     Get the block size of the file referred to by this Stat.
     @return the block size of the file referred to by this Stat
   */
-  uint64_t get_blksize() const;
+  uint64_t blksize() const {
+    return blksize_;
+  }
 
   /**
     Get the block count of the file referred to by this Stat.
     @return the block count of the file referred to by this Stat
   */
-  uint64_t get_blocks() const;
+  uint64_t blocks() const {
+    return blocks_;
+  }
 #endif
-
 
   /**
     Get the creation time of the file referred to by this Stat.
     @return the creation time of the file referred to by this Stat
   */
-  const DateTime& get_ctime() const {
-    return ctime;
+  const DateTime& ctime() const {
+    return ctime_;
   }
 
 #ifndef _WIN32
@@ -138,63 +143,25 @@ public:
     Get the ID of the device containing the file referred to by this Stat.
     @return the ID of the device containing file referred to by this Stat
   */
-  uint64_t get_dev() const;
+  uint64_t dev() const {
+    return dev_;
+  }
 
   /**
     Get the group ID (gid) of the owner of the file referred to by this Stat.
     @return the group ID (gid) of the owner of the file referred to by this Stat
   */
-  gid_t get_gid() const;
+  gid_t gid() const {
+    return gid_;
+  }
 
   /**
     Get the inode number of the file referred to by this Stat.
     @return the inode number of the file referred to by this Stat
   */
-  uint64_t get_ino() const;
-
-  /**
-    Get the mode bits (including permissions) of the file referred to by this
-      Stat.
-    @return the mode bits (including permissions) of the file referred to by
-      this Stat
-  */
-  mode_t get_mode() const;
-#endif
-
-  const DateTime& get_mtime() const {
-    return mtime;
+  uint64_t ino() const {
+    return ino_;
   }
-
-  /**
-    Get the number of hard links that point to the file referred to by this
-      Stat.
-    @return the number of hard links that point to the file referred to by this
-      Stat
-  */
-  int16_t get_nlink() const;
-
-#ifndef _WIN32
-  /**
-    Get the device ID of the file referred to by this Stat, if the file is a
-      device.
-    @return the device ID of the file referred to by this Stat, if the file is
-      a device.
-  */
-  uint64_t get_rdev() const;
-#endif
-
-  /**
-    Get the size of the file referred to by this Stat.
-    @return the size of the file referred to by this Stat
-  */
-  uint64_t get_size() const;
-
-#ifndef _WIN32
-  /**
-    Get the user ID (uid) of the owner of the file referred to by this Stat.
-    @return the user ID (uid) of the owner of the file referred to by this Stat
-  */
-  uid_t get_uid() const;
 #endif
 
 public:
@@ -253,6 +220,36 @@ public:
   */
   bool ISSOCK() const;
 #endif
+
+  /**
+    Get the last modified time of the file referred to by this Stat.
+    @return the last modified time of the file referred to by this Stat
+  */
+  const DateTime& mtime() const {
+    return mtime_;
+  }
+
+#ifndef _WIN32
+  /**
+    Get the mode bits (including permissions) of the file referred to by this
+      Stat.
+    @return the mode bits (including permissions) of the file referred to by
+      this Stat
+  */
+  mode_t mode() const {
+    return mode_;
+  }
+#endif
+
+  /**
+    Get the number of hard links that point to the file referred to by this
+      Stat.
+    @return the number of hard links that point to the file referred to by this
+      Stat
+  */
+  int16_t nlink() const {
+    return nlink_;
+  }
 
 public:
   /**
@@ -316,34 +313,65 @@ public:
   virtual Stat& operator=(const WIN32_FIND_DATA& win32_find_data);
 #endif
 
+public:
+#ifndef _WIN32
+  /**
+    Get the device ID of the file referred to by this Stat, if the file is a
+      device.
+    @return the device ID of the file referred to by this Stat, if the file is
+      a device.
+  */
+  uint64_t rdev() const {
+    return rdev_;
+  }
+#endif
+
+  /**
+    Get the size of the file referred to by this Stat.
+    @return the size of the file referred to by this Stat
+  */
+  uint64_t size() const {
+    return size_;
+  }
+
+#ifndef _WIN32
+  /**
+    Get the user ID (uid) of the owner of the file referred to by this Stat.
+    @return the user ID (uid) of the owner of the file referred to by this Stat
+  */
+  uid_t uid() const {
+    return uid_;
+  }
+#endif
+
 private:
   void set_size(uint32_t nFileSizeLow, uint32_t nFileSizeHigh);
 
 private:
-  DateTime atime;
+  DateTime atime_;
 #ifdef _WIN32
-  uint32_t attributes;
+  uint32_t attributes_;
 #else
-  blksize_t blksize;
-  blkcnt_t blocks;
+  blksize_t blksize_;
+  blkcnt_t blocks_;
 #endif
-  DateTime ctime;
+  DateTime ctime_;
 #ifndef _WIN32
-  dev_t dev;
-  gid_t gid;
-  ino_t ino;
-  mode_t mode;
+  dev_t dev_;
+  gid_t gid_;
+  ino_t ino_;
+  mode_t mode_;
 #endif
-  DateTime mtime;
+  DateTime mtime_;
 #ifdef _WIN32
-  int16_t nlink;
+  int16_t nlink_;
 #else
-  nlink_t nlink;
-  dev_t rdev;
+  nlink_t nlink_;
+  dev_t rdev_;
 #endif
-  uint64_t size;
+  uint64_t size_;
 #ifndef _WIN32
-  uid_t uid;
+  uid_t uid_;
 #endif
 };
 }
