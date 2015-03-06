@@ -183,7 +183,7 @@ unique_ptr<HttpServerEvent> HttpServerEventQueue::timeddequeue(const Time& timeo
         CHECK(false);
         break;
       }
-    } else if (timeout_remaining > static_cast<uint64_t>(0)) {
+    } else if (timeout_remaining) {
       Time elapsed_time = Time::now() - start_time;
       if (timeout_remaining > elapsed_time) {
         timeout_remaining -= elapsed_time;

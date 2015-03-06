@@ -65,7 +65,7 @@ public:
     @return an event if one is available immediately, otherwise NULL
   */
   virtual ::std::unique_ptr<EventT> trydequeue() {
-    return timeddequeue(0);
+    return timeddequeue(Time::ZERO);
   }
 
   /**

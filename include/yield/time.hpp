@@ -44,10 +44,10 @@ namespace yield {
 class Time {
 public:
   /**
-    Constant: the largest value this class can store,
+    Singleton: the largest value this class can store,
       often used to indicate infinite timeouts.
   */
-  const static uint64_t FOREVER = static_cast<uint64_t>(~0);
+  const static Time FOREVER;
 
   /**
     Constant: number of nanoseconds in a millisecond.
@@ -64,13 +64,19 @@ public:
   */
   const static uint64_t NS_IN_US = static_cast<uint64_t>(1000);
 
+  /**
+    Singleton: the smallest value this class can store,
+      often used to indicate try-and-timeout
+  */
+  const static Time ZERO;
+
 public:
   /**
     Construct a Time from a nanosecond value.
     @param ns nanoseconds
   */
   Time(uint64_t ns)
-    : _ns(ns) {
+    : ns_(ns) {
   }
 
   /**
@@ -78,7 +84,7 @@ public:
     @param s seconds
   */
   Time(int s)
-    : _ns(static_cast<uint32_t>(s) * NS_IN_S) {
+    : ns_(static_cast<uint32_t>(s) * NS_IN_S) {
   }
 
   /**
@@ -86,13 +92,13 @@ public:
     @param s fractions of seconds
   */
   Time(double s)
-    : _ns(static_cast<uint64_t>(s* static_cast<double>(NS_IN_S))) {
+    : ns_(static_cast<uint64_t>(s* static_cast<double>(NS_IN_S))) {
   }
 
   /**
     Copy constructor.
   */
-  Time(const Time& time) : _ns(time._ns) { }
+  Time(const Time& time) : ns_(time.ns_) { }
 
 #ifndef _WIN32
   /**
@@ -114,7 +120,7 @@ public:
     @return the stored time in fractions of milliseconds
   */
   double ms() const {
-    return static_cast<double>(_ns) / NS_IN_MS;
+    return static_cast<double>(ns_) / NS_IN_MS;
   }
 
   /**
@@ -130,7 +136,7 @@ public:
     @return the stored time in nanoseconds
   */
   uint64_t ns() const {
-    return _ns;
+    return ns_;
   }
 
   /**
@@ -138,7 +144,7 @@ public:
     @return the stored time in fractions of seconds
   */
   double s() const {
-    return static_cast<double>(_ns) / NS_IN_S;
+    return static_cast<double>(ns_) / NS_IN_S;
   }
 
   /**
@@ -146,16 +152,24 @@ public:
     @return the stored time in fractions of microseconds
   */
   double us() const {
-    return static_cast<double>(_ns) / NS_IN_US;
+    return static_cast<double>(ns_) / NS_IN_US;
   }
 
 public:
+  /**
+    Return whether the time is non-zero.
+    @return true if the time is non-zero
+   */
+  operator bool() const {
+    return ns_ > 0;
+  }
+
   /**
     Return the stored time in nanoseconds.
     @return the stored time in nanoseconds
   */
   operator uint64_t() const {
-    return _ns;
+    return ns_;
   }
 
 #ifndef _WIN32
@@ -189,7 +203,7 @@ public:
     @param time another other Time instance
   */
   Time& operator=(const Time& time) {
-    _ns = time._ns;
+    ns_ = time.ns_;
     return *this;
   }
 
@@ -198,7 +212,7 @@ public:
     @param ns nanoseconds
   */
   Time& operator=(uint64_t ns) {
-    _ns = ns;
+    ns_ = ns;
     return *this;
   }
 
@@ -208,7 +222,7 @@ public:
     @return a new Time instance
   */
   Time operator+(const Time& time) const {
-    return Time(_ns + time._ns);
+    return Time(ns_ + time.ns_);
   }
 
   /**
@@ -217,7 +231,7 @@ public:
     @return a new Time instance
   */
   Time operator+(uint64_t ns) const {
-    return Time(_ns + ns);
+    return Time(ns_ + ns);
   }
 
   /**
@@ -226,7 +240,7 @@ public:
     @return *this
   */
   Time& operator+=(const Time& time) {
-    _ns += time._ns;
+    ns_ += time.ns_;
     return *this;
   }
 
@@ -236,7 +250,7 @@ public:
     @return *this
   */
   Time& operator+=(uint64_t ns) {
-    _ns += ns;
+    ns_ += ns;
     return *this;
   }
 
@@ -246,10 +260,10 @@ public:
     @return a new Time instance
   */
   Time operator-(const Time& time) const {
-    if (_ns >= time._ns) {
-      return Time(_ns - time._ns);
+    if (ns_ >= time.ns_) {
+      return Time(ns_ - time.ns_);
     } else {
-      return Time(static_cast<uint64_t>(0));
+      return Time::ZERO;
     }
   }
 
@@ -259,10 +273,10 @@ public:
     @return a new Time instance
   */
   Time operator-(uint64_t ns) const {
-    if (_ns >= ns) {
-      return Time(_ns - ns);
+    if (ns_ >= ns) {
+      return Time(ns_ - ns);
     } else {
-      return Time(static_cast<uint64_t>(0));
+      return Time::ZERO;
     }
   }
 
@@ -272,7 +286,7 @@ public:
     @return *this
   */
   Time& operator-=(const Time& time) {
-    _ns = (_ns >= time._ns) ? (_ns - time._ns) : 0;
+    ns_ = (ns_ >= time.ns_) ? (ns_ - time.ns_) : 0;
     return *this;
   }
 
@@ -282,10 +296,10 @@ public:
     @return *this
   */
   Time& operator-=(uint64_t ns) {
-    if (_ns >= ns) {
-      _ns -= ns;
+    if (ns_ >= ns) {
+      ns_ -= ns;
     } else {
-      _ns = 0;
+      ns_ = 0;
     }
 
     return *this;
@@ -297,7 +311,7 @@ public:
     @return a new Time instance
   */
   Time operator*(const Time& time) const {
-    return Time(_ns * time._ns);
+    return Time(ns_ * time.ns_);
   }
 
   /**
@@ -306,7 +320,7 @@ public:
     @return a new Time instance
   */
   Time operator*(uint64_t ns) const {
-    return Time(_ns * ns);
+    return Time(ns_ * ns);
   }
 
   /**
@@ -315,7 +329,7 @@ public:
     @return *this
   */
   Time& operator*=(const Time& time) {
-    _ns *= time._ns;
+    ns_ *= time.ns_;
     return *this;
   }
 
@@ -325,7 +339,7 @@ public:
     @return *this
   */
   Time& operator*=(const uint64_t ns) {
-    _ns *= ns;
+    ns_ *= ns;
     return *this;
   }
 
@@ -335,7 +349,7 @@ public:
     @return true if the two Times are equal
   */
   bool operator==(const Time& time) const {
-    return _ns == time._ns;
+    return ns_ == time.ns_;
   }
 
   /**
@@ -344,7 +358,7 @@ public:
     @return true if the two times are equal
   */
   bool operator==(uint64_t ns) const {
-    return _ns == ns;
+    return ns_ == ns;
   }
 
   /**
@@ -353,7 +367,7 @@ public:
     @return true if the two Times are not equal
   */
   bool operator!=(const Time& time) const {
-    return _ns != time._ns;
+    return ns_ != time.ns_;
   }
 
   /**
@@ -362,7 +376,7 @@ public:
     @return true if the two times are not equal
   */
   bool operator!=(uint64_t ns) const {
-    return _ns != ns;
+    return ns_ != ns;
   }
 
   /**
@@ -371,7 +385,7 @@ public:
     @return true if this time is less than the other
   */
   bool operator<(const Time& time) const {
-    return _ns < time._ns;
+    return ns_ < time.ns_;
   }
 
   /**
@@ -380,7 +394,7 @@ public:
     @return true if this Time is less than the nanosecond value
   */
   bool operator<(uint64_t ns) const {
-    return _ns < ns;
+    return ns_ < ns;
   }
 
   /**
@@ -389,7 +403,7 @@ public:
     @return true if this time is less than or equal to the other
   */
   bool operator<=(const Time& time) const {
-    return _ns <= time._ns;
+    return ns_ <= time.ns_;
   }
 
   /**
@@ -398,7 +412,7 @@ public:
     @return true if this Time is less than or equal to the nanosecond value
   */
   bool operator<=(uint64_t ns) const {
-    return _ns <= ns;
+    return ns_ <= ns;
   }
 
   /**
@@ -407,7 +421,7 @@ public:
     @return true if this time is greater than the other
   */
   bool operator>(const Time& time) const {
-    return _ns > time._ns;
+    return ns_ > time.ns_;
   }
 
   /**
@@ -416,7 +430,7 @@ public:
     @return true if this Time is greater than the nanosecond value
   */
   bool operator>(uint64_t ns) const {
-    return _ns > ns;
+    return ns_ > ns;
   }
 
   /**
@@ -425,7 +439,7 @@ public:
     @return true if this time is greater than or equal to the other
   */
   bool operator>=(const Time& time) const {
-    return _ns >= time._ns;
+    return ns_ >= time.ns_;
   }
 
   /**
@@ -434,11 +448,11 @@ public:
     @return true if this Time is greater than or equal to the nanosecond value
   */
   bool operator>=(uint64_t ns) const {
-    return _ns >= ns;
+    return ns_ >= ns;
   }
 
 private:
-  uint64_t _ns;
+  uint64_t ns_;
 };
 }
 

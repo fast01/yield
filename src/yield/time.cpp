@@ -36,8 +36,10 @@
 #endif
 
 namespace yield {
+const Time Time::FOREVER(static_cast<uint64_t>(~0));
+const Time Time::ZERO(static_cast<uint64_t>(0));
+
 #ifndef _WIN32
-const uint64_t Time::FOREVER;
 const uint64_t Time::NS_IN_MS;
 const uint64_t Time::NS_IN_S;
 const uint64_t Time::NS_IN_US;

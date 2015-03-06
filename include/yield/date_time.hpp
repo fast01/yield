@@ -277,7 +277,7 @@ public:
     if (unix_date_time_ns >= other.unix_date_time_ns) {
       return Time(unix_date_time_ns - other.unix_date_time_ns);
     } else {
-      return Time(static_cast<uint64_t>(0));
+      return Time::ZERO;
     }
   }
 
