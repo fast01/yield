@@ -182,15 +182,15 @@ public:
     Entry& operator=(const WIN32_FIND_DATA&);
 #else
     Entry(const Path& name, Type type)
-      : name(name), type(type)
+      : name_(name), type_(type)
     { }
 
     void set_name(const Path& name) {
-      this->name = name;
+      this->name_ = name;
     }
 
     void set_type(Type type) {
-      this->type = type;
+      this->type_ = type;
     }
 #endif
 

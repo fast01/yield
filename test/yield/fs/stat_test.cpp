@@ -292,16 +292,16 @@ TEST_F(StatTest, operator_as_struct_stat) {
   unique_ptr<Stat> stbuf1 = FileSystem().stat(get_test_file_name());
 
   struct stat ss = static_cast<struct stat>(*stbuf1);
-  ASSERT_EQ(ss.st_blksize, stbuf1->get_blksize());
-  ASSERT_EQ(ss.st_blocks, stbuf1->get_blocks());
-  ASSERT_EQ(ss.st_dev, stbuf1->get_dev());
-  ASSERT_EQ(ss.st_gid, stbuf1->get_gid());
-  ASSERT_EQ(ss.st_ino, stbuf1->get_ino());
-  ASSERT_EQ(ss.st_mode, stbuf1->get_mode());
-  ASSERT_EQ(ss.st_nlink, stbuf1->get_nlink());
-  ASSERT_EQ(ss.st_rdev, stbuf1->get_rdev());
-  ASSERT_EQ(ss.st_size, stbuf1->get_size());
-  ASSERT_EQ(ss.st_uid, stbuf1->get_uid());
+  ASSERT_EQ(ss.st_blksize, stbuf1->blksize());
+  ASSERT_EQ(ss.st_blocks, stbuf1->blocks());
+  ASSERT_EQ(ss.st_dev, stbuf1->dev());
+  ASSERT_EQ(ss.st_gid, stbuf1->gid());
+  ASSERT_EQ(ss.st_ino, stbuf1->ino());
+  ASSERT_EQ(ss.st_mode, stbuf1->mode());
+  ASSERT_EQ(ss.st_nlink, stbuf1->nlink());
+  ASSERT_EQ(ss.st_rdev, stbuf1->rdev());
+  ASSERT_EQ(ss.st_size, stbuf1->size());
+  ASSERT_EQ(ss.st_uid, stbuf1->uid());
 
   Stat stbuf2(ss);
   ASSERT_EQ(stbuf2, *stbuf1);

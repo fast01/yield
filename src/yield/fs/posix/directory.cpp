@@ -33,7 +33,7 @@
 namespace yield {
 namespace fs {
 Directory::Directory(DIR* dirp, const Path& path)
-  : dirp_(dirp_), path_(path)
+  : dirp_(dirp), path_(path)
 { }
 
 bool Directory::close() {
@@ -122,7 +122,7 @@ void Directory::rewind() {
 
 
 Directory::Entry::Type Directory::Entry::type() const {
-  return type;
+  return type_;
 }
 
 bool Directory::Entry::is_hidden() const {
