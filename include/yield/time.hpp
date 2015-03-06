@@ -157,14 +157,6 @@ public:
 
 public:
   /**
-    Return whether the time is non-zero.
-    @return true if the time is non-zero
-   */
-  operator bool() const {
-    return ns_ > 0;
-  }
-
-  /**
     Return the stored time in nanoseconds.
     @return the stored time in nanoseconds
   */
