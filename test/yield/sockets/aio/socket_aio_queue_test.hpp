@@ -210,7 +210,8 @@ TYPED_TEST_P(SocketAioQueueTest, recv_split) {
   sockets.second()->send("test", 4, 0);
 
   for (uint8_t i = 0; i < 2; i++) {
-    unique_ptr<SocketAiocb> out_aiocb = aio_queue.dequeue();
+    unique_ptr<SocketAiocb> out_aiocb = aio_queue.timeddequeue(Time(30));
+    ASSERT_TRUE(static_cast<bool>(out_aiocb));
     ASSERT_EQ(out_aiocb->error(), 0);
     ASSERT_EQ(out_aiocb->return_(), 2);
     ASSERT_EQ(*static_cast<RecvAiocb&>(*out_aiocb).buffer(), i == 0 ? "te" : "st");
