@@ -71,14 +71,14 @@ Time::Time(const timespec& ts) {
 }
 
 Time& Time::operator=(const timespec& ts) {
-  _ns = ts.tv_sec * NS_IN_S + ts.tv_nsec;
+  ns_ = ts.tv_sec * NS_IN_S + ts.tv_nsec;
   return *this;
 }
 
 Time::operator timespec() const {
   timespec ts;
-  ts.tv_sec = _ns / NS_IN_S;
-  ts.tv_nsec = _ns % NS_IN_S;
+  ts.tv_sec = ns_ / NS_IN_S;
+  ts.tv_nsec = ns_ % NS_IN_S;
   return ts;
 }
 
@@ -87,7 +87,7 @@ Time::Time(const timeval& tv) {
 }
 
 Time& Time::operator=(const timeval& tv) {
-  _ns = tv.tv_sec * NS_IN_S
+  ns_ = tv.tv_sec * NS_IN_S
         +
         static_cast<uint64_t>(tv.tv_usec * NS_IN_US);
   return *this;
@@ -95,8 +95,8 @@ Time& Time::operator=(const timeval& tv) {
 
 Time::operator timeval() const {
   timeval tv;
-  tv.tv_sec = static_cast<time_t>(_ns / NS_IN_S);
-  tv.tv_usec = (_ns % NS_IN_S) / NS_IN_US;
+  tv.tv_sec = static_cast<time_t>(ns_ / NS_IN_S);
+  tv.tv_usec = (ns_ % NS_IN_S) / NS_IN_US;
   return tv;
 }
 #endif
