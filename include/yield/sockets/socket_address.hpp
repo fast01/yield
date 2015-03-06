@@ -30,10 +30,6 @@
 
 #include <memory>
 
-#include "yield/exception.hpp"
-#include "yield/socket_t.hpp"
-#include "yield/uri/uri.hpp"
-
 #ifndef _WIN32
 #include <arpa/inet.h> // for socklen_t
 #endif
@@ -43,6 +39,13 @@
 #ifndef _WIN32
 #include <sys/socket.h> // for sockaddr_storage
 #endif
+
+#include "yield/exception.hpp"
+#ifndef _WIN32
+#include "yield/memcpy_s.hpp"
+#endif
+#include "yield/socket_t.hpp"
+#include "yield/uri/uri.hpp"
 
 struct addrinfo;
 struct sockaddr;

@@ -49,7 +49,7 @@ bool unique_fd::close() {
     fd_ = INVALID_FD;
     return true;
   } else {
-    fd_ = INVALID_HANDLE_VALUE;
+    fd_ = INVALID_FD;
     return false;
   }
 }

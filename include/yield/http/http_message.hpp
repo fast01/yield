@@ -29,6 +29,7 @@
 #define _YIELD_HTTP_HTTP_MESSAGE_HPP_
 
 #include <cstdint>
+#include <cstring>
 #include <memory>
 #include <string>
 #include <utility> // for std::pair
@@ -154,7 +155,7 @@ public:
     @return true if the field is present, false if not
   */
   bool get_field(const char* name, iovec& value) const {
-    return get_field(name, strlen(name), value);
+    return get_field(name, ::strlen(name), value);
   }
 
   /**

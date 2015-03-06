@@ -30,6 +30,11 @@
 
 #include <cstdint>
 
+#ifndef _WIN32
+struct timespec;
+struct timeval;
+#endif
+
 namespace yield {
 /**
   An interval time with no reference, similar to struct timespec.

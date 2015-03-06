@@ -33,6 +33,8 @@
 #include <ostream>
 #include <stdlib.h>
 #include <unistd.h>
+
+#include "yield/memcpy_s.hpp"
 #endif
 
 namespace yield {

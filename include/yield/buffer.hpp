@@ -28,6 +28,7 @@
 #ifndef _YIELD_BUFFER_HPP_
 #define _YIELD_BUFFER_HPP_
 
+#include <cstring>
 #include <memory>
 #include <string>
 

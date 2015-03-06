@@ -33,6 +33,8 @@
 #include <Windows.h>
 #else
 #include <errno.h>
+
+#include "yield/memcpy_s.hpp"
 #endif
 
 namespace yield {

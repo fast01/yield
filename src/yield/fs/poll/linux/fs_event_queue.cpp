@@ -43,16 +43,14 @@ namespace poll {
 using linux::Watches;
 
 FsEventQueue::FsEventQueue() {
-  epoll_fd_ = ::epoll_create(32768);
+  epoll_fd_.reset(::epoll_create(32768));
   if (epoll_fd_ == -1) {
     throw Exception();
   }
 
-  event_fd_ = ::eventfd(0, 0);
+  event_fd_.reset(::eventfd(0, 0));
   if (event_fd_ == -1) {
-    Exception e;
-    ::close(epoll_fd_);
-    throw e;
+    throw Exception();
   }
 
   epoll_event epoll_event_;
@@ -60,29 +58,19 @@ FsEventQueue::FsEventQueue() {
   epoll_event_.data.fd = event_fd_;
   epoll_event_.events = EPOLLIN;
   if (::epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, event_fd_, &epoll_event_) != 0) {
-    Exception e;
-    ::close(epoll_fd_);
-    ::close(event_fd_);
-    throw e;
+    throw Exception();
   }
 
-  inotify_fd_ = inotify_init();
+  inotify_fd_.reset(inotify_init());
   if (inotify_fd_ == -1) {
-    Exception e;
-    ::close(epoll_fd_);
-    ::close(event_fd_);
-    throw e;
+    throw Exception();
   }
 
   memset(&epoll_event_, 0, sizeof(epoll_event_));
   epoll_event_.data.fd = inotify_fd_;
   epoll_event_.events = EPOLLIN;
   if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, inotify_fd_, &epoll_event_) != 0) {
-    Exception e;
-    ::close(epoll_fd_);
-    ::close(event_fd_);
-    ::close(inotify_fd_);
-    throw e;
+    throw Exception();
   }
 
   watches_.reset(new linux::Watches);

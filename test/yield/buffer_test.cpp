@@ -32,6 +32,8 @@
 
 #include <sstream>
 
+#include "yield/memcpy_s.hpp"
+
 namespace yield {
 using ::std::shared_ptr;
 using ::std::string;

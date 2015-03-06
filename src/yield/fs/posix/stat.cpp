@@ -27,6 +27,8 @@
 
 #include "yield/fs/stat.hpp"
 
+#include <cstring>
+
 namespace yield {
 namespace fs {
 Stat::Stat(const struct stat& stbuf)

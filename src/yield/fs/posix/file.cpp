@@ -154,7 +154,7 @@ bool File::datasync() {
 unique_ptr<File> File::dup(fd_t fd) {
   fd_t dup_fd = ::dup(fd);
   if (dup_fd != -1) {
-    return unique_ptr<File>(new File(dup_fd));
+    return unique_ptr<File>(new File(unique_fd(dup_fd)));
   } else {
     return NULL;
   }
