@@ -38,7 +38,9 @@
 
 namespace yield {
 namespace fs {
-::std::unique_ptr<File> FileSystem::creat(const Path& path) {
+using ::std::unique_ptr;
+
+unique_ptr<File> FileSystem::creat(const Path& path) {
   return open(path, O_CREAT | O_WRONLY | O_TRUNC);
 }
 
@@ -72,47 +74,47 @@ bool FileSystem::mkdir(const Path& path) {
   return CreateDirectory(path.c_str(), NULL) == TRUE;
 }
 
-::std::unique_ptr<File> FileSystem::mkfifo(const Path& path, uint32_t flags) {
-  if (path.find_first_of(L"\\\\.\\pipe") != Path::npos) {
-    DWORD dwOpenMode = 0;
-    if ((flags & O_ASYNC) == O_ASYNC) {
-      dwOpenMode |= FILE_FLAG_OVERLAPPED;
-    }
-    if ((flags & O_RDWR) == O_RDWR) {
-      dwOpenMode |= PIPE_ACCESS_DUPLEX;
-    } else if ((flags & O_WRONLY) == O_WRONLY) {
-      dwOpenMode |= PIPE_ACCESS_OUTBOUND;
-    } else {
-      dwOpenMode |= PIPE_ACCESS_INBOUND;
-    }
-
-    DWORD dwPipeMode = PIPE_TYPE_BYTE | PIPE_READMODE_BYTE;
-    if ((flags & O_NONBLOCK) == O_NONBLOCK) {
-      dwPipeMode |= PIPE_NOWAIT;
-    } else {
-      dwPipeMode |= PIPE_WAIT;
-    }
-
-    unique_fd hNamedPipe(
-      CreateNamedPipe(
-          path.c_str(),
-          dwOpenMode,
-          dwPipeMode,
-          PIPE_UNLIMITED_INSTANCES,
-          4096,
-          4096,
-          0,
-          NULL
-        ));
-
-    if (hNamedPipe) {
-      return ::std::unique_ptr<NamedPipe>(new NamedPipe(::std::move(hNamedPipe)));
-    } else {
-      return NULL;
-    }
-  } else {
+unique_ptr<File> FileSystem::mkfifo(const Path& path, uint32_t flags) {
+  if (path.find_first_of(L"\\\\.\\pipe") == Path::npos) {
     SetLastError(ERROR_INVALID_PARAMETER);
-    return NULL;
+    return unique_ptr<NamedPipe>();
+  }
+
+  DWORD dwOpenMode = 0;
+  if ((flags & O_ASYNC) == O_ASYNC) {
+    dwOpenMode |= FILE_FLAG_OVERLAPPED;
+  }
+  if ((flags & O_RDWR) == O_RDWR) {
+    dwOpenMode |= PIPE_ACCESS_DUPLEX;
+  } else if ((flags & O_WRONLY) == O_WRONLY) {
+    dwOpenMode |= PIPE_ACCESS_OUTBOUND;
+  } else {
+    dwOpenMode |= PIPE_ACCESS_INBOUND;
+  }
+
+  DWORD dwPipeMode = PIPE_TYPE_BYTE | PIPE_READMODE_BYTE;
+  if ((flags & O_NONBLOCK) == O_NONBLOCK) {
+    dwPipeMode |= PIPE_NOWAIT;
+  } else {
+    dwPipeMode |= PIPE_WAIT;
+  }
+
+  unique_fd hNamedPipe(
+    CreateNamedPipe(
+        path.c_str(),
+        dwOpenMode,
+        dwPipeMode,
+        PIPE_UNLIMITED_INSTANCES,
+        4096,
+        4096,
+        0,
+        NULL
+      ));
+
+  if (hNamedPipe) {
+    return unique_ptr<NamedPipe>(new NamedPipe(::std::move(hNamedPipe)));
+  } else {
+    return unique_ptr<NamedPipe>();
   }
 }
 
@@ -131,7 +133,7 @@ bool FileSystem::mktree(const Path& path) {
   return ret;
 }
 
-::std::unique_ptr<File>
+unique_ptr<File>
 FileSystem::open(
   const Path& path,
   uint32_t flags,
@@ -197,13 +199,13 @@ FileSystem::open(
       SetEndOfFile(fd);
     }
 
-    return ::std::unique_ptr<File>(new File(unique_fd(fd)));
+    return unique_ptr<File>(new File(unique_fd(fd)));
   }
 
   return NULL;
 }
 
-::std::unique_ptr<Directory> FileSystem::opendir(const Path& path) {
+unique_ptr<Directory> FileSystem::opendir(const Path& path) {
   HANDLE hDirectory
   = CreateFile(
       path.c_str(),
@@ -216,9 +218,9 @@ FileSystem::open(
     );
 
   if (hDirectory != INVALID_HANDLE_VALUE) {
-    return ::std::unique_ptr<Directory>(new Directory(unique_fd(hDirectory)));
+    return unique_ptr<Directory>(new Directory(unique_fd(hDirectory)));
   } else {
-    return NULL;
+    return unique_ptr<Directory>();
   }
 }
 
@@ -248,12 +250,12 @@ bool FileSystem::rmdir(const Path& path) {
   return RemoveDirectory(path.c_str()) == TRUE;
 }
 
-::std::unique_ptr<Stat> FileSystem::stat(const Path& path) {
+unique_ptr<Stat> FileSystem::stat(const Path& path) {
   WIN32_FILE_ATTRIBUTE_DATA stbuf;
   if (GetFileAttributesEx(path.c_str(), GetFileExInfoStandard, &stbuf)) {
-    return ::std::unique_ptr<Stat>(new Stat(stbuf));
+    return unique_ptr<Stat>(new Stat(stbuf));
   } else {
-    return NULL;
+    return unique_ptr<Stat>();
   }
 }
 
@@ -285,7 +287,7 @@ bool FileSystem::statvfs(const Path& path, struct statvfs& stbuf) {
 }
 
 bool FileSystem::touch(const Path& path) {
-  ::std::unique_ptr<File> file = creat(path);
+  unique_ptr<File> file = creat(path);
   return file != NULL;
 }
 
@@ -344,7 +346,7 @@ bool FileSystem::utime(
       }
     }
   } else {
-    ::std::unique_ptr<File> file = open(path, O_WRONLY);
+    unique_ptr<File> file = open(path, O_WRONLY);
     if (file != NULL) {
       if (SetFileTime(*file, ftCreationTime, ftLastAccessTime, ftLastWriteTime)) {
         return true;

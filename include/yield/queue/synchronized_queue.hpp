@@ -97,7 +97,7 @@ public:
             timeout_left -= elapsed_time;
           } else {
             cond_.unlock_mutex();
-            return NULL;
+            return ::std::unique_ptr<ElementT>();
           }
         }
       }
@@ -121,7 +121,7 @@ public:
       }
     }
 
-    return NULL;
+    return ::std::unique_ptr<ElementT>();
   }
 
   /**
@@ -134,7 +134,7 @@ public:
     queue_.push(::std::move(element));
     cond_.signal();
     cond_.unlock_mutex();
-    return NULL;
+    return ::std::unique_ptr<ElementT>();
   }
 
   /**

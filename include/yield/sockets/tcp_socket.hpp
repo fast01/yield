@@ -87,7 +87,7 @@ public:
     if (socket_ != static_cast<socket_t>(-1)) {
       return ::std::unique_ptr<StreamSocket>(new TcpSocket(domain(), socket_));
     } else {
-      return NULL;
+      return ::std::unique_ptr<StreamSocket>();
     }
   }
 

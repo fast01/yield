@@ -51,7 +51,7 @@ public:
 public:
   unique_ptr<FdEvent> tryenqueue(unique_ptr<FdEvent> event) override {
     CHECK(false);
-    return NULL;
+    return unique_ptr<FdEvent>();
   }
 };
 
@@ -74,7 +74,7 @@ public:
 
 public:
   // yield::EventQueue
-  ::std::unique_ptr<FdEvent> timeddequeue(const Time& timeout) override {
+  unique_ptr<FdEvent> timeddequeue(const Time& timeout) override {
     DWORD dwRet
     = WaitForMultipleObjectsEx(
         handles.size(),
@@ -85,14 +85,14 @@ public:
       );
 
     if (dwRet == WAIT_OBJECT_0) {
-      return NULL;
+      return unique_ptr<FdEvent>();
     } else if (dwRet > WAIT_OBJECT_0 && dwRet < WAIT_OBJECT_0 + handles.size()) {
       return ::std::unique_ptr<FdEvent>(new FdEvent(
                handles[dwRet - WAIT_OBJECT_0],
                fd_event_types[dwRet - WAIT_OBJECT_0]
              ));
     } else {
-      return NULL;
+      return unique_ptr<FdEvent>();
     }
   }
 
@@ -275,7 +275,7 @@ public:
 
 public:
   // yield::EventQueue
-  ::std::unique_ptr<FdEvent> timeddequeue(const Time& timeout) override {
+  unique_ptr<FdEvent> timeddequeue(const Time& timeout) override {
     // Scan pollfds once for outstanding revents from the last WSAPoll,
     // then call WSAPoll again if necessary.
     int ret = 0;
@@ -290,7 +290,7 @@ public:
             pollfd_.revents = 0;
             char m;
             recv(wake_socket_pair[0], &m, 1, 0);
-            return NULL;
+            return unique_ptr<FdEvent>();
           } else {
             fd_t fd = reinterpret_cast<fd_t>(pollfd_.fd);
             uint16_t revents;
@@ -313,7 +313,7 @@ public:
         );
     } while (ret > 0);
 
-    return NULL;
+    return unique_ptr<FdEvent>();
   }
 
   // yield::poll::SocketImpl
@@ -375,7 +375,7 @@ public:
 
 public:
   // yield::EventQueue
-  ::std::unique_ptr<FdEvent> timeddequeue(const Time& timeout) override {
+  unique_ptr<FdEvent> timeddequeue(const Time& timeout) override {
     fd_set except_fd_set_copy, read_fd_set_copy, write_fd_set_copy;
 
     memcpy_s(
@@ -448,7 +448,7 @@ public:
           if (socket_ == wake_socket_pair[0]) {
             char m;
             recv(wake_socket_pair[0], &m, 1, 0);
-            return NULL;
+            return unique_ptr<FdEvent>();
           } else {
             return ::std::unique_ptr<FdEvent>(new FdEvent(
                      reinterpret_cast<fd_t>(socket_),
@@ -461,7 +461,7 @@ public:
       }
     }
 
-    return NULL;
+    return unique_ptr<FdEvent>();
   }
 
 public:

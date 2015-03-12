@@ -191,7 +191,7 @@ unique_ptr<HttpServerEvent> HttpServerEventQueue::timeddequeue(const Time& timeo
         timeout_remaining = 0;
       }
     } else {
-      return NULL;
+      return unique_ptr<HttpServerEvent>();
     }
   }
 }

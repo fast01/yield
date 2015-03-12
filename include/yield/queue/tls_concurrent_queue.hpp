@@ -98,7 +98,7 @@ public:
 
     if (stack != NULL) {
       stack->push(::std::move(element));
-      return NULL;
+      return ::std::unique_ptr<ElementT>();
     } else {
       return queue_.tryenqueue(::std::move(element));
     }

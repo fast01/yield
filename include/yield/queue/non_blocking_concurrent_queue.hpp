@@ -175,7 +175,7 @@ public:
           tail_element_i.compare_exchange_weak(old_tail_element_i, new_tail_element_i);
         }
 
-        return NULL;
+        return ::std::unique_ptr<ElementT>();
       }
     }
   }

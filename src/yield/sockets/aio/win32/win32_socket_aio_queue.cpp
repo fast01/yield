@@ -86,7 +86,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::timeddequeue(const Time& timeout) {
     );
 
   if (lpOverlapped == NULL) {
-    return NULL;
+    return unique_ptr<SocketAiocb>();
   }
 
   unique_ptr<SocketAiocb> aiocb;
@@ -266,7 +266,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
       if (lpfnGetAcceptExSockaddrs == NULL) {
         accept_aiocb.set_error(WSAGetLastError());
         log_error(accept_aiocb);
-        return NULL;
+        return unique_ptr<SocketAiocb>();
       }
     }
 
@@ -318,7 +318,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
         ||
         WSAGetLastError() == WSA_IO_PENDING
       ) {
-        return NULL;
+        return unique_ptr<SocketAiocb>();
       }
     }
 
@@ -387,7 +387,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
         ||
         WSAGetLastError() == WSA_IO_PENDING
       ) {
-        return NULL;
+        return unique_ptr<SocketAiocb>();
       }
     }
 
@@ -420,7 +420,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
         ||
         WSAGetLastError() == WSA_IO_PENDING
       ) {
-        return NULL;
+        return unique_ptr<SocketAiocb>();
       }
     } else { // Scatter I/O
       vector<iovec> wsabufs;
@@ -439,7 +439,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
         ||
         WSAGetLastError() == WSA_IO_PENDING
       ) {
-        return NULL;
+        return unique_ptr<SocketAiocb>();
       }
     }
 
@@ -477,7 +477,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
         ||
         WSAGetLastError() == WSA_IO_PENDING
       ) {
-        return NULL;
+        return unique_ptr<SocketAiocb>();
       }
     } else { // Scatter I/O
       vector<iovec> wsabufs;
@@ -498,7 +498,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
         ||
         WSAGetLastError() == WSA_IO_PENDING
       ) {
-        return NULL;
+        return unique_ptr<SocketAiocb>();
       }
     }
 
@@ -529,7 +529,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
         ||
         WSAGetLastError() == WSA_IO_PENDING
       ) {
-        return NULL;
+        return unique_ptr<SocketAiocb>();
       }
     } else { // Gather I/O
       vector<iovec> wsabufs;
@@ -548,7 +548,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
         ||
         WSAGetLastError() == WSA_IO_PENDING
       ) {
-        return NULL;
+        return unique_ptr<SocketAiocb>();
       }
     }
 
@@ -596,7 +596,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
       ||
       WSAGetLastError() == WSA_IO_PENDING
     ) {
-      return NULL;
+      return unique_ptr<SocketAiocb>();
     }
 
     sendfile_aiocb.set_error(WSAGetLastError());

@@ -123,7 +123,7 @@ DirectoryWatch::parse(
       return fs_event;
     } else {
       old_paths.pop();
-      return NULL;
+      return unique_ptr<FsEvent>();
     }
   }
   break;
@@ -143,13 +143,13 @@ DirectoryWatch::parse(
 
     old_paths.push(path);
 
-    return NULL;
+    return unique_ptr<FsEvent>();
   }
   break;
 
   default:
     CHECK(false);
-    return NULL;
+    return unique_ptr<FsEvent>();
   }
 
   if (want_fs_event_type(fs_event_type)) {
@@ -157,7 +157,7 @@ DirectoryWatch::parse(
     log_fs_event(*fs_event);
     return fs_event;
   } else {
-    return NULL;
+    return unique_ptr<FsEvent>();
   }
 }
 }

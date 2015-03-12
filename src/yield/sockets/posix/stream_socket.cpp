@@ -50,7 +50,7 @@ unique_ptr<StreamSocket> StreamSocket::accept(SocketAddress& peername) {
   if (peer_socket != -1) {
     return dup2(peer_socket);
   } else {
-    return NULL;
+    return unique_ptr<StreamSocket>();
   }
 }
 

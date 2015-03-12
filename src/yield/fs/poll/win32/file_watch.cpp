@@ -65,13 +65,13 @@ FileWatch::parse(
     case FILE_ACTION_RENAMED_OLD_NAME: {
       CHECK(old_name_.empty());
       old_name_ = name;
-      return NULL;
+      return unique_ptr<FsEvent>();
     }
     break;
 
     default:
       CHECK(false);
-      return NULL;
+      return unique_ptr<FsEvent>();
     }
 
     if (want_fs_event_type(fs_event_type)) {
@@ -79,7 +79,7 @@ FileWatch::parse(
       log_fs_event(*fs_event);
       return fs_event;
     } else {
-      return NULL;
+      return unique_ptr<FsEvent>();
     }
   } else if (
     !old_name_.empty()
@@ -93,10 +93,10 @@ FileWatch::parse(
       log_fs_event(*fs_event);
       return fs_event;
     } else {
-      return NULL;
+      return unique_ptr<FsEvent>();
     }
   } else {
-    return NULL;
+    return unique_ptr<FsEvent>();
   }
 }
 }

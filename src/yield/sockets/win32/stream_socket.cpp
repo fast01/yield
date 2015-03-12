@@ -45,7 +45,7 @@ const int StreamSocket::Option::LINGER = SO_LINGER;
   if (peer_socket != INVALID_SOCKET) {
     return dup2(peer_socket);
   } else {
-    return NULL;
+    return ::std::unique_ptr<StreamSocket>();
   }
 }
 

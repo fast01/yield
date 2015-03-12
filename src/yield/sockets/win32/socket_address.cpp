@@ -164,7 +164,7 @@ SocketAddress::getaddrinfo(
     freeaddrinfo(addrinfo_);
     return socket_address;
   } else {
-    return NULL;
+    return ::std::unique_ptr<SocketAddress>();
   }
 }
 

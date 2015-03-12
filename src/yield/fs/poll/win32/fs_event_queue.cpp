@@ -134,7 +134,7 @@ bool FsEventQueue::dissociate(const Path& path) {
 
 unique_ptr<FsEvent> FsEventQueue::tryenqueue(unique_ptr<FsEvent> event) {
   CHECK(false);
-  return NULL;
+  return unique_ptr<FsEvent>();
   //return PostQueuedCompletionStatus(
   //         hIoCompletionPort,
   //         0,
@@ -166,7 +166,7 @@ unique_ptr<FsEvent> FsEventQueue::timeddequeue(const Time& timeout) {
   if (lpOverlapped != NULL) {
     win32::Watch& watch = win32::Watch::cast(*lpOverlapped);
     if (watch.is_closed()) {
-      return NULL;
+      return unique_ptr<FsEvent>();
     }
     CHECK_EQ(bRet, TRUE);
     CHECK_GT(dwBytesTransferred, 0);
@@ -208,7 +208,7 @@ unique_ptr<FsEvent> FsEventQueue::timeddequeue(const Time& timeout) {
   //  return reinterpret_cast<FsEvent*>(ulCompletionKey);
   }
 
-  return NULL;
+  return unique_ptr<FsEvent>();
 }
 }
 }

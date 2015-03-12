@@ -174,7 +174,7 @@ SocketAddress::getaddrinfo(
     freeaddrinfo(addrinfo_);
     return socket_address;
   } else {
-    return NULL;
+    return unique_ptr<SocketAddress>();
   }
 }
 

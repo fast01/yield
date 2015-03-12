@@ -35,7 +35,8 @@ namespace yield {
 namespace fs {
 namespace poll {
 namespace linux {
-using std::map;
+using ::std::map;
+using ::std::unique_ptr;
 
 Watch::Watch(
   FsEvent::Type fs_event_types,
@@ -51,7 +52,7 @@ Watch::~Watch() {
   inotify_rm_watch(inotify_fd_, wd_);
 }
 
-::std::unique_ptr<FsEvent> Watch::parse(const inotify_event& inotify_event_) {
+unique_ptr<FsEvent> Watch::parse(const inotify_event& inotify_event_) {
   uint32_t mask = inotify_event_.mask;
 
   bool isdir;
@@ -115,7 +116,7 @@ Watch::~Watch() {
     mask ^= IN_MOVED_FROM;
     CHECK(!name.empty());
     old_names_[inotify_event_.cookie] = name;
-    return NULL;
+    return unique_ptr<FsEvent>();
   } else if ((mask & IN_MOVED_TO) == IN_MOVED_TO) {
     mask ^= IN_MOVED_TO;
     CHECK_EQ(mask, 0);
@@ -138,7 +139,7 @@ Watch::~Watch() {
       return fs_event;
     } else {
       old_names_.erase(old_name_i);
-      return NULL;
+      return unique_ptr<FsEvent>();
     }
   }
 
@@ -149,7 +150,7 @@ Watch::~Watch() {
     log_fs_event(*fs_event);
     return fs_event;
   } else {
-    return NULL;
+    return unique_ptr<FsEvent>();
   }
 }
 }

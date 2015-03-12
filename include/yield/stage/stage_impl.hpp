@@ -129,12 +129,11 @@ private:
     event_queue_arrival_count_++;
 
     if (event_queue_->tryenqueue(::std::move(event)) == NULL) {
-      return NULL;
+      return ::std::unique_ptr<EventT>();
     }/* else {
       LOG(ERROR) << "event queue full, stopping.";
-      return NULL;
     }*/
-    return NULL;
+    return ::std::unique_ptr<EventT>();
   }
 
   void init() {

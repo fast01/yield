@@ -52,7 +52,7 @@ public:
     if (this->element.compare_exchange_weak(old_element, new_element)) {
       return ::std::unique_ptr<ElementT>(reinterpret_cast<ElementT*>(old_element));
     } else {
-      return NULL;
+      return ::std::unique_ptr<ElementT>();
     }
   }
 
@@ -60,7 +60,7 @@ public:
     uintptr_t new_element = reinterpret_cast<uintptr_t>(element.release());
     uintptr_t old_element = 0;
     if (this->element.compare_exchange_weak(old_element, new_element)) {
-      return NULL;
+      return ::std::unique_ptr<ElementT>();
     } else {
       return ::std::unique_ptr<ElementT>(reinterpret_cast<ElementT*>(new_element));
     }

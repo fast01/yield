@@ -95,7 +95,7 @@ unique_ptr<Stat> FileSystem::lstat(const Path& path) {
   if (::lstat(path.c_str(), &stbuf) == 0) {
     return unique_ptr<Stat>(new Stat(stbuf));
   } else {
-    return NULL;
+    return unique_ptr<Stat>();
   }
 }
 
@@ -116,7 +116,7 @@ FileSystem::mkfifo(
   if (::mkfifo(path.c_str(), mode) == 0) {
     return move(open(path, flags | O_NONBLOCK, mode));
   } else {
-    return NULL;
+    return unique_ptr<File>();
   }
 }
 
@@ -149,7 +149,7 @@ FileSystem::open(
   if (fd >= 0) {
     return unique_ptr<File>(new File(unique_fd(fd)));
   } else {
-    return NULL;
+    return unique_ptr<File>();
   }
 }
 
@@ -158,7 +158,7 @@ unique_ptr<Directory> FileSystem::opendir(const Path& path) {
   if (dirp != NULL) {
     return unique_ptr<Directory>(new Directory(dirp, path));
   } else {
-    return NULL;
+    return unique_ptr<Directory>();
   }
 }
 
@@ -196,7 +196,7 @@ unique_ptr<Stat> FileSystem::stat(const Path& path) {
   if (::stat(path.c_str(), &stbuf) == 0) {
     return unique_ptr<Stat>(new Stat(stbuf));
   } else {
-    return NULL;
+    return unique_ptr<Stat>();
   }
 }
 

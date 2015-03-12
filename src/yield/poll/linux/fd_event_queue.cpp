@@ -95,7 +95,7 @@ bool FdEventQueue::dissociate(fd_t fd) {
 
 unique_ptr<FdEvent> FdEventQueue::tryenqueue(unique_ptr<FdEvent>) {
   CHECK(false);
-  return NULL;
+  return unique_ptr<FdEvent>();
 /*
   if (event_queue.enqueue(event)) {
     uint64_t data = 1;
@@ -114,10 +114,10 @@ unique_ptr<FdEvent> FdEventQueue::timeddequeue(const Time& timeout) {
     = (timeout == Time::FOREVER) ? -1 : static_cast<int>(timeout.ms());
   int ret = epoll_wait(epfd_, &epoll_event_, 1, timeout_ms);
   if (ret == 0) {
-    return NULL;
+    return unique_ptr<FdEvent>();
   } else if (ret < 0) {
     CHECK_EQ(errno, EINTR);
-    return NULL;
+    return unique_ptr<FdEvent>();
   }
   CHECK_EQ(ret, 1);
 
@@ -125,7 +125,7 @@ unique_ptr<FdEvent> FdEventQueue::timeddequeue(const Time& timeout) {
     uint64_t data;
     ssize_t read_ret = read(wake_fd_, &data, sizeof(data));
     CHECK_EQ(read_ret, static_cast<ssize_t>(sizeof(data)));
-    return NULL;
+    return unique_ptr<FdEvent>();
   }
 
   return unique_ptr<FdEvent>(new FdEvent(epoll_event_.data.fd, epoll_event_.events));

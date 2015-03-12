@@ -38,6 +38,7 @@
 namespace yield {
 namespace fs {
 using ::std::string;
+using ::std::unique_ptr;
 using ::std::vector;
 
 File::Lock::Lock(
@@ -158,17 +159,17 @@ bool File::datasync() {
       DUPLICATE_SAME_ACCESS
     )
   ) {
-    return ::std::unique_ptr<File>(new File(unique_fd(dup_fd)));
+    return unique_ptr<File>(new File(unique_fd(dup_fd)));
   } else {
-    return NULL;
+    return unique_ptr<File>();
   }
 }
 
-::std::unique_ptr<File> File::dup(FILE* file) {
+unique_ptr<File> File::dup(FILE* file) {
   return dup(reinterpret_cast<fd_t>(_get_osfhandle(_fileno(file))));
 }
 
-::std::unique_ptr<File::Map>
+unique_ptr<File::Map>
 File::mmap(
   size_t length,
   off_t offset,
@@ -181,7 +182,7 @@ File::mmap(
     if (uliFileSize.LowPart != INVALID_FILE_SIZE) {
       length = static_cast<size_t>(uliFileSize.QuadPart);
     } else {
-      return NULL;
+      return unique_ptr<File::Map>();
     }
   }
 
@@ -224,10 +225,10 @@ File::mmap(
 
       if (lpMapAddress == NULL) {
         CloseHandle(hFileMapping);
-        return NULL;
+        return unique_ptr<File::Map>();
       }
     } else {
-      return NULL;
+      return unique_ptr<File::Map>();
     }
   } else { // length == 0
     // Can't CreateFileMapping on an empty file; instead
@@ -572,7 +573,7 @@ bool File::setlk(const Lock& lock, bool wait) {
   if (GetFileInformationByHandle(*this, &by_handle_file_information) != 0) {
     return ::std::unique_ptr<Stat>(new Stat(by_handle_file_information));
   } else {
-    return NULL;
+    return unique_ptr<Stat>();
   }
 }
 

@@ -49,14 +49,14 @@ public:
       queue_.pop();
       return element;
     } else {
-      return NULL;
+      return ::std::unique_ptr<ElementT>();
     }
   }
 
   ::std::unique_ptr<ElementT> tryenqueue(::std::unique_ptr<ElementT> element) override {
     ::yield::thread::Mutex::Holder mutex_holder(mutex_);
     queue_.push(::std::move(element));
-    return NULL;
+    return ::std::unique_ptr<ElementT>();
   }
 
 private:

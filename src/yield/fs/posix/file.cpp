@@ -156,7 +156,7 @@ unique_ptr<File> File::dup(fd_t fd) {
   if (dup_fd != -1) {
     return unique_ptr<File>(new File(unique_fd(dup_fd)));
   } else {
-    return NULL;
+    return unique_ptr<File>();
   }
 }
 
@@ -168,12 +168,12 @@ unique_ptr<File::Lock> File::getlk(const Lock& lock) {
   struct flock flock_ = lock;
   if (fcntl(*this, F_GETLK, &flock_) == 0) {
     if (flock_.l_type == F_UNLCK) { // No lock blocking lock
-      return NULL;
+      return unique_ptr<Lock>();
     } else {
       return unique_ptr<Lock>(new Lock(flock_));
     }
   } else {
-    return NULL;
+    return unique_ptr<Lock>();
   }
 }
 
@@ -190,7 +190,7 @@ File::mmap(
     if (::fstat(*this, &stbuf) == 0) {
       length = stbuf.st_size;
     } else {
-      return NULL;
+      return unique_ptr<Map>();
     }
   }
 
@@ -201,7 +201,7 @@ File::mmap(
   if (length > 0) {
     data = ::mmap(NULL, length, prot, flags, *this, offset);
     if (data == MAP_FAILED) {
-      return NULL;
+      return unique_ptr<Map>();
     }
   } else {
     data = MAP_FAILED;
@@ -311,7 +311,7 @@ unique_ptr<Stat> File::stat() {
   if (fstat(*this, &stbuf) == 0) {
     return unique_ptr<Stat>(new Stat(stbuf));
   } else {
-    return NULL;
+    return unique_ptr<Stat>();
   }
 }
 

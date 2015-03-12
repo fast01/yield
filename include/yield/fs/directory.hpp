@@ -232,7 +232,7 @@ public:
     if (read(entry)) {
       return ::std::unique_ptr<Entry>(entry);
     } else {
-      return NULL;
+      return ::std::unique_ptr<Entry>();
     }
   }
 

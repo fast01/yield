@@ -41,6 +41,7 @@ namespace yield {
 namespace fs {
 namespace poll {
 using linux::Watches;
+using ::std::unique_ptr;
 
 FsEventQueue::FsEventQueue() {
   epoll_fd_.reset(::epoll_create(32768));
@@ -144,7 +145,7 @@ bool FsEventQueue::dissociate(const Path& path) {
   }
 }
 
-::std::unique_ptr<FsEvent> FsEventQueue::tryenqueue(::std::unique_ptr<FsEvent> event) {
+unique_ptr<FsEvent> FsEventQueue::tryenqueue(unique_ptr<FsEvent> event) {
   CHECK(false);
   return false;
   //if (event_queue.enqueue(event)) {
@@ -157,8 +158,8 @@ bool FsEventQueue::dissociate(const Path& path) {
   //}
 }
 
-::std::unique_ptr<FsEvent> FsEventQueue::timeddequeue(const Time& timeout) {
-  ::std::unique_ptr<FsEvent> event = event_queue_.trydequeue();
+unique_ptr<FsEvent> FsEventQueue::timeddequeue(const Time& timeout) {
+  unique_ptr<FsEvent> event = event_queue_.trydequeue();
   if (event) {
     return event;
   }
@@ -169,10 +170,10 @@ bool FsEventQueue::dissociate(const Path& path) {
   int ret = epoll_wait(epoll_fd_, &epoll_event_, 1, timeout_ms);
 
   if (ret == 0) {
-    return NULL;
+    return unique_ptr<FsEvent>();
   } else if (ret < 0) {
     CHECK(errno == EINTR);
-    return NULL;
+    return unique_ptr<FsEvent>();
   }
 
   CHECK_EQ(ret, 1);
@@ -180,7 +181,7 @@ bool FsEventQueue::dissociate(const Path& path) {
   if (epoll_event_.data.fd == event_fd_) {
     uint64_t data;
     ::read(event_fd_, &data, sizeof(data));
-    return NULL;
+    return unique_ptr<FsEvent>();
   }
 
   CHECK_EQ(epoll_event_.data.fd, inotify_fd_);
@@ -200,7 +201,7 @@ bool FsEventQueue::dissociate(const Path& path) {
 
     linux::Watch* watch = watches_->find(inotify_event_->wd);
     if (watch != NULL) {
-      ::std::unique_ptr<FsEvent> fs_event = watch->parse(*inotify_event_);
+      unique_ptr<FsEvent> fs_event = watch->parse(*inotify_event_);
       if (fs_event) {
         event_queue_.tryenqueue(::std::move(fs_event));
       }
