@@ -28,6 +28,8 @@
 #ifndef _YIELD_FS_POLL_FS_EVENT_QUEUE_HPP_
 #define _YIELD_FS_POLL_FS_EVENT_QUEUE_HPP_
 
+#include <map>
+
 #include "yield/unique_fd.hpp"
 #if defined(__FreeBSD__) || defined(__linux__) || defined(__MACH__) || defined(_WIN32)
 #include "yield/event_queue.hpp"
