@@ -5,5 +5,4 @@ source_group("Source Files\\" FILES ${SRC})
 add_library(yield.http.server STATIC ${INCLUDE_} ${SRC})
 target_link_libraries(yield.http.server yield.fs yield.http yield.sockets.aio yield.stage)
 
-add_subdirectory(file)
 add_subdirectory(ygi)
