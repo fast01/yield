@@ -42,16 +42,16 @@ public:
   class Holder {
   public:
     Holder(Mutex& lock)
-      : lock(lock) {
-      lock.lock();
+      : lock_(lock) {
+      lock_.lock();
     }
 
     ~Holder() {
-      lock.unlock();
+      lock_.unlock();
     }
 
   private:
-    Mutex& lock;
+    Mutex& lock_;
   };
 
 public:

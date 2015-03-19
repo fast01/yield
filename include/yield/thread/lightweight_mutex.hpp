@@ -47,16 +47,16 @@ public:
   class Holder {
   public:
     Holder(LightweightMutex& lock)
-      : lock(lock) {
-      lock.lock();
+      : lock_(lock) {
+      lock_.lock();
     }
 
     ~Holder() {
-      lock.unlock();
+      lock_.unlock();
     }
 
   private:
-    LightweightMutex& lock;
+    LightweightMutex& lock_;
   };
 
 public:
