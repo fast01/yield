@@ -40,13 +40,13 @@ TEST(Stage, constructor) {
   StageImpl<TestEvent>(unique_ptr<TestEventHandler>(new TestEventHandler));
 }
 
-TEST(Stage, handle) {
-  StageImpl<TestEvent>(unique_ptr<TestEventHandler>(new TestEventHandler)).handle(unique_ptr<TestEvent>(new TestEvent));
+TEST(Stage, tryenqueue) {
+  StageImpl<TestEvent>(unique_ptr<TestEventHandler>(new TestEventHandler)).tryenqueue(unique_ptr<TestEvent>(new TestEvent));
 }
 
 TEST(Stage, visit) {
   unique_ptr< StageImpl<TestEvent> > stage(new StageImpl<TestEvent>(unique_ptr<TestEventHandler>(new TestEventHandler)));
-  stage->handle(unique_ptr<TestEvent>(new TestEvent));
+  stage->tryenqueue(unique_ptr<TestEvent>(new TestEvent));
   bool visit_ret = stage->visit(Time::FOREVER);
   ASSERT_TRUE(visit_ret);
   ASSERT_EQ(static_cast<TestEventHandler&>(stage->event_handler()).get_seen_events_count(), 1);

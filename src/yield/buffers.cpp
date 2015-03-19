@@ -40,7 +40,7 @@ Buffers::as_read_iovecs(
   Buffer* next_buffer = &buffers;
   do {
     read_iovecs.push_back(next_buffer->as_read_iovec());
-    next_buffer = next_buffer->get_next_buffer().get();
+    next_buffer = next_buffer->next_buffer().get();
   } while (next_buffer != NULL);
 }
 
@@ -56,7 +56,7 @@ Buffers::as_write_iovecs(
     iovec write_iovec = next_buffer->as_write_iovec();
     ret += write_iovec.iov_len;
     write_iovecs.push_back(write_iovec);
-    next_buffer = next_buffer->get_next_buffer().get();
+    next_buffer = next_buffer->next_buffer().get();
   } while (next_buffer != NULL);
 
   return ret;
@@ -75,16 +75,16 @@ Buffers::as_write_iovecs(
     iovec write_iovec = next_buffer->as_write_iovec();
     if (write_iovec.iov_len < offset) {
       offset -= write_iovec.iov_len;
-      next_buffer = next_buffer->get_next_buffer().get();
+      next_buffer = next_buffer->next_buffer().get();
     } else if (write_iovec.iov_len == offset) {
-      next_buffer = next_buffer->get_next_buffer().get();
+      next_buffer = next_buffer->next_buffer().get();
       break;
     } else {
       write_iovec.iov_base = static_cast<char*>(write_iovec.iov_base) + offset;
       write_iovec.iov_len -= offset;
       ret += write_iovec.iov_len;
       write_iovecs.push_back(write_iovec);
-      next_buffer = next_buffer->get_next_buffer().get();
+      next_buffer = next_buffer->next_buffer().get();
       break;
     }
   } while (next_buffer != NULL);
@@ -93,7 +93,7 @@ Buffers::as_write_iovecs(
     iovec write_iovec = next_buffer->as_write_iovec();
     ret += write_iovec.iov_len;
     write_iovecs.push_back(write_iovec);
-    next_buffer = next_buffer->get_next_buffer().get();
+    next_buffer = next_buffer->next_buffer().get();
   }
 
   return ret;
@@ -117,7 +117,7 @@ void Buffers::put(Buffer& buffers, const void* data, size_t size) {
       }
     }
 
-    next_buffer = next_buffer->get_next_buffer().get();
+    next_buffer = next_buffer->next_buffer().get();
   } while (next_buffer != NULL);
 }
 
@@ -127,7 +127,7 @@ size_t Buffers::size(const Buffer& buffers) {
   const Buffer* next_buffer = &buffers;
   do {
     size += next_buffer->size();
-    next_buffer = next_buffer->get_next_buffer().get();
+    next_buffer = next_buffer->next_buffer().get();
   } while (next_buffer != NULL);
 
   return size;

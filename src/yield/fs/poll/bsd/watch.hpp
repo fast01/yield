@@ -29,12 +29,13 @@
 #define _YIELD_FS_POLL_BSD_WATCH_HPP_
 
 #include "yield/config.hpp"
+
 #include <unistd.h>
 
 struct kevent;
 
 namespace yield {
-template <class> class EventHandler;
+class EventSink;
 
 namespace fs {
 namespace poll {
@@ -48,7 +49,7 @@ public:
   }
 
 public:
-  virtual void read(const kevent&, EventHandler<FsEvent>& fs_event_handler) = 0;
+  virtual void read(const kevent&, EventSink<FsEvent>& fs_event_handler) = 0;
 
 protected:
   Watch(int fd)

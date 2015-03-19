@@ -143,13 +143,6 @@ TEST(Buffer, empty) {
   ASSERT_FALSE(buffer->empty());
 }
 
-TEST(Buffer, get_next_buffer) {
-  unique_ptr<Buffer> buffer(new Buffer(2));
-  shared_ptr<Buffer> buffer2(new Buffer(2));
-  buffer->set_next_buffer(buffer2);
-  ASSERT_EQ(buffer->get_next_buffer(), buffer2);
-}
-
 TEST(Buffer, getpagesize) {
   size_t pagesize = Buffer::getpagesize();
   ASSERT_GT(pagesize, 0u);
@@ -169,6 +162,13 @@ TEST(Buffer, is_page_aligned_const_void) {
 TEST(Buffer, is_page_aligned_iovec) {
   unique_ptr<Buffer> buffer(new Buffer(Buffer::getpagesize(), Buffer::getpagesize()));
   ASSERT_TRUE(Buffer::is_page_aligned(buffer->as_read_iovec()));
+}
+
+TEST(Buffer, next_buffer) {
+  unique_ptr<Buffer> buffer(new Buffer(2));
+  shared_ptr<Buffer> buffer2(new Buffer(2));
+  buffer->set_next_buffer(buffer2);
+  ASSERT_EQ(buffer->next_buffer(), buffer2);
 }
 
 TEST(Buffer, operator_array) {
@@ -317,13 +317,13 @@ TEST(Buffer, set_next_buffer) {
   shared_ptr<Buffer> buffer3(new Buffer(2));
 
   buffer->set_next_buffer(buffer2);
-  ASSERT_EQ(buffer->get_next_buffer(), buffer2);
+  ASSERT_EQ(buffer->next_buffer(), buffer2);
 
   buffer->set_next_buffer(buffer3);
-  ASSERT_EQ(buffer->get_next_buffer(), buffer3);
+  ASSERT_EQ(buffer->next_buffer(), buffer3);
 
   buffer->set_next_buffer(NULL);
-  ASSERT_FALSE(buffer->get_next_buffer());
+  ASSERT_FALSE(buffer->next_buffer());
 }
 
 TEST(Buffer, size) {

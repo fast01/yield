@@ -36,7 +36,7 @@ using ::std::string;
 using ::std::vector;
 
 ssize_t Channel::read(Buffer& buffer) {
-  if (buffer.get_next_buffer() == NULL) {
+  if (!buffer.next_buffer()) {
     ssize_t read_ret = read(buffer, buffer.capacity() - buffer.size());
     if (read_ret > 0) {
       buffer.put(NULL, static_cast<size_t>(read_ret));
@@ -54,7 +54,7 @@ ssize_t Channel::read(Buffer& buffer) {
 }
 
 ssize_t Channel::write(const Buffer& buffer) {
-  if (buffer.get_next_buffer() == NULL) {
+  if (!buffer.next_buffer()) {
     return write(buffer, buffer.size());
   } else {
     vector<iovec> iov;

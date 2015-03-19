@@ -31,10 +31,10 @@
 #include "yield/time.hpp"
 #include "yield/sockets/stream_socket.hpp"
 #include "yield/sockets/aio/accept_aiocb.hpp"
-#include "yield/sockets/aio/socket_nbio_queue.hpp"
 #include "yield/sockets/aio/connect_aiocb.hpp"
 #include "yield/sockets/aio/recv_aiocb.hpp"
 #include "yield/sockets/aio/recvfrom_aiocb.hpp"
+#include "yield/sockets/aio/socket_nbio_queue.hpp"
 #include "yield/sockets/aio/send_aiocb.hpp"
 #include "yield/sockets/aio/sendfile_aiocb.hpp"
 
@@ -93,14 +93,14 @@ public:
 };
 
 SocketNbioQueue::SocketNbioQueue()
-  : fd_event_queue(true) {
+  : fd_event_queue_(true) {
 }
 
 void SocketNbioQueue::associate(SocketAiocb& aiocb, RetryStatus retry_status) {
   switch (retry_status) {
   case RetryStatus::WANT_RECV: {
     bool associate_ret =
-      fd_event_queue.associate(
+      fd_event_queue_.associate(
         aiocb.socket(),
         FdEvent::TYPE_READ_READY
       );
@@ -110,7 +110,7 @@ void SocketNbioQueue::associate(SocketAiocb& aiocb, RetryStatus retry_status) {
 
   case RetryStatus::WANT_SEND: {
     bool associate_ret =
-      fd_event_queue.associate(
+      fd_event_queue_.associate(
         aiocb.socket(),
         FdEvent::TYPE_WRITE_READY
       );
@@ -347,7 +347,7 @@ SocketNbioQueue::retry_send(
   size_t& partial_send_len
 ) {
   ssize_t complete_send_ret, send_ret;
-  if (buffer.get_next_buffer() == NULL) {
+  if (!buffer.next_buffer()) {
     complete_send_ret = buffer.size() - partial_send_len;
     send_ret
     = aiocb.socket().send(
@@ -466,15 +466,15 @@ unique_ptr<SocketAiocb> SocketNbioQueue::timeddequeue(const Time& timeout) {
 }
 
 unique_ptr<SocketAiocb> SocketNbioQueue::timeddequeue_fd_event_queue(const Time& timeout) {
-  shared_ptr<FdEvent> fd_event = fd_event_queue.timeddequeue(timeout);
+  shared_ptr<FdEvent> fd_event = fd_event_queue_.timeddequeue(timeout);
   if (!fd_event) {
     return unique_ptr<SocketAiocb>();
   }
 
   fd_t fd = fd_event->fd();
 
-  auto socket_state_i = this->socket_state.find(fd);
-  CHECK_NE(socket_state_i, this->socket_state.end());
+  auto socket_state_i = this->socket_state_.find(fd);
+  CHECK_NE(socket_state_i, this->socket_state_.end());
   SocketState* socket_state = socket_state_i->second;
 
   uint16_t want_fd_event_types = 0;
@@ -498,8 +498,8 @@ unique_ptr<SocketAiocb> SocketNbioQueue::timeddequeue_fd_event_queue(const Time&
 
           if (socket_state->empty()) {
             delete socket_state;
-            this->socket_state.erase(socket_state_i);
-            fd_event_queue.dissociate(fd);
+            this->socket_state_.erase(socket_state_i);
+            fd_event_queue_.dissociate(fd);
           }
         } else {
           socket_state->aiocb_state[aiocb_priority]
@@ -521,20 +521,20 @@ unique_ptr<SocketAiocb> SocketNbioQueue::timeddequeue_fd_event_queue(const Time&
 
   CHECK_NE(want_fd_event_types, 0);
   bool associate_ret
-  = fd_event_queue.associate(fd, want_fd_event_types);
+  = fd_event_queue_.associate(fd, want_fd_event_types);
   CHECK(associate_ret);
 
   return unique_ptr<SocketAiocb>();
 }
 
 unique_ptr<SocketAiocb> SocketNbioQueue::trydequeue_aiocb_queue() {
-  unique_ptr<SocketAiocb> aiocb(aiocb_queue.trydequeue());
+  unique_ptr<SocketAiocb> aiocb(aiocb_queue_.trydequeue());
   if (!aiocb) {
     return unique_ptr<SocketAiocb>();
   }
 
-  auto socket_state_i = this->socket_state.find(aiocb->socket());
-  if (socket_state_i == this->socket_state.end()) {
+  auto socket_state_i = this->socket_state_.find(aiocb->socket());
+  if (socket_state_i == this->socket_state_.end()) {
     size_t partial_send_len = 0;
     RetryStatus retry_status = retry(*aiocb, partial_send_len);
     switch (retry_status) {
@@ -544,7 +544,7 @@ unique_ptr<SocketAiocb> SocketNbioQueue::trydequeue_aiocb_queue() {
     default: {
       uint8_t aiocb_priority = get_aiocb_priority(*aiocb);
       SocketState* socket_state = new SocketState();
-      this->socket_state[aiocb->socket()] = socket_state;
+      this->socket_state_[aiocb->socket()] = socket_state;
       associate(*aiocb, retry_status);
       socket_state->aiocb_state[aiocb_priority] = new AiocbState(move(aiocb), partial_send_len);
       // aiocb is empty here
@@ -601,15 +601,15 @@ unique_ptr<SocketAiocb> SocketNbioQueue::trydequeue_aiocb_queue() {
 }
 
 unique_ptr<SocketAiocb> SocketNbioQueue::tryenqueue(unique_ptr<SocketAiocb> aiocb) {
-  unique_ptr<SocketAiocb> ret = aiocb_queue.tryenqueue(move(aiocb));
+  unique_ptr<SocketAiocb> ret = aiocb_queue_.tryenqueue(move(aiocb));
   if (ret == NULL) {
-    fd_event_queue.wake();
+    fd_event_queue_.wake();
   }
   return ret;
 }
 
 void SocketNbioQueue::wake() {
-  fd_event_queue.wake();
+  fd_event_queue_.wake();
 }
 }
 }

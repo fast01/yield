@@ -49,6 +49,15 @@ public:
   virtual bool dissociate(fd_t fd) = 0;
 
 public:
+  // yield::EventQueue
+  unique_ptr<FdEvent> dequeue() override {
+    return timeddequeue(Time::FOREVER);
+  }
+
+  unique_ptr<FdEvent> trydequeue() override {
+    return timeddequeue(Time::ZERO);
+  }
+
   unique_ptr<FdEvent> tryenqueue(unique_ptr<FdEvent> event) override {
     CHECK(false);
     return unique_ptr<FdEvent>();

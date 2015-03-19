@@ -91,7 +91,7 @@ public:
     const MessageFlags& flags,
     const SocketAddress& peername
   ) {
-    if (buffer.get_next_buffer() == NULL) {
+    if (!buffer.next_buffer()) {
       iovec iov = buffer.as_write_iovec();
       return sendto(iov.iov_base, iov.iov_len, flags, peername);
     } else {

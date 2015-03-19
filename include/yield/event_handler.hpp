@@ -45,12 +45,12 @@ public:
   virtual ~EventHandler() { }
 
 public:
-  /**
-    "Handle" a new reference to an Event, usually asynchronously with respective to
-      the caller. The handling may be an enqueue (as in EventQueue) or some event
-      processing code.
-    @param event a new reference to an Event to handle
-  */
+  // EventSink
+  ::std::unique_ptr<EventT> tryenqueue(::std::unique_ptr<EventT> event) override {
+    handle(::std::move(event));
+    return ::std::unique_ptr<EventT>();
+  }
+
   virtual void handle(::std::unique_ptr<EventT> event) = 0;
 };
 }

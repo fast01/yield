@@ -28,6 +28,7 @@
 #ifndef _YIELD_STAGE_STAGE_IMPL_HPP_
 #define _YIELD_STAGE_STAGE_IMPL_HPP_
 
+#include "yield/event_handler.hpp"
 #include "yield/event_queue.hpp"
 #include "yield/event_sink.hpp"
 #include "yield/time.hpp"
@@ -39,7 +40,7 @@ namespace stage {
 template <class EventT>
 class StageImpl : public EventSink<EventT>, public Stage {
 public:
-  StageImpl(::std::unique_ptr< EventHandler<EventT>> event_handler)
+  StageImpl(::std::unique_ptr< EventHandler<EventT> > event_handler)
     : event_handler_(::std::move(event_handler)),
       event_queue_(new ::yield::queue::SynchronizedEventQueue<EventT>) {
     init();
@@ -75,6 +76,12 @@ public:
     return service_rate_s_;
   }
 
+  ::std::unique_ptr<EventT> tryenqueue(::std::unique_ptr<EventT> event) override {
+    event_queue_length_++;
+    event_queue_arrival_count_++;
+    return event_queue_->tryenqueue(::std::move(event));
+  }
+
   void visit() {
     ::std::unique_ptr<EventT> event = event_queue_->dequeue();
     if (event == NULL) {
@@ -107,12 +114,6 @@ public:
     return true;
   }
 
-public:
-  // yield::EventHandler
-  void handle(::std::unique_ptr<EventT> event) override {
-    tryenqueue(::std::move(event));
-  }
-
 protected:
   StageImpl(::std::unique_ptr< EventQueue<EventT> > event_queue)
     : event_queue_(::std::move(event_queue)) {
@@ -124,18 +125,6 @@ protected:
   }
 
 private:
-  ::std::unique_ptr<EventT> tryenqueue(::std::unique_ptr<EventT> event) {
-    event_queue_length_++;
-    event_queue_arrival_count_++;
-
-    if (event_queue_->tryenqueue(::std::move(event)) == NULL) {
-      return ::std::unique_ptr<EventT>();
-    }/* else {
-      LOG(ERROR) << "event queue full, stopping.";
-    }*/
-    return ::std::unique_ptr<EventT>();
-  }
-
   void init() {
     event_queue_arrival_count_ = 0;
     event_queue_length_ = 0;

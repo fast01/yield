@@ -284,7 +284,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
       shared_ptr<Buffer> recv_buffer = accept_aiocb.recv_buffer();
       if (recv_buffer != NULL) {
         if (
-          recv_buffer->get_next_buffer() == NULL
+          !recv_buffer->next_buffer()
           &&
           recv_buffer->capacity() - recv_buffer->size()
           >=
@@ -404,7 +404,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
 
     DWORD dwFlags = static_cast<DWORD>(recv_aiocb.flags());
 
-    if (recv_aiocb.buffer()->get_next_buffer() == NULL) {
+    if (!recv_aiocb.buffer()->next_buffer()) {
       iovec wsabuf = recv_aiocb.buffer()->as_read_iovec();
 
       if (
@@ -459,7 +459,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
     socklen_t& peername_len = recvfrom_aiocb.peername_len();
     peername_len = SocketAddress::len(recvfrom_aiocb.socket().domain());
 
-    if (recvfrom_aiocb.buffer()->get_next_buffer() == NULL) {
+    if (!recvfrom_aiocb.buffer()->next_buffer()) {
       iovec wsabuf = recvfrom_aiocb.buffer()->as_read_iovec();
 
       if (
@@ -513,7 +513,7 @@ unique_ptr<SocketAiocb> Win32SocketAioQueue::tryenqueue(unique_ptr<SocketAiocb> 
 
     log_enqueue(send_aiocb);
 
-    if (send_aiocb.buffer().get_next_buffer() == NULL) {
+    if (!send_aiocb.buffer().next_buffer()) {
       iovec wsabuf = send_aiocb.buffer().as_write_iovec();
 
       if (

@@ -144,8 +144,8 @@ TYPED_TEST_P(SocketAioQueueTest, recvmsg) {
   ASSERT_EQ(out_aiocb->return_(), 2);
   ASSERT_EQ(buffer->size(), 1);
   ASSERT_EQ((*buffer)[0], 'm');
-  ASSERT_EQ(buffer->get_next_buffer()->size(), 1);
-  ASSERT_EQ((*buffer->get_next_buffer())[0], 'm');
+  ASSERT_EQ(buffer->next_buffer()->size(), 1);
+  ASSERT_EQ((*buffer->next_buffer())[0], 'm');
 }
 
 TYPED_TEST_P(SocketAioQueueTest, recv_queued) {

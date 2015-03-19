@@ -41,7 +41,7 @@ ConnectAiocb::ConnectAiocb(
   send_buffer_(send_buffer),
   socket_(socket_) {
   if (send_buffer != NULL) {
-    CHECK_EQ(send_buffer->get_next_buffer(), NULL);
+    CHECK(!send_buffer->next_buffer());
   }
 }
 

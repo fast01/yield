@@ -40,17 +40,15 @@
 namespace yield {
 using ::std::string;
 
-size_t Buffer::pagesize = 0;
+size_t Buffer::pagesize_ = 0;
 
 Buffer::Buffer(size_t capacity) {
   alloc(ALIGNMENT_DEFAULT, capacity);
-  next_buffer = NULL;
   size_ = 0;
 }
 
 Buffer::Buffer(size_t alignment, size_t capacity) {
   alloc(alignment, capacity);
-  next_buffer = NULL;
   size_ = 0;
 }
 
@@ -58,7 +56,6 @@ Buffer::Buffer(size_t capacity, void* data, size_t size)
   : capacity_(capacity),
     data_(data),
     size_(size) {
-  next_buffer = NULL;
 }
 
 Buffer::~Buffer() {
@@ -107,17 +104,17 @@ Buffer::copy(
 }
 
 size_t Buffer::getpagesize() {
-  if (pagesize != 0) {
-    return pagesize;
+  if (pagesize_ != 0) {
+    return pagesize_;
   } else {
 #ifdef _WIN32
     SYSTEM_INFO system_info;
     GetSystemInfo(&system_info);
-    pagesize = system_info.dwPageSize;
+    pagesize_ = system_info.dwPageSize;
 #else
-    pagesize = ::getpagesize();
+    pagesize_ = ::getpagesize();
 #endif
-    return pagesize;
+    return pagesize_;
   }
 }
 
@@ -177,7 +174,7 @@ std::ostream& operator<<(std::ostream& os, const Buffer& buffer) {
      ", " <<
      "data=" << data_str <<
      ", " <<
-     "next_buffer=" << buffer.get_next_buffer() <<
+     "next_buffer=" << buffer.next_buffer() <<
      ", " <<
      "size=" << buffer.size() <<
      ")";
@@ -234,9 +231,5 @@ void Buffer::put(const void* data, size_t size) {
 
     size_ += size;
   }
-}
-
-void Buffer::set_next_buffer(::std::shared_ptr<Buffer> next_buffer) {
-  this->next_buffer = next_buffer;
 }
 }

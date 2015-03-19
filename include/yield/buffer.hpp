@@ -194,15 +194,6 @@ public:
 
 public:
   /**
-    Get the next Buffer in a linked list of <code>Buffer</code>s.
-    @return the next Buffer in a linked list of <code>Buffer</code>s
-  */
-  ::std::shared_ptr<Buffer> get_next_buffer() const {
-    return next_buffer;
-  }
-
-public:
-  /**
     Get the system page size in bytes (usually a multiple of 4096).
     @return the system page size in bytes
   */
@@ -231,6 +222,23 @@ public:
     @return true if data is system page size-aligned
   */
   static bool is_page_aligned(const void* data);
+
+public:
+  /**
+    Get the next Buffer in a linked list of <code>Buffer</code>s.
+    @return the next Buffer in a linked list of <code>Buffer</code>s
+  */
+  const ::std::shared_ptr<Buffer>& next_buffer() const {
+    return next_buffer_;
+  }
+
+  /**
+    Get the next Buffer in a linked list of <code>Buffer</code>s.
+    @return the next Buffer in a linked list of <code>Buffer</code>s
+  */
+  ::std::shared_ptr<Buffer>& next_buffer() {
+    return next_buffer_;
+  }
 
 public:
   /**
@@ -412,7 +420,9 @@ public:
     Set the next Buffer in a linked list of <code>Buffer</code>s.
     @param next_buffer the next Buffer in a linked list of <code>Buffer</code>s
   */
-  void set_next_buffer(::std::shared_ptr<Buffer> next_buffer);
+  void set_next_buffer(::std::shared_ptr<Buffer> next_buffer) {
+    this->next_buffer_ = next_buffer;
+  }
 
 public:
   /**
@@ -442,8 +452,8 @@ private:
   void alloc(size_t alignment, size_t capacity);
 
 private:
-  static size_t pagesize;
-  ::std::shared_ptr<Buffer> next_buffer;
+  static size_t pagesize_;
+  ::std::shared_ptr<Buffer> next_buffer_;
   size_t size_;
 };
 

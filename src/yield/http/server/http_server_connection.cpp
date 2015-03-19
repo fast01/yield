@@ -75,7 +75,7 @@ public:
   ) {
       unique_ptr<HttpServerRequest> http_request(new HttpServerRequest(body, connection_.shared_from_this(), fields_offset, header, http_version, method, uri));
       DLOG(DEBUG) << "parsed " << *http_request;
-      connection_.event_handler_->handle(move(http_request));
+      connection_.event_handler_->tryenqueue(move(http_request));
   }
 
   void read(shared_ptr<Buffer> buffer) override {

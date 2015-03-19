@@ -49,7 +49,7 @@ public:
     unique_ptr<StageImpl<TestEvent>> stage(new StageImpl<TestEvent>(unique_ptr<TestEventHandler>(new TestEventHandler)));
     unique_ptr<StageScheduler> stage_scheduler(new StageSchedulerType);
     stage_scheduler->schedule(move(stage));
-    stage->handle(unique_ptr<TestEvent>(new TestEvent));
+    stage->tryenqueue(unique_ptr<TestEvent>(new TestEvent));
     while (static_cast<TestEventHandler&>(stage->event_handler()).get_seen_events_count() < 1) {
       yield::thread::Thread::sleep(0.1);
     }

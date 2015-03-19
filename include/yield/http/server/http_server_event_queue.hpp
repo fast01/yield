@@ -86,8 +86,18 @@ public:
 
 public:
   // yield::EventQueue
+  ::std::unique_ptr<HttpServerEvent> dequeue() override {
+    return timeddequeue(Time::FOREVER);
+  }
+
   ::std::unique_ptr<HttpServerEvent> timeddequeue(const Time& timeout) override;
+
+  ::std::unique_ptr<HttpServerEvent> trydequeue() override {
+    return timeddequeue(Time::ZERO);
+  }
+
   ::std::unique_ptr<HttpServerEvent> tryenqueue(::std::unique_ptr<HttpServerEvent>) override;
+
   void wake() override;
 
 private:

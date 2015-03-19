@@ -44,12 +44,12 @@ public:
 
 public:
   // yield::fs::poll::ScanningWatch
-  void scan(EventHandler<FsEvent>& fs_event_handler) {
+  void scan(EventSink<FsEvent>& fs_event_handler) override {
     scan(fs_event_handler, fs_event_types());
   }
 
 protected:
-  void scan(EventHandler<FsEvent>& fs_event_handler, FsEvent::Type fs_event_types);
+  void scan(EventSink<FsEvent>& fs_event_handler, FsEvent::Type fs_event_types);
 
 private:
   ::std::unique_ptr<Stat> stat(Directory::Entry&);

@@ -29,7 +29,7 @@
 #define _YIELD_FS_POLL_SCANNING_WATCH_HPP_
 
 #include "./watch.hpp"
-#include "yield/event_handler.hpp"
+#include "yield/event_sink.hpp"
 #include "yield/fs/directory.hpp"
 #include "yield/fs/stat.hpp"
 
@@ -38,7 +38,7 @@ namespace fs {
 namespace poll {
 class ScanningWatch : public Watch {
 public:
-  virtual void scan(EventHandler<FsEvent>& fs_event_handler) = 0;
+  virtual void scan(EventSink<FsEvent>& fs_event_handler) = 0;
 
 protected:
   ScanningWatch(FsEvent::Type fs_event_types, const Path& path)

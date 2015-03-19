@@ -77,7 +77,16 @@ public:
 
 public:
   // yield::EventQueue
+  ::std::unique_ptr<SocketAiocb> dequeue() override {
+    return timeddequeue(Time::FOREVER);
+  }
+
   ::std::unique_ptr<SocketAiocb> timeddequeue(const Time& timeout) override;
+
+  ::std::unique_ptr<SocketAiocb> trydequeue() override {
+    return timeddequeue(Time::ZERO);
+  }
+
   ::std::unique_ptr<SocketAiocb> tryenqueue(::std::unique_ptr<SocketAiocb> aiocb) override;
   void wake() override;
 
@@ -118,9 +127,9 @@ private:
   ::std::unique_ptr<SocketAiocb> trydequeue_aiocb_queue();
 
 private:
-  ::yield::queue::BlockingConcurrentQueue<SocketAiocb> aiocb_queue;
-  ::yield::poll::FdEventQueue fd_event_queue;
-  ::std::map<fd_t, SocketState*> socket_state;
+  ::yield::queue::BlockingConcurrentQueue<SocketAiocb> aiocb_queue_;
+  ::yield::poll::FdEventQueue fd_event_queue_;
+  ::std::map<fd_t, SocketState*> socket_state_;
 };
 }
 }

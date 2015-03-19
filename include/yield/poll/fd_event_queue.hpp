@@ -75,7 +75,16 @@ public:
 
 public:
   // yield::EventQueue
+  ::std::unique_ptr<FdEvent> dequeue() override {
+    return timeddequeue(Time::FOREVER);
+  }
+
   ::std::unique_ptr<FdEvent> timeddequeue(const Time& timeout) override;
+
+  ::std::unique_ptr<FdEvent> trydequeue() override {
+    return timeddequeue(Time::ZERO);
+  }
+
   ::std::unique_ptr<FdEvent> tryenqueue(::std::unique_ptr<FdEvent> event) override;
   void wake() override;
 

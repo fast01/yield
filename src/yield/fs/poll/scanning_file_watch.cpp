@@ -46,7 +46,7 @@ ScanningFileWatch::ScanningFileWatch(
   }
 }
 
-void ScanningFileWatch::scan(EventHandler<FsEvent>& fs_event_handler) {
+void ScanningFileWatch::scan(EventSink<FsEvent>& fs_event_handler) {
   unique_ptr<Stat> new_stbuf = FileSystem().stat(path());
   unique_ptr<Stat> old_stbuf(stbuf.release());
   CHECK_NE(old_stbuf, NULL);
@@ -70,7 +70,7 @@ void ScanningFileWatch::scan(EventHandler<FsEvent>& fs_event_handler) {
   if (want_fs_event_type(fs_event_type)) {
     unique_ptr<FsEvent> fs_event(new FsEvent(path(), fs_event_type));
     log_fs_event(*fs_event);
-    fs_event_handler.handle(move(fs_event));
+    fs_event_handler.tryenqueue(move(fs_event));
   }
 
   stbuf.reset(new_stbuf.release());

@@ -49,7 +49,7 @@ TEST(Buffers, as_read_iovecs) {
   vector<iovec> read_iovecs;
   Buffers::as_read_iovecs(*buffers, read_iovecs);
   ASSERT_EQ(read_iovecs[0], buffers->as_read_iovec());
-  ASSERT_EQ(read_iovecs[1], buffers->get_next_buffer()->as_read_iovec());
+  ASSERT_EQ(read_iovecs[1], buffers->next_buffer()->as_read_iovec());
 }
 
 TEST(Buffers, as_write_iovecs) {
@@ -59,7 +59,7 @@ TEST(Buffers, as_write_iovecs) {
   Buffers::as_write_iovecs(*buffers, write_iovecs);
   ASSERT_EQ(write_iovecs.size(), 2);
   ASSERT_EQ(write_iovecs[0], buffers->as_write_iovec());
-  ASSERT_EQ(write_iovecs[1], buffers->get_next_buffer()->as_write_iovec());
+  ASSERT_EQ(write_iovecs[1], buffers->next_buffer()->as_write_iovec());
 }
 
 TEST(Buffers, as_write_iovecs_offset) {
@@ -70,30 +70,30 @@ TEST(Buffers, as_write_iovecs_offset) {
   Buffers::as_write_iovecs(*buffers, 0, write_iovecs);
   ASSERT_EQ(write_iovecs.size(), 2);
   ASSERT_EQ(write_iovecs[0], buffers->as_write_iovec());
-  ASSERT_EQ(write_iovecs[1], buffers->get_next_buffer()->as_write_iovec());
+  ASSERT_EQ(write_iovecs[1], buffers->next_buffer()->as_write_iovec());
   write_iovecs.clear();
 
   Buffers::as_write_iovecs(*buffers, 1, write_iovecs);
   ASSERT_EQ(write_iovecs.size(), 2);
   ASSERT_EQ(write_iovecs[0].iov_base, static_cast<char*>(*buffers) + 1);
   ASSERT_EQ(write_iovecs[0].iov_len, buffers->size() - 1);
-  ASSERT_EQ(write_iovecs[1], buffers->get_next_buffer()->as_write_iovec());
+  ASSERT_EQ(write_iovecs[1], buffers->next_buffer()->as_write_iovec());
   write_iovecs.clear();
 
   Buffers::as_write_iovecs(*buffers, 5, write_iovecs);
   ASSERT_EQ(write_iovecs.size(), 1);
-  ASSERT_EQ(write_iovecs[0], buffers->get_next_buffer()->as_write_iovec());
+  ASSERT_EQ(write_iovecs[0], buffers->next_buffer()->as_write_iovec());
   write_iovecs.clear();
 
   Buffers::as_write_iovecs(*buffers, 6, write_iovecs);
   ASSERT_EQ(write_iovecs.size(), 1);
   ASSERT_EQ(
     write_iovecs[0].iov_base,
-    static_cast<char*>(*buffers->get_next_buffer()) + 1
+    static_cast<char*>(*buffers->next_buffer()) + 1
   );
   ASSERT_EQ(
     write_iovecs[0].iov_len,
-    buffers->get_next_buffer()->size() - 1
+    buffers->next_buffer()->size() - 1
   );
   write_iovecs.clear();
 

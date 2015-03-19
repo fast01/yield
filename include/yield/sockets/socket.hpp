@@ -239,7 +239,7 @@ public:
     @return the number of bytes read on success, -1+errno on failure
   */
   ssize_t recv(Buffer& buffer, const MessageFlags& flags) {
-    if (buffer.get_next_buffer() == NULL) {
+    if (!buffer.next_buffer()) {
       iovec iov = buffer.as_read_iovec();
       ssize_t recv_ret = recv(iov.iov_base, iov.iov_len, flags);
       if (recv_ret > 0) {
@@ -290,7 +290,7 @@ public:
     const MessageFlags& flags,
     SocketAddress& peername
   ) {
-    if (buffer.get_next_buffer() == NULL) {
+    if (!buffer.next_buffer()) {
       iovec iov = buffer.as_read_iovec();
       ssize_t recv_ret = recvfrom(iov.iov_base, iov.iov_len, flags, peername);
       if (recv_ret > 0) {
@@ -372,7 +372,7 @@ public:
     @return the number of bytes written on success, -1+errno on failure
   */
   ssize_t send(const Buffer& buffer, const MessageFlags& flags) {
-    if (buffer.get_next_buffer() == NULL) {
+    if (!buffer.next_buffer()) {
       iovec iov = buffer.as_write_iovec();
       return send(iov.iov_base, iov.iov_len, flags);
     } else {

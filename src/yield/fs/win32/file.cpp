@@ -250,7 +250,7 @@ File::mmap(
 }
 
 ssize_t File::pread(Buffer& buffer, off_t offset) {
-  if (buffer.get_next_buffer() == NULL) {
+  if (!buffer.next_buffer()) {
     ssize_t pread_ret
     = pread(buffer, buffer.capacity() - buffer.size(), offset);
     if (pread_ret > 0) {
@@ -372,7 +372,7 @@ ssize_t File::preadv(const iovec* iov, int iovlen, off_t offset) {
 }
 
 ssize_t File::pwrite(const Buffer& buffer, off_t offset) {
-  if (buffer.get_next_buffer() == NULL) {
+  if (!buffer.next_buffer()) {
     return pwrite(buffer, buffer.size(), offset);
   } else {
     vector<iovec> iov;

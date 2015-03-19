@@ -49,10 +49,6 @@ public:
   enum class State { CONNECTED, ERROR };
 
 public:
-  //EventHandler<HttpServerRequest>& http_request_handler() {
-  //  return *http_request_handler_;
-  //}
-
   ::yield::sockets::SocketAddress& peername() const {
     return *peername_;
   }
@@ -97,7 +93,7 @@ private:
 private:
   HttpServerConnection(
     ::std::shared_ptr< EventQueue< ::yield::sockets::aio::SocketAiocb > > aio_queue,
-    ::std::shared_ptr< EventHandler<HttpServerEvent > > event_handler,
+    ::std::shared_ptr< EventSink<HttpServerEvent > > event_handler,
     ::std::shared_ptr< ::yield::sockets::SocketAddress > peername,
     ::std::shared_ptr< ::yield::sockets::StreamSocket > socket_
   ) : aio_queue_(aio_queue),
@@ -114,7 +110,7 @@ private:
 
 private:
   ::std::shared_ptr< EventQueue< ::yield::sockets::aio::SocketAiocb > >  aio_queue_;
-  ::std::shared_ptr< EventHandler<HttpServerEvent> > event_handler_;
+  ::std::shared_ptr< EventSink<HttpServerEvent> > event_handler_;
   ::std::shared_ptr< ::yield::sockets::SocketAddress > peername_;
   ::std::shared_ptr< ::yield::sockets::StreamSocket > socket_;
   State state_;

@@ -39,7 +39,7 @@ public:
 
 public:
   // yield::fs::poll::ScanningWatch
-  void scan(EventHandler<FsEvent>& fs_event_handler);
+  void scan(EventSink<FsEvent>& fs_event_handler);
 
 private:
   ::std::unique_ptr<Stat> stbuf;

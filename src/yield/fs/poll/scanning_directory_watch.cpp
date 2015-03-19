@@ -75,7 +75,7 @@ ScanningDirectoryWatch::ScanningDirectoryWatch(
 
 void
 ScanningDirectoryWatch::scan(
-  EventHandler<FsEvent>& fs_event_handler,
+  EventSink<FsEvent>& fs_event_handler,
   FsEvent::Type fs_event_types
 ) {
   unique_ptr<Directory> directory = FileSystem().opendir(this->path());
@@ -117,7 +117,7 @@ ScanningDirectoryWatch::scan(
                       fs_event_type
                     ));
                     log_fs_event(*fs_event);
-                    fs_event_handler.handle(move(fs_event));
+                    fs_event_handler.tryenqueue(move(fs_event));
                   }
                 }
               } else { // dentry type has changed
@@ -169,7 +169,7 @@ ScanningDirectoryWatch::scan(
                   fs_event_type
                 ));
                 log_fs_event(*fs_event);
-                fs_event_handler.handle(move(fs_event));
+                fs_event_handler.tryenqueue(move(fs_event));
               }
 
               // Don't dec_ref new_dentry_i->second, the Stat;
@@ -206,7 +206,7 @@ ScanningDirectoryWatch::scan(
                 fs_event_type
               ));
               log_fs_event(*fs_event);
-              fs_event_handler.handle(move(fs_event));
+              fs_event_handler.tryenqueue(move(fs_event));
             }
           }
         }
@@ -234,7 +234,7 @@ ScanningDirectoryWatch::scan(
             fs_event_type
           ));
           log_fs_event(*fs_event);
-          fs_event_handler.handle(move(fs_event));
+          fs_event_handler.tryenqueue(move(fs_event));
         }
       }
     }
@@ -258,7 +258,7 @@ ScanningDirectoryWatch::scan(
           fs_event_type
         ));
         log_fs_event(*fs_event);
-        fs_event_handler.handle(move(fs_event));
+        fs_event_handler.tryenqueue(move(fs_event));
       }
     }
 
