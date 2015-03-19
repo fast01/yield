@@ -28,8 +28,8 @@
 #ifndef _YIELD_STAGE_STAGE_IMPL_HPP_
 #define _YIELD_STAGE_STAGE_IMPL_HPP_
 
-#include "yield/event_handler.hpp"
 #include "yield/event_queue.hpp"
+#include "yield/event_sink.hpp"
 #include "yield/time.hpp"
 #include "yield/stage/stage.hpp"
 #include "yield/queue/synchronized_event_queue.hpp"
@@ -37,7 +37,7 @@
 namespace yield {
 namespace stage {
 template <class EventT>
-class StageImpl : public EventHandler<EventT>, public Stage {
+class StageImpl : public EventSink<EventT>, public Stage {
 public:
   StageImpl(::std::unique_ptr< EventHandler<EventT>> event_handler)
     : event_handler_(::std::move(event_handler)),

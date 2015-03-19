@@ -25,33 +25,29 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_EVENT_HANDLER_HPP_
-#define _YIELD_EVENT_HANDLER_HPP_
+#ifndef _YIELD_EVENT_SINK_HPP_
+#define _YIELD_EVENT_SINK_HPP_
 
 #include <memory>
 
-#include "yield/event_sink.hpp"
-
 namespace yield {
 /**
-  Abstract base class for event handlers in the event-driven concurrency subsystem.
+  Interface for event sinks in the event-driven concurrency subsystem.
 */
 template <class EventT>
-class EventHandler : public EventSink<EventT> {
+class EventSink {
 public:
   /**
-    Empty virtual destructor
+    Empty virtual destructor.
   */
-  virtual ~EventHandler() { }
+  virtual ~EventSink() { }
 
-public:
   /**
-    "Handle" a new reference to an Event, usually asynchronously with respective to
-      the caller. The handling may be an enqueue (as in EventQueue) or some event
-      processing code.
-    @param event a new reference to an Event to handle
+    Enqueue an event, non-blocking.
+    @param event the event to enqueue
+    @return NULL if the enqueue succeeded, otherwise the event
   */
-  virtual void handle(::std::unique_ptr<EventT> event) = 0;
+  virtual ::std::unique_ptr<EventT> tryenqueue(::std::unique_ptr<EventT> event) = 0;
 };
 }
 

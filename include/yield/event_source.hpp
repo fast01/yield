@@ -25,33 +25,48 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef _YIELD_EVENT_HANDLER_HPP_
-#define _YIELD_EVENT_HANDLER_HPP_
+#ifndef _YIELD_EVENT_SOURCE_HPP_
+#define _YIELD_EVENT_SOURCE_HPP_
 
 #include <memory>
 
-#include "yield/event_sink.hpp"
+#include "yield/time.hpp"
 
 namespace yield {
 /**
-  Abstract base class for event handlers in the event-driven concurrency subsystem.
+  Interface for event sources in the event-driven concurrency subsystem.
 */
 template <class EventT>
-class EventHandler : public EventSink<EventT> {
+class EventSource {
 public:
   /**
-    Empty virtual destructor
+    Empty virtual destructor.
   */
-  virtual ~EventHandler() { }
+  virtual ~EventSource() { }
 
-public:
   /**
-    "Handle" a new reference to an Event, usually asynchronously with respective to
-      the caller. The handling may be an enqueue (as in EventQueue) or some event
-      processing code.
-    @param event a new reference to an Event to handle
+    Dequeue an event, blocking indefinitely until one becomes available or wake() is called.
+    @return an event if one is available, NULL if wake() was called before that
   */
-  virtual void handle(::std::unique_ptr<EventT> event) = 0;
+  virtual ::std::unique_ptr<EventT> dequeue() = 0;
+
+  /**
+    Dequeue an event, blocking until one becomes available, the timeout expires, or wake() is called.
+    @param timeout the time to wait for new events
+    @return an event if one is available within the timeout, otherwise NULL
+  */
+  virtual ::std::unique_ptr<EventT> timeddequeue(const Time& timeout) = 0;
+
+  /**
+    Dequeue an event, non-blocking.
+    @return an event if one is available immediately, otherwise NULL
+  */
+  virtual ::std::unique_ptr<EventT> trydequeue() = 0;
+
+  /**
+    Interrupt a blocking dequeue.
+   */
+  virtual void wake() = 0;
 };
 }
 
