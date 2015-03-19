@@ -80,12 +80,11 @@ SedaStageScheduler::~SedaStageScheduler() {
 
 void
 SedaStageScheduler::schedule(
-  unique_ptr<Stage> stage,
+  shared_ptr<Stage> stage,
   ConcurrencyLevel concurrency_level
 ) {
-  shared_ptr<Stage> stage_shared(stage.release());
   for (int16_t thread_i = 0; thread_i < concurrency_level; thread_i++) {
-    threads.push_back(unique_ptr<Thread>(new Thread(unique_ptr<Runnable>(new SedaStage(stage_shared)))));
+    threads.push_back(unique_ptr<Thread>(new Thread(unique_ptr<Runnable>(new SedaStage(stage)))));
   }
 }
 }

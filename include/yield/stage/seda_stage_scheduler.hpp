@@ -39,7 +39,7 @@ public:
 
 public:
   // StageScheduler
-  void schedule(::std::unique_ptr<Stage>, ConcurrencyLevel) override;
+  void schedule(::std::shared_ptr<Stage>, ConcurrencyLevel) override;
 
 private:
   class SedaStage;

@@ -32,12 +32,13 @@
 namespace yield {
 namespace stage {
 using ::std::move;
+using ::std::shared_ptr;
 using ::std::unique_ptr;
 
 class WavefrontStageScheduler::StagePoller
     : public PollingStageScheduler::StagePoller {
 public:
-  StagePoller(unique_ptr<Stage> first_stage)
+  StagePoller(shared_ptr<Stage> first_stage)
     : PollingStageScheduler::StagePoller(move(first_stage))
   { }
 
@@ -46,7 +47,7 @@ public:
     Time visit_timeout(0.5);
 
     while (should_run()) {
-      ::std::vector< ::std::unique_ptr<Stage> >& stages = this->stages();
+      ::std::vector< ::std::shared_ptr<Stage> >& stages = this->stages();
       size_t stage_i_max = stages.size();
 
       // Forward
@@ -73,7 +74,7 @@ public:
 
 unique_ptr<PollingStageScheduler::StagePoller>
 WavefrontStageScheduler::create_stage_poller(
-  unique_ptr<Stage> first_stage
+  shared_ptr<Stage> first_stage
 ) {
   return unique_ptr<StagePoller>(new StagePoller(move(first_stage)));
 }

@@ -28,11 +28,13 @@
 #ifndef _YIELD_STAGE_POLLING_STAGE_SCHEDULER_HPP_
 #define _YIELD_STAGE_POLLING_STAGE_SCHEDULER_HPP_
 
+#include <queue>
 #include <vector>
 
 #include "yield/queue/rendezvous_concurrent_queue.hpp"
 #include "yield/stage/stage_scheduler.hpp"
 #include "yield/thread/runnable.hpp"
+#include "yield/thread/lightweight_mutex.hpp"
 #include "yield/thread/thread.hpp"
 
 namespace yield {
@@ -42,7 +44,7 @@ public:
   virtual ~PollingStageScheduler();
 
   // StageScheduler
-  void schedule(::std::unique_ptr<Stage>, ConcurrencyLevel) override;
+  void schedule(::std::shared_ptr<Stage>, ConcurrencyLevel) override;
 
 protected:
   class StagePoller : public ::yield::thread::Runnable {
@@ -51,31 +53,32 @@ protected:
     }
 
   public:
-    void schedule(::std::unique_ptr<Stage>);
+    void schedule(::std::shared_ptr<Stage>);
 
     void stop() {
       should_run_ = false;
     }
 
   protected:
-    StagePoller(::std::unique_ptr<Stage>);
+    StagePoller(::std::shared_ptr<Stage>);
 
-    ::std::vector< ::std::unique_ptr<Stage> >& stages();
+    ::std::vector< ::std::shared_ptr<Stage> >& stages();
 
     inline bool should_run() const {
       return should_run_;
     }
 
   private:
-    ::yield::queue::RendezvousConcurrentQueue<Stage> new_stage_;
+    ::yield::thread::LightweightMutex new_stages_lock_;
+    ::std::queue< ::std::shared_ptr<Stage> > new_stages_;
     bool should_run_;
-    ::std::vector< ::std::unique_ptr<Stage> > stages_;
+    ::std::vector< ::std::shared_ptr<Stage> > stages_;
   };
 
 protected:
   PollingStageScheduler() { }
 
-  virtual ::std::unique_ptr<StagePoller> create_stage_poller( ::std::unique_ptr<Stage> ) = 0;
+  virtual ::std::unique_ptr<StagePoller> create_stage_poller(::std::shared_ptr<Stage>) = 0;
 
 private:
   ::std::vector< ::std::unique_ptr< ::yield::thread::Thread > > threads;

@@ -30,9 +30,10 @@
 
 namespace yield {
 namespace stage {
-using ::std::move;
+using ::std::shared_ptr;
 using ::std::unique_ptr;
 using ::std::vector;
+using ::yield::thread::LightweightMutex;
 using ::yield::thread::Thread;
 
 PollingStageScheduler::~PollingStageScheduler() {
@@ -48,7 +49,7 @@ PollingStageScheduler::~PollingStageScheduler() {
 
 void
 PollingStageScheduler::schedule(
-  unique_ptr<Stage> stage,
+  shared_ptr<Stage> stage,
   ConcurrencyLevel concurrency_level
 ) {
   for (uint16_t thread_i = 0; thread_i < concurrency_level; thread_i++) {
@@ -58,29 +59,30 @@ PollingStageScheduler::schedule(
       = static_cast<StagePoller&>(thread->runnable());
       stage_poller.schedule(move(stage));
     } else {
-      threads.push_back(unique_ptr<Thread>(new Thread(move(create_stage_poller(move(stage))))));
+      threads.push_back(unique_ptr<Thread>(new Thread(move(create_stage_poller(stage)))));
     }
   }
 }
 
 
-PollingStageScheduler::StagePoller::StagePoller(unique_ptr<Stage> first_stage) {
+PollingStageScheduler::StagePoller::StagePoller(shared_ptr<Stage> first_stage) {
   stages_.push_back(::std::move(first_stage));
 }
 
-vector< unique_ptr<Stage> >& PollingStageScheduler::StagePoller::stages() {
-  unique_ptr<Stage> new_stage = this->new_stage_.trydequeue();
-  while (new_stage != NULL) {
-    stages_.push_back(move(new_stage));
-    new_stage = this->new_stage_.trydequeue();
+vector< shared_ptr<Stage> >& PollingStageScheduler::StagePoller::stages() {
+  if (new_stages_lock_.trylock()) {
+    while (!new_stages_.empty()) {
+      stages_.push_back(new_stages_.front());
+      new_stages_.pop();
+    }
+    new_stages_lock_.unlock();
   }
   return stages_;
 }
 
-void PollingStageScheduler::StagePoller::schedule(unique_ptr<Stage> stage) {
-  while (stage != NULL) {
-    stage = new_stage_.tryenqueue(move(stage));
-  }
+void PollingStageScheduler::StagePoller::schedule(shared_ptr<Stage> stage) {
+  LightweightMutex::Holder new_stages_lock_holder(new_stages_lock_);
+  new_stages_.push(stage);
 }
 }
 }

@@ -54,11 +54,11 @@ public:
   };
 
 public:
-  virtual void schedule(::std::unique_ptr<Stage> stage) {
-    return schedule(::std::move(stage), ConcurrencyLevel::DEFAULT);
+  virtual void schedule(::std::shared_ptr<Stage> stage) {
+    return schedule(stage, ConcurrencyLevel::DEFAULT);
   }
 
-  virtual void schedule(::std::unique_ptr<Stage>, ConcurrencyLevel) = 0;
+  virtual void schedule(::std::shared_ptr<Stage>, ConcurrencyLevel) = 0;
 };
 }
 }

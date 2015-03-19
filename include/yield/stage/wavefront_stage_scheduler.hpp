@@ -39,7 +39,7 @@ private:
 
 private:
   // PollingStageScheduler
-  ::std::unique_ptr<PollingStageScheduler::StagePoller> create_stage_poller(::std::unique_ptr<Stage> first_stage) override;
+  ::std::unique_ptr<PollingStageScheduler::StagePoller> create_stage_poller(::std::shared_ptr<Stage> first_stage) override;
 };
 }
 }
